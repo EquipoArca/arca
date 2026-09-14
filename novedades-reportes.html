@@ -1,0 +1,740 @@
+<<<<<<< HEAD
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Novedades - ARCA</title>
+    <link rel="stylesheet" href="novedades-reportes-style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+  <nav class="top-nav">
+    <div class="top-left">
+        <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu"></i>        
+        <div class="mini-logo-circle">
+            <img src="logo.png" alt="Logo">
+        </div>
+        <span class="page-title" id="titulo-pagina">Inicio</span>
+    </div>
+
+    <div class="search-bar">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" placeholder="Busca algo">
+        <i class="fa-solid fa-microphone"></i>
+    </div>
+
+    <div class="top-right">
+        <div class="user-header-info">
+            <!-- 1. PERFIL Y MINI MENÚ -->
+            <div class="user-profile-menu" id="user-profile-menu" style="display: none;">
+                <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
+                    <img src="logo.png" id="user-avatar-img" alt="Perfil">
+                </div>
+
+                <div class="mini-menu-card" id="mini-menu-card">
+                    <div class="mini-menu-header">
+                        <span id="mini-menu-username">Usuario</span>
+                    </div>
+                    <hr class="mini-menu-divider">
+                    <a href="javascript:void(0)" onclick="mostrarSeccion('configuracion')" class="mini-menu-item btn-ajustes">
+                        <i class="fa-solid fa-gear"></i>
+                        <span>Ajustes</span>
+                    </a>
+                    <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Cerrar sesión</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 2. CAMPANA DE NOTIFICACIONES -->
+            <div class="notif-circle">
+                <a href="#" onclick="abrirBloqueo()"><i class="fa-solid fa-bell"></i></a>
+            </div>
+        </div>
+    </div>
+  </nav>
+
+  <aside class="sidebar" id="sidebar">
+      <div class="side-icons">
+          <a href="home.html?seccion=inicio" id="link-inicio" class="menu-fila">
+              <i class="fa-solid fa-house active"></i>
+              <span class="menu-text">Inicio</span>
+          </a>
+          <a href="home.html?seccion=perfil" id="link-perfil" class="menu-fila">
+              <i class="fa-solid fa-circle-user"></i>
+              <span class="menu-text">Perfil</span>
+          </a>
+          <a href="home.html?seccion=guardado" id="link-guardado" class="menu-fila">
+              <i class="fa-solid fa-bookmark"></i>
+              <span class="menu-text">Guardado</span>
+          </a>
+          <a href="home.html?seccion=mapa" id="link-mapa" class="menu-fila">
+              <i class="fa-solid fa-location-dot"></i>
+              <span class="menu-text">Mapa</span>
+          </a>
+          <a href="home.html?seccion=configuracion" id="link-config" class="menu-fila">
+              <i class="fa-solid fa-gear"></i>
+              <span class="menu-text">Ajustes</span>
+          </a>
+      </div>
+  </aside>
+
+  <main class="main-content">
+      <aside class="panel-filtros">
+          <div class="titulo-filtro">Filtros</div>
+          <a href="novedades.html" class="btn-filtro" style="text-decoration: none;">Todo</a>
+          <a href="novedades-reportes.html" class="btn-filtro" style="text-decoration: none;">Reportes</a>
+          <a href="novedades-adopciones.html" class="btn-filtro" style="text-decoration: none;">Adopciones</a>
+          <a href="novedades-eventos.html" class="btn-filtro" style="text-decoration: none;">Eventos</a>
+      </aside>
+
+      <section class="feed-novedades" id="contenedor-novedades">
+          <article class="tarjeta-reporte">
+              <div class="header-tarjeta-reporte">
+                  <div class="badge-titulo-reporte">No hay ningún reporte nuevo</div>
+                  <span class="fecha-reporte">--/--/----</span>
+              </div>
+              <div class="contenido-reporte">
+                  <div class="contenedor-foto-reporte foto-vacia">
+                      <i class="fa-solid fa-paw icono-huella"></i>
+                  </div>
+                  <div class="info-reporte">
+                      <div class="etiqueta-estado">. . .</div>
+                      <button class="btn-detalles" onclick="abrirBloqueo()">Ver detalles</button>
+                  </div>
+              </div>
+          </article>
+      </section>
+  </main>
+
+  <div id="miOverlay" class="overlay-bloqueo">
+      <div class="modal-arca">
+          <h2>ARCA</h2>
+          <div class="slogan"><p>Cuidamos su vida, protegemos su alegría</p></div>
+          <hr>
+          
+          <div id="paso1">
+              <p class="texto-registro"><strong>Inicia sesión o Regístrate</strong> para acceder a todas las funciones.</p>
+              <div class="botones-registro">
+                  <button class="btn-login" onclick="mostrarOpcionesSociales()">Iniciar sesión / Registrarte</button>
+                  <button class="btn-cerrar" onclick="cerrarBloqueo()">Seguir explorando</button>
+              </div>
+          </div>
+
+          <div id="paso2" style="display: none;">
+              <p class="texto-registro"><strong>Ingresa tus datos de acceso</strong></p>
+              <div class="login-options">
+                  <button class="btn-social email" onclick="mostrarFormularioCorreo()">
+                      <img src="https://cdn-icons-png.flaticon.com/512/542/542689.png" alt="E"> Continuar con Correo
+                  </button>
+                  <button class="btn-fundacion">Soy Fundación</button>
+                  <button class="btn-volver" onclick="volverAlPaso1()">← Volver</button>
+              </div>
+          </div>
+
+          <div id="paso3" style="display: none;">
+              <p class="texto-registro"><strong>Ingresa tus datos</strong></p>
+              <div class="formulario-correo">
+                  <input type="email" id="email-input" placeholder="Correo electrónico" class="input-arca">
+                  <div class="botones-registro">
+                      <button class="btn-login" onclick="ejecutarLoginEmail()">Entrar</button>
+                      <button class="btn-cerrar" onclick="volverAlPaso2()">Atrás</button>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <!-- Scripts principales -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+  <script>
+      // Sidebar Toggle
+      document.addEventListener('DOMContentLoaded', () => {
+          const btnToggleMenu = document.getElementById('btn-toggle-menu');
+          const sidebar = document.getElementById('sidebar');
+
+          if (btnToggleMenu && sidebar) {
+              btnToggleMenu.addEventListener('click', (e) => {
+                  e.stopPropagation();
+                  sidebar.classList.toggle('sidebar-abierta'); 
+              });
+          }
+      });
+  </script>   
+
+  <!-- Único Script limpio para cargar las publicaciones globales -->
+  <script>
+      document.addEventListener('DOMContentLoaded', async () => {
+          const contenedor = document.getElementById('contenedor-novedades');
+          if (!contenedor) return;
+
+          try {
+              const respuesta = await fetch('http://localhost:3000/api/publicaciones-globales');
+              if (!respuesta.ok) throw new Error("Error al obtener las publicaciones globales");
+              
+              const publicaciones = await respuesta.json();
+
+              if (publicaciones.length > 0) {
+                  contenedor.innerHTML = ''; // Limpia el mensaje por defecto
+
+                  // Usamos un bucle para procesar cada publicación y su respectiva traducción de ubicación
+                  for (const pub of publicaciones) {
+                      const imagenSrc = pub.img_reporte ? pub.img_reporte : 'logo.png';
+                      const fechaFormateada = pub.Fecha_reporte ? pub.Fecha_reporte.split('T')[0] : '';
+                      
+                      // Limpiamos y traducimos las coordenadas usando la función global
+                      let textoUbicacionBruta = pub.Ubicacion || pub.ubicacion || '';
+                      let ubicacionBonita = await obtenerNombreUbicacionGlobal(textoUbicacionBruta);
+
+                      const tarjeta = document.createElement('article');
+                      tarjeta.className = 'tarjeta-prototipo-estilo';
+                      
+                      tarjeta.innerHTML = `
+                          <div class="proto-card-top">
+                              <div class="proto-titulo-pill">Nuevo Reporte</div>
+                              <span class="proto-fecha">${fechaFormateada}</span>
+                          </div>
+
+                          <div class="proto-card-body">
+                              <div class="proto-img-wrapper">
+                                  <img src="${imagenSrc}" alt="Reporte">
+                              </div>
+
+                              <div class="proto-content-right">
+                                  <div class="proto-pill-tipo">${pub.nombre_tipo_reporte || 'Animal en situación de calle'}</div>
+                                  <div class="proto-info-extra">
+                                      <span class="proto-autor">Publicado por: <a href="perfil_usuario.html">@${pub.nombre_usuario || 'Usuario'}</a></span>
+                                      <p class="proto-ubicacion"><i class="fa-solid fa-location-dot"></i> ${ubicacionBonita}</p>
+                                  </div>
+                                  <div class="proto-footer-row">
+                                      <button class="proto-btn-detalles" onclick="window.location.href='detalle_reporte.html?id=${pub.id_reporte}'">Ver detalles</button>
+                                  </div>
+                              </div>
+                          </div>
+                      `;
+                      contenedor.appendChild(tarjeta);
+                  }
+              }
+          } catch (error) {
+              console.error("No se pudieron cargar las novedades:", error);
+          }
+      });
+  </script>
+  <style>
+      /* Estilos corregidos y limpios de la tarjeta prototipo */
+      .tarjeta-prototipo-estilo {
+          background: #fde8e5; 
+          border-radius: 24px;
+          padding: 24px;
+          margin-bottom: 25px;
+          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+          border: 2px solid #f9d5d3;
+          width: 100%;
+          max-width: 950px;
+          margin-left: auto;
+          margin-right: auto;
+          font-family: 'Itim', cursive, sans-serif;
+          box-sizing: border-box;
+      }
+
+      .proto-card-top {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 18px;
+      }
+
+      .proto-titulo-pill {
+          background: #fbc2c4;
+          color: #2b2b2b;
+          padding: 8px 32px;
+          border-radius: 30px;
+          font-size: 22px;
+          font-weight: bold;
+          box-shadow: 0 2px 5px rgba(0,0,0,0.04);
+      }
+
+      .proto-fecha {
+          font-size: 15px;
+          font-weight: bold;
+          color: #444;
+      }
+
+      .proto-card-body {
+          display: flex;
+          gap: 24px;
+          align-items: center;
+      }
+
+      .proto-img-wrapper {
+          width: 210px;
+          height: 150px;
+          border-radius: 20px;
+          overflow: hidden;
+          background: #fff;
+          border: 2px solid #f9d5d3;
+          flex-shrink: 0;
+          box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+      }
+
+      .proto-img-wrapper img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+      }
+
+      .proto-content-right {
+          flex-grow: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+      }
+
+      .proto-pill-tipo {
+          background: #fff;
+          color: #333;
+          padding: 8px 22px;
+          border-radius: 20px;
+          font-size: 15px;
+          font-weight: bold;
+          border: 1px solid #f3c1c3;
+          display: inline-block;
+          align-self: flex-start;
+      }
+
+      .proto-info-extra {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+      }
+
+      .proto-autor {
+          font-size: 14px;
+          color: #555;
+      }
+
+      .proto-autor a {
+          color: #d9534f;
+          text-decoration: none;
+          font-weight: bold;
+      }
+
+      .proto-autor a:hover {
+          text-decoration: underline;
+      }
+
+      .proto-ubicacion {
+          font-size: 13px;
+          color: #666;
+          margin: 0;
+      }
+
+      .proto-footer-row {
+          display: flex;
+          justify-content: flex-end;
+          margin-top: 5px;
+      }
+
+      .proto-btn-detalles {
+          background-color: #fffde8; 
+          color: #2b2b2b;
+          border: 1px solid #f0e6b8;
+          padding: 10px 28px;
+          border-radius: 20px;
+          cursor: pointer;
+          font-weight: bold;
+          font-size: 15px;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+          transition: all 0.2s;
+          font-family: 'Itim', cursive, sans-serif;
+      }
+
+      .proto-btn-detalles:hover {
+          background-color: #fff9c4;
+      }
+  </style>
+
+  <script src="script.js"></script>
+</body>
+</html>
+=======
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Novedades - ARCA</title>
+    <link rel="stylesheet" href="novedades-reportes-style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+  <nav class="top-nav">
+    <div class="top-left">
+        <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu"></i>        
+        <div class="mini-logo-circle">
+            <img src="logo.png" alt="Logo">
+        </div>
+        <span class="page-title" id="titulo-pagina">Inicio</span>
+    </div>
+
+    <div class="search-bar">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" placeholder="Busca algo">
+        <i class="fa-solid fa-microphone"></i>
+    </div>
+
+    <div class="top-right">
+        <div class="user-header-info">
+            <!-- 1. PERFIL Y MINI MENÚ -->
+            <div class="user-profile-menu" id="user-profile-menu" style="display: none;">
+                <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
+                    <img src="logo.png" id="user-avatar-img" alt="Perfil">
+                </div>
+
+                <div class="mini-menu-card" id="mini-menu-card">
+                    <div class="mini-menu-header">
+                        <span id="mini-menu-username">Usuario</span>
+                    </div>
+                    <hr class="mini-menu-divider">
+                    <a href="javascript:void(0)" onclick="mostrarSeccion('configuracion')" class="mini-menu-item btn-ajustes">
+                        <i class="fa-solid fa-gear"></i>
+                        <span>Ajustes</span>
+                    </a>
+                    <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Cerrar sesión</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 2. CAMPANA DE NOTIFICACIONES -->
+            <div class="notif-circle">
+                <a href="#" onclick="abrirBloqueo()"><i class="fa-solid fa-bell"></i></a>
+            </div>
+        </div>
+    </div>
+  </nav>
+
+  <aside class="sidebar" id="sidebar">
+      <div class="side-icons">
+          <a href="home.html?seccion=inicio" id="link-inicio" class="menu-fila">
+              <i class="fa-solid fa-house active"></i>
+              <span class="menu-text">Inicio</span>
+          </a>
+          <a href="home.html?seccion=perfil" id="link-perfil" class="menu-fila">
+              <i class="fa-solid fa-circle-user"></i>
+              <span class="menu-text">Perfil</span>
+          </a>
+          <a href="home.html?seccion=guardado" id="link-guardado" class="menu-fila">
+              <i class="fa-solid fa-bookmark"></i>
+              <span class="menu-text">Guardado</span>
+          </a>
+          <a href="home.html?seccion=mapa" id="link-mapa" class="menu-fila">
+              <i class="fa-solid fa-location-dot"></i>
+              <span class="menu-text">Mapa</span>
+          </a>
+          <a href="home.html?seccion=configuracion" id="link-config" class="menu-fila">
+              <i class="fa-solid fa-gear"></i>
+              <span class="menu-text">Ajustes</span>
+          </a>
+      </div>
+  </aside>
+
+  <main class="main-content">
+      <aside class="panel-filtros">
+          <div class="titulo-filtro">Filtros</div>
+          <a href="novedades.html" class="btn-filtro" style="text-decoration: none;">Todo</a>
+          <a href="novedades-reportes.html" class="btn-filtro" style="text-decoration: none;">Reportes</a>
+          <a href="novedades-adopciones.html" class="btn-filtro" style="text-decoration: none;">Adopciones</a>
+          <a href="novedades-eventos.html" class="btn-filtro" style="text-decoration: none;">Eventos</a>
+      </aside>
+
+      <section class="feed-novedades" id="contenedor-novedades">
+          <article class="tarjeta-reporte">
+              <div class="header-tarjeta-reporte">
+                  <div class="badge-titulo-reporte">No hay ningún reporte nuevo</div>
+                  <span class="fecha-reporte">--/--/----</span>
+              </div>
+              <div class="contenido-reporte">
+                  <div class="contenedor-foto-reporte foto-vacia">
+                      <i class="fa-solid fa-paw icono-huella"></i>
+                  </div>
+                  <div class="info-reporte">
+                      <div class="etiqueta-estado">. . .</div>
+                      <button class="btn-detalles" onclick="abrirBloqueo()">Ver detalles</button>
+                  </div>
+              </div>
+          </article>
+      </section>
+  </main>
+
+  <div id="miOverlay" class="overlay-bloqueo">
+      <div class="modal-arca">
+          <h2>ARCA</h2>
+          <div class="slogan"><p>Cuidamos su vida, protegemos su alegría</p></div>
+          <hr>
+          
+          <div id="paso1">
+              <p class="texto-registro"><strong>Inicia sesión o Regístrate</strong> para acceder a todas las funciones.</p>
+              <div class="botones-registro">
+                  <button class="btn-login" onclick="mostrarOpcionesSociales()">Iniciar sesión / Registrarte</button>
+                  <button class="btn-cerrar" onclick="cerrarBloqueo()">Seguir explorando</button>
+              </div>
+          </div>
+
+          <div id="paso2" style="display: none;">
+              <p class="texto-registro"><strong>Ingresa tus datos de acceso</strong></p>
+              <div class="login-options">
+                  <button class="btn-social email" onclick="mostrarFormularioCorreo()">
+                      <img src="https://cdn-icons-png.flaticon.com/512/542/542689.png" alt="E"> Continuar con Correo
+                  </button>
+                  <button class="btn-fundacion">Soy Fundación</button>
+                  <button class="btn-volver" onclick="volverAlPaso1()">← Volver</button>
+              </div>
+          </div>
+
+          <div id="paso3" style="display: none;">
+              <p class="texto-registro"><strong>Ingresa tus datos</strong></p>
+              <div class="formulario-correo">
+                  <input type="email" id="email-input" placeholder="Correo electrónico" class="input-arca">
+                  <div class="botones-registro">
+                      <button class="btn-login" onclick="ejecutarLoginEmail()">Entrar</button>
+                      <button class="btn-cerrar" onclick="volverAlPaso2()">Atrás</button>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <!-- Scripts principales -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+  <script>
+      // Sidebar Toggle
+      document.addEventListener('DOMContentLoaded', () => {
+          const btnToggleMenu = document.getElementById('btn-toggle-menu');
+          const sidebar = document.getElementById('sidebar');
+
+          if (btnToggleMenu && sidebar) {
+              btnToggleMenu.addEventListener('click', (e) => {
+                  e.stopPropagation();
+                  sidebar.classList.toggle('sidebar-abierta'); 
+              });
+          }
+      });
+  </script>   
+
+  <!-- Único Script limpio para cargar las publicaciones globales -->
+  <script>
+      document.addEventListener('DOMContentLoaded', async () => {
+          const contenedor = document.getElementById('contenedor-novedades');
+          if (!contenedor) return;
+
+          try {
+              const respuesta = await fetch('http://localhost:3000/api/publicaciones-globales');
+              if (!respuesta.ok) throw new Error("Error al obtener las publicaciones globales");
+              
+              const publicaciones = await respuesta.json();
+
+              if (publicaciones.length > 0) {
+                  contenedor.innerHTML = ''; // Limpia el mensaje por defecto
+
+                  // Usamos un bucle para procesar cada publicación y su respectiva traducción de ubicación
+                  for (const pub of publicaciones) {
+                      const imagenSrc = pub.img_reporte ? pub.img_reporte : 'logo.png';
+                      const fechaFormateada = pub.Fecha_reporte ? pub.Fecha_reporte.split('T')[0] : '';
+                      
+                      // Limpiamos y traducimos las coordenadas usando la función global
+                      let textoUbicacionBruta = pub.Ubicacion || pub.ubicacion || '';
+                      let ubicacionBonita = await obtenerNombreUbicacionGlobal(textoUbicacionBruta);
+
+                      const tarjeta = document.createElement('article');
+                      tarjeta.className = 'tarjeta-prototipo-estilo';
+                      
+                      tarjeta.innerHTML = `
+                          <div class="proto-card-top">
+                              <div class="proto-titulo-pill">Nuevo Reporte</div>
+                              <span class="proto-fecha">${fechaFormateada}</span>
+                          </div>
+
+                          <div class="proto-card-body">
+                              <div class="proto-img-wrapper">
+                                  <img src="${imagenSrc}" alt="Reporte">
+                              </div>
+
+                              <div class="proto-content-right">
+                                  <div class="proto-pill-tipo">${pub.nombre_tipo_reporte || 'Animal en situación de calle'}</div>
+                                  <div class="proto-info-extra">
+                                      <span class="proto-autor">Publicado por: <a href="perfil_usuario.html">@${pub.nombre_usuario || 'Usuario'}</a></span>
+                                      <p class="proto-ubicacion"><i class="fa-solid fa-location-dot"></i> ${ubicacionBonita}</p>
+                                  </div>
+                                  <div class="proto-footer-row">
+                                      <button class="proto-btn-detalles" onclick="window.location.href='detalle_reporte.html?id=${pub.id_reporte}'">Ver detalles</button>
+                                  </div>
+                              </div>
+                          </div>
+                      `;
+                      contenedor.appendChild(tarjeta);
+                  }
+              }
+          } catch (error) {
+              console.error("No se pudieron cargar las novedades:", error);
+          }
+      });
+  </script>
+  <style>
+      /* Estilos corregidos y limpios de la tarjeta prototipo */
+      .tarjeta-prototipo-estilo {
+          background: #fde8e5; 
+          border-radius: 24px;
+          padding: 24px;
+          margin-bottom: 25px;
+          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+          border: 2px solid #f9d5d3;
+          width: 100%;
+          max-width: 950px;
+          margin-left: auto;
+          margin-right: auto;
+          font-family: 'Itim', cursive, sans-serif;
+          box-sizing: border-box;
+      }
+
+      .proto-card-top {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 18px;
+      }
+
+      .proto-titulo-pill {
+          background: #fbc2c4;
+          color: #2b2b2b;
+          padding: 8px 32px;
+          border-radius: 30px;
+          font-size: 22px;
+          font-weight: bold;
+          box-shadow: 0 2px 5px rgba(0,0,0,0.04);
+      }
+
+      .proto-fecha {
+          font-size: 15px;
+          font-weight: bold;
+          color: #444;
+      }
+
+      .proto-card-body {
+          display: flex;
+          gap: 24px;
+          align-items: center;
+      }
+
+      .proto-img-wrapper {
+          width: 210px;
+          height: 150px;
+          border-radius: 20px;
+          overflow: hidden;
+          background: #fff;
+          border: 2px solid #f9d5d3;
+          flex-shrink: 0;
+          box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+      }
+
+      .proto-img-wrapper img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+      }
+
+      .proto-content-right {
+          flex-grow: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+      }
+
+      .proto-pill-tipo {
+          background: #fff;
+          color: #333;
+          padding: 8px 22px;
+          border-radius: 20px;
+          font-size: 15px;
+          font-weight: bold;
+          border: 1px solid #f3c1c3;
+          display: inline-block;
+          align-self: flex-start;
+      }
+
+      .proto-info-extra {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+      }
+
+      .proto-autor {
+          font-size: 14px;
+          color: #555;
+      }
+
+      .proto-autor a {
+          color: #d9534f;
+          text-decoration: none;
+          font-weight: bold;
+      }
+
+      .proto-autor a:hover {
+          text-decoration: underline;
+      }
+
+      .proto-ubicacion {
+          font-size: 13px;
+          color: #666;
+          margin: 0;
+      }
+
+      .proto-footer-row {
+          display: flex;
+          justify-content: flex-end;
+          margin-top: 5px;
+      }
+
+      .proto-btn-detalles {
+          background-color: #fffde8; 
+          color: #2b2b2b;
+          border: 1px solid #f0e6b8;
+          padding: 10px 28px;
+          border-radius: 20px;
+          cursor: pointer;
+          font-weight: bold;
+          font-size: 15px;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+          transition: all 0.2s;
+          font-family: 'Itim', cursive, sans-serif;
+      }
+
+      .proto-btn-detalles:hover {
+          background-color: #fff9c4;
+      }
+  </style>
+
+  <script src="script.js"></script>
+</body>
+</html>
+>>>>>>> 73ad380385be04225f0aeedc8f01200318850109
+    

@@ -1,0 +1,528 @@
+<<<<<<< HEAD
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil - ARCA</title>
+    <link rel="stylesheet" href="style_home.css">
+    <link rel="stylesheet" href="perfil.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <nav class="top-nav">
+        <div class="top-left">
+            <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu"></i>
+            <div class="mini-logo-circle">
+                <img src="logo.png" alt="Logo ARCA">
+            </div>
+            <span class="page-title">Perfil</span>
+        </div>
+        <div class="search-bar">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="input-busqueda-nav" name="busqueda" placeholder="Busca algo" aria-label="Buscar en la aplicación">
+            <i class="fa-solid fa-microphone"></i>
+        </div>
+        <div class="top-right">
+            <div class="user-header-info">
+
+            <!-- 1. PERFIL Y MINI MENÚ (Avatar con menú desplegable) -->
+            <div class="user-profile-menu" id="user-profile-menu">
+                <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
+                    <img src="logo.png" id="user-avatar-img" alt="Perfil">
+                </div>
+
+                <div class="mini-menu-card" id="mini-menu-card">
+                    <div class="mini-menu-header">
+                        <span id="mini-menu-username">Usuario</span>
+                    </div>
+                    
+                    <hr class="mini-menu-divider">
+                    
+                    <a href="javascript:void(0)" onclick="mostrarSeccion('configuracion')" class="mini-menu-item btn-ajustes">
+                        <i class="fa-solid fa-gear"></i>
+                        <span>Ajustes</span>
+                    </a>
+                    
+                    <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Cerrar sesión</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 2. CAMPANA DE NOTIFICACIONES -->
+            <div class="notif-circle">
+                <a href="notificaciones.html" aria-label="Notificaciones"><i class="fa-solid fa-bell"></i></a>
+            </div>
+
+        </div>
+    </div>
+  </nav>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="side-icons">
+            <a href="home.html" class="menu-fila">
+                <i class="fa-solid fa-house"></i>
+                <span class="menu-text">Inicio</span>
+            </a>
+            <a href="perfil_usuario.html" class="menu-fila activa">
+                <i class="fa-solid fa-circle-user"></i>
+                <span class="menu-text">Perfil</span>
+            </a>
+            <a href="guardados_usuario.html" class="menu-fila">
+                <i class="fa-solid fa-bookmark"></i>
+                <span class="menu-text">Guardado</span>
+            </a>
+            <a href="mapa.html" class="menu-fila">
+                <i class="fa-solid fa-location-dot"></i>
+                <span class="menu-text">Mapa</span>
+            </a>
+            <a href="configuracion_usuario.html" class="menu-fila">
+                <i class="fa-solid fa-gear"></i>
+                <span class="menu-text">Ajustes</span>
+            </a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="perfil-prototipo-container">
+            <div class="perfil-header-prototipo">
+                <div class="avatar-wrapper" onclick="abrirModalFoto()">
+                    <div class="avatar-circulo" id="avatar-contenedor">
+                        <svg viewBox="0 0 24 24" fill="currentColor" class="icono-silueta" id="svg-silueta">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                        <img id="foto-perfil-img" src="" alt="Foto de Perfil" style="display: none;">
+                    </div>
+                    <button type="button" class="btn-lapiz-editar" aria-label="Editar foto">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 20h9"></path>
+                            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                        </svg>
+                    </button>
+                </div>
+                <h2 id="mostrar-nombre-usuario">@cargando...</h2>
+            </div>
+
+            <div class="perfil-grid-opciones">
+                <button type="button" class="btn-opcion-perfil" id="btn-cambiar-nombre" onclick="abrirModalNombre()">
+                    Cambiar nombre de usuario
+                </button>
+
+                <button type="button" class="btn-opcion-perfil btn-texto-largo" id="btn-cambiar-correo" onclick="abrirModalCorreo()">
+                    Editar correo electrónico
+                </button>
+
+                <button type="button" class="btn-opcion-perfil" id="btn-cambiar-telefono" onclick="abrirModalTelefono()" style="display: flex; justify-content: space-between; align-items: center;">
+                    <span id="texto-estado-telefono">Cambiar número de celular</span>
+                </button>
+
+                <a href="perfil_adoptante.html" class="btn-opcion-perfil">
+                    Perfil de adoptante
+                </a>
+
+                <a href="mis_publicaciones.html" class="btn-opcion-perfil">
+                    Mis publicaciones
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- MODAL FOTO DE PERFIL -->
+    <div id="modal-foto-perfil" class="modal-foto-overlay" onclick="cerrarModalFoto(event)">
+        <div class="modal-foto-contenido">
+            <button type="button" class="btn-cerrar-modal" onclick="cerrarModalFotoDirecto()">&times;</button>
+            <div class="modal-avatar-preview" id="modal-avatar-contenedor">
+                <svg viewBox="0 0 24 24" fill="currentColor" class="icono-silueta" id="modal-svg-silueta">
+                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                </svg>
+                <img id="foto-preview-ampliada" src="" alt="Vista Previa Foto" style="display: none;">
+            </div>
+            <div class="modal-foto-acciones">
+                <button type="button" class="btn-opcion-modal btn-cambiar" onclick="ejecutarCambiarFoto()">Cambiar foto de perfil</button>
+                <button type="button" class="btn-opcion-modal btn-borrar" onclick="ejecutarBorrarFoto()">Borrar foto de perfil</button>
+            </div>
+            <input type="file" id="input-nueva-foto" accept="image/*" style="display: none;" onchange="procesarNuevaFoto(event)">
+        </div>
+    </div>
+
+    <!-- MODAL CAMBIAR NOMBRE DE USUARIO -->
+    <div id="modal-cambiar-nombre" class="modal-foto-overlay" onclick="cerrarModalNombreOverlay(event)">
+        <div class="modal-foto-contenido modal-nombre-box">
+            <button type="button" class="btn-cerrar-modal" onclick="cerrarModalNombre()">&times;</button>
+            <div class="etiqueta-rosa">Nombre de usuario actual:</div>
+            <div class="nombre-actual-display" id="modal-nombre-actual">@cargando...</div>
+            <div class="etiqueta-rosa">Nuevo nombre de usuario:</div>
+            <div class="input-contenedor-nombre">
+                <span class="prefijo-at">@</span>
+                <input type="text" id="input-nuevo-nombre" placeholder="tu_nuevo_usuario" maxlength="20">
+            </div>
+            <p class="texto-restriccion">Solo puedes cambiar tu usuario una vez cada 30 días</p>
+            <p id="mensaje-estado-nombre" class="mensaje-validacion" style="margin-top: 5px; font-size: 13px;"></p>
+            <button type="button" class="btn-confirmar-nombre" id="btn-guardar-nuevo-nombre">
+                Cambiar nombre de usuario
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL CAMBIAR CORREO ELECTRÓNICO -->
+    <div id="modal-cambiar-correo" class="modal-foto-overlay" onclick="cerrarModalCorreoOverlay(event)">
+        <div class="modal-foto-contenido modal-nombre-box">
+            <button type="button" class="btn-cerrar-modal" onclick="cerrarModalCorreo()">&times;</button>
+            <div class="etiqueta-rosa">Correo actual:</div>
+            <div class="nombre-actual-display" id="modal-correo-actual" style="font-size: 16px; word-break: break-all;">@cargando...</div>
+
+            <div id="paso-nuevo-correo">
+                <div class="etiqueta-rosa">Nuevo correo electrónico:</div>
+                <div class="input-contenedor-nombre">
+                    <i class="fa-solid fa-envelope" style="margin-right: 8px; color: #555;"></i>
+                    <input type="email" id="input-nuevo-correo" placeholder="nuevo@correo.com">
+                </div>
+                <p id="mensaje-error-correo" class="mensaje-error" style="display: none;"></p>
+                <button type="button" class="btn-confirmar-nombre" id="btn-enviar-codigo-correo">
+                    Enviar código de verificación
+                </button>
+            </div>
+
+            <div id="paso-codigo-otp" style="display: none; text-align: center;">
+                <p class="texto-restriccion">Ingresa el código de 4 dígitos enviado a tu nuevo correo:</p>
+                <div class="otp-container" style="display: flex; gap: 8px; justify-content: center; margin: 15px 0;">
+                    <input type="text" maxlength="1" pattern="[0-9]" class="otp-correo-input" inputmode="numeric" style="width: 40px; height: 45px; text-align: center; font-size: 20px; border-radius: 8px; border: 1px solid #ccc;" />
+                    <input type="text" maxlength="1" pattern="[0-9]" class="otp-correo-input" inputmode="numeric" style="width: 40px; height: 45px; text-align: center; font-size: 20px; border-radius: 8px; border: 1px solid #ccc;" />
+                    <input type="text" maxlength="1" pattern="[0-9]" class="otp-correo-input" inputmode="numeric" style="width: 40px; height: 45px; text-align: center; font-size: 20px; border-radius: 8px; border: 1px solid #ccc;" />
+                    <input type="text" maxlength="1" pattern="[0-9]" class="otp-correo-input" inputmode="numeric" style="width: 40px; height: 45px; text-align: center; font-size: 20px; border-radius: 8px; border: 1px solid #ccc;" />
+                </div>
+                <p id="mensaje-error-otp-correo" class="mensaje-error" style="display: none;"></p>
+                <button type="button" class="btn-confirmar-nombre" id="btn-verificar-cambio-correo">
+                    Verificar y cambiar correo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CAMBIAR / VERIFICAR CELULAR -->
+    <div id="modal-cambiar-telefono" class="modal-foto-overlay" onclick="cerrarModalTelefonoOverlay(event)">
+        <div class="modal-foto-contenido modal-nombre-box">
+            <button type="button" class="btn-cerrar-modal" onclick="cerrarModalTelefono()">&times;</button>
+            <div class="etiqueta-rosa">Número de celular actual:</div>
+            <div class="nombre-actual-display" id="modal-telefono-actual">@cargando...</div>
+
+            <div id="paso-nuevo-telefono">
+                <div class="etiqueta-rosa">Nuevo número de celular:</div>
+                <div class="input-contenedor-nombre">
+                    <i class="fa-solid fa-phone" style="margin-right: 8px; color: #555;"></i>
+                    <input type="tel" id="input-nuevo-telefono" placeholder="+573001234567" maxlength="15">
+                </div>
+                <p id="mensaje-error-telefono" class="mensaje-error" style="display: none;"></p>
+                <button type="button" class="btn-confirmar-nombre" id="btn-guardar-y-verificar-tel">
+                    Guardar y enviar código
+                </button>
+                <div id="recaptcha-container" style="display: none;"></div>
+            </div>
+
+            <div id="paso-codigo-otp-tel" style="display: none; text-align: center;">
+                <p class="texto-restriccion">Ingresa el código de 6 dígitos enviado por SMS a tu celular:</p>
+                <div class="otp-container" style="display: flex; gap: 6px; justify-content: center; margin: 15px 0;">
+                    <input type="text" maxlength="1" pattern="[0-9]" class="otp-tel-input" inputmode="numeric" style="width: 36px; height: 42px; text-align: center; font-size: 20px; border-radius: 8px; border: 1px solid #ccc;" />
+                    <input type="text" maxlength="1" pattern="[0-9]" class="otp-tel-input" inputmode="numeric" style="width: 36px; height: 42px; text-align: center; font-size: 20px; border-radius: 8px; border: 1px solid #ccc;" />
+                    <input type="text" maxlength="1" pattern="[0-9]" class="otp-tel-input" inputmode="numeric" style="width: 36px; height: 42px; text-align: center; font-size: 20px; border-radius: 8px; border: 1px solid #ccc;" />
+                    <input type="text" maxlength="1" pattern="[0-9]" class="otp-tel-input" inputmode="numeric" style="width: 36px; height: 42px; text-align: center; font-size: 20px; border-radius: 8px; border: 1px solid #ccc;" />
+                    <input type="text" maxlength="1" pattern="[0-9]" class="otp-tel-input" inputmode="numeric" style="width: 36px; height: 42px; text-align: center; font-size: 20px; border-radius: 8px; border: 1px solid #ccc;" />
+                    <input type="text" maxlength="1" pattern="[0-9]" class="otp-tel-input" inputmode="numeric" style="width: 36px; height: 42px; text-align: center; font-size: 20px; border-radius: 8px; border: 1px solid #ccc;" />
+                </div>
+                <p id="mensaje-error-otp-tel" class="mensaje-error" style="display: none;"></p>
+                <button type="button" class="btn-confirmar-nombre" id="btn-verificar-codigo-tel">
+                    Verificar número
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    <script src="script.js"></script>
+    <script src="perfil.js"></script>
+    
+    <script>
+        const btnToggleMenu = document.getElementById('btn-toggle-menu');
+        const sidebar = document.getElementById('sidebar');
+
+        if (btnToggleMenu && sidebar) {
+            btnToggleMenu.addEventListener('click', () => {
+                sidebar.classList.toggle('sidebar-abierta');
+            });
+        }
+    </script>
+</body>
+=======
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil - ARCA</title>
+    <link rel="stylesheet" href="style_home.css">
+    <link rel="stylesheet" href="perfil.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <nav class="top-nav">
+        <div class="top-left">
+            <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu"></i>
+            <div class="mini-logo-circle">
+                <img src="logo.png" alt="Logo ARCA">
+            </div>
+            <span class="page-title">Perfil</span>
+        </div>
+        <div class="search-bar">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="input-busqueda-nav" name="busqueda" placeholder="Busca algo" aria-label="Buscar en la aplicación">
+            <i class="fa-solid fa-microphone"></i>
+        </div>
+        <div class="top-right">
+            <div class="user-header-info">
+
+            <!-- 1. PERFIL Y MINI MENÚ (Avatar con menú desplegable) -->
+            <div class="user-profile-menu" id="user-profile-menu">
+                <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
+                    <img src="logo.png" id="user-avatar-img" alt="Perfil">
+                </div>
+
+                <div class="mini-menu-card" id="mini-menu-card">
+                    <div class="mini-menu-header">
+                        <span id="mini-menu-username">Usuario</span>
+                    </div>
+                    
+                    <hr class="mini-menu-divider">
+                    
+                    <a href="javascript:void(0)" onclick="mostrarSeccion('configuracion')" class="mini-menu-item btn-ajustes">
+                        <i class="fa-solid fa-gear"></i>
+                        <span>Ajustes</span>
+                    </a>
+                    
+                    <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Cerrar sesión</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 2. CAMPANA DE NOTIFICACIONES -->
+            <div class="notif-circle">
+                <a href="notificaciones.html" aria-label="Notificaciones"><i class="fa-solid fa-bell"></i></a>
+            </div>
+
+        </div>
+    </div>
+  </nav>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="side-icons">
+            <a href="home.html" class="menu-fila">
+                <i class="fa-solid fa-house"></i>
+                <span class="menu-text">Inicio</span>
+            </a>
+            <a href="perfil_usuario.html" class="menu-fila activa">
+                <i class="fa-solid fa-circle-user"></i>
+                <span class="menu-text">Perfil</span>
+            </a>
+            <a href="guardados_usuario.html" class="menu-fila">
+                <i class="fa-solid fa-bookmark"></i>
+                <span class="menu-text">Guardado</span>
+            </a>
+            <a href="mapa.html" class="menu-fila">
+                <i class="fa-solid fa-location-dot"></i>
+                <span class="menu-text">Mapa</span>
+            </a>
+            <a href="configuracion_usuario.html" class="menu-fila">
+                <i class="fa-solid fa-gear"></i>
+                <span class="menu-text">Ajustes</span>
+            </a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="perfil-prototipo-container">
+            <div class="perfil-header-prototipo">
+                <div class="avatar-wrapper" onclick="abrirModalFoto()">
+                    <div class="avatar-circulo" id="avatar-contenedor">
+                        <svg viewBox="0 0 24 24" fill="currentColor" class="icono-silueta" id="svg-silueta">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                        <img id="foto-perfil-img" src="" alt="Foto de Perfil" style="display: none;">
+                    </div>
+                    <button type="button" class="btn-lapiz-editar" aria-label="Editar foto">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 20h9"></path>
+                            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                        </svg>
+                    </button>
+                </div>
+                <h2 id="mostrar-nombre-usuario">@cargando...</h2>
+            </div>
+
+            <div class="perfil-grid-opciones">
+                <button type="button" class="btn-opcion-perfil" id="btn-cambiar-nombre" onclick="abrirModalNombre()">
+                    Cambiar nombre de usuario
+                </button>
+
+                <button type="button" class="btn-opcion-perfil btn-texto-largo" id="btn-cambiar-correo" onclick="abrirModalCorreo()">
+                    Editar correo electrónico
+                </button>
+
+                <button type="button" class="btn-opcion-perfil" id="btn-cambiar-telefono" onclick="abrirModalTelefono()" style="display: flex; justify-content: space-between; align-items: center;">
+                    <span id="texto-estado-telefono">Cambiar número de celular</span>
+                </button>
+
+                <a href="perfil_adoptante.html" class="btn-opcion-perfil">
+                    Perfil de adoptante
+                </a>
+
+                <a href="mis_publicaciones.html" class="btn-opcion-perfil">
+                    Mis publicaciones
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- MODAL FOTO DE PERFIL -->
+    <div id="modal-foto-perfil" class="modal-foto-overlay" onclick="cerrarModalFoto(event)">
+        <div class="modal-foto-contenido">
+            <button type="button" class="btn-cerrar-modal" onclick="cerrarModalFotoDirecto()">&times;</button>
+            <div class="modal-avatar-preview" id="modal-avatar-contenedor">
+                <svg viewBox="0 0 24 24" fill="currentColor" class="icono-silueta" id="modal-svg-silueta">
+                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                </svg>
+                <img id="foto-preview-ampliada" src="" alt="Vista Previa Foto" style="display: none;">
+            </div>
+            <div class="modal-foto-acciones">
+                <button type="button" class="btn-opcion-modal btn-cambiar" onclick="ejecutarCambiarFoto()">Cambiar foto de perfil</button>
+                <button type="button" class="btn-opcion-modal btn-borrar" onclick="ejecutarBorrarFoto()">Borrar foto de perfil</button>
+            </div>
+            <input type="file" id="input-nueva-foto" accept="image/*" style="display: none;" onchange="procesarNuevaFoto(event)">
+        </div>
+    </div>
+
+    <!-- MODAL CAMBIAR NOMBRE DE USUARIO -->
+    <div id="modal-cambiar-nombre" class="modal-foto-overlay" onclick="cerrarModalNombreOverlay(event)">
+        <div class="modal-foto-contenido modal-nombre-box">
+            <button type="button" class="btn-cerrar-modal" onclick="cerrarModalNombre()">&times;</button>
+            <div class="etiqueta-rosa">Nombre de usuario actual:</div>
+            <div class="nombre-actual-display" id="modal-nombre-actual">@cargando...</div>
+            <div class="etiqueta-rosa">Nuevo nombre de usuario:</div>
+            <div class="input-contenedor-nombre">
+                <span class="prefijo-at">@</span>
+                <input type="text" id="input-nuevo-nombre" placeholder="tu_nuevo_usuario" maxlength="20">
+            </div>
+            <p class="texto-restriccion">Solo puedes cambiar tu usuario una vez cada 30 días</p>
+            <p id="mensaje-estado-nombre" class="mensaje-validacion" style="margin-top: 5px; font-size: 13px;"></p>
+            <button type="button" class="btn-confirmar-nombre" id="btn-guardar-nuevo-nombre">
+                Cambiar nombre de usuario
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL CAMBIAR CORREO ELECTRÓNICO -->
+    <div id="modal-cambiar-correo" class="modal-foto-overlay" onclick="cerrarModalCorreoOverlay(event)">
+        <div class="modal-foto-contenido modal-nombre-box">
+            <button type="button" class="btn-cerrar-modal" onclick="cerrarModalCorreo()">&times;</button>
+            <div class="etiqueta-rosa">Correo actual:</div>
+            <div class="nombre-actual-display" id="modal-correo-actual" style="font-size: 16px; word-break: break-all;">@cargando...</div>
+
+            <div id="paso-nuevo-correo">
+                <div class="etiqueta-rosa">Nuevo correo electrónico:</div>
+                <div class="input-contenedor-nombre">
+                    <i class="fa-solid fa-envelope" style="margin-right: 8px; color: #555;"></i>
+                    <input type="email" id="input-nuevo-correo" placeholder="nuevo@correo.com">
+                </div>
+                <p id="mensaje-error-correo" class="mensaje-error" style="display: none;"></p>
+                <button type="button" class="btn-confirmar-nombre" id="btn-enviar-codigo-correo">
+                    Enviar código de verificación
+                </button>
+            </div>
+
+            <div id="paso-codigo-otp" style="display: none; text-align: center;">
+                <p class="texto-restriccion">Ingresa el código de 4 dígitos enviado a tu nuevo correo:</p>
+                <div class="otp-container" style="display: flex; gap: 8px; justify-content: center; margin: 15px 0;">
+                    <input type="text" maxlength="1" pattern="[0-9]" class="otp-correo-input" inputmode="numeric" style="width: 40px; height: 45px; text-align: center; font-size: 20px; border-radius: 8px; border: 1px solid #ccc;" />
+                    <input type="text" maxlength="1" pattern="[0-9]" class="otp-correo-input" inputmode="numeric" style="width: 40px; height: 45px; text-align: center; font-size: 20px; border-radius: 8px; border: 1px solid #ccc;" />
+                    <input type="text" maxlength="1" pattern="[0-9]" class="otp-correo-input" inputmode="numeric" style="width: 40px; height: 45px; text-align: center; font-size: 20px; border-radius: 8px; border: 1px solid #ccc;" />
+                    <input type="text" maxlength="1" pattern="[0-9]" class="otp-correo-input" inputmode="numeric" style="width: 40px; height: 45px; text-align: center; font-size: 20px; border-radius: 8px; border: 1px solid #ccc;" />
+                </div>
+                <p id="mensaje-error-otp-correo" class="mensaje-error" style="display: none;"></p>
+                <button type="button" class="btn-confirmar-nombre" id="btn-verificar-cambio-correo">
+                    Verificar y cambiar correo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CAMBIAR / VERIFICAR CELULAR -->
+    <div id="modal-cambiar-telefono" class="modal-foto-overlay" onclick="cerrarModalTelefonoOverlay(event)">
+        <div class="modal-foto-contenido modal-nombre-box">
+            <button type="button" class="btn-cerrar-modal" onclick="cerrarModalTelefono()">&times;</button>
+            <div class="etiqueta-rosa">Número de celular actual:</div>
+            <div class="nombre-actual-display" id="modal-telefono-actual">@cargando...</div>
+
+            <div id="paso-nuevo-telefono">
+                <div class="etiqueta-rosa">Nuevo número de celular:</div>
+                <div class="input-contenedor-nombre">
+                    <i class="fa-solid fa-phone" style="margin-right: 8px; color: #555;"></i>
+                    <input type="tel" id="input-nuevo-telefono" placeholder="+573001234567" maxlength="15">
+                </div>
+                <p id="mensaje-error-telefono" class="mensaje-error" style="display: none;"></p>
+                <button type="button" class="btn-confirmar-nombre" id="btn-guardar-y-verificar-tel">
+                    Guardar y enviar código
+                </button>
+                <div id="recaptcha-container" style="display: none;"></div>
+            </div>
+
+            <div id="paso-codigo-otp-tel" style="display: none; text-align: center;">
+                <p class="texto-restriccion">Ingresa el código de 6 dígitos enviado por SMS a tu celular:</p>
+                <div class="otp-container" style="display: flex; gap: 6px; justify-content: center; margin: 15px 0;">
+                    <input type="text" maxlength="1" pattern="[0-9]" class="otp-tel-input" inputmode="numeric" style="width: 36px; height: 42px; text-align: center; font-size: 20px; border-radius: 8px; border: 1px solid #ccc;" />
+                    <input type="text" maxlength="1" pattern="[0-9]" class="otp-tel-input" inputmode="numeric" style="width: 36px; height: 42px; text-align: center; font-size: 20px; border-radius: 8px; border: 1px solid #ccc;" />
+                    <input type="text" maxlength="1" pattern="[0-9]" class="otp-tel-input" inputmode="numeric" style="width: 36px; height: 42px; text-align: center; font-size: 20px; border-radius: 8px; border: 1px solid #ccc;" />
+                    <input type="text" maxlength="1" pattern="[0-9]" class="otp-tel-input" inputmode="numeric" style="width: 36px; height: 42px; text-align: center; font-size: 20px; border-radius: 8px; border: 1px solid #ccc;" />
+                    <input type="text" maxlength="1" pattern="[0-9]" class="otp-tel-input" inputmode="numeric" style="width: 36px; height: 42px; text-align: center; font-size: 20px; border-radius: 8px; border: 1px solid #ccc;" />
+                    <input type="text" maxlength="1" pattern="[0-9]" class="otp-tel-input" inputmode="numeric" style="width: 36px; height: 42px; text-align: center; font-size: 20px; border-radius: 8px; border: 1px solid #ccc;" />
+                </div>
+                <p id="mensaje-error-otp-tel" class="mensaje-error" style="display: none;"></p>
+                <button type="button" class="btn-confirmar-nombre" id="btn-verificar-codigo-tel">
+                    Verificar número
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    <script src="script.js"></script>
+    <script src="perfil.js"></script>
+    
+    <script>
+        const btnToggleMenu = document.getElementById('btn-toggle-menu');
+        const sidebar = document.getElementById('sidebar');
+
+        if (btnToggleMenu && sidebar) {
+            btnToggleMenu.addEventListener('click', () => {
+                sidebar.classList.toggle('sidebar-abierta');
+            });
+        }
+    </script>
+</body>
+>>>>>>> 73ad380385be04225f0aeedc8f01200318850109
+</html>

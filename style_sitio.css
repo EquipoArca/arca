@@ -1,0 +1,222 @@
+<<<<<<< HEAD
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    height: 100vh;
+    font-family: 'Itim', sans-serif;
+    background-image: url('fondo.png.png');
+    background-size: cover;
+    background-position: center;
+    background-color: #fce4ec;
+    overflow: hidden;
+}
+
+/* --- Logo Superior Izquierda --- */
+.header {
+    
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    height: 80px;
+    width: 80px;
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.small-logo-circle {
+    
+    width: 70px;
+    height: 70px;
+    background-color: #e57373; /* Mismo color del círculo principal */
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.small-logo {
+    display: flex;
+    width: 80px;
+    height: 70px;
+    overflow: hidden;
+    border-radius: 100%;
+    box-shadow: none;
+}
+
+/* --- Contenido --- */
+.main-content {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.title {
+    margin-top: 20px;
+    font-size: 3.5rem;
+    font-weight: 500;
+    margin-bottom: 30px;
+    color: #000;
+    text-align: center;
+}
+
+.info-box {
+    margin-top: 5px;
+    background-color: #fbc2c4;
+    padding: 20px;
+    border-radius: 30px;
+    max-width: 850px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    margin-bottom: 40px;
+}
+
+.info-box ul {
+    margin-top: 10px;
+    list-style: none; /* Quitamos los puntos por defecto para usar los emojis de la imagen */
+    text-align: center;
+}
+
+.info-box li {
+    font-size: 1.5rem;
+    line-height: 1.3;
+    color: #000;
+    font-weight: 450;
+    margin-bottom: 10px;
+}
+
+/* --- Botón "Inicio" --- */
+.home-button {
+    background-color: #fbc2c4;
+    padding: 12px 50px;
+    border-radius: 25px;
+    text-decoration: none;
+    color: #333;
+    font-size: 1.2rem;
+    font-weight: 600;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+.home-button:hover {
+    transform: scale(1.05);
+    background-color: #f9abb0;
+=======
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    height: 100vh;
+    font-family: 'Itim', sans-serif;
+    background-image: url('fondo.png.png');
+    background-size: cover;
+    background-position: center;
+    background-color: #fce4ec;
+    overflow: hidden;
+}
+
+/* --- Logo Superior Izquierda --- */
+.header {
+    
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    height: 80px;
+    width: 80px;
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.small-logo-circle {
+    
+    width: 70px;
+    height: 70px;
+    background-color: #e57373; /* Mismo color del círculo principal */
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.small-logo {
+    display: flex;
+    width: 80px;
+    height: 70px;
+    overflow: hidden;
+    border-radius: 100%;
+    box-shadow: none;
+}
+
+/* --- Contenido --- */
+.main-content {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.title {
+    margin-top: 20px;
+    font-size: 3.5rem;
+    font-weight: 500;
+    margin-bottom: 30px;
+    color: #000;
+    text-align: center;
+}
+
+.info-box {
+    margin-top: 5px;
+    background-color: #fbc2c4;
+    padding: 20px;
+    border-radius: 30px;
+    max-width: 850px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    margin-bottom: 40px;
+}
+
+.info-box ul {
+    margin-top: 10px;
+    list-style: none; /* Quitamos los puntos por defecto para usar los emojis de la imagen */
+    text-align: center;
+}
+
+.info-box li {
+    font-size: 1.5rem;
+    line-height: 1.3;
+    color: #000;
+    font-weight: 450;
+    margin-bottom: 10px;
+}
+
+/* --- Botón "Inicio" --- */
+.home-button {
+    background-color: #fbc2c4;
+    padding: 12px 50px;
+    border-radius: 25px;
+    text-decoration: none;
+    color: #333;
+    font-size: 1.2rem;
+    font-weight: 600;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+.home-button:hover {
+    transform: scale(1.05);
+    background-color: #f9abb0;
+>>>>>>> 73ad380385be04225f0aeedc8f01200318850109
+}

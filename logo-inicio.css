@@ -1,0 +1,168 @@
+<<<<<<< HEAD
+/* Reset básico para eliminar espacios residuales */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body, html {
+    height: 100%;
+    font-family: 'Itim', sans-serif;
+}
+
+body {
+    /* Aquí cargamos tu archivo fondo.png */
+    background-image: url('fondo.png.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #fce4ec; /* Color de respaldo similar al rosado de la imagen */
+}
+
+.container {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px; /* Espaciado entre el logo, texto y botón */
+}
+.logo-wrapper {
+    width: 280px; /* Ajusta según el tamaño real de tu logo.png */
+    border-radius: 50%;
+   
+}
+
+.main-logo {
+    width: 100%;
+    height: auto;
+    background-color:#e57373;
+    border-radius: 50%;
+    
+}
+img{
+    box-shadow: 5px 5px 15px rgba(0,0,0,0.5);
+}
+
+
+.slogan {
+    font-size: 2.8rem;
+    color: #000000;
+    max-width: 800px;
+    font-family: 'Itim', sans-serif;
+    font-weight: 10;
+}
+
+.next-button {
+    background-color: #fbc2c4; /* Tono rosado suave del botón */
+    width: 100px;
+    height: 45px;
+    border-radius: 25px;
+    display: flex;
+    justify-content: center;
+    padding-bottom: 15px;
+    align-items: center;
+    text-decoration: none;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.next-button:hover {
+    transform: scale(1.05);
+    background-color: #f9abb0;
+    
+}
+
+.next-button span {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #333;
+    margin-top: 5px;
+=======
+/* Reset básico para eliminar espacios residuales */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body, html {
+    height: 100%;
+    font-family: 'Itim', sans-serif;
+}
+
+body {
+    /* Aquí cargamos tu archivo fondo.png */
+    background-image: url('fondo.png.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #fce4ec; /* Color de respaldo similar al rosado de la imagen */
+}
+
+.container {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px; /* Espaciado entre el logo, texto y botón */
+}
+.logo-wrapper {
+    width: 280px; /* Ajusta según el tamaño real de tu logo.png */
+    border-radius: 50%;
+   
+}
+
+.main-logo {
+    width: 100%;
+    height: auto;
+    background-color:#e57373;
+    border-radius: 50%;
+    
+}
+img{
+    box-shadow: 5px 5px 15px rgba(0,0,0,0.5);
+}
+
+
+.slogan {
+    font-size: 2.8rem;
+    color: #000000;
+    max-width: 800px;
+    font-family: 'Itim', sans-serif;
+    font-weight: 10;
+}
+
+.next-button {
+    background-color: #fbc2c4; /* Tono rosado suave del botón */
+    width: 100px;
+    height: 45px;
+    border-radius: 25px;
+    display: flex;
+    justify-content: center;
+    padding-bottom: 15px;
+    align-items: center;
+    text-decoration: none;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.next-button:hover {
+    transform: scale(1.05);
+    background-color: #f9abb0;
+    
+}
+
+.next-button span {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #333;
+    margin-top: 5px;
+>>>>>>> 73ad380385be04225f0aeedc8f01200318850109
+}

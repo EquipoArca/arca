@@ -1,0 +1,370 @@
+<<<<<<< HEAD
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guardados - ARCA</title>
+    <link rel="stylesheet" href="style_home.css">
+    <link rel="stylesheet" href="style_guardados.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Estilos idénticos al modal de detalles de novedades */
+        .modal-foto-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            backdrop-filter: blur(3px);
+        }
+        .modal-foto-contenido {
+            background: #fff8eb;
+            border: 2px solid #e8a87c;
+            border-radius: 30px;
+            padding: 30px;
+            position: relative;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            width: 750px;
+            max-width: 95%;
+            max-height: 90vh;
+            overflow-y: auto;
+            text-align: left;
+        }
+        .btn-cerrar-modal {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #666;
+            font-family: 'Itim', cursive;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- BARRA DE NAVEGACIÓN SUPERIOR -->
+    <nav class="top-nav">
+        <div class="top-left">
+            <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu"></i>
+            <div class="mini-logo-circle">
+                <img src="logo.png" alt="Logo ARCA">
+            </div>
+            <span class="page-title">Guardados</span>
+        </div>
+        <div class="search-bar">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="input-busqueda-nav" name="busqueda" placeholder="Busca algo" aria-label="Buscar en la aplicación">
+            <i class="fa-solid fa-microphone"></i>
+        </div>
+        <div class="top-right">
+            <div class="user-header-info">
+
+            <!-- 1. PERFIL Y MINI MENÚ (Avatar con menú desplegable) -->
+            <div class="user-profile-menu" id="user-profile-menu">
+                <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
+                    <img src="logo.png" id="user-avatar-img" alt="Perfil">
+                </div>
+
+                <div class="mini-menu-card" id="mini-menu-card">
+                    <div class="mini-menu-header">
+                        <span id="mini-menu-username">Usuario</span>
+                    </div>
+                    
+                    <hr class="mini-menu-divider">
+                    
+                    <a href="javascript:void(0)" onclick="mostrarSeccion('configuracion')" class="mini-menu-item btn-ajustes">
+                        <i class="fa-solid fa-gear"></i>
+                        <span>Ajustes</span>
+                    </a>
+                    
+                    <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Cerrar sesión</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 2. CAMPANA DE NOTIFICACIONES -->
+            <div class="notif-circle">
+                <a href="notificaciones.html" aria-label="Notificaciones"><i class="fa-solid fa-bell"></i></a>
+            </div>
+
+        </div>
+    </div>
+  </nav>
+
+    <!-- BARRA LATERAL -->
+    <aside class="sidebar" id="sidebar">
+        <div class="side-icons">
+            <a href="home.html" class="menu-fila">
+                <i class="fa-solid fa-house"></i>
+                <span class="menu-text">Inicio</span>
+            </a>
+            <a href="perfil_usuario.html" class="menu-fila">
+                <i class="fa-solid fa-circle-user"></i>
+                <span class="menu-text">Perfil</span>
+            </a>
+            <a href="guardados_usuario.html" class="menu-fila activa">
+                <i class="fa-solid fa-bookmark"></i>
+                <span class="menu-text">Guardado</span>
+            </a>
+            <a href="mapa.html" class="menu-fila">
+                <i class="fa-solid fa-location-dot"></i>
+                <span class="menu-text">Mapa</span>
+            </a>
+            <a href="configuracion_usuario.html" class="menu-fila">
+                <i class="fa-solid fa-gear"></i>
+                <span class="menu-text">Ajustes</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="main-content">
+        <div class="guardados-container" style="padding: 20px; max-width: 900px; margin: 0 auto;">
+            <h2 style="font-family: 'Itim', cursive; color: #000000; margin-bottom: 20px;">Tus publicaciones guardadas</h2>
+            
+            <!-- Contenedor donde se cargarán las publicaciones o el estado vacío -->
+            <div id="grid-publicaciones-guardadas" class="posts-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px;">
+                
+                <!-- Estado vacío predeterminado -->
+                <div id="estado-vacio-guardados" style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                    <i class="fa-solid fa-bookmark" style="font-size: 48px; color: #fec39f; margin-bottom: 15px;"></i>
+                    <h3 style="font-family: 'Itim', cursive; color: #333; font-size: 20px; margin-bottom: 8px;">Aún no hay publicaciones guardadas</h3>
+                    <p style="color: #666; font-size: 14px;">Explora las últimas novedades o el mapa y guarda las publicaciones que te interesen para verlas aquí.</p>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- MODAL DE DETALLES DEL REPORTE (Idéntico al de últimas novedades) -->
+    <div id="modal-detalle-publicacion" class="modal-foto-overlay" onclick="cerrarModalDetalleOverlay(event)">
+        <div class="modal-foto-contenido">
+            <button type="button" class="btn-cerrar-modal" onclick="cerrarModalDetalle()">&times;</button>
+            
+            <div id="contenido-detalle-dinamico">
+                <!-- Se inyecta dinámicamente desde script_guardados.js -->
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS DE FIREBASE Y LÓGICA -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    <script src="script.js"></script>
+    <script src="script_guardados.js"></script>
+    
+    <script>
+        // Script para desplegar/contraer el menú lateral
+        const btnToggleMenu = document.getElementById('btn-toggle-menu');
+        const sidebar = document.getElementById('sidebar');
+
+        if (btnToggleMenu && sidebar) {
+            btnToggleMenu.addEventListener('click', () => {
+                sidebar.classList.toggle('sidebar-abierta');
+            });
+        }
+    </script>
+    
+</body>
+=======
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guardados - ARCA</title>
+    <link rel="stylesheet" href="style_home.css">
+    <link rel="stylesheet" href="style_guardados.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Estilos idénticos al modal de detalles de novedades */
+        .modal-foto-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            backdrop-filter: blur(3px);
+        }
+        .modal-foto-contenido {
+            background: #fff8eb;
+            border: 2px solid #e8a87c;
+            border-radius: 30px;
+            padding: 30px;
+            position: relative;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            width: 750px;
+            max-width: 95%;
+            max-height: 90vh;
+            overflow-y: auto;
+            text-align: left;
+        }
+        .btn-cerrar-modal {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #666;
+            font-family: 'Itim', cursive;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- BARRA DE NAVEGACIÓN SUPERIOR -->
+    <nav class="top-nav">
+        <div class="top-left">
+            <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu"></i>
+            <div class="mini-logo-circle">
+                <img src="logo.png" alt="Logo ARCA">
+            </div>
+            <span class="page-title">Guardados</span>
+        </div>
+        <div class="search-bar">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="input-busqueda-nav" name="busqueda" placeholder="Busca algo" aria-label="Buscar en la aplicación">
+            <i class="fa-solid fa-microphone"></i>
+        </div>
+        <div class="top-right">
+            <div class="user-header-info">
+
+            <!-- 1. PERFIL Y MINI MENÚ (Avatar con menú desplegable) -->
+            <div class="user-profile-menu" id="user-profile-menu">
+                <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
+                    <img src="logo.png" id="user-avatar-img" alt="Perfil">
+                </div>
+
+                <div class="mini-menu-card" id="mini-menu-card">
+                    <div class="mini-menu-header">
+                        <span id="mini-menu-username">Usuario</span>
+                    </div>
+                    
+                    <hr class="mini-menu-divider">
+                    
+                    <a href="javascript:void(0)" onclick="mostrarSeccion('configuracion')" class="mini-menu-item btn-ajustes">
+                        <i class="fa-solid fa-gear"></i>
+                        <span>Ajustes</span>
+                    </a>
+                    
+                    <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Cerrar sesión</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 2. CAMPANA DE NOTIFICACIONES -->
+            <div class="notif-circle">
+                <a href="notificaciones.html" aria-label="Notificaciones"><i class="fa-solid fa-bell"></i></a>
+            </div>
+
+        </div>
+    </div>
+  </nav>
+
+    <!-- BARRA LATERAL -->
+    <aside class="sidebar" id="sidebar">
+        <div class="side-icons">
+            <a href="home.html" class="menu-fila">
+                <i class="fa-solid fa-house"></i>
+                <span class="menu-text">Inicio</span>
+            </a>
+            <a href="perfil_usuario.html" class="menu-fila">
+                <i class="fa-solid fa-circle-user"></i>
+                <span class="menu-text">Perfil</span>
+            </a>
+            <a href="guardados_usuario.html" class="menu-fila activa">
+                <i class="fa-solid fa-bookmark"></i>
+                <span class="menu-text">Guardado</span>
+            </a>
+            <a href="mapa.html" class="menu-fila">
+                <i class="fa-solid fa-location-dot"></i>
+                <span class="menu-text">Mapa</span>
+            </a>
+            <a href="configuracion_usuario.html" class="menu-fila">
+                <i class="fa-solid fa-gear"></i>
+                <span class="menu-text">Ajustes</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="main-content">
+        <div class="guardados-container" style="padding: 20px; max-width: 900px; margin: 0 auto;">
+            <h2 style="font-family: 'Itim', cursive; color: #000000; margin-bottom: 20px;">Tus publicaciones guardadas</h2>
+            
+            <!-- Contenedor donde se cargarán las publicaciones o el estado vacío -->
+            <div id="grid-publicaciones-guardadas" class="posts-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px;">
+                
+                <!-- Estado vacío predeterminado -->
+                <div id="estado-vacio-guardados" style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                    <i class="fa-solid fa-bookmark" style="font-size: 48px; color: #fec39f; margin-bottom: 15px;"></i>
+                    <h3 style="font-family: 'Itim', cursive; color: #333; font-size: 20px; margin-bottom: 8px;">Aún no hay publicaciones guardadas</h3>
+                    <p style="color: #666; font-size: 14px;">Explora las últimas novedades o el mapa y guarda las publicaciones que te interesen para verlas aquí.</p>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- MODAL DE DETALLES DEL REPORTE (Idéntico al de últimas novedades) -->
+    <div id="modal-detalle-publicacion" class="modal-foto-overlay" onclick="cerrarModalDetalleOverlay(event)">
+        <div class="modal-foto-contenido">
+            <button type="button" class="btn-cerrar-modal" onclick="cerrarModalDetalle()">&times;</button>
+            
+            <div id="contenido-detalle-dinamico">
+                <!-- Se inyecta dinámicamente desde script_guardados.js -->
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS DE FIREBASE Y LÓGICA -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    <script src="script.js"></script>
+    <script src="script_guardados.js"></script>
+    
+    <script>
+        // Script para desplegar/contraer el menú lateral
+        const btnToggleMenu = document.getElementById('btn-toggle-menu');
+        const sidebar = document.getElementById('sidebar');
+
+        if (btnToggleMenu && sidebar) {
+            btnToggleMenu.addEventListener('click', () => {
+                sidebar.classList.toggle('sidebar-abierta');
+            });
+        }
+    </script>
+    
+</body>
+>>>>>>> 73ad380385be04225f0aeedc8f01200318850109
+</html>
