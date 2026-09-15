@@ -1,0 +1,492 @@
+<<<<<<< HEAD
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARCA - Módulo de Reportes</title>
+    <!-- Chart.js para las gráficas -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Itim&display=swap');
+
+    body {
+        background-color: #fceee9; /* Fondo suave rosado/crema */
+        font-family: 'Itim', sans-serif;
+        margin: 0;
+        padding: 40px 20px;
+        color: #5a4b49;
+    }
+
+    .main-container {
+        max-width: 950px;
+        margin: 0 auto;
+    }
+
+    .header-modulo {
+        text-align: center;
+        margin-bottom: 35px;
+    }
+
+    .header-modulo h1 {
+        margin: 0;
+        color: #e57373; /* Tono rosa rojizo estilo logo ARCA */
+        font-size: 2.2rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+    }
+
+    .header-modulo p {
+        margin-top: 6px;
+        color: #8d7b78;
+        font-size: 1.05rem;
+        font-weight: 600;
+    }
+
+    /* Tarjetas principales estilo login */
+    .reporte-card {
+        background: rgba(235, 203, 201, 0.75); /* Rosa pastel traslúcido */
+        border: 2px solid #ffffff;
+        border-radius: 28px;
+        padding: 30px;
+        margin-bottom: 35px;
+        box-shadow: 0 10px 25px rgba(212, 165, 165, 0.25);
+        backdrop-filter: blur(5px);
+    }
+
+    .reporte-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 2px dashed rgba(255, 255, 255, 0.6);
+        padding-bottom: 15px;
+        margin-bottom: 25px;
+    }
+
+    .reporte-card-header h2 {
+        margin: 0;
+        font-size: 1.35rem;
+        color: #5a4b49;
+        font-weight: 700;
+    }
+
+    .reporte-card-header small {
+        color: #7d6a68;
+        font-weight: 600;
+    }
+
+    .grid-reporte {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 25px;
+        align-items: center;
+    }
+
+    /* Tabla estilizada */
+    .tabla-reporte {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 8px;
+    }
+
+    .tabla-reporte th {
+        background-color: transparent;
+        color: #6d5957;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 8px 12px;
+        text-align: left;
+    }
+
+    .tabla-reporte td {
+        background: #ffffff;
+        padding: 12px 16px;
+        color: #4a3e3c;
+        font-size: 0.95rem;
+        font-weight: 600;
+    }
+
+    .tabla-reporte td:first-child {
+        border-top-left-radius: 14px;
+        border-bottom-left-radius: 14px;
+    }
+
+    .tabla-reporte td:last-child {
+        border-top-right-radius: 14px;
+        border-bottom-right-radius: 14px;
+    }
+
+    .grafica-box {
+        width: 100%;
+        max-width: 290px;
+        margin: 0 auto;
+        background: #ffffff;
+        padding: 15px;
+        border-radius: 22px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    }
+
+    /* Botón estilo "Entrar" (Verde menta con borde oscuro) */
+    .btn-imprimir {
+        background-color: #eaf5d8; /* Verde menta clarito */
+        color: #435e23;
+        border: 2px solid #2d381c; /* Borde oscuro bien marcado */
+        padding: 10px 22px;
+        border-radius: 16px;
+        cursor: pointer;
+        font-family: 'Quicksand', sans-serif;
+        font-weight: 700;
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+    }
+
+    .btn-imprimir:hover {
+        background-color: #dceec4;
+        transform: translateY(-2px);
+    }
+
+    @media print {
+        .btn-imprimir { display: none; }
+        body { background: white; padding: 0; }
+        .reporte-card { box-shadow: none; border: 1px solid #ddd; background: white; }
+    }
+
+    @media (max-width: 768px) {
+        .grid-reporte { grid-template-columns: 1fr; }
+    }
+</style>
+</head>
+<body>
+
+<div class="main-container">
+
+    <div class="header-modulo">
+        <h1>📊 Panel de Reportes - ARCA</h1>
+        <p>Métricas y estadísticas en tiempo real de la plataforma</p>
+    </div>
+
+    <!-- REPORTE 1: DEMOGRAFÍA DE USUARIOS POR EDAD -->
+    <div class="reporte-card">
+        <div class="reporte-card-header">
+            <div>
+                <h2>👥 Demografía de Usuarios por Rango de Edad</h2>
+                <small style="color: #64748b;">Calculado dinámicamente según la fecha de nacimiento registrada</small>
+            </div>
+            <button class="btn-imprimir" onclick="window.print()">🖨️ Exportar</button>
+        </div>
+
+        <div class="grid-reporte">
+            <!-- Tabla Usuarios -->
+            <table class="tabla-reporte">
+                <thead>
+                    <tr>
+                        <th>Rango de Edad</th>
+                        <th>Total Registrados</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-usuarios">
+                    <!-- Aquí se llenarán las filas desde Node -->
+                    <tr>
+                        <td>18 - 24 años</td>
+                        <td>0 usuarios</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Gráfica Usuarios -->
+            <div class="grafica-box">
+                <canvas id="graficoUsuarios"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- REPORTE 2: EMERGENCIAS POR TIPO (1.1) -->
+    <div class="reporte-card">
+        <div class="reporte-card-header">
+            <div>
+                <h2>🚨 Balance de Emergencias por Tipo</h2>
+                <small style="color: #64748b;">Consolidado de alertas comunitarias ingresadas en la tabla reportes</small>
+            </div>
+            <button class="btn-imprimir" onclick="window.print()">🖨️ Exportar</button>
+        </div>
+
+        <div class="grid-reporte">
+            <!-- Tabla Emergencias -->
+            <table class="tabla-reporte">
+                <thead>
+                    <tr>
+                        <th>Tipo de Emergencia</th>
+                        <th>Casos Registrados</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-emergencias">
+                    <!-- Aquí se llenarán las filas desde Node -->
+                    <tr>
+                        <td>Sin datos</td>
+                        <td>0 casos</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Gráfica Emergencias -->
+            <div class="grafica-box">
+                <canvas id="graficoEmergencias"></canvas>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script> <!-- AÑADIDO -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+<script src="script.js"></script>
+</body>
+=======
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARCA - Módulo de Reportes</title>
+    <!-- Chart.js para las gráficas -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Itim&display=swap');
+
+    body {
+        background-color: #fceee9; /* Fondo suave rosado/crema */
+        font-family: 'Itim', sans-serif;
+        margin: 0;
+        padding: 40px 20px;
+        color: #5a4b49;
+    }
+
+    .main-container {
+        max-width: 950px;
+        margin: 0 auto;
+    }
+
+    .header-modulo {
+        text-align: center;
+        margin-bottom: 35px;
+    }
+
+    .header-modulo h1 {
+        margin: 0;
+        color: #e57373; /* Tono rosa rojizo estilo logo ARCA */
+        font-size: 2.2rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+    }
+
+    .header-modulo p {
+        margin-top: 6px;
+        color: #8d7b78;
+        font-size: 1.05rem;
+        font-weight: 600;
+    }
+
+    /* Tarjetas principales estilo login */
+    .reporte-card {
+        background: rgba(235, 203, 201, 0.75); /* Rosa pastel traslúcido */
+        border: 2px solid #ffffff;
+        border-radius: 28px;
+        padding: 30px;
+        margin-bottom: 35px;
+        box-shadow: 0 10px 25px rgba(212, 165, 165, 0.25);
+        backdrop-filter: blur(5px);
+    }
+
+    .reporte-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 2px dashed rgba(255, 255, 255, 0.6);
+        padding-bottom: 15px;
+        margin-bottom: 25px;
+    }
+
+    .reporte-card-header h2 {
+        margin: 0;
+        font-size: 1.35rem;
+        color: #5a4b49;
+        font-weight: 700;
+    }
+
+    .reporte-card-header small {
+        color: #7d6a68;
+        font-weight: 600;
+    }
+
+    .grid-reporte {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 25px;
+        align-items: center;
+    }
+
+    /* Tabla estilizada */
+    .tabla-reporte {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 8px;
+    }
+
+    .tabla-reporte th {
+        background-color: transparent;
+        color: #6d5957;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 8px 12px;
+        text-align: left;
+    }
+
+    .tabla-reporte td {
+        background: #ffffff;
+        padding: 12px 16px;
+        color: #4a3e3c;
+        font-size: 0.95rem;
+        font-weight: 600;
+    }
+
+    .tabla-reporte td:first-child {
+        border-top-left-radius: 14px;
+        border-bottom-left-radius: 14px;
+    }
+
+    .tabla-reporte td:last-child {
+        border-top-right-radius: 14px;
+        border-bottom-right-radius: 14px;
+    }
+
+    .grafica-box {
+        width: 100%;
+        max-width: 290px;
+        margin: 0 auto;
+        background: #ffffff;
+        padding: 15px;
+        border-radius: 22px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    }
+
+    /* Botón estilo "Entrar" (Verde menta con borde oscuro) */
+    .btn-imprimir {
+        background-color: #eaf5d8; /* Verde menta clarito */
+        color: #435e23;
+        border: 2px solid #2d381c; /* Borde oscuro bien marcado */
+        padding: 10px 22px;
+        border-radius: 16px;
+        cursor: pointer;
+        font-family: 'Quicksand', sans-serif;
+        font-weight: 700;
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+    }
+
+    .btn-imprimir:hover {
+        background-color: #dceec4;
+        transform: translateY(-2px);
+    }
+
+    @media print {
+        .btn-imprimir { display: none; }
+        body { background: white; padding: 0; }
+        .reporte-card { box-shadow: none; border: 1px solid #ddd; background: white; }
+    }
+
+    @media (max-width: 768px) {
+        .grid-reporte { grid-template-columns: 1fr; }
+    }
+</style>
+</head>
+<body>
+
+<div class="main-container">
+
+    <div class="header-modulo">
+        <h1>📊 Panel de Reportes - ARCA</h1>
+        <p>Métricas y estadísticas en tiempo real de la plataforma</p>
+    </div>
+
+    <!-- REPORTE 1: DEMOGRAFÍA DE USUARIOS POR EDAD -->
+    <div class="reporte-card">
+        <div class="reporte-card-header">
+            <div>
+                <h2>👥 Demografía de Usuarios por Rango de Edad</h2>
+                <small style="color: #64748b;">Calculado dinámicamente según la fecha de nacimiento registrada</small>
+            </div>
+            <button class="btn-imprimir" onclick="window.print()">🖨️ Exportar</button>
+        </div>
+
+        <div class="grid-reporte">
+            <!-- Tabla Usuarios -->
+            <table class="tabla-reporte">
+                <thead>
+                    <tr>
+                        <th>Rango de Edad</th>
+                        <th>Total Registrados</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-usuarios">
+                    <!-- Aquí se llenarán las filas desde Node -->
+                    <tr>
+                        <td>18 - 24 años</td>
+                        <td>0 usuarios</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Gráfica Usuarios -->
+            <div class="grafica-box">
+                <canvas id="graficoUsuarios"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- REPORTE 2: EMERGENCIAS POR TIPO (1.1) -->
+    <div class="reporte-card">
+        <div class="reporte-card-header">
+            <div>
+                <h2>🚨 Balance de Emergencias por Tipo</h2>
+                <small style="color: #64748b;">Consolidado de alertas comunitarias ingresadas en la tabla reportes</small>
+            </div>
+            <button class="btn-imprimir" onclick="window.print()">🖨️ Exportar</button>
+        </div>
+
+        <div class="grid-reporte">
+            <!-- Tabla Emergencias -->
+            <table class="tabla-reporte">
+                <thead>
+                    <tr>
+                        <th>Tipo de Emergencia</th>
+                        <th>Casos Registrados</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-emergencias">
+                    <!-- Aquí se llenarán las filas desde Node -->
+                    <tr>
+                        <td>Sin datos</td>
+                        <td>0 casos</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Gráfica Emergencias -->
+            <div class="grafica-box">
+                <canvas id="graficoEmergencias"></canvas>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script> <!-- AÑADIDO -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+<script src="script.js"></script>
+</body>
+>>>>>>> 73ad380385be04225f0aeedc8f01200318850109
+</html>

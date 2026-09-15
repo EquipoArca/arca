@@ -1,0 +1,1678 @@
+<<<<<<< HEAD
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle del Reporte - ARCA</title>
+    <link rel="stylesheet" href="style_home.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        html, body {
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Itim', cursive, sans-serif;
+            background-color: #fce8e6;
+        }
+
+        .main-content {
+            height: calc(100vh - 70px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 20px;
+            box-sizing: border-box;
+        }
+
+        .detalle-container-principal {
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 28px;
+            padding: 20px 30px;
+            width: 100%;
+            max-width: 1100px;
+            box-shadow: 0 12px 35px rgba(220, 150, 140, 0.12);
+            border: 2px solid rgba(255, 255, 255, 0.7);
+            box-sizing: border-box;
+        }
+
+        .detalle-header-card {
+            background: rgba(253, 203, 208, 0.65);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 10px 20px;
+            border-radius: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 15px rgba(230, 160, 140, 0.08);
+        }
+
+        .detalle-header-card h1 {
+            margin: 0;
+            font-size: 22px;
+            color: #2b2b2b;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .detalle-header-icon {
+            width: 26px;
+            height: 26px;
+            object-fit: contain;
+            border-radius: 50%;
+        }
+
+        .header-acciones-derecha {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .detalle-btn-volver {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid #f4c2c4;
+            padding: 6px 14px;
+            border-radius: 14px;
+            color: #d9534f;
+            font-weight: bold;
+            font-size: 13px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            font-family: 'Itim', cursive, sans-serif;
+        }
+
+        .detalle-btn-volver:hover {
+            background: #fff;
+            transform: translateY(-1px);
+        }
+
+        .detalle-fecha-texto {
+            font-size: 13px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .detalle-body-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.3fr;
+            gap: 20px;
+            align-items: stretch;
+        }
+
+        .detalle-col-izq {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .detalle-col-derecha {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .detalle-titulo-capsula {
+            background: rgba(252, 185, 160, 0.75);
+            backdrop-filter: blur(8px);
+            padding: 8px 16px;
+            border-radius: 18px;
+            font-size: 17px;
+            font-weight: bold;
+            color: #2b2b2b;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(230, 160, 140, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .detalle-sub-label {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 2px;
+            font-weight: bold;
+        }
+
+        .detalle-pill-situacion {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(6px);
+            color: #333;
+            padding: 6px 14px;
+            border-radius: 14px;
+            font-size: 13px;
+            font-weight: bold;
+            border: 1px solid #f9cab5;
+            display: inline-block;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+
+        .detalle-foto-wrapper {
+            width: 100%;
+            height: 180px;
+            border-radius: 18px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.8);
+            border: 3px solid #fca38d;
+            box-shadow: 0 6px 18px rgba(230, 150, 130, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .detalle-foto-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .detalle-caja-descripcion {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 20px;
+            padding: 22px;
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 6px 20px rgba(230, 150, 130, 0.06);
+            font-size: 15.5px;
+            color: #333;
+            line-height: 1.5;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+
+        .detalle-footer-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .detalle-bloque-mini {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(8px);
+            padding: 12px 16px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            font-size: 13.5px;
+            color: #444;
+            box-shadow: 0 4px 12px rgba(230, 150, 130, 0.04);
+        }
+
+        .detalle-bloque-mini strong {
+            color: #e06d53;
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
+
+        .contacto-items {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 13.5px;
+        }
+
+        .contacto-fila-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.85);
+            padding: 6px 12px;
+            border-radius: 14px;
+            border: 1px solid #f9cab5;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+            gap: 10px;
+        }
+
+        .btn-contacto-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+            cursor: pointer;
+            flex-grow: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .btn-contacto-link.whatsapp {
+            color: #25d366;
+        }
+
+        .btn-contacto-link.correo {
+            color: #007bff;
+        }
+
+        .btn-contacto-link:hover {
+            text-decoration: underline;
+        }
+
+        .btn-copiar-mini {
+            background: #fff;
+            border: 1px solid #f4c2c4;
+            cursor: pointer;
+            color: #d9534f;
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 10px;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+            font-family: 'Itim', cursive, sans-serif;
+        }
+
+        .btn-copiar-mini:hover {
+            background: #ffe5dd;
+        }
+
+        .btn-ver-mapa-chiquito {
+            color: #e06d53;
+            font-weight: bold;
+            text-decoration: none;
+            font-size: 12.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 4px;
+            transition: color 0.2s;
+        }
+
+        .btn-ver-mapa-chiquito:hover {
+            color: #b8432a;
+            text-decoration: underline;
+        }
+
+        .detalle-barra-inferior {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            padding-top: 12px;
+            border-top: 1px dashed rgba(245, 180, 165, 0.6);
+        }
+
+        .detalle-info-autor {
+            font-size: 13.5px;
+            color: #555;
+        }
+
+        .detalle-info-autor a {
+            color: #e06d53;
+            text-decoration: none;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s;
+        }
+
+        .detalle-info-autor a:hover {
+            color: #b8432a;
+            text-decoration: underline;
+        }
+
+        .badge-ver-perfil {
+            font-size: 11px;
+            background: rgba(252, 185, 160, 0.4);
+            padding: 2px 6px;
+            border-radius: 8px;
+            color: #d9534f;
+            border: 1px dashed #fca38d;
+            margin-left: 4px;
+        }
+
+        .detalle-btn-accion {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(6px);
+            color: #2b2b2b;
+            border: 1px solid #f4d0c5;
+            padding: 8px 20px;
+            border-radius: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13.5px;
+            box-shadow: 0 3px 10px rgba(230, 150, 130, 0.08);
+            text-decoration: none;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'Itim', cursive, sans-serif;
+        }
+
+        .detalle-btn-accion:hover {
+            background: #ffe5dd;
+        }
+
+        .detalle-btn-editar {
+            background: #fca38d;
+            color: #fff;
+            border: none;
+        }
+        .detalle-btn-editar:hover {
+            background: #eb917b;
+        }
+
+        .modal-arca-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-arca-box {
+            background: #ffffff;
+            border-radius: 28px;
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            border: 2px solid #fce8e6;
+            font-family: 'Itim', cursive, sans-serif;
+            animation: modalScale 0.2s ease-in-out;
+        }
+
+        @keyframes modalScale {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-huella-icono {
+            font-size: 36px;
+            color: #7b5c93;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .modal-arca-box h3 {
+            margin: 0 0 10px 0;
+            color: #2b2b2b;
+            font-size: 20px;
+        }
+
+        .modal-arca-box p {
+            color: #555;
+            font-size: 15px;
+            line-height: 1.4;
+            margin-bottom: 20px;
+        }
+
+        .modal-botones-fila {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .modal-btn-aceptar {
+            background: #fca38d;
+            color: #fff;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 18px;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+            font-family: 'Itim', cursive, sans-serif;
+            box-shadow: 0 4px 12px rgba(252, 163, 141, 0.4);
+            transition: background 0.2s;
+        }
+
+        .modal-btn-aceptar:hover {
+            background: #eb917b;
+        }
+
+        .modal-btn-cancelar {
+            background: #f1f1f1;
+            color: #555;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 18px;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+            font-family: 'Itim', cursive, sans-serif;
+            transition: background 0.2s;
+        }
+
+        .modal-btn-cancelar:hover {
+            background: #e2e2e2;
+        }
+    </style>
+</head>
+<body>
+
+  <!-- Barra de Navegación Superior -->
+  <nav class="top-nav">
+    <div class="top-left">
+        <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu"></i>
+        <div class="mini-logo-circle">
+            <img src="logo.png" alt="Logo">
+        </div>
+        <span class="page-title" id="titulo-pagina">Publicación</span>
+    </div>
+
+    <div class="search-bar">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="input-busqueda-nav" name="busqueda" placeholder="Busca algo" aria-label="Buscar en la aplicación">
+        <i class="fa-solid fa-microphone"></i>
+    </div>
+
+    <div class="top-right">
+        <div class="user-header-info">
+            <div class="user-profile-menu" id="user-profile-menu">
+                <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
+                    <img src="logo.png" id="user-avatar-img" alt="Perfil">
+                </div>
+                <div class="mini-menu-card" id="mini-menu-card">
+                    <div class="mini-menu-header">
+                        <span id="mini-menu-username">Usuario</span>
+                    </div>
+                    <hr class="mini-menu-divider">
+                    <a href="javascript:void(0)" onclick="mostrarSeccion('configuracion')" class="mini-menu-item btn-ajustes">
+                        <i class="fa-solid fa-gear"></i>
+                        <span>Ajustes</span>
+                    </a>
+                    <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Cerrar sesión</span>
+                    </a>
+                </div>
+            </div>
+            <div class="notif-circle">
+                <a href="notificaciones.html" aria-label="Notificaciones"><i class="fa-solid fa-bell"></i></a>
+            </div>
+        </div>
+    </div>
+  </nav>
+
+  <!-- Barra Lateral (Sidebar) -->
+  <aside class="sidebar" id="sidebar">
+      <div class="side-icons">
+          <a href="home.html" class="menu-fila"><i class="fa-solid fa-house"></i><span class="menu-text">Inicio</span></a>
+          <a href="perfil_usuario.html" class="menu-fila"><i class="fa-solid fa-circle-user"></i><span class="menu-text">Perfil</span></a>
+          <a href="guardados_usuario.html" class="menu-fila"><i class="fa-solid fa-bookmark"></i><span class="menu-text">Guardado</span></a>
+          <a href="mapa.html" class="menu-fila"><i class="fa-solid fa-location-dot"></i><span class="menu-text">Mapa</span></a>
+          <a href="configuracion_usuario.html" class="menu-fila"><i class="fa-solid fa-gear"></i><span class="menu-text">Ajustes</span></a>
+      </div>
+  </aside>
+
+  <!-- Contenido Principal -->
+  <main class="main-content">
+      <div class="detalle-container-principal">
+          <div class="detalle-header-card">
+              <h1>Reporte <img src="rlogo.png" class="detalle-header-icon" alt="Logo ARCA"></h1>
+              <div class="header-acciones-derecha">
+                  <!-- Botón de volver dinámico con ID -->
+                  <a href="novedades.html" id="btn-volver-dinamico" class="detalle-btn-volver"><i class="fa-solid fa-arrow-left"></i> Volver a novedades</a>
+                  <span class="detalle-fecha-texto" id="lbl-fecha">Publicado el --/--/----</span>
+              </div>
+          </div>
+
+          <div class="detalle-body-grid">
+              <div class="detalle-col-izq">
+                  <div class="detalle-titulo-capsula">Animal reportado</div>
+                  <div>
+                      <div class="detalle-sub-label">Situación:</div>
+                      <div class="detalle-pill-situacion" id="lbl-tipo-reporte">Cargando situación...</div>
+                  </div>
+                  <div class="detalle-foto-wrapper">
+                      <img id="img-reporte" src="logo.png" alt="Foto del reporte">
+                  </div>
+              </div>
+
+              <div class="detalle-col-derecha">
+                  <div class="detalle-caja-descripcion" id="lbl-descripcion">
+                      Cargando descripción detallada del reporte...
+                  </div>
+              </div>
+          </div>
+
+          <div class="detalle-footer-info">
+              <div class="detalle-bloque-mini">
+                  <strong>Medios de contacto:</strong>
+                  <div class="contacto-items" id="lbl-contacto">
+                      <div>Cargando...</div>
+                  </div>
+              </div>
+              <div class="detalle-bloque-mini">
+                  <strong>Ubicación:</strong>
+                  <div id="lbl-ubicacion">Cargando ubicación...</div>
+              </div>
+          </div>
+
+          <div class="detalle-barra-inferior">
+              <div class="detalle-info-autor">
+                  Publicado por: 
+                  <a href="perfil_usuario.html" id="link-autor" title="Ver perfil del autor">
+                      <span id="nombre-autor-texto">@usuario</span>
+                      <span class="badge-ver-perfil"><i class="fa-solid fa-user-check"></i> Ver perfil</span>
+                  </a>
+              </div>
+              <div id="contenedor-boton-accion">
+                  <button class="detalle-btn-accion"><i class="fa-solid fa-bookmark"></i> Publicación guardada</button>
+              </div>
+          </div>
+      </div>
+  </main>
+
+  <!-- Modal Estilo ARCA con Huellitas para Confirmar Redirección -->
+  <div id="modalConfirmacion" class="modal-arca-overlay">
+      <div class="modal-arca-box">
+          <div class="modal-huella-icono">
+              <i class="fa-solid fa-paw"></i>
+              <i class="fa-solid fa-paw" style="font-size: 26px; margin-top: 10px;"></i>
+          </div>
+          <h3 id="modalTitulo">Abrir enlace</h3>
+          <p id="modalMensaje">¿Deseas abrir esta aplicación externa?</p>
+          <div class="modal-botones-fila">
+              <button id="modalBtnAceptar" class="modal-btn-aceptar">Aceptar</button>
+              <button onclick="cerrarModalArca()" class="modal-btn-cancelar">Cancelar</button>
+          </div>
+      </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="script.js"></script>
+  <script>
+      document.addEventListener('DOMContentLoaded', () => {
+          const btnToggleMenu = document.getElementById('btn-toggle-menu');
+          const sidebar = document.getElementById('sidebar');
+
+          if (btnToggleMenu && sidebar) {
+              btnToggleMenu.addEventListener('click', (e) => {
+                  e.stopPropagation();
+                  sidebar.classList.toggle('sidebar-abierta');
+              });
+          }
+
+          // CONFIGURACIÓN DINÁMICA DEL BOTÓN "VOLVER"
+          const urlParams = new URLSearchParams(window.location.search);
+          const origen = urlParams.get('origen');
+          const btnVolver = document.getElementById('btn-volver-dinamico');
+
+          if (btnVolver) {
+              if (origen === 'guardados') {
+                  btnVolver.innerHTML = `<i class="fa-solid fa-arrow-left"></i> Volver a guardados`;
+                  btnVolver.href = 'guardados_usuario.html'; // Cambia por el nombre real de tu archivo de guardados
+              } else if (origen === 'mis-reportes') {
+                  btnVolver.innerHTML = `<i class="fa-solid fa-arrow-left"></i> Volver a mis reportes`;
+                  btnVolver.href = 'mis_reportes.html'; // Cambia si usas otro nombre
+              } else {
+                  btnVolver.innerHTML = `<i class="fa-solid fa-arrow-left"></i> Volver a novedades`;
+                  btnVolver.href = 'novedades.html';
+              }
+          }
+
+          cargarDetalleReporte();
+      });
+
+      function copiarAlPortapapeles(texto) {
+          navigator.clipboard.writeText(texto).then(() => {
+              alert(`¡Copiado: ${texto}!`);
+          }).catch(err => {
+              console.error('Error al copiar: ', err);
+          });
+      }
+
+      async function obtenerNombreUbicacion(lat, lon) {
+          if (!lat || !lon) return "Ubicación no especificada";
+          try {
+              const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`;
+              const respuesta = await fetch(url, {
+                  headers: {
+                      'Accept-Language': 'es',
+                      'User-Agent': 'ARCA-App-Mascotas'
+                  }
+              });
+              
+              if (!respuesta.ok) throw new Error("Error en el servidor de mapas");
+              
+              const datos = await respuesta.json();
+              
+              if (datos && datos.address) {
+                  const addr = datos.address;
+                  const calle = addr.road || addr.pedestrian || addr.footway || "";
+                  const numero = addr.house_number || "";
+                  const barrio = addr.neighbourhood || addr.suburb || addr.city_district || "";
+                  const ciudad = addr.town || addr.city || addr.state || "Medellín";
+                  
+                  if (calle) {
+                      let direccionExacta = numero ? `${calle} #${numero}` : calle;
+                      if (barrio && barrio !== calle) {
+                          direccionExacta += `, ${barrio}`;
+                      }
+                      return direccionExacta;
+                  }
+                  
+                  return barrio && barrio !== ciudad ? `${barrio}, ${ciudad}` : ciudad;
+              }
+              return "San Cristóbal, Medellín (Ubicación aproximada)";
+          } catch (error) {
+              console.warn("La API de mapas falló localmente, usando texto limpio de respaldo.");
+              return "San Cristóbal, Medellín (Ubicación aproximada)";
+          }
+      }
+
+      let urlDestinoGlobal = "";
+
+      function abrirModalArca(titulo, mensaje, url) {
+          document.getElementById('modalTitulo').textContent = titulo;
+          document.getElementById('modalMensaje').textContent = mensaje;
+          urlDestinoGlobal = url;
+          document.getElementById('modalConfirmacion').style.display = 'flex';
+      }
+
+      function cerrarModalArca() {
+          document.getElementById('modalConfirmacion').style.display = 'none';
+      }
+
+      document.getElementById('modalBtnAceptar').addEventListener('click', () => {
+          if (urlDestinoGlobal) {
+              window.open(urlDestinoGlobal, '_blank');
+          }
+          cerrarModalArca();
+      });
+
+      async function cargarDetalleReporte() {
+          const params = new URLSearchParams(window.location.search);
+          const reporteId = params.get('id');
+
+          if (!reporteId) {
+              alert("No se especificó ningún reporte.");
+              window.location.href = 'novedades.html';
+              return;
+          }
+
+          try {
+              const respuesta = await fetch(`http://localhost:3000/api/publicaciones-globales`);
+              if (!respuesta.ok) throw new Error("No se pudo cargar la información.");
+              
+              const publicaciones = await respuesta.json();
+              const reporte = publicaciones.find(r =>
+               Number(r.id_reporte) === Number(reporteId) || Number(r.id_publicacion) === Number(reporteId));
+              if (!reporte) {
+                  throw new Error("Reporte no encontrado.");
+              }
+
+              document.getElementById('lbl-fecha').textContent = `Publicado el ${reporte.Fecha_reporte ? reporte.Fecha_reporte.split('T')[0] : ''}`;
+              document.getElementById('lbl-tipo-reporte').textContent = reporte.nombre_tipo_reporte || 'Reporte General';
+              document.getElementById('lbl-descripcion').textContent = reporte.Descripcion || 'Sin descripción proporcionada.';
+              
+              if (reporte.img_reporte) {
+                  document.getElementById('img-reporte').src = reporte.img_reporte;
+              }
+
+              let textoUbicacionOriginal = reporte.Ubicacion || reporte.ubicacion || 'Ubicación no especificada';
+              let textoUbicacionLimpia = textoUbicacionOriginal.replace('Ubicación GPS:', '').trim();
+              let textoUbicacionFinal = textoUbicacionOriginal;
+
+              if (textoUbicacionLimpia.includes(',')) {
+                  const partes = textoUbicacionLimpia.split(',');
+                  const latPosible = parseFloat(partes[0].trim());
+                  const lonPosible = parseFloat(partes[1].trim());
+
+                  if (!isNaN(latPosible) && !isNaN(lonPosible)) {
+                      textoUbicacionFinal = await obtenerNombreUbicacion(latPosible, lonPosible);
+                      reporte.latitud = latPosible;
+                      reporte.longitud = lonPosible;
+                  }
+              }
+
+              let htmlUbicacion = `<span>${textoUbicacionFinal}</span>`;
+              if (reporte.latitud && reporte.longitud) {
+                  htmlUbicacion += `<br><a href="mapa.html?lat=${reporte.latitud}&lng=${reporte.longitud}" class="btn-ver-mapa-chiquito"><i class="fa-solid fa-map-location-dot"></i> Ver en el mapa</a>`;
+              }
+              document.getElementById('lbl-ubicacion').innerHTML = htmlUbicacion;
+
+              let contactoHTML = "";
+              const tel = reporte.telefono_contacto ? reporte.telefono_contacto.trim() : "";
+              const correo = reporte.correo_contacto ? reporte.correo_contacto.trim() : "";
+
+              const urlGmail = correo ? `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(correo)}&su=${encodeURIComponent("Sobre tu reporte en ARCA")}&body=${encodeURIComponent("Hola, vi tu publicación en ARCA y me interesa ayudar con el caso...")}` : "";
+              const urlWhatsapp = tel ? `https://wa.me/${tel.replace(/\D/g,'')}` : "";
+
+              if (tel && correo) {
+                  contactoHTML = `
+                      <div class="contacto-fila-item">
+                          <a href="javascript:void(0)" onclick="abrirModalArca('Abrir WhatsApp', '¿Deseas abrir WhatsApp para escribir al número ${tel}?', '${urlWhatsapp}')" class="btn-contacto-link whatsapp">
+                              <i class="fa-brands fa-whatsapp"></i> ${tel}
+                          </a>
+                          <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${tel}')" title="Copiar teléfono">
+                              <i class="fa-solid fa-copy"></i> Copiar
+                          </button>
+                      </div>
+                      <div class="contacto-fila-item">
+                          <a href="javascript:void(0)" onclick="abrirModalArca('Abrir Gmail', '¿Deseas redactar un correo a ${correo} usando Gmail?', '${urlGmail}')" class="btn-contacto-link correo">
+                              <i class="fa-solid fa-envelope"></i> ${correo}
+                          </a>
+                          <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${correo}')" title="Copiar correo">
+                              <i class="fa-solid fa-copy"></i> Copiar
+                          </button>
+                      </div>
+                  `;
+              } else if (tel) {
+                  contactoHTML = `
+                      <div class="contacto-fila-item">
+                          <a href="javascript:void(0)" onclick="abrirModalArca('Abrir WhatsApp', '¿Deseas abrir WhatsApp para escribir al número ${tel}?', '${urlWhatsapp}')" class="btn-contacto-link whatsapp">
+                              <i class="fa-brands fa-whatsapp"></i> ${tel}
+                          </a>
+                          <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${tel}')" title="Copiar teléfono">
+                              <i class="fa-solid fa-copy"></i> Copiar
+                          </button>
+                      </div>
+                  `;
+              } else if (correo) {
+                  contactoHTML = `
+                      <div class="contacto-fila-item">
+                          <a href="javascript:void(0)" onclick="abrirModalArca('Abrir Gmail', '¿Deseas redactar un correo a ${correo} usando Gmail?', '${urlGmail}')" class="btn-contacto-link correo">
+                              <i class="fa-solid fa-envelope"></i> ${correo}
+                          </a>
+                          <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${correo}')" title="Copiar correo">
+                              <i class="fa-solid fa-copy"></i> Copiar
+                          </button>
+                      </div>
+                  `;
+              } else {
+                  contactoHTML = `<span style="color: #666; font-style: italic;"><i class="fa-solid fa-comments"></i> Disponible por chat interno de la app</span>`;
+              }
+              document.getElementById('lbl-contacto').innerHTML = contactoHTML;
+
+              const nombreUsuario = reporte.nombre_usuario || 'usuario';
+              document.getElementById('nombre-autor-texto').textContent = `@${nombreUsuario}`;
+
+              const usuarioLogueadoId = localStorage.getItem('id_usuarios') || 1; 
+              const contenedorBoton = document.getElementById('contenedor-boton-accion');
+
+              if (Number(reporte.id_usuarios) === Number(usuarioLogueadoId)) {
+                  contenedorBoton.innerHTML = `
+                      <a href="editar_reporte.html?id=${reporte.id_reporte}" class="detalle-btn-accion detalle-btn-editar">
+                          <i class="fa-solid fa-pen-to-square"></i> Editar reporte
+                      </a>
+                  `;
+              } else {
+                  contenedorBoton.innerHTML = `
+                      <button class="detalle-btn-accion" onclick="alert('Publicación guardada en tus favoritos')">
+                          <i class="fa-solid fa-bookmark"></i> Publicación guardada
+                      </button>
+                  `;
+              }
+
+          } catch (error) {
+              console.error("Error al cargar detalle:", error);
+              alert("Hubo un error al cargar los detalles del reporte.");
+          }
+      }
+  </script>
+</body>
+=======
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle del Reporte - ARCA</title>
+    <link rel="stylesheet" href="style_home.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        html, body {
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Itim', cursive, sans-serif;
+            background-color: #fce8e6;
+        }
+
+        .main-content {
+            height: calc(100vh - 70px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 20px;
+            box-sizing: border-box;
+        }
+
+        .detalle-container-principal {
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 28px;
+            padding: 20px 30px;
+            width: 100%;
+            max-width: 1100px;
+            box-shadow: 0 12px 35px rgba(220, 150, 140, 0.12);
+            border: 2px solid rgba(255, 255, 255, 0.7);
+            box-sizing: border-box;
+        }
+
+        .detalle-header-card {
+            background: rgba(253, 203, 208, 0.65);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 10px 20px;
+            border-radius: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 15px rgba(230, 160, 140, 0.08);
+        }
+
+        .detalle-header-card h1 {
+            margin: 0;
+            font-size: 22px;
+            color: #2b2b2b;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .detalle-header-icon {
+            width: 26px;
+            height: 26px;
+            object-fit: contain;
+            border-radius: 50%;
+        }
+
+        .header-acciones-derecha {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .detalle-btn-volver {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid #f4c2c4;
+            padding: 6px 14px;
+            border-radius: 14px;
+            color: #d9534f;
+            font-weight: bold;
+            font-size: 13px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            font-family: 'Itim', cursive, sans-serif;
+        }
+
+        .detalle-btn-volver:hover {
+            background: #fff;
+            transform: translateY(-1px);
+        }
+
+        .detalle-fecha-texto {
+            font-size: 13px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .detalle-body-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.3fr;
+            gap: 20px;
+            align-items: stretch;
+        }
+
+        .detalle-col-izq {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .detalle-col-derecha {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .detalle-titulo-capsula {
+            background: rgba(252, 185, 160, 0.75);
+            backdrop-filter: blur(8px);
+            padding: 8px 16px;
+            border-radius: 18px;
+            font-size: 17px;
+            font-weight: bold;
+            color: #2b2b2b;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(230, 160, 140, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .detalle-sub-label {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 2px;
+            font-weight: bold;
+        }
+
+        .detalle-pill-situacion {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(6px);
+            color: #333;
+            padding: 6px 14px;
+            border-radius: 14px;
+            font-size: 13px;
+            font-weight: bold;
+            border: 1px solid #f9cab5;
+            display: inline-block;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+
+        .detalle-foto-wrapper {
+            width: 100%;
+            height: 180px;
+            border-radius: 18px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.8);
+            border: 3px solid #fca38d;
+            box-shadow: 0 6px 18px rgba(230, 150, 130, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .detalle-foto-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .detalle-caja-descripcion {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 20px;
+            padding: 22px;
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 6px 20px rgba(230, 150, 130, 0.06);
+            font-size: 15.5px;
+            color: #333;
+            line-height: 1.5;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+
+        .detalle-footer-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .detalle-bloque-mini {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(8px);
+            padding: 12px 16px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            font-size: 13.5px;
+            color: #444;
+            box-shadow: 0 4px 12px rgba(230, 150, 130, 0.04);
+        }
+
+        .detalle-bloque-mini strong {
+            color: #e06d53;
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
+
+        .contacto-items {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 13.5px;
+        }
+
+        .contacto-fila-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.85);
+            padding: 6px 12px;
+            border-radius: 14px;
+            border: 1px solid #f9cab5;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+            gap: 10px;
+        }
+
+        .btn-contacto-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+            cursor: pointer;
+            flex-grow: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .btn-contacto-link.whatsapp {
+            color: #25d366;
+        }
+
+        .btn-contacto-link.correo {
+            color: #007bff;
+        }
+
+        .btn-contacto-link:hover {
+            text-decoration: underline;
+        }
+
+        .btn-copiar-mini {
+            background: #fff;
+            border: 1px solid #f4c2c4;
+            cursor: pointer;
+            color: #d9534f;
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 10px;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+            font-family: 'Itim', cursive, sans-serif;
+        }
+
+        .btn-copiar-mini:hover {
+            background: #ffe5dd;
+        }
+
+        .btn-ver-mapa-chiquito {
+            color: #e06d53;
+            font-weight: bold;
+            text-decoration: none;
+            font-size: 12.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 4px;
+            transition: color 0.2s;
+        }
+
+        .btn-ver-mapa-chiquito:hover {
+            color: #b8432a;
+            text-decoration: underline;
+        }
+
+        .detalle-barra-inferior {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            padding-top: 12px;
+            border-top: 1px dashed rgba(245, 180, 165, 0.6);
+        }
+
+        .detalle-info-autor {
+            font-size: 13.5px;
+            color: #555;
+        }
+
+        .detalle-info-autor a {
+            color: #e06d53;
+            text-decoration: none;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s;
+        }
+
+        .detalle-info-autor a:hover {
+            color: #b8432a;
+            text-decoration: underline;
+        }
+
+        .badge-ver-perfil {
+            font-size: 11px;
+            background: rgba(252, 185, 160, 0.4);
+            padding: 2px 6px;
+            border-radius: 8px;
+            color: #d9534f;
+            border: 1px dashed #fca38d;
+            margin-left: 4px;
+        }
+
+        .detalle-btn-accion {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(6px);
+            color: #2b2b2b;
+            border: 1px solid #f4d0c5;
+            padding: 8px 20px;
+            border-radius: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13.5px;
+            box-shadow: 0 3px 10px rgba(230, 150, 130, 0.08);
+            text-decoration: none;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'Itim', cursive, sans-serif;
+        }
+
+        .detalle-btn-accion:hover {
+            background: #ffe5dd;
+        }
+
+        .detalle-btn-editar {
+            background: #fca38d;
+            color: #fff;
+            border: none;
+        }
+        .detalle-btn-editar:hover {
+            background: #eb917b;
+        }
+
+        .modal-arca-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-arca-box {
+            background: #ffffff;
+            border-radius: 28px;
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            border: 2px solid #fce8e6;
+            font-family: 'Itim', cursive, sans-serif;
+            animation: modalScale 0.2s ease-in-out;
+        }
+
+        @keyframes modalScale {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-huella-icono {
+            font-size: 36px;
+            color: #7b5c93;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .modal-arca-box h3 {
+            margin: 0 0 10px 0;
+            color: #2b2b2b;
+            font-size: 20px;
+        }
+
+        .modal-arca-box p {
+            color: #555;
+            font-size: 15px;
+            line-height: 1.4;
+            margin-bottom: 20px;
+        }
+
+        .modal-botones-fila {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .modal-btn-aceptar {
+            background: #fca38d;
+            color: #fff;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 18px;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+            font-family: 'Itim', cursive, sans-serif;
+            box-shadow: 0 4px 12px rgba(252, 163, 141, 0.4);
+            transition: background 0.2s;
+        }
+
+        .modal-btn-aceptar:hover {
+            background: #eb917b;
+        }
+
+        .modal-btn-cancelar {
+            background: #f1f1f1;
+            color: #555;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 18px;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+            font-family: 'Itim', cursive, sans-serif;
+            transition: background 0.2s;
+        }
+
+        .modal-btn-cancelar:hover {
+            background: #e2e2e2;
+        }
+    </style>
+</head>
+<body>
+
+  <!-- Barra de Navegación Superior -->
+  <nav class="top-nav">
+    <div class="top-left">
+        <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu"></i>
+        <div class="mini-logo-circle">
+            <img src="logo.png" alt="Logo">
+        </div>
+        <span class="page-title" id="titulo-pagina">Publicación</span>
+    </div>
+
+    <div class="search-bar">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="input-busqueda-nav" name="busqueda" placeholder="Busca algo" aria-label="Buscar en la aplicación">
+        <i class="fa-solid fa-microphone"></i>
+    </div>
+
+    <div class="top-right">
+        <div class="user-header-info">
+            <div class="user-profile-menu" id="user-profile-menu">
+                <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
+                    <img src="logo.png" id="user-avatar-img" alt="Perfil">
+                </div>
+                <div class="mini-menu-card" id="mini-menu-card">
+                    <div class="mini-menu-header">
+                        <span id="mini-menu-username">Usuario</span>
+                    </div>
+                    <hr class="mini-menu-divider">
+                    <a href="javascript:void(0)" onclick="mostrarSeccion('configuracion')" class="mini-menu-item btn-ajustes">
+                        <i class="fa-solid fa-gear"></i>
+                        <span>Ajustes</span>
+                    </a>
+                    <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Cerrar sesión</span>
+                    </a>
+                </div>
+            </div>
+            <div class="notif-circle">
+                <a href="notificaciones.html" aria-label="Notificaciones"><i class="fa-solid fa-bell"></i></a>
+            </div>
+        </div>
+    </div>
+  </nav>
+
+  <!-- Barra Lateral (Sidebar) -->
+  <aside class="sidebar" id="sidebar">
+      <div class="side-icons">
+          <a href="home.html" class="menu-fila"><i class="fa-solid fa-house"></i><span class="menu-text">Inicio</span></a>
+          <a href="perfil_usuario.html" class="menu-fila"><i class="fa-solid fa-circle-user"></i><span class="menu-text">Perfil</span></a>
+          <a href="guardados_usuario.html" class="menu-fila"><i class="fa-solid fa-bookmark"></i><span class="menu-text">Guardado</span></a>
+          <a href="mapa.html" class="menu-fila"><i class="fa-solid fa-location-dot"></i><span class="menu-text">Mapa</span></a>
+          <a href="configuracion_usuario.html" class="menu-fila"><i class="fa-solid fa-gear"></i><span class="menu-text">Ajustes</span></a>
+      </div>
+  </aside>
+
+  <!-- Contenido Principal -->
+  <main class="main-content">
+      <div class="detalle-container-principal">
+          <div class="detalle-header-card">
+              <h1>Reporte <img src="rlogo.png" class="detalle-header-icon" alt="Logo ARCA"></h1>
+              <div class="header-acciones-derecha">
+                  <!-- Botón de volver dinámico con ID -->
+                  <a href="novedades.html" id="btn-volver-dinamico" class="detalle-btn-volver"><i class="fa-solid fa-arrow-left"></i> Volver a novedades</a>
+                  <span class="detalle-fecha-texto" id="lbl-fecha">Publicado el --/--/----</span>
+              </div>
+          </div>
+
+          <div class="detalle-body-grid">
+              <div class="detalle-col-izq">
+                  <div class="detalle-titulo-capsula">Animal reportado</div>
+                  <div>
+                      <div class="detalle-sub-label">Situación:</div>
+                      <div class="detalle-pill-situacion" id="lbl-tipo-reporte">Cargando situación...</div>
+                  </div>
+                  <div class="detalle-foto-wrapper">
+                      <img id="img-reporte" src="logo.png" alt="Foto del reporte">
+                  </div>
+              </div>
+
+              <div class="detalle-col-derecha">
+                  <div class="detalle-caja-descripcion" id="lbl-descripcion">
+                      Cargando descripción detallada del reporte...
+                  </div>
+              </div>
+          </div>
+
+          <div class="detalle-footer-info">
+              <div class="detalle-bloque-mini">
+                  <strong>Medios de contacto:</strong>
+                  <div class="contacto-items" id="lbl-contacto">
+                      <div>Cargando...</div>
+                  </div>
+              </div>
+              <div class="detalle-bloque-mini">
+                  <strong>Ubicación:</strong>
+                  <div id="lbl-ubicacion">Cargando ubicación...</div>
+              </div>
+          </div>
+
+          <div class="detalle-barra-inferior">
+              <div class="detalle-info-autor">
+                  Publicado por: 
+                  <a href="perfil_usuario.html" id="link-autor" title="Ver perfil del autor">
+                      <span id="nombre-autor-texto">@usuario</span>
+                      <span class="badge-ver-perfil"><i class="fa-solid fa-user-check"></i> Ver perfil</span>
+                  </a>
+              </div>
+              <div id="contenedor-boton-accion">
+                  <button class="detalle-btn-accion"><i class="fa-solid fa-bookmark"></i> Publicación guardada</button>
+              </div>
+          </div>
+      </div>
+  </main>
+
+  <!-- Modal Estilo ARCA con Huellitas para Confirmar Redirección -->
+  <div id="modalConfirmacion" class="modal-arca-overlay">
+      <div class="modal-arca-box">
+          <div class="modal-huella-icono">
+              <i class="fa-solid fa-paw"></i>
+              <i class="fa-solid fa-paw" style="font-size: 26px; margin-top: 10px;"></i>
+          </div>
+          <h3 id="modalTitulo">Abrir enlace</h3>
+          <p id="modalMensaje">¿Deseas abrir esta aplicación externa?</p>
+          <div class="modal-botones-fila">
+              <button id="modalBtnAceptar" class="modal-btn-aceptar">Aceptar</button>
+              <button onclick="cerrarModalArca()" class="modal-btn-cancelar">Cancelar</button>
+          </div>
+      </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="script.js"></script>
+  <script>
+      document.addEventListener('DOMContentLoaded', () => {
+          const btnToggleMenu = document.getElementById('btn-toggle-menu');
+          const sidebar = document.getElementById('sidebar');
+
+          if (btnToggleMenu && sidebar) {
+              btnToggleMenu.addEventListener('click', (e) => {
+                  e.stopPropagation();
+                  sidebar.classList.toggle('sidebar-abierta');
+              });
+          }
+
+          // CONFIGURACIÓN DINÁMICA DEL BOTÓN "VOLVER"
+          const urlParams = new URLSearchParams(window.location.search);
+          const origen = urlParams.get('origen');
+          const btnVolver = document.getElementById('btn-volver-dinamico');
+
+          if (btnVolver) {
+              if (origen === 'guardados') {
+                  btnVolver.innerHTML = `<i class="fa-solid fa-arrow-left"></i> Volver a guardados`;
+                  btnVolver.href = 'guardados_usuario.html'; // Cambia por el nombre real de tu archivo de guardados
+              } else if (origen === 'mis-reportes') {
+                  btnVolver.innerHTML = `<i class="fa-solid fa-arrow-left"></i> Volver a mis reportes`;
+                  btnVolver.href = 'mis_reportes.html'; // Cambia si usas otro nombre
+              } else {
+                  btnVolver.innerHTML = `<i class="fa-solid fa-arrow-left"></i> Volver a novedades`;
+                  btnVolver.href = 'novedades.html';
+              }
+          }
+
+          cargarDetalleReporte();
+      });
+
+      function copiarAlPortapapeles(texto) {
+          navigator.clipboard.writeText(texto).then(() => {
+              alert(`¡Copiado: ${texto}!`);
+          }).catch(err => {
+              console.error('Error al copiar: ', err);
+          });
+      }
+
+      async function obtenerNombreUbicacion(lat, lon) {
+          if (!lat || !lon) return "Ubicación no especificada";
+          try {
+              const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`;
+              const respuesta = await fetch(url, {
+                  headers: {
+                      'Accept-Language': 'es',
+                      'User-Agent': 'ARCA-App-Mascotas'
+                  }
+              });
+              
+              if (!respuesta.ok) throw new Error("Error en el servidor de mapas");
+              
+              const datos = await respuesta.json();
+              
+              if (datos && datos.address) {
+                  const addr = datos.address;
+                  const calle = addr.road || addr.pedestrian || addr.footway || "";
+                  const numero = addr.house_number || "";
+                  const barrio = addr.neighbourhood || addr.suburb || addr.city_district || "";
+                  const ciudad = addr.town || addr.city || addr.state || "Medellín";
+                  
+                  if (calle) {
+                      let direccionExacta = numero ? `${calle} #${numero}` : calle;
+                      if (barrio && barrio !== calle) {
+                          direccionExacta += `, ${barrio}`;
+                      }
+                      return direccionExacta;
+                  }
+                  
+                  return barrio && barrio !== ciudad ? `${barrio}, ${ciudad}` : ciudad;
+              }
+              return "San Cristóbal, Medellín (Ubicación aproximada)";
+          } catch (error) {
+              console.warn("La API de mapas falló localmente, usando texto limpio de respaldo.");
+              return "San Cristóbal, Medellín (Ubicación aproximada)";
+          }
+      }
+
+      let urlDestinoGlobal = "";
+
+      function abrirModalArca(titulo, mensaje, url) {
+          document.getElementById('modalTitulo').textContent = titulo;
+          document.getElementById('modalMensaje').textContent = mensaje;
+          urlDestinoGlobal = url;
+          document.getElementById('modalConfirmacion').style.display = 'flex';
+      }
+
+      function cerrarModalArca() {
+          document.getElementById('modalConfirmacion').style.display = 'none';
+      }
+
+      document.getElementById('modalBtnAceptar').addEventListener('click', () => {
+          if (urlDestinoGlobal) {
+              window.open(urlDestinoGlobal, '_blank');
+          }
+          cerrarModalArca();
+      });
+
+      async function cargarDetalleReporte() {
+          const params = new URLSearchParams(window.location.search);
+          const reporteId = params.get('id');
+
+          if (!reporteId) {
+              alert("No se especificó ningún reporte.");
+              window.location.href = 'novedades.html';
+              return;
+          }
+
+          try {
+              const respuesta = await fetch(`http://localhost:3000/api/publicaciones-globales`);
+              if (!respuesta.ok) throw new Error("No se pudo cargar la información.");
+              
+              const publicaciones = await respuesta.json();
+              const reporte = publicaciones.find(r =>
+               Number(r.id_reporte) === Number(reporteId) || Number(r.id_publicacion) === Number(reporteId));
+              if (!reporte) {
+                  throw new Error("Reporte no encontrado.");
+              }
+
+              document.getElementById('lbl-fecha').textContent = `Publicado el ${reporte.Fecha_reporte ? reporte.Fecha_reporte.split('T')[0] : ''}`;
+              document.getElementById('lbl-tipo-reporte').textContent = reporte.nombre_tipo_reporte || 'Reporte General';
+              document.getElementById('lbl-descripcion').textContent = reporte.Descripcion || 'Sin descripción proporcionada.';
+              
+              if (reporte.img_reporte) {
+                  document.getElementById('img-reporte').src = reporte.img_reporte;
+              }
+
+              let textoUbicacionOriginal = reporte.Ubicacion || reporte.ubicacion || 'Ubicación no especificada';
+              let textoUbicacionLimpia = textoUbicacionOriginal.replace('Ubicación GPS:', '').trim();
+              let textoUbicacionFinal = textoUbicacionOriginal;
+
+              if (textoUbicacionLimpia.includes(',')) {
+                  const partes = textoUbicacionLimpia.split(',');
+                  const latPosible = parseFloat(partes[0].trim());
+                  const lonPosible = parseFloat(partes[1].trim());
+
+                  if (!isNaN(latPosible) && !isNaN(lonPosible)) {
+                      textoUbicacionFinal = await obtenerNombreUbicacion(latPosible, lonPosible);
+                      reporte.latitud = latPosible;
+                      reporte.longitud = lonPosible;
+                  }
+              }
+
+              let htmlUbicacion = `<span>${textoUbicacionFinal}</span>`;
+              if (reporte.latitud && reporte.longitud) {
+                  htmlUbicacion += `<br><a href="mapa.html?lat=${reporte.latitud}&lng=${reporte.longitud}" class="btn-ver-mapa-chiquito"><i class="fa-solid fa-map-location-dot"></i> Ver en el mapa</a>`;
+              }
+              document.getElementById('lbl-ubicacion').innerHTML = htmlUbicacion;
+
+              let contactoHTML = "";
+              const tel = reporte.telefono_contacto ? reporte.telefono_contacto.trim() : "";
+              const correo = reporte.correo_contacto ? reporte.correo_contacto.trim() : "";
+
+              const urlGmail = correo ? `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(correo)}&su=${encodeURIComponent("Sobre tu reporte en ARCA")}&body=${encodeURIComponent("Hola, vi tu publicación en ARCA y me interesa ayudar con el caso...")}` : "";
+              const urlWhatsapp = tel ? `https://wa.me/${tel.replace(/\D/g,'')}` : "";
+
+              if (tel && correo) {
+                  contactoHTML = `
+                      <div class="contacto-fila-item">
+                          <a href="javascript:void(0)" onclick="abrirModalArca('Abrir WhatsApp', '¿Deseas abrir WhatsApp para escribir al número ${tel}?', '${urlWhatsapp}')" class="btn-contacto-link whatsapp">
+                              <i class="fa-brands fa-whatsapp"></i> ${tel}
+                          </a>
+                          <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${tel}')" title="Copiar teléfono">
+                              <i class="fa-solid fa-copy"></i> Copiar
+                          </button>
+                      </div>
+                      <div class="contacto-fila-item">
+                          <a href="javascript:void(0)" onclick="abrirModalArca('Abrir Gmail', '¿Deseas redactar un correo a ${correo} usando Gmail?', '${urlGmail}')" class="btn-contacto-link correo">
+                              <i class="fa-solid fa-envelope"></i> ${correo}
+                          </a>
+                          <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${correo}')" title="Copiar correo">
+                              <i class="fa-solid fa-copy"></i> Copiar
+                          </button>
+                      </div>
+                  `;
+              } else if (tel) {
+                  contactoHTML = `
+                      <div class="contacto-fila-item">
+                          <a href="javascript:void(0)" onclick="abrirModalArca('Abrir WhatsApp', '¿Deseas abrir WhatsApp para escribir al número ${tel}?', '${urlWhatsapp}')" class="btn-contacto-link whatsapp">
+                              <i class="fa-brands fa-whatsapp"></i> ${tel}
+                          </a>
+                          <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${tel}')" title="Copiar teléfono">
+                              <i class="fa-solid fa-copy"></i> Copiar
+                          </button>
+                      </div>
+                  `;
+              } else if (correo) {
+                  contactoHTML = `
+                      <div class="contacto-fila-item">
+                          <a href="javascript:void(0)" onclick="abrirModalArca('Abrir Gmail', '¿Deseas redactar un correo a ${correo} usando Gmail?', '${urlGmail}')" class="btn-contacto-link correo">
+                              <i class="fa-solid fa-envelope"></i> ${correo}
+                          </a>
+                          <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${correo}')" title="Copiar correo">
+                              <i class="fa-solid fa-copy"></i> Copiar
+                          </button>
+                      </div>
+                  `;
+              } else {
+                  contactoHTML = `<span style="color: #666; font-style: italic;"><i class="fa-solid fa-comments"></i> Disponible por chat interno de la app</span>`;
+              }
+              document.getElementById('lbl-contacto').innerHTML = contactoHTML;
+
+              const nombreUsuario = reporte.nombre_usuario || 'usuario';
+              document.getElementById('nombre-autor-texto').textContent = `@${nombreUsuario}`;
+
+              const usuarioLogueadoId = localStorage.getItem('id_usuarios') || 1; 
+              const contenedorBoton = document.getElementById('contenedor-boton-accion');
+
+              if (Number(reporte.id_usuarios) === Number(usuarioLogueadoId)) {
+                  contenedorBoton.innerHTML = `
+                      <a href="editar_reporte.html?id=${reporte.id_reporte}" class="detalle-btn-accion detalle-btn-editar">
+                          <i class="fa-solid fa-pen-to-square"></i> Editar reporte
+                      </a>
+                  `;
+              } else {
+                  contenedorBoton.innerHTML = `
+                      <button class="detalle-btn-accion" onclick="alert('Publicación guardada en tus favoritos')">
+                          <i class="fa-solid fa-bookmark"></i> Publicación guardada
+                      </button>
+                  `;
+              }
+
+          } catch (error) {
+              console.error("Error al cargar detalle:", error);
+              alert("Hubo un error al cargar los detalles del reporte.");
+          }
+      }
+  </script>
+</body>
+>>>>>>> 73ad380385be04225f0aeedc8f01200318850109
+</html>
