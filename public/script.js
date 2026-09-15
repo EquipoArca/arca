@@ -649,3 +649,53 @@ async function obtenerNombreUbicacionGlobal(textoUbicacionOriginal) {
     return textoUbicacionOriginal;
 }
 
+// Muestra el modal de alerta offline o lanza un alert si no existe en el HTML
+function mostrarAlertaOffline() {
+    const overlay = document.getElementById('offline-alert-overlay');
+    if (overlay) {
+        overlay.classList.remove('d-none');
+    } else {
+        alert("¡No tienes conexión a internet! Inténtalo más tarde.");
+    }
+}
+
+// Oculta el modal de alerta offline
+function ocultarAlertaOffline() {
+    const overlay = document.getElementById('offline-alert-overlay');
+    if (overlay) {
+        overlay.classList.add('d-none');
+    }
+}
+
+// Configura los eventos de los botones de cierre al cargar el DOM
+document.addEventListener('DOMContentLoaded', () => {
+    const btnCerrar = document.getElementById('close-offline-alert');
+    const btnX = document.getElementById('close-x-btn');
+
+    if (btnCerrar) btnCerrar.addEventListener('click', ocultarAlertaOffline);
+    if (btnX) btnX.addEventListener('click', ocultarAlertaOffline);
+
+    // Si al cargar la página el dispositivo no tiene internet, muestra la alerta
+    if (!navigator.onLine) {
+        mostrarAlertaOffline();
+    }
+});
+
+// Escuchadores en tiempo real para cuando se desconecta o conecta internet
+window.addEventListener('offline', () => {
+    mostrarAlertaOffline();
+});
+
+window.addEventListener('online', () => {
+    ocultarAlertaOffline();
+});
+
+// Ejemplo de cómo usar la validación dentro de cualquier función de tu archivo
+function miFuncion() {
+    if (!navigator.onLine) {
+        mostrarAlertaOffline();
+        return;
+    }
+
+}
+
