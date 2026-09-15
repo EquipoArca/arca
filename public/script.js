@@ -445,7 +445,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function cargarReporteEdad() {
     try {
-        const res = await fetch('http://localhost:3000/api/reportes/usuarios-edad');
+        const res = await fetch('/api/reportes/usuarios-edad');
         const data = await res.json();
 
         const tbody = document.getElementById('tabla-usuarios');
@@ -488,7 +488,7 @@ async function cargarReporteEdad() {
 
 async function cargarReporteEmergencias() {
     try {
-        const res = await fetch('http://localhost:3000/api/reportes/emergencias');
+        const res = await fetch('/api/reportes/emergencias');
         const data = await res.json();
 
         const tbody = document.getElementById('tabla-emergencias');

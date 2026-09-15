@@ -293,8 +293,8 @@
 
             try {
                 const [respReportes, respIdsGuardados] = await Promise.all([
-                    fetch(`http://localhost:3000/api/mis-reportes?correo=${encodeURIComponent(correo)}`),
-                    fetch(`http://localhost:3000/api/guardados/ids/${encodeURIComponent(correo)}`)
+                    fetch(`/api/mis-reportes?correo=${encodeURIComponent(correo)}`),
+                    fetch(`/api/guardados/ids/${encodeURIComponent(correo)}`)
                 ]);
                 
                 if (!respReportes.ok) throw new Error("No se pudieron cargar las publicaciones");
@@ -483,7 +483,7 @@
             }
 
             try {
-                const response = await fetch(`http://localhost:3000/api/reportes/${idReporte}`, {
+                const response = await fetch(`/api/reportes/${idReporte}`, {
                     method: 'DELETE'
                 });
 
@@ -518,7 +518,7 @@
 
             const icono = btn.querySelector('i');
             const estaGuardadoActual = btn.getAttribute('data-guardado') === 'true';
-            const endpoint = estaGuardadoActual ? 'http://localhost:3000/api/quitar-guardado' : 'http://localhost:3000/api/guardar-publicacion';
+            const endpoint = estaGuardadoActual ? '/api/quitar-guardado' : '/api/guardar-publicacion';
 
             try {
                 const respuesta = await fetch(endpoint, {

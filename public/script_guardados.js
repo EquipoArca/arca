@@ -36,7 +36,7 @@ function mostrarMensajeIniciaSesion() {
 
 async function cargarPublicacionesGuardadas(correo) {
     try {
-        const response = await fetch(`http://localhost:3000/api/guardar-publicacion/${encodeURIComponent(correo)}`);
+        const response = await fetch(`/api/guardar-publicacion/${encodeURIComponent(correo)}`);
         if (!response.ok) throw new Error("No se pudieron cargar los guardados");
 
         const publicacionesGuardadas = await response.json();

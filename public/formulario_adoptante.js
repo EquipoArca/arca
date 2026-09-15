@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             try {
-                const respuesta = await fetch('http://localhost:3000/api/guardar-adoptante', {
+                const respuesta = await fetch('/api/guardar-adoptante', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(datosGuardar)
@@ -89,11 +89,11 @@ document.addEventListener('DOMContentLoaded', () => {
 // Función para cargar datos cuando se presiona "Editar Perfil"
 async function cargarDatosCompletosAdoptante(correo) {
     try {
-        const resUser = await fetch(`http://localhost:3000/obtener-usuario?correo=${encodeURIComponent(correo)}`);
+        const resUser = await fetch(`/obtener-usuario?correo=${encodeURIComponent(correo)}`);
         if (!resUser.ok) return;
         const datosUser = await resUser.json();
 
-        const resFicha = await fetch(`http://localhost:3000/api/obtener-ficha-adoptante/${datosUser.id_usuarios}`);
+        const resFicha = await fetch(`/api/obtener-ficha-adoptante/${datosUser.id_usuarios}`);
         if (!resFicha.ok) return;
         const ficha = await resFicha.json();
 
@@ -142,7 +142,7 @@ async function cargarDatosRegistroUsuario(correo) {
     if (!correo) return;
 
     try {
-        const res = await fetch(`http://localhost:3000/api/datos-usuario-registro?correo=${encodeURIComponent(correo)}`);
+        const res = await fetch(`/api/datos-usuario-registro?correo=${encodeURIComponent(correo)}`);
         if (!res.ok) return;
         const usuario = await res.json();
 

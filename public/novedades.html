@@ -172,7 +172,7 @@
         if (!contenedor) return;
 
         try {
-            const respuesta = await fetch('http://localhost:3000/api/publicaciones-globales');
+            const respuesta = await fetch('/api/publicaciones-globales');
             if (!respuesta.ok) throw new Error("Error al obtener las publicaciones globales");
             
             const publicaciones = await respuesta.json();

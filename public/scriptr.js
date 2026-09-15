@@ -102,7 +102,7 @@ if (inputNombreReg && mensajeEstadoReg) {
         mensajeEstadoReg.className = "mensaje-validacion esperando";
 
         temporizadorValidacion = setTimeout(() => {
-            fetch(`http://localhost:3000/validar-nombre-usuario?nombre=${encodeURIComponent(nombreVal)}`)
+            fetch(`/validar-nombre-usuario?nombre=${encodeURIComponent(nombreVal)}`)
                 .then(res => res.json())
                 .then(data => {
                     if (data.disponible) {
@@ -206,7 +206,7 @@ if (formRegistro) {
 
         try {
             // Solicitar al backend que envíe el código OTP al correo
-            const resOtp = await fetch('http://localhost:3000/enviar-codigo-otp', {
+            const resOtp = await fetch('/enviar-codigo-otp', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ correo: emailTemporal })
@@ -281,7 +281,7 @@ if (formOtp) {
 
         try {
             // 1. Validar código con el servidor
-            const resVerif = await fetch('http://localhost:3000/verificar-otp', {
+            const resVerif = await fetch('/verificar-otp', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ correo: emailTemporal, codigo: codigoCompleto })
@@ -308,7 +308,7 @@ if (formOtp) {
                 Telefono_usuario: telElement ? telElement.value : "",
             };
 
-            const resMySQL = await fetch('http://localhost:3000/registrar-usuario', {
+            const resMySQL = await fetch('/registrar-usuario', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(datosUsuario)

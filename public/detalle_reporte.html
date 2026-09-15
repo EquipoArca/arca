@@ -715,7 +715,7 @@
           }
 
           try {
-              const respuesta = await fetch(`http://localhost:3000/api/publicaciones-globales`);
+              const respuesta = await fetch(`/api/publicaciones-globales`);
               if (!respuesta.ok) throw new Error("No se pudo cargar la información.");
               
               const publicaciones = await respuesta.json();

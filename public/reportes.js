@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
         firebase.auth().onAuthStateChanged(async (user) => {
             if (user && user.email) {
                 try {
-                    const respuesta = await fetch(`http://localhost:3000/obtener-usuario?correo=${encodeURIComponent(user.email)}`);
+                    const respuesta = await fetch(`/obtener-usuario?correo=${encodeURIComponent(user.email)}`);
                     
                     if (respuesta.ok) {
                         const usuario = await respuesta.json();
@@ -271,11 +271,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const urlParamsSubmit = new URLSearchParams(window.location.search);
             const idEditar = urlParamsSubmit.get('editar');
 
-            let urlFetch = 'http://localhost:3000/crear-reporte';
+            let urlFetch = '/crear-reporte';
             let metodoFetch = 'POST';
 
             if (idEditar) {
-                urlFetch = `http://localhost:3000/api/reportes/${idEditar}`;
+                urlFetch = `/api/reportes/${idEditar}`;
                 metodoFetch = 'PUT';
             }
 
@@ -331,7 +331,7 @@ if (idReporteEditar) {
     const btnEnviar = document.querySelector('.btn-enviar-reporte'); 
     if (btnEnviar) btnEnviar.textContent = "Guardar Cambios";
 
-    fetch(`http://localhost:3000/api/reportes/${idReporteEditar}`)
+    fetch(`/api/reportes/${idReporteEditar}`)
         .then(res => {
             if (!res.ok) throw new Error("No se pudo cargar la información del reporte");
             return res.json();

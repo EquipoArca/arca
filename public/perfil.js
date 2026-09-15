@@ -135,7 +135,7 @@ async function procesarNuevaFoto(event) {
             mostrarFotoUsuario(fotoBase64);
             cerrarModalFotoDirecto();
 
-            fetch('http://localhost:3000/guardar-foto-perfil', {
+            fetch('/guardar-foto-perfil', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -159,7 +159,7 @@ firebase.auth().onAuthStateChanged(async (user) => {
     if (user) {
         try {
             // Hacemos la petición a tu servidor para obtener los datos del usuario
-            const respuesta = await fetch(`http://localhost:3000/obtener-usuario?correo=${encodeURIComponent(user.email)}`);
+            const respuesta = await fetch(`/obtener-usuario?correo=${encodeURIComponent(user.email)}`);
             const data = await respuesta.json();
 
             if (respuesta.ok) {
@@ -191,7 +191,7 @@ function ejecutarBorrarFoto() {
     mostrarSiluetaDefault();
     cerrarModalFotoDirecto();
 
-    fetch('http://localhost:3000/guardar-foto-perfil', {
+    fetch('/guardar-foto-perfil', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -281,7 +281,7 @@ function abrirModalTelefono() {
     const user = firebase.auth().currentUser;
     
     if (user) {
-        fetch(`http://localhost:3000/obtener-usuario?correo=${encodeURIComponent(user.email)}`)
+        fetch(`/obtener-usuario?correo=${encodeURIComponent(user.email)}`)
             .then(res => res.json())
             .then(data => {
                 const elemTelActual = document.getElementById('modal-telefono-actual');
@@ -351,7 +351,7 @@ if (btnGuardarTel) {
             errorElem.style.display = 'none';
 
             // Petición directa a tu servidor para actualizar en la base de datos
-            const respuesta = await fetch('http://localhost:3000/actualizar-telefono-usuario', {
+            const respuesta = await fetch('/actualizar-telefono-usuario', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
@@ -405,7 +405,7 @@ if (inputNombre && mensajeEstado) {
         temporizadorValidacion = setTimeout(() => {
             const urlCorreo = user ? `&correo_actual=${encodeURIComponent(user.email)}` : '';
             
-            fetch(`http://localhost:3000/validar-nombre-usuario?nombre=${encodeURIComponent(nombreVal)}${urlCorreo}`)
+            fetch(`/validar-nombre-usuario?nombre=${encodeURIComponent(nombreVal)}${urlCorreo}`)
                 .then(res => res.json())
                 .then(data => {
                     if (data.disponible) {

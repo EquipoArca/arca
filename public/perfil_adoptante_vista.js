@@ -8,12 +8,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             // 1. Primero obtenemos el id_usuarios interno mediante el correo
-            const resUser = await fetch(`http://localhost:3000/obtener-usuario?correo=${encodeURIComponent(user.email)}`);
+            const resUser = await fetch(`/obtener-usuario?correo=${encodeURIComponent(user.email)}`);
             if (!resUser.ok) throw new Error("No se pudo obtener el usuario.");
             const datosUser = await resUser.json();
 
             // 2. Consultamos la ficha de adoptante usando el id_usuarios
-            const resFicha = await fetch(`http://localhost:3000/api/obtener-ficha-adoptante/${datosUser.id_usuarios}`);
+            const resFicha = await fetch(`/api/obtener-ficha-adoptante/${datosUser.id_usuarios}`);
             
             if (resFicha.ok) {
                 const ficha = await resFicha.json();
