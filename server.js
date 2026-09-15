@@ -18,15 +18,14 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(cors());
 
-// Configuración de MySQL con variables de entorno y soporte para Aiven
-// Configuración de MySQL robusta para Render y Aiven
+// Configuración de MySQL robusta adaptada a los datos de Aiven
 const db = mysql.createConnection({
-    host: process.env.DB_HOST || 'localhost',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'basearca',
-    port: process.env.DB_PORT ? Number(process.env.DB_PORT) : 3306,
-    ssl: process.env.DB_HOST && process.env.DB_HOST !== 'localhost' ? { rejectUnauthorized: false } : undefined,
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME || 'defaultdb',
+    port: process.env.DB_PORT ? Number(process.env.DB_PORT) : 24612,
+    ssl: { rejectUnauthorized: false },
     multipleStatements: true
 });
 
@@ -36,7 +35,7 @@ db.connect((err) => {
         console.error('❌ Error al conectar a la base de datos MySQL:', err);
         return;
     }
-    console.log('✅ Conectado exitosamente a la base de datos MySQL en:', process.env.DB_HOST || 'localhost');
+    console.log('✅ Conectado exitosamente a la base de datos MySQL en Aiven!');
 });
 
 // Configuración de Nodemailer
