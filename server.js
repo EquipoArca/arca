@@ -44,16 +44,19 @@ db.connect((err) => {
     console.log('✅ Conectado exitosamente a la base de datos MySQL en Aiven!');
 });
 
-// Configuración de Nodemailer
+// Configuración alternativa de Nodemailer de forma explícita
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false, // false para usar TLS/STARTTLS en el puerto 587
     auth: {
         user: 'arcaoficial0@gmail.com',
         pass: 'darl pzpf sjgz aggx'
+    },
+    tls: {
+        rejectUnauthorized: false // Ayuda a evitar bloqueos de certificados en entornos en la nube
     }
 });
-
-const codigosOTP = {};
 
 // ==========================================
 // AUTENTICACIÓN Y REGISTRO
