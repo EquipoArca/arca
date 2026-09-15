@@ -49,7 +49,7 @@ auth.onAuthStateChanged(async (user) => {
 
         // Petición única a Node.js/MySQL para obtener datos del usuario
         try {
-            const response = await fetch(`http://localhost:3000/obtener-usuario?correo=${encodeURIComponent(user.email)}`);
+            const response = await fetch(`/obtener-usuario?correo=${encodeURIComponent(user.email)}`);
             if (!response.ok) {
                 throw new Error(`Error HTTP: ${response.status}`);
             }
