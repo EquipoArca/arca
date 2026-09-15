@@ -191,6 +191,12 @@ async function ejecutarLoginEmail() {
         return;
     }
 
+    // 1. Verificación previa de conexión
+    if (!navigator.onLine) {
+        mostrarAlertaOffline();
+        return;
+    }
+
     try {
         const metodos = await auth.fetchSignInMethodsForEmail(email);
         if (metodos.length > 0) {
@@ -200,13 +206,46 @@ async function ejecutarLoginEmail() {
             window.location.href = `registro.html?email=${encodeURIComponent(email)}`;
         }
     } catch (error) {
-        if (error.code === 'auth/invalid-email') {
+        // Si hay error de red o de conexión en Firebase -> Muestra TU modal
+        if (!navigator.onLine || error.code === 'auth/network-request-failed') {
+            mostrarAlertaOffline();
+        } else if (error.code === 'auth/invalid-email') {
             alert("Por favor, ingresa un correo electrónico válido.");
         } else {
             console.error("Error al verificar correo:", error);
             alert("Ocurrió un error al verificar la cuenta: " + error.message);
         }
     }
+}
+
+function iniciarSesionFinal() {
+    // Verificación de red antes de intentar autenticar
+    if (!navigator.onLine) {
+        mostrarAlertaOffline();
+        return;
+    }
+
+    const passInput = document.getElementById("password-input-modal");
+    const pass = passInput ? passInput.value.trim() : "";
+
+    if (pass === "") {
+        alert("Por favor, ingresa tu contraseña.");
+        return;
+    }
+
+    auth.signInWithEmailAndPassword(correoValidado, pass)
+        .then(() => {
+            activarModoFull();
+        })
+        .catch((error) => {
+            if (!navigator.onLine || error.code === 'auth/network-request-failed') {
+                mostrarAlertaOffline();
+            } else if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                alert("Contraseña incorrecta. Inténtalo de nuevo.");
+            } else {
+                alert("Error al iniciar sesión: " + error.message);
+            }
+        });
 }
 
 function mostrarPasoContrasena(email) {
