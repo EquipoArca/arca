@@ -57,6 +57,7 @@ const transporter = nodemailer.createTransport({
         rejectUnauthorized: false // Ayuda a evitar bloqueos de certificados en entornos en la nube
     }
 });
+const codigosOTP = {};
 
 // ==========================================
 // AUTENTICACIÓN Y REGISTRO
