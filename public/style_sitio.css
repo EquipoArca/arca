@@ -5,29 +5,57 @@
 }
 
 body {
-    height: 100vh;
-    font-family: 'Itim', sans-serif;
-    background-image: url('fondo.png.png');
+    min-height: 100vh;
+    font-family: 'Itim', cursive, sans-serif;
+    background-color: #fff0f5;
+    background-image: url('fondo.png.png'); /* Tu fondo de huellitas */
     background-size: cover;
     background-position: center;
-    background-color: #fce4ec;
-    overflow: hidden;
+    background-attachment: fixed;
+    color: #333333;
+}
+
+.brand-title, 
+.modal-arca h2 {
+    font-family: 'Itim', cursive, sans-serif;
+    font-size: 4.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    -webkit-text-stroke: 2.5px #e5a4a4;
+    paint-order: stroke fill;
+    letter-spacing: 2px;
+    text-align: center;
+    margin-bottom: 20px;
 }
 
 /* --- Logo Superior Izquierda --- */
 .header {
+    
     position: absolute;
     top: 20px;
     left: 20px;
     height: 80px;
     width: 80px;
-    display: flex;
+    display:flex;
     justify-content: center;
     align-items: center;
     overflow: hidden;
 }
 
+.card, 
+.seccion-arca, 
+.perfil-layout,
+.main-container {
+    background-color: #fcae9cb3; /* El color exacto de las tarjetas de la foto */
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border-radius: 26px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+}
+
 .small-logo-circle {
+    
     width: 70px;
     height: 70px;
     background-color: #e57373; /* Mismo color del círculo principal */
@@ -66,12 +94,13 @@ body {
 }
 
 .info-box {
-    margin-top: 5px;
-    background-color: #fbc2c4;
-    padding: 20px;
-    border-radius: 30px;
+    background-color: rgba(255, 185, 172, 0.48); /* Color salmón pastel translúcido de la imagen */
+    border: 1.5px solid rgba(230, 140, 125, 0.35); /* Borde suave en tono salmón */
+    padding: 25px 35px;
+    border-radius: 26px;
     max-width: 850px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04); /* Sombra muy tenue */
     margin-bottom: 40px;
 }
 
@@ -91,18 +120,18 @@ body {
 
 /* --- Botón "Inicio" --- */
 .home-button {
-    background-color: #fbc2c4;
+    background-color:  #d16161;
     padding: 12px 50px;
     border-radius: 25px;
     text-decoration: none;
-    color: #333;
+    color: #f0eeee;
     font-size: 1.2rem;
     font-weight: 600;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 10px  #d16161;
     transition: transform 0.2s, background-color 0.2s;
 }
 
 .home-button:hover {
     transform: scale(1.05);
-    background-color: #f9abb0;
+    background-color: #d16161;
 }

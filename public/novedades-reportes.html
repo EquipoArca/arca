@@ -12,6 +12,25 @@
 </head>
 <body>
 
+    <div id="offline-alert-overlay" class="offline-overlay d-none">
+    <div class="offline-card">
+        <!-- Botón X (cerrar) superior derecho -->
+        <button type="button" id="close-x-btn" class="close-x">&times;</button>
+
+        <!-- Icono de alerta -->
+        <div class="alert-icon-circle">
+            <div class="alert-icon-inner">!</div>
+        </div>
+
+        <!-- Título y mensaje -->
+        <h3>¡Sin conexión a internet!</h3>
+        <p>No se pudo verificar tu cuenta. Revisa tu conexión a internet e inténtalo más tarde.</p>
+
+        <!-- Botón de acción 'Aceptar' -->
+        <button type="button" id="close-offline-alert">Aceptar</button>
+    </div>
+</div>
+
   <nav class="top-nav">
     <div class="top-left">
         <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu"></i>        
