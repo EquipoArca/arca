@@ -2,6 +2,7 @@ const mysql = require('mysql2');
 const express = require('express'); 
 const cors = require('cors');
 const nodemailer = require('nodemailer');
+const path = require('path'); // <--- 1. Importa path para manejar rutas de carpetas
 
 const { initializeApp, cert } = require('firebase-admin/app');
 const { getAuth } = require('firebase-admin/auth');
@@ -17,6 +18,11 @@ const app = express();
 app.use(express.json({ limit: '10mb' })); 
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(cors());
+
+// ==========================================
+// ARCHIVOS ESTÁTICOS (¡ESTO ES LO QUE FALTABA!)
+// ==========================================
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Configuración de MySQL robusta adaptada a los datos de Aiven
 const db = mysql.createConnection({
