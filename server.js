@@ -56,6 +56,7 @@ const transporter = nodemailer.createTransport({
         rejectUnauthorized: false
     }
 });
+const codigosOTP = {};
 // ==========================================
 // AUTENTICACIÓN Y REGISTRO
 // ==========================================
