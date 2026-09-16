@@ -1,6 +1,23 @@
 document.addEventListener('DOMContentLoaded', () => {
     const contenedor = document.getElementById('contenedorNotificaciones');
 
+    // ==========================================
+    // CONTROL Y EVENTOS DE INTERNET (OFFLINE)
+    // ==========================================
+    const btnCerrar = document.getElementById('close-offline-alert');
+    const btnX = document.getElementById('close-x-btn');
+
+    if (btnCerrar) btnCerrar.addEventListener('click', ocultarAlertaOffline);
+    if (btnX) btnX.addEventListener('click', ocultarAlertaOffline);
+
+    // Verificar si el dispositivo no tiene internet al cargar la página
+    if (!navigator.onLine) {
+        mostrarAlertaOffline();
+    }
+
+    // ==========================================
+    // RENDERIZADO DE NOTIFICACIONES
+    // ==========================================
     function renderizarNotificaciones(listaNotificaciones) {
         if (!contenedor) return;
         contenedor.innerHTML = '';
@@ -75,3 +92,44 @@ document.addEventListener('DOMContentLoaded', () => {
     // Probar plantilla vacía por defecto
     renderizarNotificaciones([]);
 });
+
+// ==========================================
+// FUNCIONES AUXILIARES Y ESCUCHADORES RED
+// ==========================================
+
+// Muestra el modal de alerta offline o lanza un alert de respaldo
+function mostrarAlertaOffline() {
+    const overlay = document.getElementById('offline-alert-overlay');
+    if (overlay) {
+        overlay.classList.remove('d-none');
+    } else {
+        alert("¡No tienes conexión a internet! Inténtalo más tarde.");
+    }
+}
+
+// Oculta el modal de alerta offline
+function ocultarAlertaOffline() {
+    const overlay = document.getElementById('offline-alert-overlay');
+    if (overlay) {
+        overlay.classList.add('d-none');
+    }
+}
+
+// Escuchadores globales para cambios en la conexión
+window.addEventListener('offline', () => {
+    mostrarAlertaOffline();
+});
+
+window.addEventListener('online', () => {
+    ocultarAlertaOffline();
+});
+
+// Ejemplo de uso antes de hacer peticiones (ej. botón "Ver detalles")
+function verDetalles(idNotificacion) {
+    if (!navigator.onLine) {
+        mostrarAlertaOffline();
+        return;
+    }
+
+    // Tu lógica para abrir el detalle de la notificación...
+}

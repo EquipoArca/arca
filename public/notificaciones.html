@@ -13,6 +13,27 @@
 </head>
 <body>
 
+      <div id="offline-alert-overlay" class="custom-alert-overlay d-none">
+  <div class="custom-alert-card">
+    <button type="button" class="close-x-btn" id="close-x-btn">&times;</button>
+
+    <div class="alert-icon-circle">
+      <svg viewBox="0 0 24 24" class="alert-icon">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+      </svg>
+    </div>
+
+    <h3 class="custom-alert-title">¡Sin conexión a internet!</h3>
+    <p class="custom-alert-message">
+      No se pudo verificar tu cuenta. Revisa tu conexión a internet e inténtalo más tarde.
+    </p>
+
+    <button type="button" id="close-offline-alert" class="custom-alert-btn">
+      Aceptar
+    </button>
+  </div>
+</div>
+
  <nav class="top-nav">
     <div class="top-left">
 <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu"></i>        

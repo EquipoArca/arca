@@ -963,3 +963,68 @@ hr {
     background: rgba(255, 255, 255, 0.35);
     transform: translateY(-1px);
 }
+
+/* Overlay completo con fondo oscuro difuminado */
+.offline-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999; /* Por encima de todo */
+}
+
+/* Tarjeta flotante centrada */
+.offline-card {
+  background-color: #ffffff;
+  padding: 25px 30px;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  max-width: 380px;
+  width: 90%;
+  position: relative;
+  animation: popIn 0.25s ease-out;
+}
+
+.offline-card h3 {
+  margin-top: 10px;
+  color: #333;
+  font-weight: bold;
+}
+
+.offline-card p {
+  color: #666;
+  margin-bottom: 20px;
+}
+
+/* Botón flotante 'X' para cerrar */
+.close-x {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background: transparent;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: #888;
+}
+
+.close-x:hover {
+  color: #000;
+}
+
+/* Clase para ocultar */
+.d-none {
+  display: none !important;
+}
+
+@keyframes popIn {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
