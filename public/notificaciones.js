@@ -89,8 +89,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Probar plantilla vacía por defecto
-    renderizarNotificaciones([]);
+    // Datos de prueba para previsualizar una notificación
+    renderizarNotificaciones([
+        { id: 1, mensaje: "Inicio de sesión requerido", fecha: "16 Sep", origen: "Sistema ARCA" }
+    ]);
 });
 
 // ==========================================
@@ -124,12 +126,57 @@ window.addEventListener('online', () => {
     ocultarAlertaOffline();
 });
 
-// Ejemplo de uso antes de hacer peticiones (ej. botón "Ver detalles")
+// ==========================================
+// DETALLE DE NOTIFICACIÓN (TARJETA DE 3 PASOS)
+// ==========================================
+
 function verDetalles(idNotificacion) {
     if (!navigator.onLine) {
         mostrarAlertaOffline();
         return;
     }
 
-    // Tu lógica para abrir el detalle de la notificación...
+    const contenedor = document.getElementById('contenedorNotificaciones');
+    if (!contenedor) return;
+
+    contenedor.style.justifyContent = 'center';
+    contenedor.innerHTML = `
+        <div class="tarjeta-pasos-login">
+            <button class="btn-volver" onclick="location.reload()">← Volver a notificaciones</button>
+            
+            <h2>Inicia sesión en 3 sencillos pasos</h2>
+            <p class="subtexto-pasos">Completa este proceso para acceder a tu cuenta de ARCA</p>
+
+            <div class="contenedor-pasos">
+                <!-- Paso 1 -->
+                <div class="paso-item">
+                    <div class="paso-numero">1</div>
+                    <div class="paso-contenido">
+                        <h3>Ingresa tu correo</h3>
+                        <p>Escribe el correo electrónico asociado a tu cuenta.</p>
+                    </div>
+                </div>
+
+                <!-- Paso 2 -->
+                <div class="paso-item">
+                    <div class="paso-numero">2</div>
+                    <div class="paso-contenido">
+                        <h3>Verifica tu identidad</h3>
+                        <p>Ingresa el código de 6 dígitos enviado a tu e-mail.</p>
+                    </div>
+                </div>
+
+                <!-- Paso 3 -->
+                <div class="paso-item">
+                    <div class="paso-numero">3</div>
+                    <div class="paso-contenido">
+                        <h3>Escribe tu contraseña</h3>
+                        <p>Introduce tu clave de acceso para ingresar al sistema.</p>
+                    </div>
+                </div>
+            </div>
+
+            <a href="login.html" class="btn-ir-login">Ir a Iniciar Sesión</a>
+        </div>
+    `;
 }
