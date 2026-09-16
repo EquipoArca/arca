@@ -47,7 +47,7 @@ db.connect((err) => {
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 587,
-    secure: false, // true para 465, false para 587
+    secure: false,
     auth: {
         user: process.env.EMAIL_USER || 'arcaoficial0@gmail.com',
         pass: process.env.EMAIL_PASS || 'darl pzpf sjgz aggx'
@@ -55,7 +55,7 @@ const transporter = nodemailer.createTransport({
     tls: {
         rejectUnauthorized: false
     },
-    family: 4 // Fuerza IPv4 para evitar bloqueos de red en Render
+    family: 4 // <-- ¡Esta línea es la clave para evitar el error ENETUNREACH!
 });
 const codigosOTP = {};
 // ==========================================
