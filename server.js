@@ -46,15 +46,16 @@ db.connect((err) => {
 
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
-    port: 465,
-    secure: true, // true para el puerto 465
+    port: 587,
+    secure: false, // true para 465, false para 587
     auth: {
-        user: 'arcaoficial0@gmail.com',
-        pass: 'darl pzpf sjgz aggx'
+        user: process.env.EMAIL_USER || 'arcaoficial0@gmail.com',
+        pass: process.env.EMAIL_PASS || 'darl pzpf sjgz aggx'
     },
     tls: {
         rejectUnauthorized: false
-    }
+    },
+    family: 4 // Fuerza IPv4 para evitar bloqueos de red en Render
 });
 const codigosOTP = {};
 // ==========================================
