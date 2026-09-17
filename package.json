@@ -1,9 +1,9 @@
 {
   "name": "arca-design",
   "version": "1.0.0",
-  "main": "script.js",
+  "description": "Backend para ARCA",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
   "keywords": [],
@@ -16,6 +16,5 @@
     "firebase-admin": "^14.3.0",
     "mysql2": "^3.22.4",
     "nodemailer": "^9.0.5"
-  },
-  "description": ""
+  }
 }
