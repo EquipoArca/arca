@@ -1,5 +1,4 @@
 require('dotenv').config(); // <--- ¡DEBE SER LA LÍNEA 1!
-
 const mysql = require('mysql2'); 
 const express = require('express'); 
 const cors = require('cors');
@@ -175,7 +174,7 @@ app.get('/api/perfil', (req, res) => {
     });
 });
 
-app.get('/obtener-usuario', (req, res) => {
+app.get('/api/obtener-usuario', (req, res) => {
     const { correo } = req.query;
 
     if (!correo) {
