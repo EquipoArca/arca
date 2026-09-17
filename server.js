@@ -917,3 +917,38 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
 });
+
+// GET: Obtener rol de usuario por correo
+app.get('/api/obtener-rol', (req, res) => {
+    const { correo } = req.query;
+
+    if (!correo) {
+        return res.status(400).json({ error: "El correo es requerido." });
+    }
+
+    const query = `
+        SELECT u.id_usuarios, u.nombre_usuario, u.correo_usuario, r.nombre_rol, u.id_rol
+        FROM usuarios u
+        LEFT JOIN roles r ON u.id_rol = r.id_rol
+        WHERE LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(?))
+    `;
+
+    db.query(query, [correo], (err, results) => {
+        if (err) {
+            console.error("❌ Error al consultar rol de usuario:", err);
+            return res.status(500).json({ error: "Error interno del servidor." });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ error: "Usuario no encontrado." });
+        }
+
+        res.json({
+            id_usuario: results[0].id_usuarios,
+            nombre_usuario: results[0].nombre_usuario,
+            correo: results[0].correo_usuario,
+            id_rol: results[0].id_rol,
+            rol: results[0].nombre_rol || 'Usuario' // Rol por defecto si es null
+        });
+    });
+});
