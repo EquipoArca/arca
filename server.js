@@ -1,8 +1,10 @@
+require('dotenv').config(); // <--- ¡DEBE SER LA LÍNEA 1!
+
 const mysql = require('mysql2'); 
 const express = require('express'); 
 const cors = require('cors');
 const nodemailer = require('nodemailer');
-const path = require('path'); // <--- 1. Importa path para manejar rutas de carpetas
+const path = require('path');
 
 const { initializeApp, cert } = require('firebase-admin/app');
 const { getAuth } = require('firebase-admin/auth');
@@ -910,10 +912,9 @@ app.get('/api/publicaciones-globales', (req, res) => {
         res.json(rows);
     });
 });
-// ==========================================
-// INICIO DEL SERVIDOR
-// ==========================================
+
 const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => {
     console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
 });
@@ -952,3 +953,4 @@ app.get('/api/obtener-rol', (req, res) => {
         });
     });
 });
+
