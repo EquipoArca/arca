@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración - ARCA</title>
+    <link rel="stylesheet" href="style_home.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Estilos adicionales específicos para la vista de configuración -->
+    <style>
+        .grid-configuracion {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 20px;
+        }
+
+        .columna-config-izq, .columna-config-der {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .config-card {
+            background-color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            border: 1px solid #fae1dd;
+        }
+
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Interruptor (Switch) personalizado estilo ARCA */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+
+        .switch input { 
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--accent-pink, #e8a598);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
+        .radio-group-config {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .opcion-radio-config {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .opcion-radio-config input {
+            margin-top: 3px;
+            accent-color: var(--accent-pink, #e8a598);
+        }
+
+        .btn-accion-config {
+            background-color: white;
+            border: 1px solid var(--accent-pink, #e8a598);
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            color: #5c4033;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        .btn-accion-config:hover {
+            background-color: #f7d6d0;
+        }
+
+        .btn-danger-config {
+            background-color: #fdf0ee;
+            border-color: #e76f51;
+            color: #e76f51;
+        }
+
+        .btn-danger-config:hover {
+            background-color: #e76f51;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .grid-configuracion {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+  <!-- Barra de Navegación Superior -->
+  <nav class="top-nav">
+    <div class="top-left">
+        <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu"></i>
+        
+        <div class="mini-logo-circle">
+            <img src="logo.png" alt="Logo">
+        </div>
+        <span class="page-title" id="titulo-pagina">Ajustes</span>
+    </div>
+
+    <div class="search-bar">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="input-busqueda-nav" name="busqueda" placeholder="Busca algo" aria-label="Buscar en la aplicación">
+        <i class="fa-solid fa-microphone"></i>
+    </div>
+
+    <div class="top-right">
+        <div class="user-header-info">
+
+            <!-- 1. PERFIL Y MINI MENÚ -->
+            <div class="user-profile-menu" id="user-profile-menu">
+                <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
+                    <img src="logo.png" id="user-avatar-img" alt="Perfil">
+                </div>
+
+                <div class="mini-menu-card" id="mini-menu-card">
+                    <div class="mini-menu-header">
+                        <span id="mini-menu-username">Usuario</span>
+                    </div>
+                    
+                    <hr class="mini-menu-divider">
+                    
+                    <a href="configuracion_usuario.html" class="mini-menu-item btn-ajustes">
+                        <i class="fa-solid fa-gear"></i>
+                        <span>Ajustes</span>
+                    </a>
+                    
+                    <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Cerrar sesión</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 2. CAMPANA DE NOTIFICACIONES -->
+            <div class="notif-circle">
+                <a href="notificaciones.html" aria-label="Notificaciones"><i class="fa-solid fa-bell"></i></a>
+            </div>
+
+        </div>
+    </div>
+  </nav>
+
+    <!-- Barra Lateral (Sidebar) -->
+    <aside class="sidebar" id="sidebar">
+        <div class="side-icons">
+            <a href="home.html" class="menu-fila">
+                <i class="fa-solid fa-house"></i>
+                <span class="menu-text">Inicio</span>
+            </a>
+            <a href="perfil_usuario.html" class="menu-fila">
+                <i class="fa-solid fa-circle-user"></i>
+                <span class="menu-text">Perfil</span>
+            </a>
+            <a href="guardados_usuario.html" class="menu-fila">
+                <i class="fa-solid fa-bookmark"></i>
+                <span class="menu-text">Guardado</span>
+            </a>
+            <a href="mapa.html" class="menu-fila">
+                <i class="fa-solid fa-location-dot"></i>
+                <span class="menu-text">Mapa</span>
+            </a>
+            <a href="configuracion_usuario.html" class="menu-fila active">
+                <i class="fa-solid fa-gear"></i>
+                <span class="menu-text">Ajustes</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Contenido Principal -->
+    <main class="main-content">
+        <div class="grid-configuracion">
+            
+            <!-- Columna Izquierda: Preferencias y Privacidad -->
+            <div class="columna-config-izq">
+                <div class="titulo-capsula">Preferencias</div>
+                
+                <div class="config-card">
+                    <div class="setting-row">
+                        <span>Recibir notificaciones en tu navegador</span>
+                        <label class="switch">
+                            <input type="checkbox" id="notifSwitch">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="titulo-capsula">Privacidad</div>
+                
+                <div class="config-card">
+                    <p style="font-weight: 600; font-size: 14px; margin-bottom: 5px;">Privacidad de reportes</p>
+                    <div class="radio-group-config">
+                        <label class="opcion-radio-config">
+                            <input type="radio" name="privacidad" value="publico" checked>
+                            <span><strong>Público:</strong> Todos los usuarios pueden ver la ubicación y tus datos de contacto.</span>
+                        </label>
+                        <label class="opcion-radio-config">
+                            <input type="radio" name="privacidad" value="fundaciones">
+                            <span><strong>Solo fundaciones:</strong> Solo organizaciones registradas podrán ver tu información para ayudarte.</span>
+                        </label>
+                        <label class="opcion-radio-config">
+                            <input type="radio" name="privacidad" value="privado">
+                            <span><strong>Privado:</strong> Nadie verá tus datos, solo la información del animal y ubicación aproximada.</span>
+                        </label>
+                    </div>
+                    <hr style="border: 0; border-top: 1px solid #fae1dd; margin: 5px 0;">
+                    <a href="javascript:void(0)" class="btn-accion-config" onclick="alert('Redirigiendo a Políticas de Privacidad...')">
+                        Ver políticas de privacidad <i class="fa-solid fa-file-lines"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Columna Derecha: Permisos, Cuenta y Soporte -->
+            <div class="columna-config-der">
+                <div class="titulo-capsula">Permisos y Cuenta</div>
+                
+                <div class="config-card">
+                    <div class="setting-row">
+                        <div>
+                            <p style="font-weight: 600;">Permisos de ubicación</p>
+                            <p style="font-size: 12px; color: #8c7365; margin-top: 3px;">Actualmente: Permitir mientras se visita el sitio</p>
+                        </div>
+                    </div>
+                    <a href="javascript:void(0)" class="btn-accion-config" onclick="alert('Abriendo lista de usuarios bloqueados...')">
+                        Bloqueados <i class="fa-solid fa-users-slash"></i>
+                    </a>
+                </div>
+
+                <div class="config-card">
+                    <a href="perfil_usuario.html" class="btn-accion-config">
+                        Cuenta <i class="fa-solid fa-user-gear"></i>
+                    </a>
+                    <button type="button" class="btn-accion-config btn-danger-config" onclick="eliminarCuenta()">
+                        Eliminar cuenta <i class="fa-solid fa-triangle-exclamation"></i>
+                    </button>
+                </div>
+
+                <div class="titulo-capsula">Soporte</div>
+                
+                <div class="config-card">
+                    <a href="javascript:void(0)" class="btn-accion-config" onclick="alert('Conectando con Ayuda y Soporte Técnico...')">
+                        Ayuda y soporte técnico <i class="fa-solid fa-headset"></i>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Tus scripts globales -->
+    <script src="script.js"></script>
+    
+    <!-- Script específico para la funcionalidad de Ajustes y Toggle del Sidebar -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Control del Sidebar (igual que en tus otras vistas)
+            const btnToggleMenu = document.getElementById('btn-toggle-menu');
+            const sidebar = document.getElementById('sidebar');
+
+            if (btnToggleMenu && sidebar) {
+                btnToggleMenu.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    sidebar.classList.toggle('sidebar-abierta');
+                });
+            }
+
+            // Sincronizar y guardar preferencias con localStorage
+            const notifSwitch = document.getElementById("notifSwitch");
+            const savedNotif = localStorage.getItem("notificaciones");
+            
+            if (savedNotif !== null) {
+                notifSwitch.checked = (savedNotif === "true");
+            }
+
+            notifSwitch.addEventListener("change", () => {
+                localStorage.setItem("notificaciones", notifSwitch.checked);
+            });
+
+            const savedPrivacidad = localStorage.getItem("privacidad");
+            if (savedPrivacidad) {
+                const radioOption = document.querySelector(`input[name="privacidad"][value="${savedPrivacidad}"]`);
+                if (radioOption) radioOption.checked = true;
+            }
+
+            document.querySelectorAll('input[name="privacidad"]').forEach(radio => {
+                radio.addEventListener("change", (e) => {
+                    localStorage.setItem("privacidad", e.target.value);
+                });
+            });
+        });
+
+        // Función para eliminar cuenta con confirmación
+        function eliminarCuenta() {
+            const confirmacion = confirm("¿Estás completamente segura de que deseas eliminar tu cuenta de ARCA? Esta acción no se puede deshacer.");
+            if (confirmacion) {
+                localStorage.clear();
+                alert("Tu cuenta ha sido eliminada correctamente.");
+                window.location.href = "index.html"; 
+            }
+        }
+    </script>
+</body>
+</html>
