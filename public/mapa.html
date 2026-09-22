@@ -12,6 +12,12 @@
     
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="dark-mode.css">
+    <script>
+    if (localStorage.getItem("modo_oscuro") === "true") {
+        document.body.classList.add("dark-mode");
+    }
+    </script>
 
     <style>
         html, body {
@@ -405,7 +411,7 @@
                 <div class="mini-menu-card" id="mini-menu-card">
                     <div class="mini-menu-header"><span id="mini-menu-username">Usuario</span></div>
                     <hr class="mini-menu-divider">
-                    <a href="configuracion_usuario.html" class="mini-menu-item btn-ajustes"><i class="fa-solid fa-gear"></i><span>Ajustes</span></a>
+                    <a href="configuracion.html" class="mini-menu-item btn-ajustes"><i class="fa-solid fa-gear"></i><span>Ajustes</span></a>
                     <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini"><i class="fa-solid fa-right-from-bracket"></i><span>Cerrar sesión</span></a>
                 </div>
             </div>
@@ -419,8 +425,8 @@
           <a href="home.html" class="menu-fila"><i class="fa-solid fa-house"></i><span class="menu-text">Inicio</span></a>
           <a href="perfil_usuario.html" class="menu-fila"><i class="fa-solid fa-circle-user"></i><span class="menu-text">Perfil</span></a>
           <a href="guardados_usuario.html" class="menu-fila"><i class="fa-solid fa-bookmark"></i><span class="menu-text">Guardado</span></a>
-          <a href="mapa_usuario.html" class="menu-fila" style="color: #e06d53;"><i class="fa-solid fa-location-dot"></i><span class="menu-text">Mapa</span></a>
-          <a href="configuracion_usuario.html" class="menu-fila"><i class="fa-solid fa-gear"></i><span class="menu-text">Ajustes</span></a>
+          <a href="mapa.html" class="menu-fila" style="color: #e06d53;"><i class="fa-solid fa-location-dot"></i><span class="menu-text">Mapa</span></a>
+          <a href="configuracion.html" class="menu-fila"><i class="fa-solid fa-gear"></i><span class="menu-text">Ajustes</span></a>
       </div>
   </aside>
 
@@ -933,5 +939,35 @@ async function cargarVeterinariasDeLaZona() {
           });
       });
   </script>
+  <!-- Motor oculto de Google Translate -->
+<div id="google_translate_element" style="display:none;"></div>
+<script type="text/javascript">
+    function googleTranslateElementInit() {
+        new google.translate.TranslateElement({ pageLanguage: 'es', autoDisplay: false }, 'google_translate_element');
+    }
+</script>
+<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+<!-- Script para aplicar el idioma guardado al cambiar de página -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const savedLang = localStorage.getItem('app_selected_lang');
+        if (savedLang && savedLang !== 'es') {
+            const interval = setInterval(() => {
+                const googleCombo = document.querySelector('.goog-te-combo');
+                if (googleCombo) {
+                    googleCombo.value = savedLang;
+                    googleCombo.dispatchEvent(new Event('change'));
+                    clearInterval(interval);
+                }
+            }, 200);
+        }
+    });
+</script>
+<style>
+    .goog-te-banner-frame { display: none !important; }
+    body { top: 0 !important; }
+    .skiptranslate { display: none !important; }
+</style>
 </body>
 </html>

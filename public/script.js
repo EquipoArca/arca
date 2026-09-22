@@ -648,4 +648,9 @@ async function obtenerNombreUbicacionGlobal(textoUbicacionOriginal) {
     
     return textoUbicacionOriginal;
 }
+document.addEventListener("DOMContentLoaded", () => {
+    if (localStorage.getItem("modo_oscuro") === "true") {
+        document.body.classList.add("dark-mode");
+    }
+});
 
