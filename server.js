@@ -44,19 +44,19 @@ db.connect((err) => {
     console.log('✅ Conectado exitosamente a la base de datos MySQL en Aiven!');
 });
 
-// Configuración de Nodemailer corregida para Render
+// Configuración de Nodemailer con Gmail (Puerto 587 y IPv4 forzado)
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 587,
-    secure: false, // true para 465, false para 587
-    family: 4,     // Fuerza el uso de IPv4 para evitar bloqueos de red en Render
+    secure: false, // Falso para el puerto 587
+    family: 4,     // Fuerza IPv4 para evitar los errores de red (ENETUNREACH) en Render
     auth: {
         user: 'arcaoficial0@gmail.com',
         pass: 'darl pzpf sjgz aggx'
     }
 });
-const codigosOTP = {};
 
+const codigosOTP = {};
 // ==========================================
 // AUTENTICACIÓN Y REGISTRO
 // ==========================================
