@@ -118,20 +118,96 @@ body {
     margin-bottom: 10px;
 }
 
-/* --- Botón "Inicio" --- */
 .home-button {
-    background-color:  #d16161;
-    padding: 12px 50px;
+    background-color: #d16161 !important;
+    width: 130px;
+    height: 48px;
     border-radius: 25px;
+    /* Usamos Grid para un centrado exacto */
+    display: grid !important;
+    place-items: center !important;
+    
     text-decoration: none;
-    color: #f0eeee;
-    font-size: 1.2rem;
-    font-weight: 600;
-    box-shadow: 0 4px 10px  #d16161;
+    border: none;
+    outline: none;
+    color: #f0eeee !important;
+    box-shadow: 0 4px 10px #d16161;
     transition: transform 0.2s, background-color 0.2s;
+    cursor: pointer;
+    padding: 0 !important;
+    margin: 0 !important;
 }
 
 .home-button:hover {
     transform: scale(1.05);
-    background-color: #d16161;
+    background-color: #d16161 !important;
+}
+
+/* Para texto o icono (span / i) */
+.home-button span, 
+.home-button i {
+    color: #f0eeee !important;
+    font-size: 3rem; /* Aumentado a 3rem */
+    line-height: 0 !important;
+    display: inline-block;
+    margin: 0 !important;
+    padding: 0 !important;
+    text-align: center;
+}
+
+/* Para SVG */
+.home-button svg {
+    color: #f0eeee !important;
+    fill: currentColor !important;
+    width: 44px; /* Aumentado a 44px */
+    height: 44px; /* Aumentado a 44px */
+    display: block;
+    margin: 0 auto !important;
+}
+
+.home-button {
+    background-color: #d16161 !important;
+    width: 130px;
+    height: 48px;
+    border-radius: 25px;
+    /* Usamos Grid para un centrado exacto */
+    display: grid !important;
+    place-items: center !important;
+    
+    text-decoration: none;
+    border: none;
+    outline: none;
+    color: #f0eeee !important;
+    box-shadow: 0 4px 10px #d16161;
+    transition: transform 0.2s, background-color 0.2s;
+    cursor: pointer;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.home-button:hover {
+    transform: scale(1.05);
+    background-color: #d16161 !important;
+}
+
+/* Para texto o icono (span / i) */
+.home-button span, 
+.home-button i {
+    color: #f0eeee !important;
+    font-size: 3rem; /* Aumentado a 3rem */
+    line-height: 0 !important;
+    display: inline-block;
+    margin: 0 !important;
+    padding: 0 !important;
+    text-align: center;
+}
+
+/* Para SVG */
+.home-button svg {
+    color: #f0eeee !important;
+    fill: currentColor !important;
+    width: 44px; /* Aumentado a 44px */
+    height: 44px; /* Aumentado a 44px */
+    display: block;
+    margin: 0 auto !important;
 }

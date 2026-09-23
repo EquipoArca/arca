@@ -88,23 +88,24 @@ body {
 }
 
 
-/* --- Botón Flecha (.next-button) estilo Imagen --- */
-/* --- Botón Flecha (.next-button) idéntico a .home-button --- */
 .next-button {
-    background-color: #d16161 !important; /* Rojo idéntico a Inicio */
-    width: 130px; /* Tamaño adaptado para guardar la misma proporción */
+    background-color: #d16161 !important;
+    width: 130px;
     height: 48px;
     border-radius: 25px;
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
+    /* Usamos Grid para un centrado exacto */
+    display: grid !important;
+    place-items: center !important;
+    
     text-decoration: none;
     border: none;
     outline: none;
-    color: #f0eeee !important; /* Fuerza color blanco para el texto o icono */
-    box-shadow: 0 4px 10px #d16161; /* Sombra idéntica a home-button */
+    color: #f0eeee !important;
+    box-shadow: 0 4px 10px #d16161;
     transition: transform 0.2s, background-color 0.2s;
     cursor: pointer;
+    padding: 0 !important;
+    margin: 0 !important;
 }
 
 .next-button:hover {
@@ -112,11 +113,24 @@ body {
     background-color: #d16161 !important;
 }
 
-/* Forzar color blanco a cualquier elemento dentro del botón (flecha, SVG o span) */
-.next-button, 
+/* Si la flecha es un texto o icono (span / i) */
 .next-button span, 
-.next-button i, 
+.next-button i {
+    color: #f0eeee !important;
+    font-size: 2.5rem;
+    line-height: 0 !important; /* Elimina la línea base extra del texto que desvia la flecha */
+    display: inline-block;
+    margin: 0 !important;
+    padding: 0 !important;
+    text-align: center;
+}
+
+/* Si la flecha es un SVG */
 .next-button svg {
     color: #f0eeee !important;
-    fill: #f0eeee !important;
+    fill: currentColor !important;
+    width: 36px;
+    height: 36px;
+    display: block;
+    margin: 0 auto !important;
 }

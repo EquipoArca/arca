@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Condiciones y Privacidad - ARCA</title>
+    <link rel="stylesheet" href="style_home.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            width: 100%;
+            overflow-y: auto;
+            font-family: 'Itim', cursive, sans-serif;
+            background-color: #fcf9f5;
+            color: #5c4033;
+        }
+
+        .main-content {
+           
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+           
+        }
+        
+        .legal-container {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 12px 40px rgba(92, 64, 51, 0.08);
+            border: 1px solid rgba(247, 214, 208, 0.6);
+            width: 90%;
+            max-width: 800px;
+        }
+
+        /* Pestañas de navegación interna */
+        .legal-tabs {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #fae1dd;
+            padding-bottom: 15px;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            font-family: 'Itim', cursive, sans-serif;
+            font-size: 18px;
+            font-weight: bold;
+            color: #8c7365;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn.active {
+            background-color: #e8a598;
+            color: white;
+            box-shadow: 0 4px 10px rgba(232, 165, 152, 0.3);
+        }
+
+        .legal-section {
+            display: none;
+        }
+
+        .legal-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 { 
+            color: #e8a598; 
+            font-size: 26px; 
+            margin-top: 0;
+            margin-bottom: 5px; 
+        }
+
+        .fecha-mod { 
+            font-size: 13px; 
+            color: #8c7365; 
+            margin-bottom: 25px; 
+            font-weight: 600;
+            display: inline-block;
+            background: rgba(232, 165, 152, 0.15);
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        h3 { 
+            color: #5c4033; 
+            font-size: 18px; 
+            margin-top: 25px; 
+            margin-bottom: 10px;
+            border-bottom: 1px solid #fae1dd; 
+            padding-bottom: 6px; 
+        }
+        
+        p, li { 
+            font-size: 15px; 
+            margin-bottom: 10px; 
+            color: #5c4033; 
+            line-height: 1.6;
+        }
+        
+        ul { padding-left: 20px; margin-bottom: 15px; }
+
+        .btn-volver { 
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 30px; 
+            padding: 10px 20px; 
+            background-color: #e8a598; 
+            color: white; 
+            text-decoration: none; 
+            border-radius: 12px; 
+            font-weight: 600; 
+            transition: background 0.2s;
+        }
+        .btn-volver:hover { background-color: #d1887b; }
+    </style>
+</head>
+<body>
+
+  <!-- Barra de Navegación Superior -->
+  <nav class="top-nav">
+    <div class="top-left">
+        <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu"></i>
+        <div class="mini-logo-circle">
+            <img src="logo.png" alt="Logo">
+        </div>
+        <span class="page-title" id="titulo-pagina">Legal</span>
+    </div>
+
+    <div class="search-bar">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="input-busqueda-nav" name="busqueda" placeholder="Busca algo" aria-label="Buscar">
+        <i class="fa-solid fa-microphone"></i>
+    </div>
+
+    <div class="top-right">
+        <div class="user-header-info">
+            <div class="user-profile-menu" id="user-profile-menu">
+                <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
+                    <img src="logo.png" id="user-avatar-img" alt="Perfil">
+                </div>
+                <div class="mini-menu-card" id="mini-menu-card">
+                    <div class="mini-menu-header"><span id="mini-menu-username">Usuario</span></div>
+                    <hr class="mini-menu-divider">
+                    <a href="configuracion.html" class="mini-menu-item btn-ajustes"><i class="fa-solid fa-gear"></i><span>Ajustes</span></a>
+                    <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini"><i class="fa-solid fa-right-from-bracket"></i><span>Cerrar sesión</span></a>
+                </div>
+            </div>
+            <div class="notif-circle">
+                <a href="notificaciones.html" aria-label="Notificaciones"><i class="fa-solid fa-bell"></i></a>
+            </div>
+        </div>
+    </div>
+  </nav>
+
+    <!-- Barra Lateral (Sidebar) -->
+    <aside class="sidebar" id="sidebar">
+        <div class="side-icons">
+            <a href="home.html" class="menu-fila"><i class="fa-solid fa-house"></i><span class="menu-text">Inicio</span></a>
+            <a href="perfil_usuario.html" class="menu-fila"><i class="fa-solid fa-circle-user"></i><span class="menu-text">Perfil</span></a>
+            <a href="guardados_usuario.html" class="menu-fila"><i class="fa-solid fa-bookmark"></i><span class="menu-text">Guardado</span></a>
+            <a href="mapa.html" class="menu-fila"><i class="fa-solid fa-location-dot"></i><span class="menu-text">Mapa</span></a>
+            <a href="configuracion.html" class="menu-fila"><i class="fa-solid fa-gear"></i><span class="menu-text">Ajustes</span></a>
+        </div>
+    </aside>
+
+    <!-- Contenido Principal -->
+    <main class="main-content">
+        <div class="legal-container">
+            
+            <!-- Pestañas para alternar -->
+            <div class="legal-tabs">
+                <button class="tab-btn active" onclick="switchTab('condiciones', event)">Condiciones de uso</button>
+                <button class="tab-btn" onclick="switchTab('politicas', event)">Políticas de Privacidad</button>
+            </div>
+
+            <!-- SECCIÓN 1: CONDICIONES DE USO -->
+            <div id="condiciones" class="legal-section active">
+                <h2>Condiciones de uso</h2>
+                <div class="fecha-mod">Última modificación: 19/09/2025</div>
+                
+                <p>Bienvenido a ARCA, una aplicación diseñada para conectar personas solidarias con animales que necesitan ayuda, y para facilitar la colaboración con fundaciones y refugios aliados.</p>
+                <p>Al instalar o usar ARCA, aceptas cumplir estas Condiciones de Uso. Si no estás de acuerdo con alguna parte, por favor no utilices la aplicación.</p>
+
+                <h3>1. Funcionalidad de ARCA</h3>
+                <p>ARCA ofrece servicios que incluyen:</p>
+                <ul>
+                    <li>Reporte de animales en situación de riesgo o abandono.</li>
+                    <li>Visualización de refugios y fundaciones cercanas.</li>
+                    <li>Seguimiento de casos y adopciones.</li>
+                    <li>Voluntariado y donaciones.</li>
+                    <li>Acceso a contenido educativo como noticias.</li>
+                </ul>
+
+                <h3>2. Propiedad Intelectual</h3>
+                <p>Todos los derechos sobre el diseño y contenido de la app pertenecen a ARCA. Queda prohibida su reproducción total o parcial sin autorización de la misma.</p>
+
+                <h3>3. Uso de datos</h3>
+                <p>Al usar ARCA aceptas que podamos recolectar la siguiente información:</p>
+                <ul>
+                    <li><strong>Ubicación en tiempo real:</strong> Para mostrar animales o refugios cercanos.</li>
+                    <li><strong>Información personal básica:</strong> Como nombre, correo electrónico y número de teléfono, lo necesario para crear una cuenta o contactarse si es necesario.</li>
+                    <li>Fotos, descripciones o reportes que usted mismo suba acerca de los animales.</li>
+                </ul>
+                <p>Toda información será tratada bajo las máximas medidas de seguridad y no va a ser compartida sin su consentimiento.</p>
+
+                <h3>4. Responsabilidad del Usuario</h3>
+                <p>Al usar ARCA, te comprometes a:</p>
+                <ul>
+                    <li>Proporcionar información veraz y confiable de forma responsable.</li>
+                    <li>No realizar reportes falsos o maliciosos.</li>
+                    <li>Respetar la privacidad de otros usuarios y fundaciones.</li>
+                    <li>No hacer uso comercial no autorizado de la app.</li>
+                </ul>
+
+                <h3>5. Colaboración con Fundaciones</h3>
+                <p>ARCA trabaja en alianza con fundaciones y refugios registrados legalmente. Cada organización es responsable de sus propios procesos de adopción, rescate y voluntariado. ARCA no actúa como intermediario legal, solo facilita el contacto y gestión de información.</p>
+
+                <h3>6. Limitación de responsabilidad</h3>
+                <p>ARCA y todo su equipo de trabajo no se hace responsable por:</p>
+                <ul>
+                    <li>Errores en los datos ingresados por el usuario o terceros.</li>
+                    <li>Resultados negativos de interacciones entre usuarios y fundaciones fuera de la app.</li>
+                    <li>Problemas técnicos fuera de nuestro control.</li>
+                </ul>
+
+                <h3>7. Modificaciones</h3>
+                <p>Nos reservamos el derecho de modificar estas condiciones en cualquier momento. Te notificaremos a través de la app.</p>
+
+                <h3>8. Contacto</h3>
+                <p>Para dudas o comentarios, escríbenos a: 
+                    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=arcaoficial0@gmail.com&su=Dudas%20o%20comentarios%20sobre%20ARCA&body=Hola%20equipo%20de%20ARCA,%20tengo%20la%20siguiente%20consulta:" 
+                    target="_blank" 
+                    style="color: #1128ff; text-decoration: underline; font-weight: bold;">
+                    arcaoficial0@gmail.com
+                    </a>
+                </p>
+                <a href="configuracion.html" class="btn-volver"><i class="fa-solid fa-arrow-left"></i> Volver a Ajustes</a>
+            </div>
+
+            <!-- SECCIÓN 2: POLÍTICAS DE PRIVACIDAD -->
+            <div id="politicas" class="legal-section">
+                <h2>Políticas de Privacidad</h2>
+                <div class="fecha-mod">Última modificación: 19/09/2025</div>
+                
+                <p>En ARCA nos tomamos muy en serio tu privacidad. En estas políticas te explicaremos qué información recopilamos, cómo la usamos y con quiénes la compartimos. Al usar ARCA, aceptas las prácticas descritas a continuación.</p>
+
+                <h3>1. Datos institucionales que proporcionas al registrarte</h3>
+                <ul>
+                    <li>Nombre legal de la fundación o refugio.</li>
+                    <li>Correo electrónico institucional.</li>
+                    <li>Número de teléfono de contacto.</li>
+                    <li>Documentos de verificación.</li>
+                    <li>Logo, descripción y zona de atención.</li>
+                    <li>Publicaciones de animales en adopción y campañas de donación o voluntariado.</li>
+                </ul>
+
+                <h3>2. ¿Para qué usamos tu información?</h3>
+                <p>Utilizamos tus datos para:</p>
+                <ul>
+                    <li>Mostrarte animales o refugios cercanos.</li>
+                    <li>Enviar notificaciones sobre casos cercanos, actualizaciones o mensajes de fundaciones.</li>
+                    <li>Facilitar el contacto con refugios, fundaciones y posibles adoptantes.</li>
+                    <li>Detectar y prevenir actividades inapropiadas o fraudulentas.</li>
+                </ul>
+                <p><em>Nunca compartiremos tu información a terceros sin tu autorización ni la usaremos con fines comerciales.</em></p>
+
+                <h3>3. Uso de la ubicación</h3>
+                <p>Tu ubicación solo se usa para:</p>
+                <ul>
+                    <li>Mostrar tu fundación o refugio en el mapa de la app.</li>
+                    <li>Ubicarte dentro de la zona de cobertura de reportes y casos.</li>
+                </ul>
+                <p>Puedes activar o desactivar la ubicación en cualquier momento desde la configuración.</p>
+
+                <h3>4. Seguridad</h3>
+                <p>Adoptamos medidas técnicas y organizativas para proteger tu información, incluyendo:</p>
+                <ul>
+                    <li>Cifrado de datos sensibles.</li>
+                    <li>Acceso restringido al perfil de la fundación.</li>
+                    <li>Autenticación segura para el inicio de sesión.</li>
+                </ul>
+                <p>Sin embargo, ningún sistema es 100% infalible. Si detectamos una violación de seguridad que afecte tu información, te lo informaremos lo antes posible.</p>
+
+                <h3>5. Contacto</h3>
+                <p>Si tienes preguntas sobre esta Política de Privacidad o el manejo de tus datos, escríbenos a: <a href="https://mail.google.com/mail/?view=cm&fs=1&to=arcaoficial0@gmail.com&su=Dudas%20o%20comentarios%20sobre%20ARCA&body=Hola%20equipo%20de%20ARCA,%20tengo%20la%20siguiente%20consulta:" 
+                    target="_blank" 
+                    style="color: #1128ff; text-decoration: underline; font-weight: bold;">
+                    arcaoficial0@gmail.com
+                    </a>
+                </p>
+
+            <a href="configuracion.html" class="btn-volver"><i class="fa-solid fa-arrow-left"></i> Volver a Ajustes</a>
+        </div>
+    </main>
+
+    <!-- Script para alternar pestañas -->
+    <script>
+        function switchTab(tabId, event) {
+            document.querySelectorAll('.legal-section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+    </script>
+
+    <!-- Firebase y Scripts globales -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    <script src="script.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btnToggleMenu = document.getElementById('btn-toggle-menu');
+            const sidebar = document.getElementById('sidebar');
+            if (btnToggleMenu && sidebar) {
+                btnToggleMenu.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    sidebar.classList.toggle('sidebar-abierta');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

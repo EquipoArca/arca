@@ -56,28 +56,48 @@ img{
 }
 
 .next-button {
-    background-color: #fbc2c4; /* Tono rosado suave del botón */
-    width: 100px;
-    height: 45px;
+    background-color: #d16161 !important;
+    width: 130px;
+    height: 48px;
     border-radius: 25px;
-    display: flex;
-    justify-content: center;
-    padding-bottom: 15px;
-    align-items: center;
+    /* Usamos Grid para un centrado exacto */
+    display: grid !important;
+    place-items: center !important;
+    
     text-decoration: none;
-    transition: transform 0.2s ease, background-color 0.2s ease;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border: none;
+    outline: none;
+    color: #f0eeee !important;
+    box-shadow: 0 4px 10px #d16161;
+    transition: transform 0.2s, background-color 0.2s;
+    cursor: pointer;
+    padding: 0 !important;
+    margin: 0 !important;
 }
 
 .next-button:hover {
     transform: scale(1.05);
-    background-color: #f9abb0;
-    
+    background-color: #d16161 !important;
 }
 
-.next-button span {
-    font-size: 3rem;
-    font-weight: bold;
-    color: #333;
-    margin-top: 5px;
+/* Si la flecha es un texto o icono (span / i) */
+.next-button span, 
+.next-button i {
+    color: #f0eeee !important;
+    font-size: 2.5rem;
+    line-height: 0 !important; /* Elimina la línea base extra del texto que desvia la flecha */
+    display: inline-block;
+    margin: 0 !important;
+    padding: 0 !important;
+    text-align: center;
+}
+
+/* Si la flecha es un SVG */
+.next-button svg {
+    color: #f0eeee !important;
+    fill: currentColor !important;
+    width: 36px;
+    height: 36px;
+    display: block;
+    margin: 0 auto !important;
 }
