@@ -18,9 +18,18 @@ if (!firebase.apps.length) {
 
 const auth = firebase.auth();
 
-// Obtener parámetros de la URL
+// Obtener parámetros de la URL e inyectarlo en el input oculto
 const urlParams = new URLSearchParams(window.location.search);
 const emailTemporal = urlParams.get('email');
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (emailTemporal) {
+        const inputEmailOculto = document.getElementById('emailRegistro');
+        if (inputEmailOculto) {
+            inputEmailOculto.value = emailTemporal;
+        }
+    }
+});
 
 // ==========================================
 // BANDERAS DE VALIDACIÓN Y ELEMENTOS
