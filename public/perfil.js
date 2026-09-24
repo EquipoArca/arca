@@ -471,6 +471,26 @@ if (btnGuardarNombre) {
 }
 
 // ==========================================
+// FUNCIÓN AUXILIAR PARA CARGAR EMAILJS AL VUELO
+// ==========================================
+function cargarEmailJS() {
+    return new Promise((resolve, reject) => {
+        if (window.emailjs) {
+            resolve(window.emailjs);
+            return;
+        }
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js";
+        script.onload = () => {
+            emailjs.init("AVpXUrYdpwa9oh438");
+            resolve(window.emailjs);
+        };
+        script.onerror = (err) => reject(err);
+        document.head.appendChild(script);
+    });
+}
+
+// ==========================================
 // ENVÍO DE CÓDIGO OTP PARA CAMBIAR CORREO (CON EMAILJS)
 // ==========================================
 const btnEnviarCodigoCorreo = document.getElementById('btn-enviar-codigo-correo');
@@ -499,12 +519,15 @@ if (btnEnviarCodigoCorreo) {
         btnEnviarCodigoCorreo.disabled = true;
 
         try {
-            // 1. Generar código OTP de 4 dígitos (idéntico al registro)[cite: 5]
+            // 1. Asegurarnos de que EmailJS esté cargado en el navegador
+            const emailjsLib = await cargarEmailJS();
+
+            // 2. Generar código OTP de 4 dígitos
             const codigoGenerado = Math.floor(1000 + Math.random() * 9000).toString();
             sessionStorage.setItem('otp_cambio_correo', codigoGenerado);
             sessionStorage.setItem('nuevo_correo_temporal', nuevoCorreo);
 
-            // 2. Parámetros para tu plantilla de EmailJS
+            // 3. Parámetros para tu plantilla de EmailJS
             const templateParams = {
                 to_email: nuevoCorreo,
                 email: nuevoCorreo,
@@ -512,10 +535,10 @@ if (btnEnviarCodigoCorreo) {
                 passcode: codigoGenerado
             };
 
-            // 3. Envío mediante EmailJS con tus credenciales
-            await emailjs.send('service_93j9cwn', 'template_bqczg41', templateParams);
+            // 4. Envío mediante la librería asegurada
+            await emailjsLib.send('service_93j9cwn', 'template_bqczg41', templateParams);
 
-            // 4. Cambiar de vista en el modal hacia los inputs OTP
+            // 5. Cambiar de vista en el modal hacia los inputs OTP
             const pasoCorreo = document.getElementById('paso-nuevo-correo');
             const pasoOtp = document.getElementById('paso-codigo-otp');
             if (pasoCorreo) pasoCorreo.style.display = 'none';
@@ -533,7 +556,6 @@ if (btnEnviarCodigoCorreo) {
         }
     };
 }
-
 // ==========================================
 // VERIFICAR EL CÓDIGO OTP E INSERTAR EL CAMBIO
 // ==========================================
