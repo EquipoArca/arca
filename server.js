@@ -258,22 +258,30 @@ app.post('/cambiar-nombre-usuario', (req, res) => {
     }
 
     db.query("SELECT id_usuarios FROM usuarios WHERE nombre_usuario = ? AND correo_usuario != ?", [nuevo_nombre, correo_usuario], (err, existeNombre) => {
-        if (err) return res.status(500).json({ error: "Error interno del servidor." });
+        if (err) {
+            console.error("❌ Error verificando nombre:", err.message);
+            return res.status(500).json({ error: "Error en el servidor: " + err.message });
+        }
 
         if (existeNombre.length > 0) {
             return res.status(400).json({ error: "El nombre de usuario ya está en uso. Intenta con otro." });
         }
 
         db.query("SELECT ultimo_cambio_nombre FROM usuarios WHERE correo_usuario = ?", [correo_usuario], (err, filas) => {
-            if (err) return res.status(500).json({ error: "Error interno del servidor." });
+            if (err) {
+                console.error("❌ Error buscando fecha de cambio:", err.message);
+                return res.status(500).json({ error: "Error en el servidor: " + err.message });
+            }
             if (filas.length === 0) return res.status(404).json({ error: "Usuario no encontrado." });
 
             const usuario = filas[0];
-            const fechaActual = new Date();
+            
+            // Generar fecha actual en formato string compatible con MySQL (YYYY-MM-DD HH:mm:ss)
+            const fechaActual = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
             if (usuario.ultimo_cambio_nombre) {
                 const ultimaFecha = new Date(usuario.ultimo_cambio_nombre);
-                const diferenciaMs = fechaActual - ultimaFecha;
+                const diferenciaMs = new Date() - ultimaFecha;
                 const diasTranscurridos = Math.floor(diferenciaMs / (1000 * 60 * 60 * 24));
 
                 if (diasTranscurridos < 30) {
@@ -282,15 +290,17 @@ app.post('/cambiar-nombre-usuario', (req, res) => {
                 }
             }
 
-            db.query("UPDATE usuarios SET nombre_usuario = ?, ultimo_cambio_nombre = ? WHERE correo_usuario = ?", [nuevo_nombre, fechaActual, correo_usuario], (err) => {
-                if (err) return res.status(500).json({ error: "Error interno del servidor." });
+            db.query("UPDATE usuarios SET nombre_usuario = ?, ultimo_cambio_nombre = ? WHERE correo_usuario = ?", [nuevo_nombre, fechaActual, correo_usuario], (errUpdate) => {
+                if (errUpdate) {
+                    console.error("❌ Error al actualizar en MySQL:", errUpdate.message);
+                    return res.status(500).json({ error: "Error al actualizar: " + errUpdate.message });
+                }
 
                 return res.json({ mensaje: "Nombre de usuario actualizado con éxito", nuevo_nombre });
             });
         });
     });
 });
-
 app.get('/validar-nombre-usuario', (req, res) => {
     const { nombre, correo_actual } = req.query;
 
