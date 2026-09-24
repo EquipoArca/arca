@@ -183,7 +183,7 @@
 
                 try {
                     // 1. Obtenemos el id_usuarios interno mediante el correo con rutas relativas limpias
-                    const resUser = await fetch(`/obtener-usuario?correo=${encodeURIComponent(user.email)}`);
+                    const resUser = await fetch(`/api/obtener-usuario?correo=${encodeURIComponent(user.email)}`);
                     if (!resUser.ok) throw new Error("No se pudo obtener el usuario.");
                     const datosUser = await resUser.json();
                     console.log("Datos del usuario recibidos:", datosUser);

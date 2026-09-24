@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
         firebase.auth().onAuthStateChanged(async (user) => {
             if (user && user.email) {
                 try {
-                    const respuesta = await fetch(`/obtener-usuario?correo=${encodeURIComponent(user.email)}`);
+                    const respuesta = await fetch(`/api/obtener-usuario?correo=${encodeURIComponent(user.email)}`);
                     
                     if (respuesta.ok) {
                         const usuario = await respuesta.json();

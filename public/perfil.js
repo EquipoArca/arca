@@ -159,7 +159,7 @@ firebase.auth().onAuthStateChanged(async (user) => {
     if (user) {
         try {
             // Hacemos la petición a tu servidor para obtener los datos del usuario
-            const respuesta = await fetch(`/obtener-usuario?correo=${encodeURIComponent(user.email)}`);
+            const respuesta = await fetch(`/api/obtener-usuario?correo=${encodeURIComponent(user.email)}`);
             const data = await respuesta.json();
 
             if (respuesta.ok) {
@@ -281,7 +281,7 @@ function abrirModalTelefono() {
     const user = firebase.auth().currentUser;
     
     if (user) {
-        fetch(`/obtener-usuario?correo=${encodeURIComponent(user.email)}`)
+        fetch(`/api/obtener-usuario?correo=${encodeURIComponent(user.email)}`)
             .then(res => res.json())
             .then(data => {
                 const elemTelActual = document.getElementById('modal-telefono-actual');

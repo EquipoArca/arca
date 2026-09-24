@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             // 1. Primero obtenemos el id_usuarios interno mediante el correo
-            const resUser = await fetch(`/obtener-usuario?correo=${encodeURIComponent(user.email)}`);
+            const resUser = await fetch(`/api/obtener-usuario?correo=${encodeURIComponent(user.email)}`);
             if (!resUser.ok) throw new Error("No se pudo obtener el usuario.");
             const datosUser = await resUser.json();
 

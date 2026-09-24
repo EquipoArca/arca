@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // Función para cargar datos cuando se presiona "Editar Perfil"
 async function cargarDatosCompletosAdoptante(correo) {
     try {
-        const resUser = await fetch(`/obtener-usuario?correo=${encodeURIComponent(correo)}`);
+        const resUser = await fetch(`/api/obtener-usuario?correo=${encodeURIComponent(correo)}`);
         if (!resUser.ok) return;
         const datosUser = await resUser.json();
 
