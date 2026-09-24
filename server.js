@@ -257,16 +257,17 @@ app.post('/cambiar-nombre-usuario', (req, res) => {
         return res.status(400).json({ error: "Faltan datos requeridos." });
     }
 
-    // 1. Verificar si el nombre ya pertenece a OTRO usuario diferente
-    const queryVerificar = "SELECT * FROM usuarios WHERE nombre_usuario = ? AND correo_usuario != ?";
-    db.query(queryVerificar, [nuevo_nombre, correo_usuario], (err, existentes) => {
+    // 1. Primero verificamos si el nombre ya le pertenece a OTRA persona
+    const queryVerificar = "SELECT correo_usuario FROM usuarios WHERE nombre_usuario = ?";
+    db.query(queryVerificar, [nuevo_nombre], (err, existentes) => {
         if (err) {
             console.error("❌ Error en consulta de verificación:", err.message);
             return res.status(500).json({ error: "Error en el servidor." });
         }
 
-        if (existentes.length > 0) {
-            // Si ya existe en otra cuenta, respondemos con un 400 amigable (no un error 500)
+        // Si el nombre existe pero el correo es DIFERENTE al nuestro, está ocupado
+        const ocupadoPorOtro = existentes.some(u => u.correo_usuario !== correo_usuario);
+        if (ocupadoPorOtro) {
             return res.status(400).json({ mensaje: "El nombre de usuario ya está en uso por otra cuenta." });
         }
 
@@ -284,7 +285,7 @@ app.post('/cambiar-nombre-usuario', (req, res) => {
             const usuario = filas[0];
             const fechaActual = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
-            // Validar restricción de los 30 días (opcional, si ya pasó o es nulo deja pasar)
+            // Validar restricción de los 30 días
             if (usuario.ultimo_cambio_nombre) {
                 const ultimaFecha = new Date(usuario.ultimo_cambio_nombre);
                 const diferenciaMs = new Date() - ultimaFecha;
@@ -316,37 +317,30 @@ app.get('/validar-nombre-usuario', (req, res) => {
         return res.status(400).json({ error: "Nombre requerido" });
     }
 
-    let sql = 'SELECT id_usuarios FROM usuarios WHERE nombre_usuario = ?';
-    let params = [nombre];
+    const nombreLimpio = nombre.trim();
 
-    if (correo_actual) {
-        sql += ' AND correo_usuario != ?';
-        params.push(correo_actual);
-    }
+    // Si nos pasan un correo, excluimos al usuario actual. 
+    // Si no nos pasan correo, buscamos de forma global por si acaso.
+    let sql = 'SELECT id_usuarios, correo_usuario FROM usuarios WHERE nombre_usuario = ?';
+    let params = [nombreLimpio];
 
     db.query(sql, params, (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
-        res.json({ disponible: results.length === 0 });
-    });
-});
 
-app.post('/actualizar-correo-usuario', (req, res) => {
-    const { correo_actual, nuevo_correo } = req.body;
-
-    if (!correo_actual || !nuevo_correo) {
-        return res.status(400).json({ error: "Faltan datos requeridos." });
-    }
-
-    const query = "UPDATE usuarios SET correo_usuario = ? WHERE correo_usuario = ?";
-    db.query(query, [nuevo_correo, correo_actual], (err, result) => {
-        if (err) {
-            console.error("❌ Error al actualizar en MySQL:", err.message);
-            return res.status(500).json({ error: "El correo ya está en uso en la base de datos." });
+        // Si no existe nadie con ese nombre, está libre de una
+        if (results.length === 0) {
+            return res.json({ disponible: true });
         }
-        res.json({ mensaje: "Correo actualizado con éxito en la base de datos." });
+
+        // Si el único que tiene ese nombre eres tú misma (comparando el correo), ¡sí está disponible para ti!
+        if (correo_actual && results.length === 1 && results[0].correo_usuario.toLowerCase() === correo_actual.trim().toLowerCase()) {
+            return res.json({ disponible: true });
+        }
+
+        // De lo contrario, le pertenece a otra persona
+        res.json({ disponible: false });
     });
 });
-
 app.post('/actualizar-telefono-usuario', (req, res) => {
     const { correo_usuario, nuevo_telefono } = req.body;
 
