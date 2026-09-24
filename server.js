@@ -257,21 +257,22 @@ app.post('/cambiar-nombre-usuario', (req, res) => {
         return res.status(400).json({ error: "Faltan datos requeridos." });
     }
 
-    // 1. Primero verificamos si el nombre ya le pertenece a OTRA persona
-    const queryVerificar = "SELECT correo_usuario FROM usuarios WHERE nombre_usuario = ?";
-    db.query(queryVerificar, [nuevo_nombre], (err, existentes) => {
+    const nombreLimpio = nuevo_nombre.trim();
+
+    // 1. Verificar si el nombre ya pertenece a OTRA persona diferente a ti
+    const queryVerificar = "SELECT correo_usuario FROM usuarios WHERE nombre_usuario = ? AND correo_usuario != ?";
+    db.query(queryVerificar, [nombreLimpio, correo_usuario], (err, existentes) => {
         if (err) {
             console.error("❌ Error en consulta de verificación:", err.message);
             return res.status(500).json({ error: "Error en el servidor." });
         }
 
-        // Si el nombre existe pero el correo es DIFERENTE al nuestro, está ocupado
-        const ocupadoPorOtro = existentes.some(u => u.correo_usuario !== correo_usuario);
-        if (ocupadoPorOtro) {
+        // Si hay resultados aquí, significa que SÍ lo tiene otra persona real
+        if (existentes.length > 0) {
             return res.status(400).json({ mensaje: "El nombre de usuario ya está en uso por otra cuenta." });
         }
 
-        // 2. Buscar la fecha del último cambio del usuario actual
+        // 2. Validar restricción de los 30 días
         db.query("SELECT ultimo_cambio_nombre FROM usuarios WHERE correo_usuario = ?", [correo_usuario], (err, filas) => {
             if (err) {
                 console.error("❌ Error buscando usuario:", err.message);
@@ -285,7 +286,6 @@ app.post('/cambiar-nombre-usuario', (req, res) => {
             const usuario = filas[0];
             const fechaActual = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
-            // Validar restricción de los 30 días
             if (usuario.ultimo_cambio_nombre) {
                 const ultimaFecha = new Date(usuario.ultimo_cambio_nombre);
                 const diferenciaMs = new Date() - ultimaFecha;
@@ -297,15 +297,15 @@ app.post('/cambiar-nombre-usuario', (req, res) => {
                 }
             }
 
-            // 3. Ejecutar la actualización final
+            // 3. Ejecutar la actualización limpia
             const queryUpdate = "UPDATE usuarios SET nombre_usuario = ?, ultimo_cambio_nombre = ? WHERE correo_usuario = ?";
-            db.query(queryUpdate, [nuevo_nombre, fechaActual, correo_usuario], (errUpdate) => {
+            db.query(queryUpdate, [nombreLimpio, fechaActual, correo_usuario], (errUpdate) => {
                 if (errUpdate) {
                     console.error("❌ Error al actualizar en MySQL:", errUpdate.message);
                     return res.status(500).json({ error: "Error al guardar en la base de datos." });
                 }
 
-                return res.json({ mensaje: "¡Nombre actualizado con éxito!", nuevo_nombre });
+                return res.json({ mensaje: "¡Nombre actualizado con éxito!", nuevo_nombre: nombreLimpio });
             });
         });
     });
