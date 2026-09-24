@@ -257,28 +257,34 @@ app.post('/cambiar-nombre-usuario', (req, res) => {
         return res.status(400).json({ error: "Faltan datos requeridos." });
     }
 
-    db.query("SELECT id_usuarios FROM usuarios WHERE nombre_usuario = ? AND correo_usuario != ?", [nuevo_nombre, correo_usuario], (err, existeNombre) => {
+    // 1. Verificar si el nombre ya pertenece a OTRO usuario diferente
+    const queryVerificar = "SELECT * FROM usuarios WHERE nombre_usuario = ? AND correo_usuario != ?";
+    db.query(queryVerificar, [nuevo_nombre, correo_usuario], (err, existentes) => {
         if (err) {
-            console.error("❌ Error verificando nombre:", err.message);
-            return res.status(500).json({ error: "Error en el servidor: " + err.message });
+            console.error("❌ Error en consulta de verificación:", err.message);
+            return res.status(500).json({ error: "Error en el servidor." });
         }
 
-        if (existeNombre.length > 0) {
-            return res.status(400).json({ error: "El nombre de usuario ya está en uso. Intenta con otro." });
+        if (existentes.length > 0) {
+            // Si ya existe en otra cuenta, respondemos con un 400 amigable (no un error 500)
+            return res.status(400).json({ mensaje: "El nombre de usuario ya está en uso por otra cuenta." });
         }
 
+        // 2. Buscar la fecha del último cambio del usuario actual
         db.query("SELECT ultimo_cambio_nombre FROM usuarios WHERE correo_usuario = ?", [correo_usuario], (err, filas) => {
             if (err) {
-                console.error("❌ Error buscando fecha de cambio:", err.message);
-                return res.status(500).json({ error: "Error en el servidor: " + err.message });
+                console.error("❌ Error buscando usuario:", err.message);
+                return res.status(500).json({ error: "Error en el servidor." });
             }
-            if (filas.length === 0) return res.status(404).json({ error: "Usuario no encontrado." });
+
+            if (filas.length === 0) {
+                return res.status(404).json({ mensaje: "Usuario no encontrado." });
+            }
 
             const usuario = filas[0];
-            
-            // Generar fecha actual en formato string compatible con MySQL (YYYY-MM-DD HH:mm:ss)
             const fechaActual = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
+            // Validar restricción de los 30 días (opcional, si ya pasó o es nulo deja pasar)
             if (usuario.ultimo_cambio_nombre) {
                 const ultimaFecha = new Date(usuario.ultimo_cambio_nombre);
                 const diferenciaMs = new Date() - ultimaFecha;
@@ -286,17 +292,19 @@ app.post('/cambiar-nombre-usuario', (req, res) => {
 
                 if (diasTranscurridos < 30) {
                     const diasRestantes = 30 - diasTranscurridos;
-                    return res.status(400).json({ error: `Debes esperar ${diasRestantes} día(s) para volver a cambiar tu nombre.` });
+                    return res.status(400).json({ mensaje: `Debes esperar ${diasRestantes} día(s) para volver a cambiar tu nombre.` });
                 }
             }
 
-            db.query("UPDATE usuarios SET nombre_usuario = ?, ultimo_cambio_nombre = ? WHERE correo_usuario = ?", [nuevo_nombre, fechaActual, correo_usuario], (errUpdate) => {
+            // 3. Ejecutar la actualización final
+            const queryUpdate = "UPDATE usuarios SET nombre_usuario = ?, ultimo_cambio_nombre = ? WHERE correo_usuario = ?";
+            db.query(queryUpdate, [nuevo_nombre, fechaActual, correo_usuario], (errUpdate) => {
                 if (errUpdate) {
                     console.error("❌ Error al actualizar en MySQL:", errUpdate.message);
-                    return res.status(500).json({ error: "Error al actualizar: " + errUpdate.message });
+                    return res.status(500).json({ error: "Error al guardar en la base de datos." });
                 }
 
-                return res.json({ mensaje: "Nombre de usuario actualizado con éxito", nuevo_nombre });
+                return res.json({ mensaje: "¡Nombre actualizado con éxito!", nuevo_nombre });
             });
         });
     });

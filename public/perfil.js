@@ -213,12 +213,17 @@ function abrirModalNombre() {
     const msgError = document.getElementById('mensaje-estado-nombre');
 
     if (elemActual) elemActual.textContent = nombreActual;
-    if (inputNuevo) inputNuevo.value = '';
-    if (msgError) msgError.textContent = '';
+    
+    // 👇 ESTO ES LO CLAVE: Forzamos a que el input empiece vacío siempre
+    if (inputNuevo) inputNuevo.value = ''; 
+    
+    if (msgError) {
+        msgError.textContent = '';
+        msgError.className = 'mensaje-validacion';
+    }
 
     if (modal) modal.classList.add('activo');
 }
-
 function cerrarModalNombre() {
     const modal = document.getElementById('modal-cambiar-nombre');
     if (modal) modal.classList.remove('activo');
