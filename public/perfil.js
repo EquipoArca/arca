@@ -1,6 +1,5 @@
-// ==========================================
-// FUNCIÓN PARA COMPRIMIR Y CONVERTIR A BASE64
-// ==========================================
+import emailjs from 'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/+esm';
+emailjs.init("AVpXUrYdpwa9oh438");
 const convertirFotoPerfilBase64 = (archivo) => {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
