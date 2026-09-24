@@ -214,29 +214,28 @@ if (formRegistro) {
         }
 
         try {
-            // Solicitar al backend que envíe el código OTP al correo
-            const resOtp = await fetch('/enviar-codigo-otp', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ correo: emailTemporal })
-            });
+            // 1. Generar código OTP de 4 dígitos en el navegador
+            const codigoGenerado = Math.floor(1000 + Math.random() * 9000).toString();
+            sessionStorage.setItem('otp_temporal', codigoGenerado);
 
-            const dataOtp = await resOtp.json();
+            // 2. Parámetros que irán a tu plantilla de EmailJS
+            const templateParams = {
+                to_email: emailTemporal,
+                passcode: codigoGenerado // Asegúrate de que tu plantilla use {{passcode}}
+            };
 
-            if (resOtp.ok) {
-                // Abrir modal si el correo fue enviado exitosamente
-                if (modalOtp) modalOtp.classList.remove('hidden');
-            } else {
-                alert(dataOtp.error || "Error al enviar el código de verificación.");
-            }
+            // 3. Enviar correo directo con EmailJS (reemplaza con tus IDs reales de EmailJS)
+            await emailjs.send('service_93j9cwn', 'template_bqczg41', templateParams);
+
+            // 4. Si todo sale bien, abrir el modal de OTP
+            if (modalOtp) modalOtp.classList.remove('hidden');
 
         } catch (error) {
-            console.error("Error al solicitar OTP:", error);
-            alert("Hubo un problema de conexión con el servidor.");
+            console.error("Error al enviar con EmailJS:", error);
+            alert("Hubo un problema al enviar el código de verificación.");
         }
     });
 }
-
 // Botón para cerrar el modal
 if (btnOtpBack && modalOtp) {
     btnOtpBack.addEventListener('click', () => {
@@ -289,17 +288,11 @@ if (formOtp) {
         }
 
         try {
-            // 1. Validar código con el servidor
-            const resVerif = await fetch('/verificar-otp', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ correo: emailTemporal, codigo: codigoCompleto })
-            });
+            // 1. Validar el código localmente comparándolo con el guardado
+            const codigoGuardado = sessionStorage.getItem('otp_temporal');
 
-            const dataVerif = await resVerif.json();
-
-            if (!resVerif.ok) {
-                alert(dataVerif.error || "Código incorrecto.");
+            if (codigoCompleto !== codigoGuardado) {
+                alert("El código de verificación es incorrecto.");
                 return;
             }
 
@@ -329,8 +322,7 @@ if (formOtp) {
             } else {
                 alert("Error al guardar la información en la base de datos.");
             }
-
-        } catch (error) {
+            } catch (error) {
             console.error("Error en la verificación/registro:", error);
             if (error.code === 'auth/email-already-in-use') {
                 alert("Este correo ya tiene una cuenta activa.");
