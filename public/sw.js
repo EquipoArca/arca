@@ -42,12 +42,16 @@ self.addEventListener('install', (e) => {
     );
 });
 
-// Responder con archivos de la caché si no hay conexión
+/// Responder con archivos de la caché si no hay conexión
 self.addEventListener('fetch', (e) => {
     e.respondWith(
         caches.match(e.request).then((respuestaCached) => {
             return respuestaCached || fetch(e.request).catch(() => {
-                // Si falla la red y no está en caché, opcionalmente puedes devolver una página offline genérica
+                // Si falla la red y no está en caché, devolvemos una respuesta de respaldo segura
+                return new Response("Recurso no disponible offline", {
+                    status: 404,
+                    statusText: "Not Found"
+                });
             });
         })
     );

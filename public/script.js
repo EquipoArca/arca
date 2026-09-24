@@ -750,4 +750,14 @@ function miFuncion() {
     }
 
 }
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Aplicar el modo oscuro automáticamente si estaba guardado
+    const modoOscuroGuardado = localStorage.getItem('darkMode') === 'true';
+    if (modoOscuroGuardado && document.body) {
+        document.body.classList.add('dark-mode');
+    }
 
+    // 2. Prevenir errores de elementos nulos en general (opcional pero muy útil)
+    // Si tienes botones de menú o clases que a veces no están en todas las páginas, 
+    // puedes manejarlas aquí de forma segura sin que la consola explote.
+});
