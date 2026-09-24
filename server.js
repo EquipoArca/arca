@@ -394,6 +394,26 @@ app.post('/verificar-telefono-usuario', (req, res) => {
         res.json({ mensaje: "¡Número de celular verificado con éxito!" });
     });
 });
+// Ruta para actualizar el correo del usuario en la base de datos
+app.post('/actualizar-correo-usuario', async (req, res) => {
+    const { correo_actual, nuevo_correo } = req.body;
+
+    if (!correo_actual || !nuevo_correo) {
+        return res.status(400).json({ success: false, mensaje: "Faltan datos requeridos." });
+    }
+
+    try {
+        // Aquí ejecutas tu consulta SQL para actualizar el correo
+        const query = 'UPDATE usuarios SET correo_usuario = ? WHERE correo_usuario = ?';
+        // Ejemplo con pool de MySQL:
+        // await pool.query(query, [nuevo_correo, correo_actual]);
+
+        res.json({ success: true, mensaje: "Correo actualizado con éxito" });
+    } catch (error) {
+        console.error("Error en base de datos:", error);
+        res.status(500).json({ success: false, mensaje: "Error interno del servidor." });
+    }
+});
 
 // ==========================================
 // REPORTES Y ESTADÍSTICAS
