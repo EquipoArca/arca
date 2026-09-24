@@ -221,8 +221,11 @@ if (formRegistro) {
             // 2. Parámetros que irán a tu plantilla de EmailJS
             const templateParams = {
                 to_email: emailTemporal,
-                passcode: codigoGenerado // Asegúrate de que tu plantilla use {{passcode}}
+                email: emailTemporal,
+                to_name: emailTemporal,
+                passcode: codigoGenerado
             };
+            
 
             // 3. Enviar correo directo con EmailJS (reemplaza con tus IDs reales de EmailJS)
             await emailjs.send('service_93j9cwn', 'template_bqczg41', templateParams);
