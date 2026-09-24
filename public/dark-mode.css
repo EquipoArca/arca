@@ -1,9 +1,8 @@
 /* ==========================================
-   MODO OSCURO GLOBAL - ARCA (STYLE_HOME ADAPTADO)
+   MODO OSCURO GLOBAL - ARCA (VERSIÓN AJUSTADA Y SIN DESBORDES)
    ========================================== */
 
-/* 1. Fondo general y configuración base del body/html */
-
+/* 1. Fondo general y colores base */
 body.dark-mode {
     background-color: #211918 !important;
     background-image: linear-gradient(rgba(125, 82, 80, 0.25), rgba(30, 24, 23, 0.85)), url('fondo.png.png') !important;
@@ -12,13 +11,33 @@ body.dark-mode {
     background-position: center !important;
     background-blend-mode: overlay !important;
     color: #f4ebd0 !important;
+    overflow-x: hidden !important; /* Evita desplazamiento lateral molesto */
+    overflow-y: auto !important;
+    height: 100% !important;
+    min-height: 100vh !important;
+    margin: 0 !important;
+}
+
+/* Control estricto de posición y dimensiones del contenido principal */
+body.dark-mode .main-content {
+    background: transparent !important;
+    position: relative !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
 }
 
 /* 2. Barra Superior (Top Nav) */
 body.dark-mode .top-nav {
-    background-color: #1f1918cc !important; /* Tono oscuro semitransparente elegante */
+    background-color: #1f1918cc !important;
     border-bottom: 1px solid #382c28 !important;
     color: #f4ebd0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
 }
 
 body.dark-mode .user-name-text {
@@ -78,14 +97,10 @@ body.dark-mode .side-icons a:hover .menu-text {
     color: #ffffff !important;
 }
 
-/* 4. Contenido Principal y Título ARCA */
-body.dark-mode .main-content {
-    background: transparent !important;
-}
-
+/* 4. Título ARCA */
 body.dark-mode .brand-title {
     color: #fbd7d3 !important;
-    -webkit-text-stroke: 4px #8c5d5b !important; /* Se adapta al tono vino oscuro del modo noche */
+    -webkit-text-stroke: 4px #8c5d5b !important;
     filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.3)) !important;
 }
 
@@ -101,7 +116,6 @@ body.dark-mode .card h2 {
     color: #f4ebd0 !important;
 }
 
-/* Colores específicos para distinguir las tarjetas en oscuro si se desea mantener la esencia */
 body.dark-mode .card.report {
     background-color: #4a3332 !important;
     border-color: #6a4544 !important;
@@ -128,26 +142,37 @@ body.dark-mode .news-button {
 /* 7. Modales, Overlays y Tarjetas Flotantes */
 body.dark-mode .overlay-bloqueo,
 body.dark-mode .modal-overlay,
-body.dark-mode .configuracion-overlay {
-    background: rgba(0, 0, 0, 0.7) !important;
+body.dark-mode .configuracion-overlay,
+body.dark-mode .modal-overlay-aviso,
+body.dark-mode .modal-foto-overlay,
+body.dark-mode .modal-overlay-arca {
+    background: rgba(0, 0, 0, 0.75) !important;
 }
 
 body.dark-mode .modal-arca,
-body.dark-mode .modal-card {
+body.dark-mode .modal-card,
+body.dark-mode .modal-tarjeta-aviso,
+body.dark-mode .modal-contenido-arca,
+body.dark-mode .modal-foto-contenido {
     background-color: #2b2321 !important;
     border: 1px solid #4a3b32 !important;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6) !important;
     color: #f4ebd0 !important;
+    max-width: 90vw !important;
+    box-sizing: border-box !important;
 }
 
 body.dark-mode .modal-arca h2,
-body.dark-mode .modal-card h2 {
+body.dark-mode .modal-card h2,
+body.dark-mode .titulo-modal-aviso,
+body.dark-mode .modal-contenido-arca h3 {
     color: #f7d6d0 !important;
     -webkit-text-stroke: 0.1px #8c5d5b !important;
 }
 
 body.dark-mode .slogan,
-body.dark-mode .modal-card .subtitulo {
+body.dark-mode .modal-card .subtitulo,
+body.dark-mode .texto-modal-aviso {
     color: #d1b5a5 !important;
 }
 
@@ -159,16 +184,19 @@ body.dark-mode .texto-registro {
     color: #b59b8e !important;
 }
 
-/* Botones dentro de modales */
 body.dark-mode .btn-login {
     background-color: #3a4528 !important;
     color: #d8ecc0 !important;
 }
 
-body.dark-mode .btn-cerrar {
+body.dark-mode .btn-cerrar,
+body.dark-mode .btn-modal-secundario {
     background-color: #382c28 !important;
     border: 1px solid #4a3b32 !important;
     color: #f4ebd0 !important;
+}
+body.dark-mode .btn-modal-secundario:hover {
+    background-color: #5d4a3f !important;
 }
 
 body.dark-mode .btn-social {
@@ -181,6 +209,7 @@ body.dark-mode .input-arca {
     background-color: #352b28 !important;
     color: #f4ebd0 !important;
     border: 1px solid #4a3b32 !important;
+    box-sizing: border-box !important;
 }
 
 body.dark-mode .btn-fundacion {
@@ -191,6 +220,23 @@ body.dark-mode .btn-fundacion {
 body.dark-mode .btn-volver,
 body.dark-mode .modal-card .btn-back {
     background-color: #382c28 !important;
+    color: #f4ebd0 !important;
+}
+
+body.dark-mode .btn-modal-primario {
+    background: #8c5d5b !important;
+    color: #f4ebd0 !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3) !important;
+}
+body.dark-mode .btn-modal-primario:hover {
+    background: #6a4544 !important;
+}
+
+body.dark-mode .circulo-icono-modal {
+    background: #4a3b32 !important;
+    border: 3px solid #8c5d5b !important;
+}
+body.dark-mode .circulo-icono-modal i {
     color: #f4ebd0 !important;
 }
 
@@ -217,7 +263,32 @@ body.dark-mode .btn-perfil-amarillo {
     color: #f4ebd0 !important;
 }
 
-/* Menú Desplegable de Usuario en la Nav */
+body.dark-mode .perfil-prototipo-container {
+    max-width: 900px;
+    width: 95%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+    padding: 40px 30px;
+    border-radius: 24px;
+    background: rgba(71, 40, 61, 0.45);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.256);
+    box-sizing: border-box;
+}
+
+body.dark-mode .perfil-header-prototipo h2 {
+    font-family: 'Itim', cursive, sans-serif;
+    font-size: 2rem;
+    color: #8c5d5b;
+    margin: 0;
+    font-weight: normal;
+    text-shadow: 0 2px 4px rgba(70, 27, 8, 0.5);
+}
+
+/* Menú Desplegable de Usuario */
 body.dark-mode .mini-menu-card {
     background: #2b2321ee !important;
     border: 1.5px solid #4a3b32 !important;
@@ -253,11 +324,19 @@ body.dark-mode .icono-silueta-nav {
     fill: #8c5d5b !important;
 }
 
-/* 9. Configuración, Invitado y Mapa */
+/* 9. Configuración, Términos y Privacidad */
 body.dark-mode .brand-arca,
 body.dark-mode .main-title,
-body.dark-mode .sub-title {
+body.dark-mode .sub-title,
+body.dark-mode .terminos-container,
+body.dark-mode .privacidad-container,
+body.dark-mode .seccion-terminos,
+body.dark-mode .seccion-privacidad {
+    background-color: #2b2321 !important;
     color: #f4ebd0 !important;
+    border-color: #4a3b32 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
 }
 
 body.dark-mode .empty-box-svg,
@@ -311,7 +390,7 @@ body.dark-mode .select-wrapper::after {
     color: #f4ebd0 !important;
 }
 
-/* 10. Vista de Reporte y Cajas Claras / Inputs */
+/* 10. Vista de Reporte y Zona de Arraste */
 body.dark-mode .titulo-capsula,
 body.dark-mode .titulo-foto-capsula {
     background-color: #844e3d !important;
@@ -338,6 +417,7 @@ body.dark-mode .input-arca {
     background-color: #352b28 !important;
     border: 1px solid #4a3b32 !important;
     color: #f4ebd0 !important;
+    box-sizing: border-box !important;
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2), 0 4px 10px rgba(0, 0, 0, 0.2) !important;
 }
 
@@ -353,27 +433,34 @@ body.dark-mode .subtitulo-reporte {
 }
 
 body.dark-mode .zona-drop {
-    border: 2px dashed rgba(76, 83, 55, 0.8);
-    border-radius: 20px;
-    background-color: rgba(75, 84, 60, 0.5);
-    backdrop-filter: blur(4px);
-    padding: 12px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
+    border: 2px dashed #8c5d5b !important;
+    border-radius: 20px !important;
+    background-color: rgba(53, 43, 40, 0.85) !important;
+    backdrop-filter: blur(4px) !important;
+    padding: 16px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    cursor: pointer !important;
+    color: #f4ebd0 !important;
+    box-sizing: border-box !important;
 }
 
 body.dark-mode .zona-drop:hover {
-    background-color: rgba(35, 39, 27, 0.75);
+    background-color: rgba(74, 59, 50, 0.9) !important;
+    border-color: #f7d6d0 !important;
 }
 
+body.dark-mode .zona-drop p,
+body.dark-mode .zona-drop span {
+    color: #f4ebd0 !important;
+}
 
 body.dark-mode .circulo-upload {
     background-color: #8c5d5b !important;
+    color: #f4ebd0 !important;
 }
 
 body.dark-mode .btn-subir-archivo,
@@ -395,11 +482,7 @@ body.dark-mode .input-contacto-wrapper i {
     color: #8c5d5b !important;
 }
 
-/* ==========================================
-   11. NUEVOS APENDICES: NOTIFICACIONES Y OTROS
-   ========================================== */
-
-/* Cuadro principal de notificaciones y contenedores tipo panel/dropdown */
+/* 11. Notificaciones y Paneles */
 body.dark-mode .notif-container,
 body.dark-mode .notifications-dropdown,
 body.dark-mode .notification-box,
@@ -409,6 +492,7 @@ body.dark-mode .notif-card {
     border: 1px solid #4a3b32 !important;
     color: #f4ebd0 !important;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+    box-sizing: border-box !important;
 }
 
 body.dark-mode .notif-header,
@@ -430,410 +514,15 @@ body.dark-mode .notification-item:hover {
     background-color: #352b28 !important;
 }
 
-body.dark-mode .perfil-prototipo-container {
-    width: 100%;
-    max-width: 900px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 30px;
-    padding: 40px 30px;
-    border-radius: 24px;
-
-    /* Efecto Cristal */
-    background: rgba(71, 40, 61, 0.45);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.256);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
-}
-body.dark-mode .perfil-header-prototipo h2 {
-    font-family: 'Itim', cursive, sans-serif;
-    font-size: 2rem;
-    color: #8c5d5b;
-    margin: 0;
-    font-weight: normal;
-    text-shadow: 0 2px 4px rgba(70, 27, 8, 0.5);
-}
-html, body {
-    height: 100vh;
-    margin: 0;
-    overflow: hidden;
-    font-family: 'Itim', cursive, sans-serif;
-    background-color: #fce8e6;
-}
-
-.main-content {
-    height: calc(100vh - 70px);
-    display: flex;
-    flex-direction: column;
-    padding: 15px 25px;
-    box-sizing: border-box;
-    animation: fadeIn 0.6s ease-in-out;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.mapa-container-principal {
-    background: rgba(255, 255, 255, 0.65);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-radius: 28px;
-    padding: 20px;
-    width: 100%;
-    height: 100%;
-    box-shadow: 0 12px 35px rgba(220, 150, 140, 0.15);
-    border: 2px solid rgba(255, 255, 255, 0.9);
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    position: relative;
-}
-
-.mapa-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: rgba(253, 203, 208, 0.75);
-    padding: 12px 22px;
-    border-radius: 18px;
-    border: 1px solid rgba(255, 255, 255, 0.9);
-    box-shadow: 0 4px 12px rgba(230, 150, 130, 0.08);
-    flex-wrap: wrap;
-    gap: 10px;
-}
-
-.mapa-header h1 {
-    margin: 0;
-    font-size: 20px;
-    color: #2b2b2b;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.mapa-header-icon {
-    color: #e06d53;
-    font-size: 22px;
-    animation: bounceIcon 2s infinite ease-in-out;
-}
-
-@keyframes bounceIcon {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-4px); }
-}
-
-.controles-mapa-superior {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-.buscador-mapa-container {
-    display: flex;
-    align-items: center;
-    background: white;
-    border: 2px solid #fca38d;
-    border-radius: 14px;
-    padding: 4px 12px;
-    gap: 8px;
-    box-shadow: 0 3px 8px rgba(230, 150, 130, 0.1);
-}
-
-.buscador-mapa-container input {
-    border: none;
-    outline: none;
-    font-family: 'Itim', cursive;
-    font-size: 13px;
-    background: transparent;
-    width: 170px;
-    color: #444;
-}
-
-.buscador-mapa-container button, .btn-escanear-zona, .btn-ver-cercanas-toggle {
-    background: #e06d53;
-    border: none;
-    color: white;
-    padding: 6px 12px;
-    border-radius: 10px;
-    cursor: pointer;
-    font-family: 'Itim', cursive;
-    font-size: 12px;
-    transition: all 0.2s;
-    box-shadow: 0 3px 8px rgba(224, 109, 83, 0.2);
-}
-
-.buscador-mapa-container button:hover, .btn-escanear-zona:hover, .btn-ver-cercanas-toggle:hover {
-    background: #cf5b42;
-    transform: translateY(-1px);
-}
-
-.btn-escanear-zona {
-    background: #2ecc71;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-.btn-escanear-zona:hover { background: #27ae60; }
-
-.btn-ver-cercanas-toggle {
-    background: #3498db;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-.btn-ver-cercanas-toggle:hover { background: #2980b9; }
-
-.filtros-mapa {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.filtro-btn {
-    background: rgba(255, 255, 255, 0.8);
-    border: 2px solid #fca38d;
-    padding: 6px 14px;
-    border-radius: 14px;
-    font-family: 'Itim', cursive;
-    font-size: 13px;
-    color: #555;
-    cursor: pointer;
-    transition: all 0.25s ease;
-    box-shadow: 0 3px 8px rgba(230, 150, 130, 0.1);
-}
-
-.filtro-btn:hover, .filtro-btn.active {
-    background: #e06d53;
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 12px rgba(224, 109, 83, 0.3);
-}
-
-.mapa-layout-cuerpo {
-    display: flex;
-    flex-grow: 1;
-    gap: 15px;
-    position: relative;
-    overflow: hidden;
-}
-
-#mapa-arca {
-    width: 100%;
-    height: 100%;
-    border-radius: 20px;
-    border: 3px solid #fca38d;
-    box-shadow: 0 6px 20px rgba(230, 150, 130, 0.15);
-    z-index: 1;
-    transition: width 0.3s ease;
-}
-
-.panel-cercanas {
-    width: 0;
-    background: rgba(255, 255, 255, 0.92);
-    backdrop-filter: blur(10px);
-    border-radius: 20px;
-    border: 0px solid #fca38d;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    transition: all 0.3s ease;
-    box-shadow: 0 6px 20px rgba(220, 120, 100, 0.15);
-    z-index: 5;
-}
-
-.panel-cercanas.abierto {
-    width: 320px;
-    border: 2px solid #fca38d;
-    padding: 15px;
-}
-
-.panel-cercanas-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 2px dashed #fca38d;
-    padding-bottom: 10px;
-    margin-bottom: 10px;
-}
-
-.panel-cercanas-header h3 {
-    margin: 0;
-    color: #3498db;
-    font-size: 15px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.btn-cerrar-panel {
-    background: none;
-    border: none;
-    font-size: 16px;
-    color: #777;
-    cursor: pointer;
-}
-.btn-cerrar-panel:hover { color: #e06d53; }
-
-.lista-cercanas-container {
-    overflow-y: auto;
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding-right: 4px;
-}
-
-.card-vet-cercana {
-    background: #fff;
-    border: 1.5px solid #a3e4d7;
-    border-radius: 12px;
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    box-shadow: 0 3px 8px rgba(46, 204, 113, 0.08);
-    transition: all 0.2s;
-}
-
-.card-vet-cercana:hover {
-    transform: translateY(-2px);
-    border-color: #27ae60;
-    box-shadow: 0 5px 12px rgba(46, 204, 113, 0.2);
-}
-
-.card-vet-cercana .vet-nombre {
-    font-size: 13px;
-    font-weight: bold;
-    color: #27ae60;
-    margin: 0;
-}
-
-.card-vet-cercana .vet-distancia {
-    font-size: 11px;
-    background: #e8f8f5;
-    color: #16a085;
-    padding: 2px 6px;
-    border-radius: 6px;
-    align-self: flex-start;
-    font-weight: bold;
-}
-
-.card-vet-cercana .vet-dir {
-    font-size: 11px;
-    color: #666;
-    margin: 0;
-}
-
-.acciones-vet-cercana {
-    display: flex;
-    gap: 6px;
-    margin-top: 4px;
-}
-
-.btn-accion-card {
-    flex: 1;
-    padding: 4px 8px;
-    border-radius: 8px;
-    font-family: 'Itim', cursive;
-    font-size: 11px;
-    text-align: center;
-    cursor: pointer;
-    text-decoration: none;
-    font-weight: bold;
-    border: none;
-}
-
-.btn-mapa-exacto {
-    background: #27ae60;
-    color: white;
-    box-shadow: 0 2px 6px rgba(39, 174, 96, 0.3);
-}
-.btn-mapa-exacto:hover { background: #219653; }
-
-.btn-enfocar-mapa {
-    background: #fca38d;
-    color: white;
-    box-shadow: 0 2px 6px rgba(252, 163, 141, 0.3);
-}
-.btn-enfocar-mapa:hover { background: #e06d53; }
-
-.leaflet-tooltip.label-nombre-pin {
-    background: rgba(255, 255, 255, 0.92);
-    border: 2px solid #fca38d;
-    border-radius: 10px;
-    font-family: 'Itim', cursive;
-    font-size: 11px;
-    font-weight: bold;
-    color: #333;
-    padding: 2px 8px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-}
-
-.btn-centrar-mapa {
-    position: absolute;
-    bottom: 25px;
-    right: 25px;
-    background: white;
-    color: #e06d53;
-    border: 2px solid #fca38d;
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    cursor: pointer;
-    box-shadow: 0 6px 20px rgba(220, 120, 100, 0.3);
-    z-index: 1000;
-    transition: all 0.3s ease;
-}
-.btn-centrar-mapa:hover { background: #e06d53; color: white; transform: scale(1.1); }
-
-.leaflet-popup-content-wrapper {
-    background: rgba(255, 255, 255, 0.96) !important;
-    backdrop-filter: blur(8px);
-    border-radius: 18px !important;
-    padding: 4px !important;
-    box-shadow: 0 10px 25px rgba(220, 120, 100, 0.22) !important;
-    border: 2px solid #fca38d;
-}
-
-.popup-card-arca {
-    font-family: 'Itim', cursive;
-    text-align: center;
-    max-width: 170px;
-    padding: 4px;
-}
-.popup-card-arca img {
-    width: 100%; height: 90px; object-fit: cover; border-radius: 12px; margin-bottom: 6px; border: 2px solid #fca38d;
-}
-.popup-card-sin-foto {
-    background: linear-gradient(135deg, #e8f8f5, #d4efdf);
-    border-radius: 12px; padding: 8px; margin-bottom: 6px; border: 2px dashed #27ae60; display: flex; flex-direction: column; align-items: center; gap: 4px;
-}
-.popup-card-arca b { color: #e06d53; font-size: 14px; display: block; margin-bottom: 2px; }
-.popup-card-arca p { font-size: 12px; color: #555; margin: 0 0 8px 0; line-height: 1.2; }
-.btn-ver-caso {
-    background: #fca38d; color: white; padding: 5px 12px; border-radius: 10px; text-decoration: none; font-size: 12px; display: inline-block; font-weight: bold; transition: all 0.2s ease;
-}
-.btn-ver-caso:hover { background: #e06d53; transform: scale(1.05); }
-
-
-/* ==========================================
-   MODO OSCURO - SECCIÓN DE MAPA (ARCA)
-   ========================================== */
-
+/* 12. Sección de Mapa y Popups de Veterinarias (Leaflet - AJUSTADO PARA EVITAR CORTES) */
 body.dark-mode .mapa-container-principal {
     background: rgba(43, 35, 33, 0.8) !important;
     border: 2px solid #4a3b32 !important;
     box-shadow: 0 12px 35px rgba(0, 0, 0, 0.5) !important;
+    width: 100% !important;
+    max-width: 1100px !important;
+    box-sizing: border-box !important;
+    margin: 0 auto !important;
 }
 
 body.dark-mode .mapa-header {
@@ -853,7 +542,6 @@ body.dark-mode .mapa-header-icon {
 body.dark-mode .buscador-mapa-container {
     background: #352b28 !important;
     border: 2px solid #4a3b32 !important;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3) !important;
 }
 
 body.dark-mode .buscador-mapa-container input {
@@ -868,22 +556,17 @@ body.dark-mode .buscador-mapa-container button {
     background: #8c5d5b !important;
     color: #f4ebd0 !important;
 }
-body.dark-mode .buscador-mapa-container button:hover {
-    background: #6a4544 !important;
-}
 
 body.dark-mode .btn-escanear-zona {
     background: #3a4528 !important;
     color: #d8ecc0 !important;
 }
-body.dark-mode .btn-escanear-zona:hover { background: #2d361f !important; }
 
 body.dark-mode .btn-ver-cercanas-toggle {
     background: #382c28 !important;
     color: #f4ebd0 !important;
     border: 1px solid #4a3b32 !important;
 }
-body.dark-mode .btn-ver-cercanas-toggle:hover { background: #4a3b32 !important; }
 
 body.dark-mode .filtro-btn {
     background: rgba(53, 43, 40, 0.8) !important;
@@ -896,73 +579,53 @@ body.dark-mode .filtro-btn.active {
     background: #8c5d5b !important;
     color: white !important;
     border-color: #8c5d5b !important;
-    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.4) !important;
-}
-
-body.dark-mode #mapa-arca {
-    border: 3px solid #4a3b32 !important;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important;
 }
 
 body.dark-mode .panel-cercanas {
     background: rgba(43, 35, 33, 0.95) !important;
     backdrop-filter: blur(10px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6) !important;
 }
-
-body.dark-mode .panel-cercanas.abierto {
-    border: 2px solid #4a3b32 !important;
-}
-
-body.dark-mode .panel-cercanas-header {
-    border-bottom: 2px dashed #4a3b32 !important;
-}
-
-body.dark-mode .panel-cercanas-header h3 {
-    color: #f7d6d0 !important;
-}
-
-body.dark-mode .btn-cerrar-panel {
-    color: #b59b8e !important;
-}
-body.dark-mode .btn-cerrar-panel:hover { color: #f7d6d0 !important; }
 
 body.dark-mode .card-vet-cercana {
     background: #2b2321 !important;
     border: 1.5px solid #4a3b32 !important;
     color: #f4ebd0 !important;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3) !important;
 }
 
-body.dark-mode .card-vet-cercana:hover {
-    border-color: #8c5d5b !important;
-    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.5) !important;
+/* Popups específicos de Leaflet para veterinarias */
+body.dark-mode .leaflet-popup-content-wrapper,
+body.dark-mode .leaflet-popup-tip {
+    background: rgba(43, 35, 33, 0.96) !important;
+    border: 2px solid #4a3b32 !important;
+    color: #f4ebd0 !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6) !important;
 }
 
-body.dark-mode .card-vet-cercana .vet-nombre {
+body.dark-mode .popup-card-arca b {
     color: #f7d6d0 !important;
 }
 
-body.dark-mode .card-vet-cercana .vet-distancia {
-    background: #3a4528 !important;
-    color: #d8ecc0 !important;
-}
-
-body.dark-mode .card-vet-cercana .vet-dir {
+body.dark-mode .popup-card-arca p {
     color: #b59b8e !important;
 }
 
-body.dark-mode .btn-mapa-exacto {
-    background: #3a4528 !important;
-    color: #d8ecc0 !important;
+body.dark-mode .popup-card-arca img {
+    border: 2px solid #4a3b32 !important;
 }
-body.dark-mode .btn-mapa-exacto:hover { background: #2d361f !important; }
 
-body.dark-mode .btn-enfocar-mapa {
+body.dark-mode .popup-card-sin-foto {
+    background: linear-gradient(135deg, #352b28, #2b2321) !important;
+    border: 2px dashed #4a3b32 !important;
+    color: #f4ebd0 !important;
+}
+
+body.dark-mode .btn-ver-caso {
     background: #8c5d5b !important;
     color: #f4ebd0 !important;
 }
-body.dark-mode .btn-enfocar-mapa:hover { background: #6a4544 !important; }
+body.dark-mode .btn-ver-caso:hover {
+    background: #6a4544 !important;
+}
 
 body.dark-mode .leaflet-tooltip.label-nombre-pin {
     background: rgba(43, 35, 33, 0.95) !important;
@@ -970,295 +633,27 @@ body.dark-mode .leaflet-tooltip.label-nombre-pin {
     color: #f4ebd0 !important;
 }
 
-body.dark-mode .btn-centrar-mapa {
-    background: #2b2321 !important;
-    color: #f7d6d0 !important;
-    border: 2px solid #4a3b32 !important;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5) !important;
-}
-body.dark-mode .btn-centrar-mapa:hover { background: #8c5d5b !important; color: white !important; }
-
-body.dark-mode .leaflet-popup-content-wrapper {
-    background: rgba(43, 35, 33, 0.96) !important;
-    border: 2px solid #4a3b32 !important;
-    color: #f4ebd0 !important;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6) !important;
-}
-
-body.dark-mode .popup-card-arca b { color: #f7d6d0 !important; }
-body.dark-mode .popup-card-arca p { color: #b59b8e !important; }
-body.dark-mode .popup-card-arca img { border: 2px solid #4a3b32 !important; }
-body.dark-mode .popup-card-sin-foto {
-    background: linear-gradient(135deg, #352b28, #2b2321) !important;
-    border: 2px dashed #4a3b32 !important;
-    color: #f4ebd0 !important;
-}
-body.dark-mode .btn-ver-caso {
-    background: #8c5d5b !important;
-    color: #f4ebd0 !important;
-}
-body.dark-mode .btn-ver-caso:hover { background: #6a4544 !important; }
-/* ==========================================
-   MODO OSCURO - SECCIÓN DE PUBLICACIONES Y GUARDADOS
-   ========================================== */
-
-/* Contenedores principales y tarjetas */
+/* 13. Publicaciones, Guardados y Adopciones */
 body.dark-mode .mis-publicaciones-container h2,
 body.dark-mode .guardados-container h2 {
     color: #f4ebd0 !important;
 }
 
-body.dark-mode #estado-vacio-mis-pubs {
-    background: rgba(53, 43, 40, 0.75) !important;
-    border: 2px solid #4a3b32 !important;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3) !important;
-}
-
-body.dark-mode #estado-vacio-mis-pubs h3,
-body.dark-mode #estado-vacio-mis-pubs p {
-    color: #f4ebd0 !important;
-}
-
-body.dark-mode #estado-vacio-mis-pubs i {
-    color: #f7d6d0 !important;
-}
-
-/* Tarjetas individuales de publicaciones */
-body.dark-mode #grid-mis-publicaciones > div:not(#estado-vacio-mis-pubs),
-body.dark-mode #grid-publicaciones-guardadas > div:not(#estado-vacio-guardados) {
-    background: rgba(53, 43, 40, 0.65) !important;
-    border: 2px solid #4a3b32 !important;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
-}
-
-body.dark-mode #grid-mis-publicaciones h3,
-body.dark-mode #grid-publicaciones-guardadas h3 {
-    color: #f4ebd0 !important;
-}
-
-body.dark-mode #grid-mis-publicaciones p,
-body.dark-mode #grid-publicaciones-guardadas p,
-body.dark-mode #grid-mis-publicaciones span {
-    color: #d1b8ab !important;
-}
-
-/* Etiquetas internas (ej. "Mi Reporte") */
-body.dark-mode span[style*="background: #faedcd"] {
-    background: #4a3b32 !important;
-    color: #f4ebd0 !important;
-}
-
-/* Estado vacío en guardados */
+body.dark-mode #estado-vacio-mis-pubs,
 body.dark-mode #estado-vacio-guardados {
     background: rgba(53, 43, 40, 0.75) !important;
-    border: 1px solid #4a3b32 !important;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3) !important;
+    border: 2px solid #4a3b32 !important;
 }
 
-body.dark-mode #estado-vacio-guardados h3 {
-    color: #f4ebd0 !important;
-}
-
-body.dark-mode #estado-vacio-guardados p {
-    color: #b59b8e !important;
-}
-
-body.dark-mode #estado-vacio-guardados i {
-    color: #8c5d5b !important;
-}
-
-/* Botón flotante de nueva publicación (+) */
 body.dark-mode .btn-flotante-mas {
     background-color: #8c5d5b !important;
     color: #f4ebd0 !important;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4) !important;
 }
 
-body.dark-mode .btn-flotante-mas:hover {
-    background-color: #6a4544 !important;
-}
-
-/* Modales de nueva publicación y detalles */
-body.dark-mode .modal-contenido-arca,
-body.dark-mode .modal-foto-contenido {
-    background: rgba(43, 35, 33, 0.95) !important;
-    border: 2px solid #4a3b32 !important;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6) !important;
-}
-
-body.dark-mode .modal-contenido-arca h3 {
-    color: #f4ebd0 !important;
-}
-
-body.dark-mode .btn-opcion-modal-tipo {
-    border: 2px solid #4a3b32 !important;
-}
-
-body.dark-mode .btn-opcion-modal-tipo[style*="background-color: #fce4ec"] {
-    background-color: rgba(140, 93, 91, 0.4) !important;
-    color: #f4ebd0 !important;
-}
-
-body.dark-mode .btn-opcion-modal-tipo[style*="background-color: #f4ebd0"] {
-    background-color: rgba(74, 59, 50, 0.8) !important;
-    color: #f4ebd0 !important;
-}
-
-body.dark-mode .modal-foto-overlay,
-body.dark-mode .modal-overlay-arca {
-    background: rgba(0, 0, 0, 0.65) !important;
-}
-
-body.dark-mode .btn-cerrar-modal {
-    color: #b59b8e !important;
-}
-
-body.dark-mode .btn-cerrar-modal:hover {
-    color: #f4ebd0 !important;
-}
-
-/* Toast de notificaciones flotantes */
-body.dark-mode #arca-toast-notificacion {
-    background: #352b28 !important;
-    color: #f4ebd0 !important;
-    border: 2px solid #4a3b32 !important;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5) !important;
-}
-/* ==========================================
-   MODO OSCURO - SECCIÓN DE NOTIFICACIONES Y NOVEDADES
-   ========================================== */
-
-/* Contenedores principales */
 body.dark-mode .feed-notificaciones,
 body.dark-mode .feed-novedades {
     background: rgba(53, 43, 40, 0.75) !important;
     border: 1px solid #4a3b32 !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
-}
-
-/* Panel izquierdo de filtros (Novedades) */
-body.dark-mode .panel-filtros {
-    background-color: rgba(43, 35, 33, 0.85) !important;
-    border-right: 1px solid #4a3b32 !important;
-    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.3) !important;
-}
-
-body.dark-mode .titulo-filtro {
-    background-color: #4a3b32 !important;
-    color: #f4ebd0 !important;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3) !important;
-}
-
-body.dark-mode .btn-filtro {
-    background-color: rgba(74, 59, 50, 0.8) !important;
-    color: #f4ebd0 !important;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2) !important;
-}
-
-body.dark-mode .btn-filtro:hover, 
-body.dark-mode .btn-filtro.active {
-    background-color: #8c5d5b !important;
-    color: #f4ebd0 !important;
-    box-shadow: 0 6px 15px rgba(140, 93, 91, 0.4) !important;
-}
-
-/* Estados vacíos (Notificaciones y Novedades) */
-body.dark-mode .estado-vacio {
-    color: #f4ebd0 !important;
-}
-
-body.dark-mode .estado-vacio i,
-body.dark-mode .icono-vacio,
-body.dark-mode .icono-notif-vacio {
-    color: #8c5d5b !important;
-    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.4)) !important;
-}
-
-body.dark-mode .estado-vacio h2 {
-    color: #f4ebd0 !important;
-}
-
-body.dark-mode .estado-vacio p,
-body.dark-mode .subtexto-vacio {
-    color: #d1b8ab !important;
-}
-
-/* Tarjetas de Notificación */
-body.dark-mode .tarjeta-notificacion {
-    background-color: rgba(53, 43, 40, 0.65) !important;
-    border: 1px solid #4a3b32 !important;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
-}
-
-body.dark-mode .badge-mensaje {
-    background-color: #4a3b32 !important;
-    color: #f4ebd0 !important;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
-}
-
-body.dark-mode .fecha-notificacion {
-    color: #d1b8ab !important;
-}
-
-body.dark-mode .etiqueta-origen {
-    background-color: #352b28 !important;
-    color: #f4ebd0 !important;
-    border: 1.5px solid #4a3b32 !important;
-}
-
-body.dark-mode .btn-detalles-notif {
-    background-color: #4a3b32 !important;
-    color: #f4ebd0 !important;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3) !important;
-}
-
-body.dark-mode .btn-detalles-notif:hover {
-    background-color: #8c5d5b !important;
-}
-
-/* Tarjetas de Novedades (Feed derecho) */
-body.dark-mode .card-novedad {
-    background-color: rgba(53, 43, 40, 0.65) !important;
-    border: 1px solid #4a3b32 !important;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3) !important;
-}
-
-body.dark-mode .card-fecha {
-    color: #d1b8ab !important;
-}
-
-body.dark-mode .card-banner {
-    background-color: #4a3b32 !important;
-    color: #f4ebd0 !important;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2) !important;
-}
-
-body.dark-mode .card-img-container {
-    border: 2px solid #8c5d5b !important;
-}
-
-body.dark-mode .pill-info {
-    background-color: rgba(74, 59, 50, 0.8) !important;
-    border: 1px solid #4a3b32 !important;
-    color: #f4ebd0 !important;
-}
-
-body.dark-mode .btn-detalles {
-    background-color: #8c5d5b !important;
-    color: #f4ebd0 !important;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3) !important;
-}
-
-body.dark-mode .btn-detalles:hover {
-    background-color: #6a4544 !important;
-}
-/* ==========================================
-   MODO OSCURO - SECCIÓN DE ADOPCIONES Y FORMULARIO DE ADOPTANTE
-   ========================================== */
-
-/* Contenedores principales y tarjetas glass */
-body.dark-mode .main-adopciones {
-    background-image: none !important; /* O si usas una capa oscura, puedes ajustarla */
 }
 
 body.dark-mode .seccion-adopcion-opciones {
@@ -1269,17 +664,14 @@ body.dark-mode .seccion-adopcion-opciones {
 
 body.dark-mode .titulo-adopciones {
     color: #f4ebd0 !important;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
 }
 
-/* Círculo con logo de adopción */
 body.dark-mode .circulo-logo-adopcion {
     background: linear-gradient(135deg, rgba(195, 135, 116, 0.9), rgba(86, 68, 62, 0.95)) !important;
     border: 2px solid #8c5d5b !important;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4) !important;
 }
 
-/* Botones principales de opciones */
 body.dark-mode .btn-adopcion-opcion {
     background: #9b6356a9 !important;
     color: #f4ebd0 !important;
@@ -1294,164 +686,71 @@ body.dark-mode .btn-adopcion-opcion:hover {
     box-shadow: 0 12px 25px rgba(140, 93, 91, 0.4) !important;
 }
 
-/* Modal de aviso */
-body.dark-mode .modal-overlay-aviso {
-    background: rgba(0, 0, 0, 0.75) !important;
-}
-
-body.dark-mode .modal-tarjeta-aviso {
-    background: rgba(43, 35, 33, 0.95) !important;
-    border: 1px solid #4a3b32 !important;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6) !important;
-}
-
-body.dark-mode .btn-cerrar-modal {
-    color: #d1b8ab !important;
-}
-
-body.dark-mode .btn-cerrar-modal:hover {
-    color: #f4ebd0 !important;
-}
-
-body.dark-mode .circulo-icono-modal {
-    background: #4a3b32 !important;
-    border: 3px solid #8c5d5b !important;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4) !important;
-}
-
-body.dark-mode .circulo-icono-modal i {
-    color: #f4ebd0 !important;
-}
-
-body.dark-mode .titulo-modal-aviso {
-    color: #f4ebd0 !important;
-}
-
-body.dark-mode .texto-modal-aviso {
-    color: #d1b8ab !important;
-}
-
-body.dark-mode .btn-modal-primario {
-    background: #8c5d5b !important;
-    color: #f4ebd0 !important;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3) !important;
-}
-
-body.dark-mode .btn-modal-primario:hover {
-    background: #6a4544 !important;
-}
-
-body.dark-mode .btn-modal-secundario {
-    background: #4a3b32 !important;
-    color: #f4ebd0 !important;
-    border: 1px solid #8c5d5b !important;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3) !important;
-}
-
-body.dark-mode .btn-modal-secundario:hover {
-    background: #5d4a3f !important;
-}
-
-
-/* ==========================================
-   FORMULARIO DE ADOPTANTE Y FICHA (MODO OSCURO)
-   ========================================== */
-
 body.dark-mode .tarjeta-formulario-glass {
     background: rgba(53, 43, 40, 0.8) !important;
     border: 1px solid #4a3b32 !important;
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5) !important;
+    width: 100% !important;
+    max-width: 800px !important;
+    margin: 0 auto !important;
+    box-sizing: border-box !important;
 }
 
-body.dark-mode .btn-volver-top {
-    color: #f4ebd0 !important;
-    background: rgba(74, 59, 50, 0.8) !important;
-}
-
-body.dark-mode .btn-volver-top:hover {
-    background: #8c5d5b !important;
-}
-
-body.dark-mode .icono-encabezado {
-    color: #8c5d5b !important;
-}
-
-body.dark-mode .encabezado-form h2 {
-    color: #f4ebd0 !important;
-}
-
-body.dark-mode .encabezado-form p {
-    color: #d1b8ab !important;
-}
-
-/* Bloques del formulario */
 body.dark-mode .bloque-form {
     background: rgba(43, 35, 33, 0.6) !important;
     border: 1px solid #4a3b32 !important;
+    box-sizing: border-box !important;
 }
 
-body.dark-mode .bloque-form h3 {
-    color: #f4ebd0 !important;
-}
-
-body.dark-mode .grupo-campo label {
-    color: #f4ebd0 !important;
-}
-
-/* Campos de entrada, selectores y textareas */
-body.dark-mode .grupo-campo input[type="text"],
-body.dark-mode .grupo-campo input[type="tel"],
-body.dark-mode .grupo-campo input[type="date"],
-body.dark-mode .grupo-campo input[type="number"],
+body.dark-mode .grupo-campo input,
 body.dark-mode .grupo-campo select,
 body.dark-mode .grupo-campo textarea {
     background: #352b28 !important;
     color: #f4ebd0 !important;
     border: 1px solid #4a3b32 !important;
+    box-sizing: border-box !important;
 }
 
-body.dark-mode .grupo-campo input:focus,
-body.dark-mode .grupo-campo select:focus,
-body.dark-mode .grupo-campo textarea:focus {
-    border-color: #8c5d5b !important;
-    box-shadow: 0 0 8px rgba(140, 93, 91, 0.5) !important;
-}
-
-body.dark-mode .opciones-inline label {
-    color: #d1b8ab !important;
-}
-
-/* Botón de guardar formulario */
 body.dark-mode .btn-guardar-form {
     background: #8c5d5b !important;
     color: #f4ebd0 !important;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4) !important;
 }
 
-body.dark-mode .btn-guardar-form:hover {
-    background: #6a4544 !important;
+/* ==========================================
+   OPTIMIZACIÓN DEL MAPA LEAFLET (DIMENSIONES EXACTAS)
+   ========================================== */
+
+body.dark-mode #mapa-arca {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 420px !important; /* Altura óptima para visualizar sin requerir tanto scroll */
+    background-color: #2b2321 !important;
+    border: 3px solid #4a3b32 !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important;
+    box-sizing: border-box !important;
+    border-radius: 12px !important;
 }
 
-/* Ficha del adoptante (lectura) */
-body.dark-mode .ficha-adoptante-tarjeta {
-    background: rgba(53, 43, 40, 0.9) !important;
-    border: 1px solid #4a3b32 !important;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
+body.dark-mode .leaflet-tile-pane img {
+    filter: brightness(0.7) invert(1) contrast(1.2) hue-rotate(200deg) saturate(0.3) !important;
 }
 
-body.dark-mode .ficha-header {
-    border-bottom: 2px solid #4a3b32 !important;
-}
-
-body.dark-mode .ficha-seccion h4 {
-    color: #8c5d5b !important;
-    border-bottom: 1px dashed #4a3b32 !important;
-}
-
-body.dark-mode .ficha-item {
-    color: #d1b8ab !important;
-}
-
-body.dark-mode .ficha-item strong {
+body.dark-mode .leaflet-control-zoom a {
+    background-color: #2b2321 !important;
     color: #f4ebd0 !important;
+    border-color: #4a3b32 !important;
+}
+
+body.dark-mode .leaflet-control-zoom a:hover {
+    background-color: #382c28 !important;
+}
+
+body.dark-mode .leaflet-control-attribution {
+    background: rgba(31, 25, 24, 0.85) !important;
+    color: #b59b8e !important;
+}
+
+body.dark-mode .leaflet-control-attribution a {
+    color: #f7d6d0 !important;
 }
