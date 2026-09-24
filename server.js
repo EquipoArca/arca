@@ -258,56 +258,76 @@ app.post('/cambiar-nombre-usuario', (req, res) => {
     }
 
     const nombreLimpio = nuevo_nombre.trim();
+    const correoLimpio = correo_usuario.trim().toLowerCase();
 
-    // 1. Verificar si el nombre ya pertenece a OTRA persona diferente a ti
-    const queryVerificar = "SELECT correo_usuario FROM usuarios WHERE nombre_usuario = ? AND correo_usuario != ?";
-    db.query(queryVerificar, [nombreLimpio, correo_usuario], (err, existentes) => {
-        if (err) {
-            console.error("❌ Error en consulta de verificación:", err.message);
+    // 1. Primero verificamos si el nombre ya pertenece al mismo usuario que lo está pidiendo
+    const queryDueñoPropio = "SELECT id_usuarios FROM usuarios WHERE nombre_usuario = ? AND LOWER(TRIM(correo_usuario)) = ?";
+    
+    db.query(queryDueñoPropio, [nombreLimpio, correoLimpio], (errPropio, resPropio) => {
+        if (errPropio) {
+            console.error("❌ Error en consulta:", errPropio.message);
             return res.status(500).json({ error: "Error en el servidor." });
         }
 
-        // Si hay resultados aquí, significa que SÍ lo tiene otra persona real
-        if (existentes.length > 0) {
-            return res.status(400).json({ mensaje: "El nombre de usuario ya está en uso por otra cuenta." });
-        }
+        // Si el resultado es mayor a 0, significa que ¡el nombre ya es tuyo! Dejamos pasar la actualización.
+        const esMismoUsuario = resPropio.length > 0;
 
-        // 2. Validar restricción de los 30 días
-        db.query("SELECT ultimo_cambio_nombre FROM usuarios WHERE correo_usuario = ?", [correo_usuario], (err, filas) => {
-            if (err) {
-                console.error("❌ Error buscando usuario:", err.message);
-                return res.status(500).json({ error: "Error en el servidor." });
-            }
-
-            if (filas.length === 0) {
-                return res.status(404).json({ mensaje: "Usuario no encontrado." });
-            }
-
-            const usuario = filas[0];
-            const fechaActual = new Date().toISOString().slice(0, 19).replace('T', ' ');
-
-            if (usuario.ultimo_cambio_nombre) {
-                const ultimaFecha = new Date(usuario.ultimo_cambio_nombre);
-                const diferenciaMs = new Date() - ultimaFecha;
-                const diasTranscurridos = Math.floor(diferenciaMs / (1000 * 60 * 60 * 24));
-
-                if (diasTranscurridos < 30) {
-                    const diasRestantes = 30 - diasTranscurridos;
-                    return res.status(400).json({ mensaje: `Debes esperar ${diasRestantes} día(s) para volver a cambiar tu nombre.` });
-                }
-            }
-
-            // 3. Ejecutar la actualización limpia
-            const queryUpdate = "UPDATE usuarios SET nombre_usuario = ?, ultimo_cambio_nombre = ? WHERE correo_usuario = ?";
-            db.query(queryUpdate, [nombreLimpio, fechaActual, correo_usuario], (errUpdate) => {
-                if (errUpdate) {
-                    console.error("❌ Error al actualizar en MySQL:", errUpdate.message);
-                    return res.status(500).json({ error: "Error al guardar en la base de datos." });
+        // 2. Si no es tuyo, verificamos que no lo tenga OTRA persona
+        const continuarVerificacion = () => {
+            const queryVerificar = "SELECT correo_usuario FROM usuarios WHERE nombre_usuario = ? AND LOWER(TRIM(correo_usuario)) != ?";
+            db.query(queryVerificar, [nombreLimpio, correoLimpio], (err, existentes) => {
+                if (err) {
+                    console.error("❌ Error en consulta de verificación:", err.message);
+                    return res.status(500).json({ error: "Error en el servidor." });
                 }
 
-                return res.json({ mensaje: "¡Nombre actualizado con éxito!", nuevo_nombre: nombreLimpio });
+                if (existentes.length > 0) {
+                    return res.status(400).json({ mensaje: "El nombre de usuario ya está en uso por otra cuenta." });
+                }
+
+                ejecutarActualizacion();
             });
-        });
+        };
+
+        const ejecutarActualizacion = () => {
+            // Validar restricción de los 30 días
+            db.query("SELECT ultimo_cambio_nombre FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = ?", [correoLimpio], (err, filas) => {
+                if (err || filas.length === 0) {
+                    return res.status(404).json({ mensaje: "Usuario no encontrado." });
+                }
+
+                const usuario = filas[0];
+                const fechaActual = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+                if (usuario.ultimo_cambio_nombre) {
+                    const ultimaFecha = new Date(usuario.ultimo_cambio_nombre);
+                    const diferenciaMs = new Date() - ultimaFecha;
+                    const diasTranscurridos = Math.floor(diferenciaMs / (1000 * 60 * 60 * 24));
+
+                    if (diasTranscurridos < 30) {
+                        const diasRestantes = 30 - diasTranscurridos;
+                        return res.status(400).json({ mensaje: `Debes esperar ${diasRestantes} día(s) para volver a cambiar tu nombre.` });
+                    }
+                }
+
+                // Ejecutar la actualización limpia
+                const queryUpdate = "UPDATE usuarios SET nombre_usuario = ?, ultimo_cambio_nombre = ? WHERE LOWER(TRIM(correo_usuario)) = ?";
+                db.query(queryUpdate, [nombreLimpio, fechaActual, correoLimpio], (errUpdate) => {
+                    if (errUpdate) {
+                        console.error("❌ Error al actualizar en MySQL:", errUpdate.message);
+                        return res.status(500).json({ error: "Error al guardar en la base de datos." });
+                    }
+
+                    return res.json({ mensaje: "¡Nombre actualizado con éxito!", nuevo_nombre: nombreLimpio });
+                });
+            });
+        };
+
+        if (esMismoUsuario) {
+            ejecutarActualizacion(); // Si es tuyo, actualizamos directo
+        } else {
+            continuarVerificacion(); // Si es nuevo, verificamos que nadie más lo tenga
+        }
     });
 });
 app.get('/validar-nombre-usuario', (req, res) => {
@@ -318,27 +338,28 @@ app.get('/validar-nombre-usuario', (req, res) => {
     }
 
     const nombreLimpio = nombre.trim();
+    const correoLimpio = correo_actual ? correo_actual.trim().toLowerCase() : '';
 
-    // Si nos pasan un correo, excluimos al usuario actual. 
-    // Si no nos pasan correo, buscamos de forma global por si acaso.
-    let sql = 'SELECT id_usuarios, correo_usuario FROM usuarios WHERE nombre_usuario = ?';
-    let params = [nombreLimpio];
+    // Buscamos si el nombre ya lo tiene CUALQUIER OTRA PERSONA (excluyendo tu correo si lo mandaron)
+    let sql = `
+        SELECT id_usuarios, correo_usuario 
+        FROM usuarios 
+        WHERE nombre_usuario = ? 
+        ${correoLimpio ? 'AND LOWER(TRIM(correo_usuario)) != ?' : ''}
+    `;
+    
+    let params = correoLimpio ? [nombreLimpio, correoLimpio] : [nombreLimpio];
 
     db.query(sql, params, (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
 
-        // Si no existe nadie con ese nombre, está libre de una
-        if (results.length === 0) {
-            return res.json({ disponible: true });
+        // Si la consulta encuentra registros, significa que OTRA PERSONA ya tiene ese nombre
+        if (results.length > 0) {
+            return res.json({ disponible: false });
         }
 
-        // Si el único que tiene ese nombre eres tú misma (comparando el correo), ¡sí está disponible para ti!
-        if (correo_actual && results.length === 1 && results[0].correo_usuario.toLowerCase() === correo_actual.trim().toLowerCase()) {
-            return res.json({ disponible: true });
-        }
-
-        // De lo contrario, le pertenece a otra persona
-        res.json({ disponible: false });
+        // Si no hay resultados de otros usuarios, el nombre está libre para ti
+        res.json({ disponible: true });
     });
 });
 app.post('/actualizar-telefono-usuario', (req, res) => {
