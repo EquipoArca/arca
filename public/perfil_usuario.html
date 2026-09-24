@@ -11,6 +11,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="dark-mode.css">
+    
+    <!-- SDK de EmailJS e Inicialización -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function(){
+            emailjs.init({
+                publicKey: "AVpXUrYdpwa9oh438", 
+            });
+        })();
+    </script>
+
     <script>
     if (localStorage.getItem("modo_oscuro") === "true") {
         document.body.classList.add("dark-mode");
@@ -35,7 +46,7 @@
         <div class="top-right">
             <div class="user-header-info">
 
-            <!-- 1. PERFIL Y MINI MENÚ (Avatar con menú desplegable) -->
+            <!-- 1. PERFIL Y MINI MENÚ -->
             <div class="user-profile-menu" id="user-profile-menu">
                 <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
                     <img src="logo.png" id="user-avatar-img" alt="Perfil">
@@ -75,7 +86,7 @@
                 <i class="fa-solid fa-house"></i>
                 <span class="menu-text">Inicio</span>
             </a>
-            <a href="perfil_usuario.html" class="menu-fila activa">
+            <a href="perfil_usuario_2.html" class="menu-fila activa">
                 <i class="fa-solid fa-circle-user"></i>
                 <span class="menu-text">Perfil</span>
             </a>
@@ -225,34 +236,19 @@
                 </div>
                 <p id="mensaje-error-telefono" class="mensaje-error" style="display: none;"></p>
                 <button type="button" class="btn-confirmar-nombre" id="btn-guardar-y-verificar-tel">
-                    Guardar y enviar código
-                </button>
-                <div id="recaptcha-container" style="display: none;"></div>
-            </div>
-
-            <div id="paso-codigo-otp-tel" style="display: none; text-align: center;">
-                <p class="texto-restriccion">Ingresa el código de 6 dígitos enviado por SMS a tu celular:</p>
-                <div class="otp-container" style="display: flex; gap: 6px; justify-content: center; margin: 15px 0;">
-                    <input type="text" maxlength="1" pattern="[0-9]" class="otp-tel-input" inputmode="numeric" style="width: 36px; height: 42px; text-align: center; font-size: 20px; border-radius: 8px; border: 1px solid #ccc;" />
-                    <input type="text" maxlength="1" pattern="[0-9]" class="otp-tel-input" inputmode="numeric" style="width: 36px; height: 42px; text-align: center; font-size: 20px; border-radius: 8px; border: 1px solid #ccc;" />
-                    <input type="text" maxlength="1" pattern="[0-9]" class="otp-tel-input" inputmode="numeric" style="width: 36px; height: 42px; text-align: center; font-size: 20px; border-radius: 8px; border: 1px solid #ccc;" />
-                    <input type="text" maxlength="1" pattern="[0-9]" class="otp-tel-input" inputmode="numeric" style="width: 36px; height: 42px; text-align: center; font-size: 20px; border-radius: 8px; border: 1px solid #ccc;" />
-                    <input type="text" maxlength="1" pattern="[0-9]" class="otp-tel-input" inputmode="numeric" style="width: 36px; height: 42px; text-align: center; font-size: 20px; border-radius: 8px; border: 1px solid #ccc;" />
-                    <input type="text" maxlength="1" pattern="[0-9]" class="otp-tel-input" inputmode="numeric" style="width: 36px; height: 42px; text-align: center; font-size: 20px; border-radius: 8px; border: 1px solid #ccc;" />
-                </div>
-                <p id="mensaje-error-otp-tel" class="mensaje-error" style="display: none;"></p>
-                <button type="button" class="btn-confirmar-nombre" id="btn-verificar-codigo-tel">
-                    Verificar número
+                    Guardar número
                 </button>
             </div>
         </div>
     </div>
 
+    <!-- SDK de Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
-    <script src="script.js"></script>
+    
+    <!-- Script principal corregido -->
     <script src="perfil.js"></script>
     
     <script>
@@ -264,36 +260,34 @@
                 sidebar.classList.toggle('sidebar-abierta');
             });
         }
-    </script>
-    <!-- Motor oculto de Google Translate -->
-<div id="google_translate_element" style="display:none;"></div>
-<script type="text/javascript">
-    function googleTranslateElementInit() {
-        new google.translate.TranslateElement({ pageLanguage: 'es', autoDisplay: false }, 'google_translate_element');
-    }
-</script>
-<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
-<!-- Script para aplicar el idioma guardado al cambiar de página -->
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const savedLang = localStorage.getItem('app_selected_lang');
-        if (savedLang && savedLang !== 'es') {
-            const interval = setInterval(() => {
-                const googleCombo = document.querySelector('.goog-te-combo');
-                if (googleCombo) {
-                    googleCombo.value = savedLang;
-                    googleCombo.dispatchEvent(new Event('change'));
-                    clearInterval(interval);
+        // Auto-foco y pegado entre casillas para el OTP del correo
+        const otpCorreoInputs = document.querySelectorAll(".otp-correo-input");
+        otpCorreoInputs.forEach((input, index) => {
+            input.addEventListener("input", (e) => {
+                input.value = input.value.replace(/[^0-9]/g, "");
+                if (input.value && index < otpCorreoInputs.length - 1) {
+                    otpCorreoInputs[index + 1].focus();
                 }
-            }, 200);
-        }
-    });
-</script>
-<style>
-    .goog-te-banner-frame { display: none !important; }
-    body { top: 0 !important; }
-    .skiptranslate { display: none !important; }
-</style>
+            });
+
+            input.addEventListener("keydown", (e) => {
+                if (e.key === "Backspace" && !input.value && index > 0) {
+                    otpCorreoInputs[index - 1].focus();
+                }
+            });
+
+            input.addEventListener("paste", (e) => {
+                e.preventDefault();
+                const pasteData = e.clipboardData.getData("text").trim();
+                if (/^\d{4}$/.test(pasteData)) {
+                    pasteData.split("").forEach((char, i) => {
+                        if (otpCorreoInputs[i]) otpCorreoInputs[i].value = char;
+                    });
+                    otpCorreoInputs[3].focus();
+                }
+            });
+        });
+    </script>
 </body>
 </html>

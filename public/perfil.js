@@ -152,29 +152,25 @@ async function procesarNuevaFoto(event) {
         }
     }
 }
+
 // ==========================================
 // CARGAR DATOS DEL PERFIL AL INICIAR LA PÁGINA
 // ==========================================
 firebase.auth().onAuthStateChanged(async (user) => {
     if (user) {
         try {
-            // Hacemos la petición a tu servidor para obtener los datos del usuario
             const respuesta = await fetch(`/api/obtener-usuario?correo=${encodeURIComponent(user.email)}`);
             const data = await respuesta.json();
 
             if (respuesta.ok) {
-                // 1. Cargar el nombre de usuario si existe el elemento
                 const elemNombre = document.getElementById('mostrar-nombre-usuario');
                 if (elemNombre && data.nombre_usuario) {
                     elemNombre.textContent = `@${data.nombre_usuario}`;
                 }
 
-                // 2. Cargar la foto de perfil si está guardada en la base de datos
                 if (data.foto_perfil) {
-                    // Usamos la función que ya tienes creada para mostrar la foto
                     mostrarFotoUsuario(data.foto_perfil);
                 } else {
-                    // Si no tiene foto, aseguramos que se vea la silueta por defecto
                     mostrarSiluetaDefault();
                 }
             }
@@ -340,7 +336,6 @@ if (btnGuardarTel) {
         let nuevoTel = document.getElementById('input-nuevo-telefono').value.trim();
         const errorElem = document.getElementById('mensaje-error-telefono');
 
-        // Restricciones básicas: longitud mínima
         if (!nuevoTel || nuevoTel.length < 7) {
             errorElem.textContent = "Ingresa un número de celular válido.";
             errorElem.style.display = 'block';
@@ -350,7 +345,6 @@ if (btnGuardarTel) {
         try {
             errorElem.style.display = 'none';
 
-            // Petición directa a tu servidor para actualizar en la base de datos
             const respuesta = await fetch('/actualizar-telefono-usuario', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -422,4 +416,177 @@ if (inputNombre && mensajeEstado) {
                 });
         }, 500);
     });
+}
+
+// ==========================================
+// GUARDAR CAMBIO DE NOMBRE DE USUARIO
+// ==========================================
+const btnGuardarNombre = document.getElementById('btn-guardar-nuevo-nombre');
+if (btnGuardarNombre) {
+    btnGuardarNombre.onclick = async () => {
+        const user = firebase.auth().currentUser;
+        const nuevoNombre = document.getElementById('input-nuevo-nombre').value.trim();
+        const mensajeEstado = document.getElementById('mensaje-estado-nombre');
+
+        if (!user) {
+            alert("No hay una sesión activa.");
+            return;
+        }
+
+        if (!nuevoNombre || nuevoNombre.length < 3) {
+            mensajeEstado.textContent = "El nombre debe tener al menos 3 caracteres.";
+            mensajeEstado.className = "mensaje-validacion error";
+            return;
+        }
+
+        try {
+            const respuesta = await fetch('/actualizar-nombre-usuario', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    correo_usuario: user.email,
+                    nuevo_nombre: nuevoNombre
+                })
+            });
+
+            const resultado = await respuesta.json();
+
+            if (respuesta.ok) {
+                alert("¡Nombre de usuario actualizado con éxito!");
+                cerrarModalNombre();
+                window.location.reload();
+            } else {
+                mensajeEstado.textContent = resultado.mensaje || "Error al actualizar el nombre.";
+                mensajeEstado.className = "mensaje-validacion error";
+            }
+        } catch (err) {
+            console.error("Error al actualizar nombre:", err);
+            mensajeEstado.textContent = "Error de conexión con el servidor.";
+            mensajeEstado.className = "mensaje-validacion error";
+        }
+    };
+}
+
+// ==========================================
+// ENVÍO DE CÓDIGO OTP PARA CAMBIAR CORREO (CON EMAILJS)
+// ==========================================
+const btnEnviarCodigoCorreo = document.getElementById('btn-enviar-codigo-correo');
+if (btnEnviarCodigoCorreo) {
+    btnEnviarCodigoCorreo.onclick = async () => {
+        const user = firebase.auth().currentUser;
+        const nuevoCorreoInput = document.getElementById('input-nuevo-correo');
+        const nuevoCorreo = nuevoCorreoInput ? nuevoCorreoInput.value.trim() : '';
+        const errorCorreo = document.getElementById('mensaje-error-correo');
+
+        if (!user) {
+            alert("No hay sesión activa.");
+            return;
+        }
+
+        if (!nuevoCorreo || !nuevoCorreo.includes('@')) {
+            if (errorCorreo) {
+                errorCorreo.textContent = "Ingresa un correo electrónico válido.";
+                errorCorreo.style.display = 'block';
+            }
+            return;
+        }
+
+        if (errorCorreo) errorCorreo.style.display = 'none';
+        btnEnviarCodigoCorreo.textContent = "Enviando código...";
+        btnEnviarCodigoCorreo.disabled = true;
+
+        try {
+            // 1. Generar código OTP de 4 dígitos (idéntico al registro)[cite: 5]
+            const codigoGenerado = Math.floor(1000 + Math.random() * 9000).toString();
+            sessionStorage.setItem('otp_cambio_correo', codigoGenerado);
+            sessionStorage.setItem('nuevo_correo_temporal', nuevoCorreo);
+
+            // 2. Parámetros para tu plantilla de EmailJS
+            const templateParams = {
+                to_email: nuevoCorreo,
+                email: nuevoCorreo,
+                to_name: user.email,
+                passcode: codigoGenerado
+            };
+
+            // 3. Envío mediante EmailJS con tus credenciales
+            await emailjs.send('service_93j9cwn', 'template_bqczg41', templateParams);
+
+            // 4. Cambiar de vista en el modal hacia los inputs OTP
+            const pasoCorreo = document.getElementById('paso-nuevo-correo');
+            const pasoOtp = document.getElementById('paso-codigo-otp');
+            if (pasoCorreo) pasoCorreo.style.display = 'none';
+            if (pasoOtp) pasoOtp.style.display = 'block';
+
+        } catch (err) {
+            console.error("Error al enviar código con EmailJS:", err);
+            if (errorCorreo) {
+                errorCorreo.textContent = "Hubo un problema al enviar el código de verificación.";
+                errorCorreo.style.display = 'block';
+            }
+        } finally {
+            btnEnviarCodigoCorreo.textContent = "Enviar código de verificación";
+            btnEnviarCodigoCorreo.disabled = false;
+        }
+    };
+}
+
+// ==========================================
+// VERIFICAR EL CÓDIGO OTP E INSERTAR EL CAMBIO
+// ==========================================
+const btnVerificarCorreo = document.getElementById('btn-verificar-cambio-correo');
+if (btnVerificarCorreo) {
+    btnVerificarCorreo.onclick = async () => {
+        const otpInputs = document.querySelectorAll('.otp-correo-input');
+        const codigoIngresado = Array.from(otpInputs).map(i => i.value).join('');
+        const codigoGuardado = sessionStorage.getItem('otp_cambio_correo');
+        const nuevoCorreoDestino = sessionStorage.getItem('nuevo_correo_temporal');
+        const errorOtp = document.getElementById('mensaje-error-otp-correo');
+        const user = firebase.auth().currentUser;
+
+        if (codigoIngresado.length !== 4) {
+            if (errorOtp) {
+                errorOtp.textContent = "Por favor ingresa los 4 dígitos completos.";
+                errorOtp.style.display = 'block';
+            }
+            return;
+        }
+
+        if (codigoIngresado !== codigoGuardado) {
+            if (errorOtp) {
+                errorOtp.textContent = "El código de verificación es incorrecto.";
+                errorOtp.style.display = 'block';
+            }
+            return;
+        }
+
+        try {
+            const respuesta = await fetch('/actualizar-correo-usuario', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    correo_actual: user.email,
+                    nuevo_correo: nuevoCorreoDestino
+                })
+            });
+
+            const resultado = await respuesta.json();
+
+            if (respuesta.ok) {
+                alert("¡Correo electrónico actualizado con éxito!");
+                sessionStorage.removeItem('otp_cambio_correo');
+                sessionStorage.removeItem('nuevo_correo_temporal');
+                window.location.reload();
+            } else {
+                throw new Error(resultado.mensaje || "No se pudo actualizar el correo en la base de datos.");
+            }
+
+        } catch (error) {
+            console.error("Error al actualizar correo:", error);
+            if (errorOtp) {
+                errorOtp.textContent = error.message || "Error al procesar el cambio.";
+                errorOtp.style.display = 'block';
+            }
+        }
+    };
 }
