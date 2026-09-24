@@ -11,17 +11,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="dark-mode.css">
-    
-    <!-- SDK de EmailJS e Inicialización -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script type="text/javascript">
         (function(){
-            emailjs.init({
-                publicKey: "AVpXUrYdpwa9oh438", 
-            });
+            emailjs.init("AVpXUrYdpwa9oh438");
         })();
     </script>
-
     <script>
     if (localStorage.getItem("modo_oscuro") === "true") {
         document.body.classList.add("dark-mode");
