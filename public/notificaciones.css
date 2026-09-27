@@ -1133,3 +1133,26 @@ hr {
   from { transform: scale(0.8); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
 }
+
+.header-notif-derecha {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.btn-borrar-notif {
+    background: transparent;
+    border: none;
+    color: #e57373;
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 8px;
+    transition: background-color 0.2s ease, transform 0.2s ease, color 0.2s ease;
+}
+
+.btn-borrar-notif:hover {
+    color: #d32f2f;
+    background-color: rgba(229, 115, 115, 0.15);
+    transform: scale(1.1);
+}

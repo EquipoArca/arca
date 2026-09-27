@@ -29,11 +29,11 @@
         }
 
         .main-content {
-            min-height: calc(100vh - 70px);
-            padding-top: 90px !important; /* Espacio para que la barra superior no tape el contenido */
-            padding-bottom: 40px;
-            box-sizing: border-box;
-            overflow: visible !important;
+        min-height: calc(100vh - 70px);
+        padding-top: 155px !important; /* Un poco más de espacio respecto a la navbar */
+        padding-bottom: 40px;
+        box-sizing: border-box;
+        overflow: visible !important;
         }
 
         body.dark-mode {
@@ -54,16 +54,17 @@
             border-color: #4f392d !important;
         }
 
-        .grid-configuracion {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-            max-width: 1200px;
-            margin: 0 auto;
-            width: 100%;
+       .grid-configuracion {
+             display: grid;
+             grid-template-columns: 1fr 1fr;
+             gap: 25px;
+             max-width: 1200px;
+             margin: 20px auto 0 auto; /* Se añade margen superior de seguridad */
+             width: 100%;
             padding: 0 20px;
             box-sizing: border-box;
-        }
+}
+
 
         .columna-config-izq, .columna-config-der {
             display: flex;
@@ -412,7 +413,7 @@
                 <!-- Tarjeta de Modo Oscuro -->
                 <div class="config-card">
                     <div class="setting-row">
-                        <span>Modo oscuro (Apariencia) 🌙</span>
+                        <span>Modo oscuro (Apariencia)</span>
                         <label class="switch">
                             <input type="checkbox" id="darkModeSwitch">
                             <span class="slider"></span>
@@ -423,7 +424,7 @@
                 <!-- Tarjeta de Selección de Idioma -->
                 <div class="config-card">
                     <div class="setting-row">
-                        <span>Idioma de la aplicación 🌍</span>
+                        <span>Idioma de la aplicación</span>
                         <select id="customLanguageSelect" style="padding: 8px 12px; border-radius: 8px; border: 1px solid var(--accent-pink, #e8a598); background-color: white; color: #5c4033; font-weight: 500; cursor: pointer; outline: none;">
                             <option value="es">Español 🇨🇴</option>
                             <option value="en">English 🇺🇸</option>
@@ -543,7 +544,7 @@
                     if (googleCombo) {
                         googleCombo.value = targetLang;
                         googleCombo.dispatchEvent(new Event('change'));
-                        mostrarToast("¡Idioma cambiado con éxito! 🌍", "success");
+                        mostrarToast("¡Idioma cambiado con éxito!", "success");
                     } else {
                         location.reload();
                     }
@@ -582,11 +583,11 @@
                     if (darkModeSwitch.checked) {
                         document.body.classList.add("dark-mode");
                         localStorage.setItem("modo_oscuro", "true");
-                        mostrarToast("Modo oscuro activado 🌙", "success");
+                        mostrarToast("Modo oscuro activado", "success");
                     } else {
                         document.body.classList.remove("dark-mode");
                         localStorage.setItem("modo_oscuro", "false");
-                        mostrarToast("Modo claro activado ☀️", "info");
+                        mostrarToast("Modo claro activado", "info");
                     }
                 });
             }
@@ -607,7 +608,7 @@
                         }
                         const permission = await Notification.requestPermission();
                         if (permission === "granted") {
-                            mostrarToast("¡Notificaciones activadas! 🔔", "success");
+                            mostrarToast("¡Notificaciones activadas!", "success");
                             localStorage.setItem("notificaciones", "true");
                         } else {
                             notifSwitch.checked = false;
@@ -615,7 +616,7 @@
                     }
                 } else {
                     localStorage.setItem("notificaciones", "false");
-                    mostrarToast("Notificaciones desactivadas. 🔕", "info");
+                    mostrarToast("Notificaciones desactivadas.", "info");
                 }
             });
 
@@ -651,7 +652,7 @@
                     if (navigator.geolocation) {
                         navigator.geolocation.getCurrentPosition(
                             () => {
-                                mostrarToast("¡Permiso de ubicación concedido! 📍", "success");
+                                mostrarToast("¡Permiso de ubicación concedido!", "success");
                                 textoEstadoUbicacion.textContent = "Actualmente: Permitido y activo";
                                 textoEstadoUbicacion.style.color = "#2a9d8f";
                             },
@@ -678,7 +679,7 @@
             document.querySelectorAll('input[name="privacidad"]').forEach(radio => {
                 radio.addEventListener("change", (e) => {
                     localStorage.setItem("privacidad_reportes", e.target.value);
-                    mostrarToast(`Privacidad guardada: ${e.target.value.toUpperCase()} 🔒`, "success");
+                    mostrarToast(`Privacidad guardada: ${e.target.value.toUpperCase()}`, "success");
                 });
             });
         });

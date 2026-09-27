@@ -754,3 +754,14 @@ body.dark-mode .leaflet-control-attribution {
 body.dark-mode .leaflet-control-attribution a {
     color: #f7d6d0 !important;
 }
+
+body.dark-mode .svg-perrito-vacio {
+    --perrito-cuerpo: #FCEADE !important;
+    --perrito-orejas: #E8A598 !important;
+    --perrito-detalles: #4A3E3D !important;
+    filter: none !important;
+}
+
+body.dark-mode .svg-perrito-vacio * {
+    stroke-opacity: 1;
+}
