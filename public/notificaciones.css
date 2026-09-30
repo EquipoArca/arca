@@ -15,21 +15,22 @@
     box-sizing: border-box;
 }
 
-/* Feed principal que alojará las notificaciones o la plantilla vacía */
 .feed-notificaciones {
     width: 100%;
     max-width: 800px;
     height: 85vh;
-    background-color: rgba(255, 240, 243, 0.82);
+    background-color: #EEF5E6; /* Verde menta pastel de la imagen */
+    border: 2px dashed #B8D8BA;  /* Borde punteado de la imagen */
     border-radius: 35px;
     padding: 30px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center; /* Centra horizontal y verticalmente cuando está vacío */
-    gap: 20px;
+    justify-content: flex-start;
+    gap: 16px;
     overflow-y: auto;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    box-sizing: border-box;
 }
 
 /* PLANTILLA ESTADO VACÍO (Estilo similar a la foto 3) */
@@ -61,15 +62,16 @@
 
 /* TARJETA DE NOTIFICACIÓN (Basado en la foto 2) */
 .tarjeta-notificacion {
-    background-color: #fde8e3;
-    border: 1px solid #f8d7d0;
-    border-radius: 28px;
-    padding: 20px 25px;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 450px;
+  padding: 16px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
 }
 
 .header-notificacion {
@@ -79,14 +81,18 @@
     width: 100%;
 }
 
+.contenedor-badge {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
 .badge-mensaje {
-    background-color: #fce3e1;
-    color: #000000;
-    font-size: 0.95rem;
-    font-weight: 700;
-    padding: 8px 18px;
-    border-radius: 20px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  font-weight: bold;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .fecha-notificacion {
@@ -96,13 +102,15 @@
 }
 
 .cuerpo-notificacion {
+    width: 100%;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center; /* Centra el botón 'Ver detalles' */
     gap: 12px;
 }
 
 .etiqueta-origen {
+    align-self: flex-start; 
     background-color: #ffffff;
     color: #000000;
     font-size: 0.9rem;
@@ -405,28 +413,25 @@ body.sidebar-abierta .main-content {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 12px;
     text-align: center;
+    color: #4a3e3d;
 }
 
-.icono-notif-vacio {
-    font-size: 4rem;
-    color: #f2a4ad; /* El rosado suave característico de las huellas en ARCA */
-    margin-bottom: 12px;
+.estado-vacio i {
+    font-size: 3.5rem;
+    color: #e57373;
 }
 
 .estado-vacio h2 {
     font-size: 2rem;
     font-weight: 700;
-    color: #000000;
     margin: 0;
-    line-height: 1; /* Cierra el espacio inferior del título */
 }
 
-.subtexto-vacio {
+.estado-vacio p {
     font-size: 1.1rem;
-    color: #535151;
-    margin: -2px 0 0 0; /* Margen negativo para subirlo aún más */
-    font-weight: 400;
+    opacity: 0.8;
 }
 
 .svg-perrito-vacio {
@@ -1135,8 +1140,10 @@ hr {
 }
 
 .header-notif-derecha {
+    grid-column: 3;
     display: flex;
     align-items: center;
+    justify-content: flex-end;
     gap: 12px;
 }
 
@@ -1155,4 +1162,24 @@ hr {
     color: #d32f2f;
     background-color: rgba(229, 115, 115, 0.15);
     transform: scale(1.1);
+}
+
+/* Corrección de colores en Modo Oscuro */
+body.dark-mode .estado-vacio h2 {
+    color: #FCEADE !important; /* Texto claro para "¡Sin notificaciones por aquí!" */
+}
+
+body.dark-mode .subtexto-vacio {
+    color: #E8A598 !important; /* Texto visible para el subtítulo */
+}
+
+body.dark-mode .badge-mensaje,
+body.dark-mode .fecha-notificacion,
+body.dark-mode .etiqueta-origen {
+    color: #FFFFFF !important;
+}
+
+body.dark-mode .tarjeta-notificacion {
+    background-color: #2D2525 !important;
+    border-color: #4A3E3D !important;
 }
