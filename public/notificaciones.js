@@ -3,7 +3,6 @@ let listaNotificaciones = JSON.parse(localStorage.getItem('arca_notificaciones')
     { id: 1, mensaje: "Inicio de sesión requerido", fecha: "16 Sep", origen: "Sistema ARCA" }
 ];
 
-// Auxiliar para obtener el contenedor del DOM
 function obtenerContenedor() {
     return document.getElementById('contenedorNotificaciones');
 }
