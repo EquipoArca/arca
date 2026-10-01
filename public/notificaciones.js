@@ -165,9 +165,51 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.eliminarNotificacion(id);
             }
         });
+
+        inicializarFiltros();
+
+    // Dibujar pantalla inicial
+    renderizarNotificaciones(listaNotificaciones);
+    
     }
 
     // Dibujar pantalla inicial
     renderizarNotificaciones(listaNotificaciones);
 });
 
+// ==========================================
+// LÓGICA DE FILTROS POR CATEGORÍA
+// ==========================================
+function inicializarFiltros() {
+    const botonesFiltro = document.querySelectorAll('.chip-filtro');
+
+    botonesFiltro.forEach(boton => {
+        boton.addEventListener('click', (e) => {
+            // 1. Quitar la clase 'activo' de todos los botones
+            botonesFiltro.forEach(btn => btn.classList.remove('activo'));
+
+            // 2. Marcar el botón presionado como activo
+            e.target.classList.add('activo');
+
+            // 3. Obtener el texto de la categoría elegida
+            const categoria = e.target.textContent.trim().toLowerCase();
+
+            // 4. Filtrar la lista de notificaciones
+            filtrarNotificaciones(categoria);
+        });
+    });
+}
+
+function filtrarNotificaciones(categoria) {
+    if (categoria === 'todas') {
+        renderizarNotificaciones(listaNotificaciones);
+        return;
+    }
+
+    // Filtra según la propiedad 'origen' o el tipo de notificación
+    const listaFiltrada = listaNotificaciones.filter(notif => {
+        return notif.origen.toLowerCase().includes(categoria);
+    });
+
+    renderizarNotificaciones(listaFiltrada);
+}
