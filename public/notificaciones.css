@@ -20,16 +20,13 @@
   border: 2px dashed #a5d6a7;  
   border-radius: 20px;
   height: fit-content;        
-  width: 100%;
-  max-width: 600px;           
-  padding: 35px 25px 50px 25px; 
-  margin-top: -50px;
-  min-height: 280px; 
+  width: 90%;                /* Ocupa casi todo el ancho disponible */
+  max-width: 1050px;         /* Expansión amplia según la caja roja */
+  padding: 30px 25px; 
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center; 
-  justify-content: center;
-  gap: 16px;                  
   box-sizing: border-box;
 }
 
@@ -1186,30 +1183,36 @@ body.dark-mode .tarjeta-notificacion {
 .filtros-notificaciones {
   display: flex;
   justify-content: center;
-  gap: 8px;
+  align-items: center;
+  gap: 12px;
   width: 100%;
-  margin-bottom: 15px;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
 }
 
 .chip-filtro {
   background-color: #ffffff;
-  border: 1px solid #f8bbd0;
-  color: #5d4037;
-  padding: 6px 14px;
-  border-radius: 16px;
-  font-weight: 600;
-  font-size: 0.85rem;
+  border: 1px solid #e8a598;   /* Borde fino salmón/durazno */
+  color: #4a3e3d;             /* Texto oscuro cálido */
+  padding: 6px 18px;
+  border-radius: 12px;        /* Bordes redondeados sutiles */
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
+/* Hover suave */
+.chip-filtro:hover {
+  background-color: #fff5f3;
+  border-color: #d89386;
+}
+
+/* Estado Activo / Seleccionado */
 .chip-filtro.activo {
-  background-color: #f8bbd0;
-  color: white;
-}
-
-.estado-vacio-notif {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
+  background-color: #e8a598;   /* Fondo relleno salmón pastel */
+  color: #ffffff;             /* Texto blanco */
+  border-color: #e8a598;
+  font-weight: 600;
 }
