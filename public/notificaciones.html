@@ -58,7 +58,6 @@
   <div class="top-right">
     <div class="user-header-info">
 
-        <!-- 1. PERFIL Y MINI MENÚ (A LA IZQUIERDA DE LA CAMPANA) -->
         <div class="user-profile-menu" id="user-profile-menu" style="display: none;">
             <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
                 <img src="logo.png" id="user-avatar-img" alt="Perfil">
@@ -93,7 +92,16 @@
 </nav>
 
 <main class="main-content">
+
     <section class="feed-notificaciones" id="contenedorNotificaciones">
+
+ <div class="filtros-notificaciones">
+        <button class="chip-filtro activo">Todas</button>
+        <button class="chip-filtro">Adopciones</button>
+        <button class="chip-filtro">Reportes</button>
+        <button class="chip-filtro">Sistema</button>
+    </div>
+
         <svg class="svg-perrito-vacio" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
     <!-- Césped suave -->
     <path d="M15 82C25 80 35 83 45 81C55 83 65 80 85 82" stroke="#A8E6CF" stroke-width="4" stroke-linecap="round"/>
