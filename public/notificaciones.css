@@ -1182,3 +1182,34 @@ body.dark-mode .tarjeta-notificacion {
     background-color: #2D2525 !important;
     border-color: #4A3E3D !important;
 }
+
+.filtros-notificaciones {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.chip-filtro {
+  background-color: #ffffff;
+  border: 1px solid #f8bbd0;
+  color: #5d4037;
+  padding: 6px 14px;
+  border-radius: 16px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.chip-filtro.activo {
+  background-color: #f8bbd0;
+  color: white;
+}
+
+.estado-vacio-notif {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
