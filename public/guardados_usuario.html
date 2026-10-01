@@ -137,24 +137,32 @@
         </div>
     </aside>
 
-    <!-- CONTENIDO PRINCIPAL -->
-    <main class="main-content">
-        <div class="guardados-container" style="padding: 20px; max-width: 900px; margin: 0 auto;">
-            <h2 style="font-family: 'Itim', cursive; color: #000000; margin-bottom: 20px;">Tus publicaciones guardadas</h2>
-            
-            <!-- Contenedor donde se cargarán las publicaciones o el estado vacío -->
-            <div id="grid-publicaciones-guardadas" class="posts-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px;">
-                
-                <!-- Estado vacío predeterminado -->
-                <div id="estado-vacio-guardados" style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-                    <i class="fa-solid fa-bookmark" style="font-size: 48px; color: #fec39f; margin-bottom: 15px;"></i>
-                    <h3 style="font-family: 'Itim', cursive; color: #333; font-size: 20px; margin-bottom: 8px;">Aún no hay publicaciones guardadas</h3>
-                    <p style="color: #666; font-size: 14px;">Explora las últimas novedades o el mapa y guarda las publicaciones que te interesen para verlas aquí.</p>
-                </div>
-
-            </div>
+   <main class="main-content">
+    <section class="feed-guardados">
+        
+        <!-- Encabezado de la tarjeta -->
+        <div class="header-guardados">
+            <h2>Tus publicaciones guardadas</h2>
+            <p class="subtitulo-guardados">Aquí encontrarás todo lo que has guardado para ver más tarde</p>
         </div>
-    </main>
+
+        <!-- Contenedor dinámico (JS renderiza aquí las publicaciones o el estado vacío) -->
+        <div id="contenedorGuardados" class="zona-guardados-dinamica">
+            
+            <div class="estado-vacio-guardados">
+                <div class="ilustracion-guardados">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#e8a598" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>
+                    </svg>
+                </div>
+                <h3>¡Aún no tienes publicaciones guardadas!</h3>
+                <p>Explora las últimas novedades o el mapa y guarda las publicaciones que te interesen con el ícono de marcador.</p>
+            </div>
+
+        </div>
+
+    </section>
+</main>
 
     <!-- MODAL DE DETALLES DEL REPORTE (Idéntico al de últimas novedades) -->
     <div id="modal-detalle-publicacion" class="modal-foto-overlay" onclick="cerrarModalDetalleOverlay(event)">
