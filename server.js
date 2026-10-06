@@ -240,7 +240,7 @@ app.post('/guardar-foto-perfil', (req, res) => {
 
     const query = "UPDATE usuarios SET foto_perfil = ? WHERE correo_usuario = ?";
 
-    db.query(query, [fotoBase64 || null, correo_usuario], (err, result) => {
+    db.query(query, [fotoBase64 || null, correo_usuario], (err) => {
         if (err) {
             console.error("❌ Error al guardar foto:", err.message);
             return res.status(500).json({ error: "Error al actualizar en la base de datos." });
@@ -370,7 +370,7 @@ app.post('/actualizar-telefono-usuario', (req, res) => {
     }
 
     const query = "UPDATE usuarios SET Telefono_usuario = ?, telefono_verificado = 0 WHERE correo_usuario = ?";
-    db.query(query, [nuevo_telefono, correo_usuario], (err, result) => {
+    db.query(query, [nuevo_telefono, correo_usuario], (err) => {
         if (err) {
             console.error("❌ Error al actualizar teléfono:", err.message);
             return res.status(500).json({ error: "Error al actualizar en la base de datos." });
@@ -387,7 +387,7 @@ app.post('/verificar-telefono-usuario', (req, res) => {
     }
 
     const query = "UPDATE usuarios SET telefono_verificado = 1 WHERE correo_usuario = ?";
-    db.query(query, [correo_usuario], (err, result) => {
+    db.query(query, [correo_usuario], (err) => {
         if (err) {
             return res.status(500).json({ error: "Error al verificar en la base de datos." });
         }
@@ -774,7 +774,7 @@ app.post('/api/guardar-publicacion', (req, res) => {
         const id_usuarios = results[0].id_usuarios;
         const query = `INSERT INTO guardados (id_usuarios, id_publicacion) VALUES (?, ?)`;
 
-        db.query(query, [id_usuarios, id_publicacion], (errInsert, result) => {
+        db.query(query, [id_usuarios, id_publicacion], (errInsert) => {
             if (errInsert) {
                 if (errInsert.code === 'ER_DUP_ENTRY') {
                     return res.status(400).json({ error: "Ya tienes esta publicación en tus guardados." });
@@ -825,7 +825,7 @@ app.post('/api/quitar-guardado', (req, res) => {
         WHERE LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(?)) AND g.id_publicacion = ?
     `;
 
-    db.query(query, [correo, id_publicacion], (err, result) => {
+    db.query(query, [correo, id_publicacion], (err) => {
         if (err) {
             console.error("❌ ERROR AL ELIMINAR GUARDADO:", err.message);
             return res.status(500).json({ error: "Error al eliminar de la base de datos" });
@@ -982,7 +982,7 @@ app.post('/api/crear-adopcion', (req, res) => {
         id_tamaño,
         descripcion_adopcion,
         ubicacion_adopcion,
-        foto_animal,
+        fotos_animal,
         correo_usuario
     } = req.body;
 
@@ -1029,7 +1029,7 @@ app.post('/api/crear-adopcion', (req, res) => {
             descripcion_adopcion,
             ciudad,
             barrio,
-            foto_animal || null,
+            fotos_animal || null,
             id_usuarios
         ];
 

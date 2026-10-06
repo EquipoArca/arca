@@ -107,6 +107,9 @@
                             <li>Solo publica animales bajo tu cuidado directo.</li>
                             <li>Prohibida la venta o intercambio comercial.</li>
                             <li>Garantiza condiciones óptimas de salud.</li>
+                            <li>Incluye fotos claras y recientes.</li>
+                            <li>Proporciona información veraz y completa.</li>
+                            <li>Animales ilegales serán reportados.</li>
                         </ul>
                     </div>
 
@@ -152,11 +155,38 @@
                     </div>
                 </div>
 
-                <!-- Tarjeta 2: Características Físicas y Descripción -->
+                <!-- Tarjeta 2: Edad, Sexo, Tamaño y Personalidad -->
                 <div class="card-adopcion-seccion">
                     <div class="campo-grupo">
-                        <label class="label-adopcion" for="edad-animal">Edad aproximada</label>
-                        <input type="text" id="edad-animal" name="edad_aprox" placeholder="Ej. 2 años / 6 meses" class="input-custom-adopcion" required>
+                        <label class="label-adopcion">Edad aproximada (Mes y Año)</label>
+                        <div style="display: flex; gap: 10px;">
+                            <select id="edad-mes" class="input-custom-adopcion" required>
+                                <option value="" disabled selected>Mes</option>
+                                <option value="01">Enero</option>
+                                <option value="02">Febrero</option>
+                                <option value="03">Marzo</option>
+                                <option value="04">Abril</option>
+                                <option value="05">Mayo</option>
+                                <option value="06">Junio</option>
+                                <option value="07">Julio</option>
+                                <option value="08">Agosto</option>
+                                <option value="09">Septiembre</option>
+                                <option value="10">Octubre</option>
+                                <option value="11">Noviembre</option>
+                                <option value="12">Diciembre</option>
+                            </select>
+                            <select id="edad-anio" class="input-custom-adopcion" required>
+                                <option value="" disabled selected>Año</option>
+                                <option value="2026">2026</option>
+                                <option value="2025">2025</option>
+                                <option value="2024">2024</option>
+                                <option value="2023">2023</option>
+                                <option value="2022">2022</option>
+                                <option value="2021">2021</option>
+                                <option value="2020">2020</option>
+                                <option value="Más antiguo">Más antiguo</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div class="campo-grupo">
@@ -205,18 +235,28 @@
                     </div>
 
                     <div class="campo-grupo">
-                        <label class="label-adopcion">Fotografía principal</label>
+                        <label class="label-adopcion">Fotografía del animal</label>
                         <div class="zona-drop-adopcion" id="zona-arrastre">
-                            <input type="file" id="input-archivo-oculto" name="fotos_adopcion" accept="image/*" style="display: none;">
-                            <div class="preview-container-adopcion">
-                                <img id="preview-img-adopcion" src="" alt="Vista previa" style="display: none;" />
-                            </div>
+                            <input type="file" id="input-archivo-oculto" name="fotos_adopcion" accept="image/*" multiple style="display: none;">
+                            <div class="preview-container-adopcion" id="preview-container" style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px;"></div>
                             <div class="contenido-drop" id="contenido-drop-placeholder">
                                 <i class="fa-solid fa-cloud-arrow-up"></i>
                                 <span>Haz clic o arrastra una foto aquí</span>
                             </div>
                         </div>
                     </div>
+                    <div class="campo-grupo">
+                        <label class="label-adopcion">Datos de contacto</label>
+                        <div class="input-contacto-wrapper" style="margin-bottom: 10px; position: relative;">
+                            <i class="fa-solid fa-phone" style="position: absolute; left: 12px; top: 14px; color: #888;"></i>
+                            <input type="tel" id="contacto-telefono" name="telefono_contacto" placeholder="Teléfono" class="input-custom-adopcion" style="padding-left: 35px;">
+                        </div>
+                        <div class="input-contacto-wrapper" style="position: relative;">
+                            <i class="fa-solid fa-envelope" style="position: absolute; left: 12px; top: 14px; color: #888;"></i>
+                            <input type="email" id="contacto-correo" name="correo_contacto" placeholder="Correo" class="input-custom-adopcion" style="padding-left: 35px;">
+                        </div>
+                    </div>
+
 
                     <button type="submit" class="btn-enviar-adopcion-final">
                         <i class="fa-solid fa-heart-circle-plus"></i> Publicar en adopciones
