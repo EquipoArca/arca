@@ -967,41 +967,32 @@ app.put('/api/reportes/:id', (req, res) => {
     });
 });
 // ==========================================
-// MÓDULO DE PUBLICACIÓN DE ADOPCIONES
+// MÓDULO CREACIÓN DE ADOPCIONES
 // ==========================================
-
+// MÓDULO CREACIÓN DE ADOPCIONES
+// ==========================================
 app.post('/api/crear-adopcion', (req, res) => {
     const {
         nombre_animal,
         id_especie,
         otro_especie,
         sexo_animal,
-        edad_aprox,
+        fecha_nacimiento_animal_aprox,
         id_raza,
         otro_raza,
         id_tamaño,
-        descripcion_animal, // Alineado con la tabla animal
-        ubicacion_adopcion,   // Viene como "Ciudad, Barrio" desde el front
-        telefono_contacto,
-        correo_contacto,
+        descripcion_animal, 
+        ciudad,
+        barrio,   
         fotos_animal,
-        correo_usuario
+        correo_usuario,
+        telefono_usuario
     } = req.body;
 
-    if (!nombre_animal || !id_especie || !correo_usuario) {
+    if (!nombre_animal || !id_especie || !correo_usuario || !telefono_usuario) {
         return res.status(400).json({ error: "Faltan campos obligatorios para registrar la adopción." });
     }
 
-    // 1. Separar ciudad y barrio si vienen combinados (ej: "Medellín, Robledo")
-    let ciudad = "Medellín";
-    let barrio = ubicacion_adopcion;
-    if (ubicacion_adopcion && ubicacion_adopcion.includes(',')) {
-        const partes = ubicacion_adopcion.split(',');
-        ciudad = partes[0].trim();
-        barrio = partes[1].trim();
-    }
-
-    // 2. Buscar el id_usuarios usando el correo del usuario logueado
     db.query("SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))", [correo_usuario], (err, results) => {
         if (err || results.length === 0) {
             console.error("❌ Error al buscar ID del usuario:", err);
@@ -1009,34 +1000,64 @@ app.post('/api/crear-adopcion', (req, res) => {
         }
 
         const id_usuarios = results[0].id_usuarios;
-        const id_estado = 2; // 2 = En adopción según tu tabla estado_animal
+        const id_estado = 2; // 2 = En adopción
 
-        // 3. Insertar el Animal (guardando ciudad, barrio y descripcion_animal correctamente)
-        const queryAnimal = "INSERT INTO animal (nombre_animal, id_especie, sexo_animal, fecha_nacimiento_animal_aprox, id_raza, otro_raza, id_tamaño, descripcion_animal, foto_animal, id_estado, id_usuarios, ciudad, barrio) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        db.query(queryAnimal, [nombre_animal, id_especie, sexo_animal, edad_aprox, id_raza, otro_raza, id_tamaño, descripcion_animal, fotos_animal, id_estado, id_usuarios, ciudad, barrio], (err, resultadoAnimal) => {
-            if (err) return res.status(500).json({ error: "Error al guardar el animal: " + err.message });
+        // INICIAR TRANSACCIÓN PARA EVITAR GUARDADOS PARCIALES SI OCURRE UN ERROR
+        db.beginTransaction(errTrans => {
+            if (errTrans) {
+                return res.status(500).json({ error: "Error al iniciar la transacción." });
+            }
+
+            const queryAnimal = "INSERT INTO animal (nombre_animal, id_especie, otro_especie, id_estado, sexo_animal, fecha_nacimiento_animal_aprox, id_raza, otro_raza, id_tamaño, descripcion_animal, ciudad, barrio, fotos_animal, correo_usuario, telefono_usuario, id_usuarios) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             
-            const idAnimalGenerado = resultadoAnimal.insertId;
+            db.query(queryAnimal, [nombre_animal, id_especie, otro_especie, id_estado, sexo_animal, fecha_nacimiento_animal_aprox, id_raza, otro_raza, id_tamaño, descripcion_animal, ciudad, barrio, fotos_animal, correo_usuario, telefono_usuario, id_usuarios], (errAnim, resultadoAnimal) => {
+                if (errAnim) {
+                    return db.rollback(() => {
+                        res.status(500).json({ error: "Error al guardar el animal: " + errAnim.message });
+                    });
+                }
+                
+                const idAnimalGenerado = resultadoAnimal.insertId;
 
-            // 4. Insertar en Publicación de Adopción
-            const queryAdopcion = "INSERT INTO publicaciones_adopcion (id_animal, telefono_contacto, correo_contacto) VALUES (?, ?, ?)";
-            db.query(queryAdopcion, [idAnimalGenerado, telefono_contacto, correo_contacto], (err, resultadoAdopcion) => {
-                if (err) return res.status(500).json({ error: "Error al guardar la adopción: " + err.message });
+                const queryAdopcion = "INSERT INTO publicaciones_adopcion (id_animal, id_usuarios, telefono_contacto, correo_contacto) VALUES (?, ?, ?, ?)";
+                
+                db.query(queryAdopcion, [idAnimalGenerado, id_usuarios, telefono_usuario, correo_usuario], (errAdop, resultadoAdopcion) => {
+                    if (errAdop) {
+                        return db.rollback(() => {
+                            res.status(500).json({ error: "Error al guardar la adopción: " + errAdop.message });
+                        });
+                    }
 
-                const idAdopcionGenerado = resultadoAdopcion.insertId;
+                    const idAdopcionGenerado = resultadoAdopcion.insertId;
 
-                // 5. Insertar en la tabla general de Publicaciones
-                const queryPublicacion = "INSERT INTO publicaciones (id_usuario, id_animal, id_publicacion_adopcion, tipo_publicacion) VALUES (?, ?, ?, 'adopcion')";
-                db.query(queryPublicacion, [id_usuarios, idAnimalGenerado, idAdopcionGenerado], (err, resultadoFinal) => {
-                    if (err) return res.status(500).json({ error: "Error al registrar la publicación general: " + err.message });
+                    const queryPublicacion = "INSERT INTO publicaciones (id_usuarios, id_animal, id_publicaciones_adopcion) VALUES (?, ?, ?)";
+                    
+                    db.query(queryPublicacion, [id_usuarios, idAnimalGenerado, idAdopcionGenerado], (errPub) => {
+                        if (errPub) {
+                            return db.rollback(() => {
+                                res.status(500).json({ error: "Error al registrar la publicación general: " + errPub.message });
+                            });
+                        }
 
-                    res.status(200).json({ mensaje: "¡Adopción publicada con éxito!" });
+                        // Si todo sale bien, confirmamos los cambios
+                        db.commit(errCommit => {
+                            if (errCommit) {
+                                return db.rollback(() => {
+                                    res.status(500).json({ error: "Error al confirmar la transacción." });
+                                });
+                            }
+                            res.status(200).json({ mensaje: "¡Adopción publicada con éxito!" });
+                        });
+                    });
                 });
             });
         });
     });
 });
 
+// ==========================================
+// GET: Obtener publicaciones globales (Reportes + Adopciones)
+// ==========================================
 app.get('/api/publicaciones-globales', (req, res) => {
     // Consulta unificada para traer publicaciones de reportes y de adopción juntas
     const sql = `
@@ -1060,10 +1081,10 @@ app.get('/api/publicaciones-globales', (req, res) => {
             p.id_publicacion,
             'adopcion' AS tipo_publicacion,
             pa.id_publicaciones_adopcion AS id_origen,
-            a.descripcion,
+            a.descripcion_animal AS descripcion,
             CONCAT(a.ciudad, ', ', a.barrio) AS ubicacion,
-            a.foto_animal AS imagen,
-            a.fecha_creacion AS fecha, /* (Asegúrate de tener un campo de fecha o timestamp en tu tabla animal, o usa el id) */
+            a.fotos_animal AS imagen,
+            a.fecha_creacion AS fecha, 
             u.nombre_usuario, 
             u.foto_perfil
         FROM publicaciones p
@@ -1076,19 +1097,16 @@ app.get('/api/publicaciones-globales', (req, res) => {
 
     db.query(sql, (err, rows) => {
         if (err) {
-            console.exports?.error ? console.error("❌ Error al obtener publicaciones globales:", err) : console.log("❌ Error:", err);
+            console.error("❌ Error al obtener publicaciones globales:", err);
             return res.status(500).json({ error: 'Hubo un error al obtener las novedades' });
         }
         res.json(rows);
     });
 });
-const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-    console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
-});
-
+// ==========================================
 // GET: Obtener rol de usuario por correo
+// ==========================================
 app.get('/api/obtener-rol', (req, res) => {
     const { correo } = req.query;
 
@@ -1123,3 +1141,10 @@ app.get('/api/obtener-rol', (req, res) => {
     });
 });
 
+// ==========================================
+// INICIALIZACIÓN DEL SERVIDOR (Siempre al final)
+// ==========================================
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
+});
