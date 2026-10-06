@@ -1120,6 +1120,36 @@ app.get('/api/mis-reportes', (req, res) => {
         res.json(rows);
     });
 });
+// ==========================================
+// GET: Obtener datos de una adopción para editar
+// ==========================================
+app.get('/api/adopciones/:id', (req, res) => {
+    const idAdopcion = req.params.id;
+
+    const sql = `
+        SELECT 
+            pa.id_publicaciones_adopcion,
+            pa.telefono_contacto,
+            pa.correo_contacto,
+            a.*
+        FROM publicaciones_adopcion pa
+        INNER JOIN animal a ON pa.id_animal = a.id_animal
+        WHERE pa.id_publicaciones_adopcion = ?
+    `;
+
+    db.query(sql, [idAdopcion], (err, results) => {
+        if (err) {
+            console.error("❌ Error al consultar la adopción para editar:", err);
+            return res.status(500).json({ error: "Error en el servidor" });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ error: "Publicación de adopción no encontrada" });
+        }
+
+        res.json(results[0]);
+    });
+});
 
 
 // ==========================================
