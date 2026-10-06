@@ -980,8 +980,8 @@ app.post('/api/crear-adopcion', (req, res) => {
         id_raza,
         otro_raza,
         id_tamaño,
-        descripcion,
-        ubicacion_adopcion,
+        descripcion_animal, // Alineado con la tabla animal
+        ubicacion_adopcion,   // Viene como "Ciudad, Barrio" desde el front
         telefono_contacto,
         correo_contacto,
         fotos_animal,
@@ -992,7 +992,16 @@ app.post('/api/crear-adopcion', (req, res) => {
         return res.status(400).json({ error: "Faltan campos obligatorios para registrar la adopción." });
     }
 
-    // 1. Buscar el id_usuarios usando el correo del usuario logueado
+    // 1. Separar ciudad y barrio si vienen combinados (ej: "Medellín, Robledo")
+    let ciudad = "Medellín";
+    let barrio = ubicacion_adopcion;
+    if (ubicacion_adopcion && ubicacion_adopcion.includes(',')) {
+        const partes = ubicacion_adopcion.split(',');
+        ciudad = partes[0].trim();
+        barrio = partes[1].trim();
+    }
+
+    // 2. Buscar el id_usuarios usando el correo del usuario logueado
     db.query("SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))", [correo_usuario], (err, results) => {
         if (err || results.length === 0) {
             console.error("❌ Error al buscar ID del usuario:", err);
@@ -1002,21 +1011,21 @@ app.post('/api/crear-adopcion', (req, res) => {
         const id_usuarios = results[0].id_usuarios;
         const id_estado = 2; // 2 = En adopción según tu tabla estado_animal
 
-        // 1. Insertar el Animal (Ya tenemos id_usuarios disponible)
-        const queryAnimal = "INSERT INTO animal (nombre_animal, id_especie, sexo_animal, fecha_nacimiento_animal_aprox, id_raza, otro_raza, id_tamaño, descripcion, foto_animal, id_estado, id_usuarios) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        db.query(queryAnimal, [nombre_animal, id_especie, sexo_animal, edad_aprox, id_raza, otro_raza, id_tamaño, descripcion, fotos_animal, id_estado, id_usuarios], (err, resultadoAnimal) => {
+        // 3. Insertar el Animal (guardando ciudad, barrio y descripcion_animal correctamente)
+        const queryAnimal = "INSERT INTO animal (nombre_animal, id_especie, sexo_animal, fecha_nacimiento_animal_aprox, id_raza, otro_raza, id_tamaño, descripcion_animal, foto_animal, id_estado, id_usuarios, ciudad, barrio) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        db.query(queryAnimal, [nombre_animal, id_especie, sexo_animal, edad_aprox, id_raza, otro_raza, id_tamaño, descripcion_animal, fotos_animal, id_estado, id_usuarios, ciudad, barrio], (err, resultadoAnimal) => {
             if (err) return res.status(500).json({ error: "Error al guardar el animal: " + err.message });
             
             const idAnimalGenerado = resultadoAnimal.insertId;
 
-            // 2. Insertar en Publicación de Adopción
-            const queryAdopcion = "INSERT INTO publicaciones_adopcion (id_animal, ubicacion_adopcion, telefono_contacto, correo_contacto) VALUES (?, ?, ?, ?)";
-            db.query(queryAdopcion, [idAnimalGenerado, ubicacion_adopcion, telefono_contacto, correo_contacto], (err, resultadoAdopcion) => {
+            // 4. Insertar en Publicación de Adopción
+            const queryAdopcion = "INSERT INTO publicaciones_adopcion (id_animal, telefono_contacto, correo_contacto) VALUES (?, ?, ?)";
+            db.query(queryAdopcion, [idAnimalGenerado, telefono_contacto, correo_contacto], (err, resultadoAdopcion) => {
                 if (err) return res.status(500).json({ error: "Error al guardar la adopción: " + err.message });
 
                 const idAdopcionGenerado = resultadoAdopcion.insertId;
 
-                // 3. Insertar en la tabla general de Publicaciones usando el id_usuarios que ya teníamos
+                // 5. Insertar en la tabla general de Publicaciones
                 const queryPublicacion = "INSERT INTO publicaciones (id_usuario, id_animal, id_publicacion_adopcion, tipo_publicacion) VALUES (?, ?, ?, 'adopcion')";
                 db.query(queryPublicacion, [id_usuarios, idAnimalGenerado, idAdopcionGenerado], (err, resultadoFinal) => {
                     if (err) return res.status(500).json({ error: "Error al registrar la publicación general: " + err.message });
