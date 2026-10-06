@@ -1088,7 +1088,7 @@ app.post('/api/crear-adopcion', (req, res) => {
 });
 
 // ==========================================
-// GET: Mis Publicaciones (Reportes + Adopciones del usuario unificados)
+// GET: Mis Publicaciones (Reportes + Adopciones unificadas)
 // ==========================================
 app.get('/api/mis-reportes', (req, res) => {
     const correoUsuario = req.query.correo;
@@ -1125,7 +1125,7 @@ app.get('/api/mis-reportes', (req, res) => {
             a.descripcion_animal AS Descripcion,
             CONCAT(a.ciudad, ', ', a.barrio) AS Ubicacion,
             a.fotos_animal AS img_reporte,
-            NOW() AS Fecha_reporte, -- Usamos fecha actual o puedes adaptarla si tienes fecha en adopcion
+            NOW() AS Fecha_reporte,
             CONCAT('Adopción: ', a.nombre_animal) AS nombre_tipo_reporte,
             pa.telefono_contacto,
             pa.correo_contacto,
@@ -1146,8 +1146,7 @@ app.get('/api/mis-reportes', (req, res) => {
         }
         res.json(rows);
     });
-}); 
-
+});
 
 
 // ==========================================
