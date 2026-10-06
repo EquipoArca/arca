@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Envío del formulario
+// Envío del formulario (Crear o Editar)
     if (formAdopcion) {
         formAdopcion.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -104,19 +104,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 correo_usuario: user.email
             };
 
+            // Detectamos si estamos editando mediante los parámetros de la URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const idAdopcionEditar = urlParams.get('editar');
+            
+            const endpoint = idAdopcionEditar ? `/api/actualizar-adopcion/${idAdopcionEditar}` : '/api/crear-adopcion';
+            const metodoHTTP = idAdopcionEditar ? 'PUT' : 'POST';
+
             try {
-                const response = await fetch('/api/crear-adopcion', {
-                    method: 'POST',
+                const response = await fetch(endpoint, {
+                    method: metodoHTTP,
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(datosAdopcion)
                 });
 
                 const resultado = await response.json();
                 if (response.ok) {
-                    alert(resultado.mensaje || "¡Publicado con éxito!");
-                    window.location.href = "home.html";
+                    alert(resultado.mensaje || "¡Operación realizada con éxito!");
+                    window.location.href = "mis_publicaciones.html";
                 } else {
-                    alert("Error: " + (resultado.error || "No se pudo registrar."));
+                    alert("Error: " + (resultado.error || resultado.mensaje || "No se pudo procesar."));
                 }
             } catch (error) {
                 console.error("Error de red:", error);

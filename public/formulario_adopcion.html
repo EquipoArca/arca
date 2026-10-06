@@ -279,52 +279,75 @@
     <script src="formulario_adopcion.js"></script>
     
     <script>
-            document.addEventListener('DOMContentLoaded', async () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
-            const idAdopciomEditar = urlParams.get('editar');
+            const idAdopcionEditar = urlParams.get('editar');
 
-            if (idAdopciomEditar) {
-                // Cambiamos el título o botón visualmente si lo deseas
-                const tituloForm = document.querySelector('h2, h1');
-                if (tituloForm) tituloForm.textContent = "Editar Publicación de Adopción 🐾";
+            if (idAdopcionEditar) {
+                const tituloForm = document.querySelector('.header-formulario-adopcion h2');
+                if (tituloForm) tituloForm.innerHTML = '<i class="fa-solid fa-paw"></i> Editar Publicación de Adopción 🐾';
 
                 try {
-                    const respuesta = await fetch(`/api/adopciones/${idAdopciomEditar}`);
+                    const respuesta = await fetch(`/api/adopciones/${idAdopcionEditar}`);
                     if (!respuesta.ok) throw new Error("No se pudo cargar la información para editar");
 
                     const data = await respuesta.json();
 
-                    // Rellenamos los campos de texto básicos
-                    if (document.getElementById('nombre_animal')) document.getElementById('nombre_animal').value = data.nombre_animal || '';
-                    if (document.getElementById('descripcion_adopcion')) document.getElementById('descripcion_adopcion').value = data.descripcion_animal || '';
-                    if (document.getElementById('edad_aprox')) document.getElementById('edad_aprox').value = data.fecha_nacimiento_animal_aprox || '';
-                    if (document.getElementById('telefono_contacto')) document.getElementById('telefono_contacto').value = data.telefono_contacto || '';
-                    if (document.getElementById('correo_contacto')) document.getElementById('correo_contacto').value = data.correo_contacto || '';
+                    // 1. Textos básicos
+                    if (document.getElementById('nombre-animal')) document.getElementById('nombre-animal').value = data.nombre_animal || '';
+                    if (document.getElementById('descripcion-adopcion')) document.getElementById('descripcion-adopcion').value = data.descripcion_animal || '';
+                    if (document.getElementById('contacto-telefono')) document.getElementById('contacto-telefono').value = data.telefono_contacto || '';
+                    if (document.getElementById('contacto-correo')) document.getElementById('contacto-correo').value = data.correo_contacto || '';
 
-                    // Rellenar ubicación combinada (Ciudad, Barrio) si manejas un input de texto de ubicación
-                    const inputUbi = document.getElementById('ubicacion_adopcion') || document.getElementById('Ubicacion');
+                    // 2. Ubicación combinada (Ciudad, Barrio)
+                    const inputUbi = document.getElementById('input-direccion-adopcion');
                     if (inputUbi) {
                         inputUbi.value = `${data.ciudad || 'Medellín'}, ${data.barrio || ''}`;
                     }
 
-                    // Seleccionar género (radio buttons o select)
-                    if (data.sexo_animal) {
+                    // 3. Edad aproximada (Separar mes y año si viene en formato MM/AAAA o similar)
+                    if (data.fecha_nacimiento_animal_aprox && data.fecha_nacimiento_animal_aprox.includes('/')) {
+                        const partesFecha = data.fecha_nacimiento_animal_aprox.split('/');
+                        if (document.getElementById('edad-mes')) document.getElementById('edad-mes').value = partesFecha[0];
+                        if (document.getElementById('edad-anio')) document.getElementById('edad-anio').value = partesFecha[1];
+                    }
+
+                    // 4. Radio Buttons (Especie, Sexo, Tamaño)
+                    if (data.id_especie) {
+                        const radioEspecie = document.querySelector(`input[name="id_especie"][value="${data.id_especie}"]`);
+                        if (radioEspecie) radioEspecie.checked = true;
+                    }
+                    if (data.sexo_animal !== undefined && data.sexo_animal !== null) {
                         const radioSexo = document.querySelector(`input[name="sexo_animal"][value="${data.sexo_animal}"]`);
                         if (radioSexo) radioSexo.checked = true;
                     }
+                    if (data.id_tamaño) {
+                        const radioTamano = document.querySelector(`input[name="id_tamaño"][value="${data.id_tamaño}"]`);
+                        if (radioTamano) radioTamano.checked = true;
+                    }
 
-                    // Seleccionar selects (especie, raza, tamaño) si ya cargan opciones
-                    if (document.getElementById('id_especie')) document.getElementById('id_especie').value = data.id_especie || '';
-                    if (document.getElementById('id_tamaño')) document.getElementById('id_tamaño').value = data.id_tamaño || '';
-                    if (document.getElementById('id_raza')) document.getElementById('id_raza').value = data.id_raza || '';
+                    // 5. Raza (Select)
+                    const selectRaza = document.getElementById('select-raza');
+                    if (selectRaza && data.id_raza) {
+                        selectRaza.value = data.id_raza;
+                        if (data.id_raza.toString() === '9') {
+                            const inputOtroRaza = document.getElementById('otro-raza');
+                            if (inputOtroRaza) {
+                                inputOtroRaza.style.display = 'block';
+                                inputOtroRaza.value = data.otro_raza || '';
+                                inputOtroRaza.required = true;
+                            }
+                        }
+                    }
 
-                    console.log("✅ Datos cargados en el formulario para edición:", data);
+                    console.log("✅ Datos cargados correctamente para edición:", data);
                 } catch (error) {
                     console.error("❌ Error al precargar datos:", error);
                     alert("Hubo un error al cargar los datos para editar.");
                 }
             }
         });
+
         document.addEventListener('DOMContentLoaded', () => {
             const btnToggleMenu = document.getElementById('btn-toggle-menu');
             const sidebar = document.getElementById('sidebar');

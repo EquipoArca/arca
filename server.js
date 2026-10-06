@@ -865,6 +865,99 @@ app.delete('/api/reportes/:id', (req, res) => {
         }
     });
 });
+app.delete('/api/adopciones/:id', (req, res) => {
+    const idAdopcion = req.params.id;
+
+    if (!idAdopcion || idAdopcion === 'undefined') {
+        return res.status(400).json({ error: "ID de adopción inválido." });
+    }
+
+    // 1. Buscamos el id_animal asociado a esta publicación de adopción
+    db.query(`SELECT id_animal FROM publicaciones_adopcion WHERE id_publicaciones_adopcion = ?`, [idAdopcion], (err, rows) => {
+        if (err) {
+            console.error("❌ Error al buscar adopción:", err.message);
+            return res.status(500).json({ error: "Error en el servidor" });
+        }
+
+        let idAnimal = rows && rows.length > 0 ? rows[0].id_animal : null;
+
+        const ejecutarBorradoAdopcionFinal = () => {
+            // Borramos de publicaciones generales usando el id_publicaciones_adopcion o id_animal
+            db.query(`DELETE FROM publicaciones WHERE id_publicaciones_adopcion = ? OR id_animal = ?`, [idAdopcion, idAnimal], () => {
+                // Borramos de publicaciones_adopcion
+                db.query(`DELETE FROM publicaciones_adopcion WHERE id_publicaciones_adopcion = ?`, [idAdopcion], () => {
+                    // Borramos el animal si existía
+                    const queryDeleteAnimal = idAnimal ? `DELETE FROM animal WHERE id_animal = ?` : null;
+                    const callbackBorrado = (errDel) => {
+                        if (errDel) {
+                            console.error("❌ Error al eliminar el animal:", errDel.message);
+                            return res.status(500).json({ error: "Error al eliminar los datos de la mascota" });
+                        }
+                        return res.json({ mensaje: "¡Publicación de adopción eliminada con éxito!" });
+                    };
+
+                    if (queryDeleteAnimal) {
+                        db.query(queryDeleteAnimal, [idAnimal], callbackBorrado);
+                    } else {
+                        res.json({ mensaje: "¡Publicación de adopción eliminada con éxito!" });
+                    }
+                });
+            });
+        };
+
+        if (idAnimal) {
+            // Borrar primero si está en guardados
+            db.query(`DELETE g FROM guardados g INNER JOIN publicaciones p ON g.id_publicacion = p.id_publicacion WHERE p.id_animal = ?`, [idAnimal], () => {
+                ejecutarBorradoAdopcionFinal();
+            });
+        } else {
+            ejecutarBorradoAdopcionFinal();
+        }
+    });
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 app.get('/api/reportes/:id', (req, res) => {
     const idReporte = req.params.id;
