@@ -261,14 +261,16 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
     <script src="script.js"></script>
     <script>
+    document.addEventListener('DOMContentLoaded', () => {
     const btnToggleMenu = document.getElementById('btn-toggle-menu');
-        const sidebar = document.getElementById('sidebar');
+    const sidebar = document.getElementById('sidebar');
 
-        if (btnToggleMenu && sidebar) {
-            btnToggleMenu.addEventListener('click', () => {
-                sidebar.classList.toggle('sidebar-abierta');
-            });
-        }
+    if (btnToggleMenu && sidebar) {
+        btnToggleMenu.addEventListener('click', () => {
+            sidebar.classList.toggle('sidebar-abierta');
+        });
+    }
+    }); 
 
         function abrirModalNuevaPub() {
             document.getElementById('modal-nueva-publicacion').style.display = 'flex';
