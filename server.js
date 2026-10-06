@@ -982,6 +982,8 @@ app.post('/api/crear-adopcion', (req, res) => {
         id_tamaño,
         descripcion_adopcion,
         ubicacion_adopcion,
+        telefono_contacto,
+        correo_contacto,
         fotos_animal,
         correo_usuario
     } = req.body;
@@ -1000,76 +1002,26 @@ app.post('/api/crear-adopcion', (req, res) => {
         const id_usuarios = results[0].id_usuarios;
         const id_estado = 2; // 2 = En adopción según tu tabla estado_animal
 
-        // Separar ciudad y barrio si vienen combinados (ej: "Medellín, Castilla")
-        let ciudad = "Medellín";
-        let barrio = ubicacion_adopcion;
-        if (ubicacion_adopcion && ubicacion_adopcion.includes(',')) {
-            const partes = ubicacion_adopcion.split(',');
-            ciudad = partes[0].trim();
-            barrio = partes[1].trim();
-        }
+        // 1. Insertar el Animal (Ya tenemos id_usuarios disponible)
+        const queryAnimal = "INSERT INTO animal (nombre_animal, id_especie, sexo_animal, fecha_nacimiento_animal_aprox, id_raza, otro_raza, id_tamaño, descripcion_animal, foto_animal, id_estado, id_usuarios) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        db.query(queryAnimal, [nombre_animal, id_especie, sexo_animal, edad_aprox, id_raza, otro_raza, id_tamaño, descripcion_adopcion, fotos_animal, id_estado, id_usuarios], (err, resultadoAnimal) => {
+            if (err) return res.status(500).json({ error: "Error al guardar el animal: " + err.message });
+            
+            const idAnimalGenerado = resultadoAnimal.insertId;
 
-        // 2. Insertar en la tabla 'animal' (id_fundacion queda en NULL porque lo publica un usuario)
-        const queryAnimal = `
-            INSERT INTO animal 
-            (nombre_animal, id_especie, otro_especie, id_estado, sexo_animal, fecha_nacimiento_animal_aprox, id_raza, otro_raza, id_tamaño, descripcion, ciudad, barrio, foto_animal, id_usuarios, id_fundacion) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)
-        `;
+            // 2. Insertar en Publicación de Adopción
+            const queryAdopcion = "INSERT INTO publicaciones_adopcion (id_animal, ubicacion_adopcion, telefono_contacto, correo_contacto) VALUES (?, ?, ?, ?)";
+            db.query(queryAdopcion, [idAnimalGenerado, ubicacion_adopcion, telefono_contacto, correo_contacto], (err, resultadoAdopcion) => {
+                if (err) return res.status(500).json({ error: "Error al guardar la adopción: " + err.message });
 
-        const valoresAnimal = [
-            nombre_animal,
-            id_especie,
-            otro_especie || null,
-            id_estado,
-            sexo_animal,
-            edad_aprox || null,
-            id_raza,
-            otro_raza || null,
-            id_tamaño,
-            descripcion_adopcion,
-            ciudad,
-            barrio,
-            fotos_animal || null,
-            id_usuarios
-        ];
+                const idAdopcionGenerado = resultadoAdopcion.insertId;
 
-        db.query(queryAnimal, valoresAnimal, (errAnimal, resultadoAnimal) => {
-            if (errAnimal) {
-                console.error("❌ Error al insertar animal:", errAnimal.message);
-                return res.status(500).json({ error: "Error al guardar el animal en la base de datos: " + errAnimal.message });
-            }
+                // 3. Insertar en la tabla general de Publicaciones usando el id_usuarios que ya teníamos
+                const queryPublicacion = "INSERT INTO publicaciones (id_usuario, id_animal, id_publicacion_adopcion, tipo_publicacion) VALUES (?, ?, ?, 'adopcion')";
+                db.query(queryPublicacion, [id_usuarios, idAnimalGenerado, idAdopcionGenerado], (err, resultadoFinal) => {
+                    if (err) return res.status(500).json({ error: "Error al registrar la publicación general: " + err.message });
 
-            const id_animal = resultadoAnimal.insertId;
-
-            // 3. Insertar en la tabla 'publicaciones_adopcion'
-            const queryPubAdopcion = `
-                INSERT INTO publicaciones_adopcion (id_animal, id_usuarios) 
-                VALUES (?, ?)
-            `;
-
-            db.query(queryPubAdopcion, [id_animal, id_usuarios], (errPubAdop, resPubAdop) => {
-                if (errPubAdop) {
-                    console.error("⚠️ Error al registrar en publicaciones_adopcion:", errPubAdop.message);
-                }
-
-                const id_publicaciones_adopcion = resPubAdop ? resPubAdop.insertId : null;
-
-                // 4. Registrar en la tabla general 'publicaciones' para que se una al feed global
-                const queryPubGeneral = `
-                    INSERT INTO publicaciones (id_animal, id_publicaciones_adopcion) 
-                    VALUES (?, ?)
-                `;
-
-                db.query(queryPubGeneral, [id_animal, id_publicaciones_adopcion], (errPubGen) => {
-                    if (errPubGen) {
-                        console.error("⚠️ Advertencia en publicaciones generales:", errPubGen.message);
-                    }
-
-                    res.status(201).json({ 
-                        exito: true, 
-                        mensaje: "¡Animal registrado y publicado en adopción con éxito!", 
-                        id_animal: id_animal 
-                    });
+                    res.status(200).json({ mensaje: "¡Adopción publicada con éxito!" });
                 });
             });
         });
