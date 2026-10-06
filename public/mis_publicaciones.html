@@ -234,7 +234,7 @@
             </h3>
 
             <div style="display: flex; flex-direction: column; gap: 15px;">
-                <a href="poner_adopcion.html" class="btn-opcion-modal-tipo" style="background-color: #fce4ec; color: #2c2c2c;">
+                <a href="formulario_adopcion.html" class="btn-opcion-modal-tipo" style="background-color: #fce4ec; color: #2c2c2c;">
                     Poner animal en adopción
                 </a>
                 <a href="formularior.html" class="btn-opcion-modal-tipo" style="background-color: #f4ebd0; color: #2c2c2c;">
@@ -260,9 +260,8 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
     <script src="script.js"></script>
-    
     <script>
-        const btnToggleMenu = document.getElementById('btn-toggle-menu');
+    const btnToggleMenu = document.getElementById('btn-toggle-menu');
         const sidebar = document.getElementById('sidebar');
 
         if (btnToggleMenu && sidebar) {
@@ -314,7 +313,6 @@
 
                     reportes.sort((a, b) => new Date(b.Fecha_reporte || 0) - new Date(a.Fecha_reporte || 0));
 
-                    // Usamos un bucle for...of para permitir el uso de 'await' en cada tarjeta
                     for (const reporte of reportes) {
                         const card = document.createElement('div');
                         card.style.cssText = `
@@ -337,14 +335,29 @@
                             }
                         }
                         
-                        const tipoReporte = reporte.nombre_tipo_reporte || reporte.NOMBRE_TIPO_REPORTE || reporte.tipo_emergencia || 'Reporte General';
-                        const idUnico = reporte.id_publicacion || reporte.id_reporte;
+                        const esAdopcion = reporte.tipo_publicacion === 'adopcion';
+                        const textoBadge = esAdopcion ? 'En Adopción' : 'Mi Reporte';
+                        const colorFondoBadge = esAdopcion ? '#fce4ec' : '#faedcd';
+                        const colorTextoBadge = esAdopcion ? '#ad526a' : '#8c6d3f';
+
+                        // Manejo inteligente de imagen (si es adopción puede venir como JSON de fotos)
+                        let imagenSrc = reporte.img_reporte || '';
+                        if (esAdopcion && imagenSrc.startsWith('[')) {
+                            try {
+                                const arrFotos = JSON.parse(imagenSrc);
+                                if (Array.isArray(arrFotos) && arrFotos.length > 0) {
+                                    imagenSrc = arrFotos[0];
+                                }
+                            } catch(e) {}
+                        }
+
+                        const tipoReporte = reporte.nombre_tipo_reporte || reporte.NOMBRE_TIPO_REPORTE || reporte.tipo_emergencia || (esAdopcion ? 'Adopción de Mascota' : 'Reporte General');
+                        const idUnico = reporte.id_publicacion || reporte.id_reporte || reporte.id_adopcion;
                         const estaGuardado = idsGuardados.includes(idUnico);
                         const colorIcono = estaGuardado ? '#d97736' : '#e8a87c';
                         const fondoBoton = estaGuardado ? '#faedcd' : 'transparent';
 
-                        // AQUÍ TRADUCIMOS LAS COORDENADAS USANDO LA FUNCIÓN GLOBAL DE SCRIPT.JS
-                        let textoUbicacionBruta = reporte.Ubicacion || '';
+                        let textoUbicacionBruta = reporte.Ubicacion || reporte.ubicacion || '';
                         let ubicacionBonita = await obtenerNombreUbicacionGlobal(textoUbicacionBruta);
 
                         card.innerHTML = `
@@ -352,14 +365,14 @@
                                 <span style="font-family: 'Itim', cursive; font-size: 13px; color: #555;">
                                     <i class="fa-regular fa-calendar" style="color: #e8a87c;"></i> ${fechaFormateada}
                                 </span>
-                                <span style="font-family: 'Itim', cursive; font-size: 12px; background: #faedcd; color: #8c6d3f; padding: 3px 10px; border-radius: 10px;">
-                                    Mi Reporte
+                                <span style="font-family: 'Itim', cursive; font-size: 12px; background: ${colorFondoBadge}; color: ${colorTextoBadge}; padding: 3px 10px; border-radius: 10px;">
+                                    ${textoBadge}
                                 </span>
                             </div>
 
-                            ${reporte.img_reporte ? `
+                            ${imagenSrc ? `
                                 <div style="width: 100%; height: 160px; border-radius: 12px; overflow: hidden;">
-                                    <img src="${reporte.img_reporte}" alt="Imagen del reporte" style="width: 100%; height: 100%; object-fit: cover;">
+                                    <img src="${imagenSrc}" alt="Imagen de la publicación" style="width: 100%; height: 100%; object-fit: cover;">
                                 </div>
                             ` : ''}
 
@@ -377,7 +390,7 @@
                             </div>
 
                             <div style="display: flex; gap: 8px; margin-top: 8px; align-items: center;">
-                                <button onclick="verDetallesReporte(${idUnico})" style="flex: 1; background: #e8a87c; border: 2px solid #e8a87c; color: white; font-family: 'Itim', cursive; padding: 8px 10px; border-radius: 15px; cursor: pointer; transition: background 0.2s;">
+                                <button onclick="verDetallesPublicacionUnificada(${idUnico})" style="flex: 1; background: #e8a87c; border: 2px solid #e8a87c; color: white; font-family: 'Itim', cursive; padding: 8px 10px; border-radius: 15px; cursor: pointer; transition: background 0.2s;">
                                     <i class="fa-solid fa-eye"></i> Ver detalles
                                 </button>
                                 <button id="btn-guardar-${idUnico}" data-guardado="${estaGuardado}" onclick="toggleGuardarPublicacion(${idUnico})" style="background: ${fondoBoton}; border: 2px solid #e8a87c; padding: 8px 12px; border-radius: 15px; cursor: pointer; transition: all 0.2s;" title="${estaGuardado ? 'Quitar de guardados' : 'Guardar publicación'}">
@@ -394,37 +407,50 @@
             }
         }
 
-        function verDetallesReporte(idPublicacionOGeneral) {
+        function verDetallesPublicacionUnificada(idPubOGeneral) {
             const user = firebase.auth().currentUser;
             if (!user) {
                 alert("Debes iniciar sesión.");
                 return;
             }
 
-            // Buscar buscando tanto por id_publicacion como por id_reporte para evitar fallos
-            const reporte = misReportesCache.find(r => (r.id_publicacion === idPublicacionOGeneral || r.id_reporte === idPublicacionOGeneral));
+            const item = misReportesCache.find(r => 
+                r.id_publicacion === idPubOGeneral || r.id_reporte === idPubOGeneral || r.id_adopcion === idPubOGeneral
+            );
 
-            if (!reporte) {
-                alert("No se encontró la información de este reporte.");
+            if (!item) {
+                alert("No se encontró la información de esta publicación.");
                 return;
             }
 
+            const esAdopcion = item.tipo_publicacion === 'adopcion';
             const contenedor = document.getElementById('contenido-detalle-dinamico');
+            
             let fechaFormateada = "Reciente";
-            if (reporte.Fecha_reporte) {
-                const dateObj = new Date(reporte.Fecha_reporte);
+            if (item.Fecha_reporte) {
+                const dateObj = new Date(item.Fecha_reporte);
                 if (!isNaN(dateObj)) {
                     fechaFormateada = dateObj.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
                 }
             }
 
-            const tipoReporte = reporte.nombre_tipo_reporte || reporte.NOMBRE_TIPO_REPORTE || reporte.tipo_emergencia || 'Publicación';
-            const idReporteReal = reporte.id_reporte; // ID clave para eliminar de la tabla reportes
+            const tipoReporte = item.nombre_tipo_reporte || item.NOMBRE_TIPO_REPORTE || item.tipo_emergencia || (esAdopcion ? 'Adopción de Mascota' : 'Publicación');
+            const idReal = esAdopcion ? (item.id_adopcion || item.id_publicacion) : (item.id_reporte || item.id_publicacion);
+
+            let fotoDetalle = item.img_reporte || '';
+            if (esAdopcion && fotoDetalle.startsWith('[')) {
+                try {
+                    const arr = JSON.parse(fotoDetalle);
+                    if (Array.isArray(arr) && arr.length > 0) {
+                        fotoDetalle = arr[0];
+                    }
+                } catch(e) {}
+            }
 
             contenedor.innerHTML = `
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #faedcd; padding-bottom: 10px; margin-bottom: 20px;">
                     <h2 style="font-family: 'Itim', cursive; color: #d97736; margin: 0; font-size: 26px;">
-                        ${tipoReporte} 🏠
+                        ${tipoReporte} ${esAdopcion ? '🐾' : '🏠'}
                     </h2>
                     <span style="font-family: 'Itim', cursive; color: #777; font-size: 14px;">
                         Publicado el ${fechaFormateada}
@@ -433,14 +459,14 @@
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: center;">
                     <div>
-                        ${reporte.img_reporte ? `
+                        ${fotoDetalle ? `
                             <div style="width: 100%; height: 220px; border-radius: 15px; overflow: hidden; border: 3px solid #e8a87c;">
-                                <img src="${reporte.img_reporte}" alt="Imagen" style="width: 100%; height: 100%; object-fit: cover;">
+                                <img src="${fotoDetalle}" alt="Imagen" style="width: 100%; height: 100%; object-fit: cover;">
                             </div>
                         ` : '<p style="font-family: \'Itim\', cursive;">Sin imagen adjunta</p>'}
                         
                         <div style="margin-top: 15px; background: #faedcd; padding: 10px; border-radius: 12px; font-family: 'Itim', cursive;">
-                            <strong>Ubicación:</strong> ${reporte.Ubicacion || 'No especificada'}
+                            <strong>Ubicación:</strong> ${item.Ubicacion || item.ubicacion || 'No especificada'}
                         </div>
                     </div>
 
@@ -448,23 +474,23 @@
                         <div style="background: #fff; border: 2px solid #e8a87c; padding: 15px; border-radius: 15px; font-family: 'Itim', cursive;">
                             <h4 style="margin: 0 0 8px 0; color: #d97736;">Descripción:</h4>
                             <p style="margin: 0; color: #444; font-size: 15px; line-height: 1.4;">
-                                ${reporte.Descripcion || 'Sin descripción detallada.'}
+                                ${item.Descripcion || 'Sin descripción detallada.'}
                             </p>
                         </div>
 
                         <div style="background: #fff; border: 2px solid #e8a87c; padding: 12px; border-radius: 15px; font-family: 'Itim', cursive;">
                             <h4 style="margin: 0 0 5px 0; color: #d97736; font-size: 14px;">Contacto:</h4>
-                            <p style="margin: 3px 0; font-size: 14px;"><i class="fa-solid fa-phone" style="color: #e8a87c;"></i> ${reporte.telefono_contacto || 'No registrado'}</p>
-                            <p style="margin: 3px 0; font-size: 14px;"><i class="fa-solid fa-envelope" style="color: #e8a87c;"></i> ${reporte.correo_contacto || user.email}</p>
+                            <p style="margin: 3px 0; font-size: 14px;"><i class="fa-solid fa-phone" style="color: #e8a87c;"></i> ${item.telefono_contacto || 'No registrado'}</p>
+                            <p style="margin: 3px 0; font-size: 14px;"><i class="fa-solid fa-envelope" style="color: #e8a87c;"></i> ${item.correo_contacto || user.email}</p>
                         </div>
                     </div>
                 </div>
 
                 <div style="display: flex; gap: 12px; margin-top: 25px; border-top: 2px solid #faedcd; padding-top: 20px;">
-                    <button onclick="abrirEditarReporte(${idReporteReal})" style="flex: 1; background: #faedcd; border: 2px solid #e8a87c; color: #8c6d3f; font-family: 'Itim', cursive; padding: 10px; border-radius: 15px; cursor: pointer; font-size: 16px;">
+                    <button onclick="abrirEditarPub(${idReal}, '${item.tipo_publicacion}')" style="flex: 1; background: #faedcd; border: 2px solid #e8a87c; color: #8c6d3f; font-family: 'Itim', cursive; padding: 10px; border-radius: 15px; cursor: pointer; font-size: 16px;">
                         <i class="fa-solid fa-pen-to-square"></i> Editar
                     </button>
-                    <button onclick="eliminarReporte(${idReporteReal})" style="flex: 1; background: #e57373; border: 2px solid #e57373; color: white; font-family: 'Itim', cursive; padding: 10px; border-radius: 15px; cursor: pointer; font-size: 16px;">
+                    <button onclick="eliminarPub(${idReal}, '${item.tipo_publicacion}')" style="flex: 1; background: #e57373; border: 2px solid #e57373; color: white; font-family: 'Itim', cursive; padding: 10px; border-radius: 15px; cursor: pointer; font-size: 16px;">
                         <i class="fa-solid fa-trash"></i> Eliminar
                     </button>
                 </div>
@@ -483,16 +509,15 @@
             }
         }
 
-        async function eliminarReporte(idReporte) {
+        async function eliminarPub(id, tipo) {
             if (!confirm("¿Estás seguro de que deseas eliminar esta publicación? Esta acción no se puede deshacer.")) {
                 return;
             }
 
-            try {
-                const response = await fetch(`/api/reportes/${idReporte}`, {
-                    method: 'DELETE'
-                });
+            const endpoint = tipo === 'adopcion' ? `/api/adopciones/${id}` : `/api/reportes/${id}`;
 
+            try {
+                const response = await fetch(endpoint, { method: 'DELETE' });
                 const resultado = await response.json();
 
                 if (response.ok) {
@@ -504,12 +529,26 @@
                 }
             } catch (error) {
                 console.error("Error al eliminar:", error);
-                alert("Hubo un error al intentar eliminar el reporte.");
+                alert("Hubo un error al intentar eliminar la publicación.");
             }
         }
 
-        function abrirEditarReporte(idReporte) {
-            alert("Redirigiendo a edición para el reporte ID: " + idReporte);
+        function abrirEditarPub(id, tipo) {
+            const mensajeTexto = tipo === 'adopcion' 
+                ? "¡Vamos a cargar los datos de tu adopción para que puedas editarlos!" 
+                : "¡Vamos a cargar los datos de tu reporte para que puedas editarlos!";
+
+            mostrarNotificacionEstilizada(
+                mensajeTexto, 
+                "info", 
+                () => {
+                    if (tipo === 'adopcion') {
+                        window.location.href = `formulario_adopcion.html?editar=${id}`;
+                    } else {
+                        window.location.href = `formularior.html?editar=${id}`;
+                    }
+                }
+            );
         }
 
         async function toggleGuardarPublicacion(idPublicacion) {
@@ -569,55 +608,45 @@
             setTimeout(() => { toast.style.transform = 'translateX(-50%) translateY(0)'; toast.style.opacity = '1'; }, 10);
             setTimeout(() => { toast.style.transform = 'translateX(-50%) translateY(100px)'; toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
         }
+
         function mostrarNotificacionEstilizada(mensaje, tipo = 'info', onConfirm = null) {
-    // Eliminar alerta previa si existe
-    const alertaAntigua = document.getElementById('modal-estilizado-arca');
-    if (alertaAntigua) alertaAntigua.remove();
+            const alertaAntigua = document.getElementById('modal-estilizado-arca');
+            if (alertaAntigua) alertaAntigua.remove();
 
-    const overlay = document.createElement('div');
-    overlay.id = 'modal-estilizado-arca';
-    overlay.style.cssText = `
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0, 0, 0, 0.4); display: flex; justify-content: center;
-        align-items: center; z-index: 9999; backdrop-filter: blur(3px);
-    `;
+            const overlay = document.createElement('div');
+            overlay.id = 'modal-estilizado-arca';
+            overlay.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0, 0, 0, 0.4); display: flex; justify-content: center;
+                align-items: center; z-index: 9999; backdrop-filter: blur(3px);
+            `;
 
-    const caja = document.createElement('div');
-    caja.style.cssText = `
-        background: #fff; padding: 30px; border-radius: 20px; width: 90%; max-width: 400px;
-        text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.15); border: 3px solid #faedcd;
-        font-family: inherit;
-    `;
+            const caja = document.createElement('div');
+            caja.style.cssText = `
+                background: #fff; padding: 30px; border-radius: 20px; width: 90%; max-width: 400px;
+                text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.15); border: 3px solid #faedcd;
+                font-family: inherit;
+            `;
 
-    caja.innerHTML = `
-        <div style="font-size: 40px; margin-bottom: 15px;">🐾</div>
-        <p style="color: #4a4a4a; font-size: 16px; margin-bottom: 25px; font-weight: 500;">${mensaje}</p>
-        <div style="display: flex; gap: 10px; justify-content: center;">
-            <button id="btn-modal-aceptar" style="
-                background: #ffb7b2; border: none; padding: 10px 25px; border-radius: 25px;
-                color: #fff; font-weight: bold; cursor: pointer; transition: 0.2s;
-            ">Aceptar</button>
-        </div>
-    `;
+            caja.innerHTML = `
+                <div style="font-size: 40px; margin-bottom: 15px;">🐾</div>
+                <p style="color: #4a4a4a; font-size: 16px; margin-bottom: 25px; font-weight: 500;">${mensaje}</p>
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <button id="btn-modal-aceptar" style="
+                        background: #ffb7b2; border: none; padding: 10px 25px; border-radius: 25px;
+                        color: #fff; font-weight: bold; cursor: pointer; transition: 0.2s;
+                    ">Aceptar</button>
+                </div>
+            `;
 
-    overlay.appendChild(caja);
-    document.body.appendChild(overlay);
+            overlay.appendChild(caja);
+            document.body.appendChild(overlay);
 
-    document.getElementById('btn-modal-aceptar').onclick = () => {
-        overlay.remove();
-        if (onConfirm) onConfirm();
-    };
-}
-function abrirEditarReporte(idReporte) {
-    mostrarNotificacionEstilizada(
-        "¡Vamos a cargar los datos de tu reporte para que puedas editarlos!", 
-        "info", 
-        () => {
-            // Redirige a tu vista de reporte añadiendo el parámetro ?editar=id
-            window.location.href = `formularior.html?editar=${idReporte}`;
+            document.getElementById('btn-modal-aceptar').onclick = () => {
+                overlay.remove();
+                if (onConfirm) onConfirm();
+            };
         }
-    );
-}
     </script>
     <!-- Motor oculto de Google Translate -->
 <div id="google_translate_element" style="display:none;"></div>

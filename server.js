@@ -1088,24 +1088,33 @@ app.post('/api/crear-adopcion', (req, res) => {
 });
 
 // ==========================================
-// GET: Obtener publicaciones globales (Reportes + Adopciones)
+// GET: Mis Publicaciones (Reportes + Adopciones del usuario unificados)
 // ==========================================
-app.get('/api/publicaciones-globales', (req, res) => {
-    // Consulta unificada para traer publicaciones de reportes y de adopción juntas
+app.get('/api/mis-reportes', (req, res) => {
+    const correoUsuario = req.query.correo;
+
+    if (!correoUsuario) {
+        return res.status(400).json({ error: "Se requiere el correo del usuario" });
+    }
+
     const sql = `
         SELECT 
             p.id_publicacion,
             'reporte' AS tipo_publicacion,
             r.id_reporte AS id_origen,
-            r.Descripcion AS descripcion,
-            r.Ubicacion AS ubicacion,
-            r.img_reporte AS imagen,
-            r.Fecha_reporte AS fecha,
-            u.nombre_usuario, 
-            u.foto_perfil
+            r.Descripcion,
+            r.Ubicacion,
+            r.img_reporte,
+            r.Fecha_reporte,
+            tr.Nombre_tipo_reporte AS nombre_tipo_reporte,
+            r.telefono_contacto,
+            r.correo_contacto,
+            NULL AS nombre_animal
         FROM publicaciones p
         INNER JOIN reportes r ON p.id_reporte = r.id_reporte
         INNER JOIN usuarios u ON r.id_usuarios = u.id_usuarios
+        LEFT JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
+        WHERE LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(?))
         
         UNION ALL
         
@@ -1113,24 +1122,27 @@ app.get('/api/publicaciones-globales', (req, res) => {
             p.id_publicacion,
             'adopcion' AS tipo_publicacion,
             pa.id_publicaciones_adopcion AS id_origen,
-            a.descripcion_animal AS descripcion,
-            CONCAT(a.ciudad, ', ', a.barrio) AS ubicacion,
-            a.fotos_animal AS imagen,
-            a.fecha_creacion AS fecha, 
-            u.nombre_usuario, 
-            u.foto_perfil
+            a.descripcion_animal AS Descripcion,
+            CONCAT(a.ciudad, ', ', a.barrio) AS Ubicacion,
+            a.fotos_animal AS img_reporte,
+            a.fecha_creacion AS Fecha_reporte,
+            CONCAT('Adopción: ', a.nombre_animal) AS nombre_tipo_reporte,
+            pa.telefono_contacto,
+            pa.correo_contacto,
+            a.nombre_animal
         FROM publicaciones p
         INNER JOIN publicaciones_adopcion pa ON p.id_publicaciones_adopcion = pa.id_publicaciones_adopcion
         INNER JOIN animal a ON pa.id_animal = a.id_animal
         INNER JOIN usuarios u ON pa.id_usuarios = u.id_usuarios
+        WHERE LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(?))
 
-        ORDER BY fecha DESC
+        ORDER BY Fecha_reporte DESC
     `;
 
-    db.query(sql, (err, rows) => {
+    db.query(sql, [correoUsuario, correoUsuario], (err, rows) => {
         if (err) {
-            console.error("❌ Error al obtener publicaciones globales:", err);
-            return res.status(500).json({ error: 'Hubo un error al obtener las novedades' });
+            console.error("❌ Error al consultar las publicaciones unificadas:", err);
+            return res.status(500).json({ error: 'Hubo un error al obtener las publicaciones' });
         }
         res.json(rows);
     });
