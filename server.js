@@ -1046,9 +1046,9 @@ app.post('/api/crear-adopcion', (req, res) => {
 
                     const idAdopcionGenerado = resultadoAdopcion.insertId;
 
-                    const queryPublicacion = "INSERT INTO publicaciones (id_usuarios, id_animal, id_publicaciones_adopcion) VALUES (?, ?, ?)";
+                    const queryPublicacion = "INSERT INTO publicaciones ( id_animal, id_publicaciones_adopcion) VALUES (?, ?)";
                     
-                    db.query(queryPublicacion, [id_usuarios, idAnimalGenerado, idAdopcionGenerado], (errPub) => {
+                    db.query(queryPublicacion, [idAnimalGenerado, idAdopcionGenerado], (errPub) => {
                         if (errPub) {
                             return db.rollback(() => {
                                 res.status(500).json({ error: "Error al registrar la publicación general: " + errPub.message });
