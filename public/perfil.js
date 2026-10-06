@@ -596,14 +596,10 @@ if (btnVerificarCorreo) {
         btnVerificarCorreo.disabled = true;
         btnVerificarCorreo.textContent = "Actualizando...";
 
-        try {
-            // 1. Guardar el correo viejo para buscar el registro en la BD
+try {
             const correoAnterior = user.email;
 
-            // 2. Actualizar el correo en Firebase Auth primero
-            await user.updateEmail(nuevoCorreoDestino);
-
-            // 3. Actualizar la base de datos MySQL mediante el backend
+            // 1. PRIMERO actualizamos MySQL a través de la API
             const respuesta = await fetch('/actualizar-correo-usuario', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -615,26 +611,43 @@ if (btnVerificarCorreo) {
 
             const resultado = await respuesta.json();
 
-            if (respuesta.ok && resultado.success) {
-                alert("¡Correo electrónico actualizado con éxito!");
-                sessionStorage.removeItem('otp_cambio_correo');
-                sessionStorage.removeItem('nuevo_correo_temporal');
-                window.location.reload();
-            } else {
+            if (!respuesta.ok || !resultado.success) {
                 throw new Error(resultado.mensaje || "No se pudo actualizar el correo en la base de datos.");
             }
+
+            // 2. SEGUNDO, si MySQL se actualizó bien, procedemos a cambiar en Firebase
+            try {
+                await user.updateEmail(nuevoCorreoDestino);
+            } catch (errorFirebase) {
+                // 3. TERCERO (Rollback): Si Firebase falla, revertimos el cambio en MySQL
+                await fetch('/actualizar-correo-usuario', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        correo_actual: nuevoCorreoDestino,
+                        nuevo_correo: correoAnterior
+                    })
+                });
+                throw errorFirebase;
+            }
+
+            // Si todo salió perfecto en ambos lados:
+            alert("¡Correo electrónico actualizado con éxito!");
+            sessionStorage.removeItem('otp_cambio_correo');
+            sessionStorage.removeItem('nuevo_correo_temporal');
+            window.location.reload();
 
         } catch (error) {
             console.error("Error al actualizar correo:", error);
             if (errorOtp) {
-                // Manejo de requerimiento de reautenticación por seguridad de Firebase
                 if (error.code === 'auth/requires-recent-login') {
-                    errorOtp.textContent = "Por seguridad, debes cerrar sesión y volver a iniciarla para realizar este cambio.";
+                    errorOtp.textContent = "Por seguridad, debes cerrar sesión e iniciarla nuevamente para hacer este cambio.";
                 } else {
                     errorOtp.textContent = error.message || "Error al procesar el cambio.";
                 }
                 errorOtp.style.display = 'block';
-            }
+        }
+        
         } finally {
             btnVerificarCorreo.disabled = false;
             btnVerificarCorreo.textContent = "Verificar y cambiar correo";

@@ -405,20 +405,35 @@ app.post('/actualizar-correo-usuario', (req, res) => {
     const correoActualLimpio = correo_actual.trim().toLowerCase();
     const nuevoCorreoLimpio = nuevo_correo.trim().toLowerCase();
 
-    const query = 'UPDATE usuarios SET correo_usuario = ? WHERE LOWER(TRIM(correo_usuario)) = ?';
-
-    // Asegúrate de cambiar 'db' por el nombre de tu variable de conexión a MySQL
-    db.query(query, [nuevoCorreoLimpio, correoActualLimpio], (err, result) => {
-        if (err) {
-            console.error("❌ Error en base de datos al cambiar correo:", err);
-            return res.status(500).json({ success: false, mensaje: "Error interno del servidor." });
+    // 1. Validamos que el nuevo correo no lo tenga otro usuario registrado
+    const sqlVerificar = "SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = ?";
+    db.query(sqlVerificar, [nuevoCorreoLimpio], (errVerif, filas) => {
+        if (errVerif) {
+            console.error("❌ Error al verificar correo nuevo:", errVerif);
+            return res.status(500).json({ success: false, mensaje: "Error en el servidor." });
         }
 
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ success: false, mensaje: "No se encontró ningún usuario con el correo actual." });
+        if (filas.length > 0) {
+            return res.status(400).json({ success: false, mensaje: "El nuevo correo ya está registrado en otra cuenta." });
         }
 
-        res.json({ success: true, mensaje: "Correo actualizado con éxito en la base de datos." });
+        // 2. Si está disponible, actualizamos en la tabla usuarios
+        const queryUpdate = 'UPDATE usuarios SET correo_usuario = ? WHERE LOWER(TRIM(correo_usuario)) = ?';
+        db.query(queryUpdate, [nuevoCorreoLimpio, correoActualLimpio], (err, result) => {
+            if (err) {
+                console.error("❌ Error en base de datos al cambiar correo:", err);
+                return res.status(500).json({ success: false, mensaje: "Error interno del servidor." });
+            }
+
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ success: false, mensaje: "No se encontró ningún usuario con el correo actual." });
+            }
+
+            // 3. También actualizamos el correo en la tabla adoptante por si tiene ficha creada
+            db.query('UPDATE adoptante SET correo = ? WHERE LOWER(TRIM(correo)) = ?', [nuevoCorreoLimpio, correoActualLimpio], () => {
+                res.json({ success: true, mensaje: "Correo actualizado con éxito en la base de datos." });
+            });
+        });
     });
 });
 // ==========================================
