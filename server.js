@@ -757,6 +757,13 @@ app.get('/api/mis-reportes', (req, res) => {
         }
         res.json(rows);
     });
+    db.query(sql, [correoUsuario, correoUsuario], (err, rows) => {
+        if (err) {
+            console.error("❌ ERROR REAL DE MYSQL EN UNIÓN:", err.message); // <-- Añade esto
+            return res.status(500).json({ error: 'Hubo un error al obtener las publicaciones', detalle: err.message });
+        }
+        res.json(rows);
+    });
 });
 
 app.post('/api/guardar-publicacion', (req, res) => {
