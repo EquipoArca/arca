@@ -356,8 +356,7 @@
                         }
 
                         const tipoReporte = reporte.nombre_tipo_reporte || reporte.NOMBRE_TIPO_REPORTE || reporte.tipo_emergencia || (esAdopcion ? 'Adopción de Mascota' : 'Reporte General');
-                        const idUnico = reporte.id_publicacion || reporte.id_reporte || reporte.id_adopcion;
-                        const estaGuardado = idsGuardados.includes(idUnico);
+                        const idUnico = reporte.id_publicacion || reporte.id_origen;
                         const colorIcono = estaGuardado ? '#d97736' : '#e8a87c';
                         const fondoBoton = estaGuardado ? '#faedcd' : 'transparent';
 
@@ -419,7 +418,7 @@
             }
 
             const item = misReportesCache.find(r => 
-                r.id_publicacion === idPubOGeneral || r.id_reporte === idPubOGeneral || r.id_adopcion === idPubOGeneral
+                r.id_publicacion === idPubOGeneral || r.id_reporte === idPubOGeneral || r.id_origen === idPubOGeneral
             );
 
             if (!item) {

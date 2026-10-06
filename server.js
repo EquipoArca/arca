@@ -1125,14 +1125,14 @@ app.get('/api/mis-reportes', (req, res) => {
             a.descripcion_animal AS Descripcion,
             CONCAT(a.ciudad, ', ', a.barrio) AS Ubicacion,
             a.fotos_animal AS img_reporte,
-            NULL AS Fecha_reporte,
+            NOW() AS Fecha_reporte, -- Usamos fecha actual o puedes adaptarla si tienes fecha en adopcion
             CONCAT('Adopción: ', a.nombre_animal) AS nombre_tipo_reporte,
             pa.telefono_contacto,
             pa.correo_contacto,
             a.nombre_animal
         FROM publicaciones p
         INNER JOIN publicaciones_adopcion pa ON p.id_publicaciones_adopcion = pa.id_publicaciones_adopcion
-        INNER JOIN animal a ON pa.id_animal = a.id_animal
+        INNER JS JOIN animal a ON pa.id_animal = a.id_animal
         INNER JOIN usuarios u ON pa.id_usuarios = u.id_usuarios
         WHERE LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(?))
 
@@ -1146,7 +1146,7 @@ app.get('/api/mis-reportes', (req, res) => {
         }
         res.json(rows);
     });
-});
+}); 
 
 
 
