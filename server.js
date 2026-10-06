@@ -984,25 +984,32 @@ app.post('/api/crear-adopcion', (req, res) => {
         ciudad,
         barrio,   
         fotos_animal,
-        correo_usuario,  // Aseguramos capturar el correo del usuario
-        telefono_contacto // El teléfono que viene del formulario (opcional/modificable)
+        correo_usuario,    // Correo del usuario autenticado (para buscar su ID)
+        correo_contacto,   // Correo que se mostrará en la adopción (viene del input, editable)
+        telefono_contacto  // Teléfono que se mostrará en la adopción (viene del input, editable)
     } = req.body;
 
     if (!nombre_animal || !id_especie || !correo_usuario) {
         return res.status(400).json({ error: "Faltan campos obligatorios para registrar la adopción." });
     }
 
-    db.query("SELECT id_usuarios, telefono_usuario FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))", [correo_usuario], (err, results) => {
+    // Buscamos el ID del usuario en la base de datos a partir de su correo
+    db.query("SELECT id_usuarios, correo_usuario AS correo_bd, telefono_usuario AS telefono_bd FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))", [correo_usuario], (err, results) => {
         if (err || results.length === 0) {
-            console.error("❌ Error al buscar ID y teléfono del usuario:", err);
+            console.error("❌ Error al buscar el usuario:", err);
             return res.status(500).json({ error: "No se pudo asociar el usuario a la adopción." });
         }
 
         const id_usuarios = results[0].id_usuarios;
-        const telefonoRegistrado = results[0].telefono_usuario;
+        const correoRegistrado = results[0].correo_bd;
+        const telefonoRegistrado = results[0].telefono_bd;
         
-        // Lógica: Si el usuario escribió un teléfono en el formulario lo usamos, 
-        // de lo contrario usamos el que está por defecto en su perfil de la base de datos.
+        // Lógica: Si el input viene con texto usamos ese (por si el usuario lo cambió), 
+        // de lo contrario usamos el que tiene por defecto en su perfil de la base de datos.
+        const correoFinal = (correo_contacto && correo_contacto.trim() !== "") 
+            ? correo_contacto 
+            : correoRegistrado;
+
         const telefonoFinal = (telefono_contacto && telefono_contacto.trim() !== "") 
             ? telefono_contacto 
             : telefonoRegistrado;
@@ -1015,10 +1022,10 @@ app.post('/api/crear-adopcion', (req, res) => {
                 return res.status(500).json({ error: "Error al iniciar la transacción." });
             }
 
-            const queryAnimal = "INSERT INTO animal (nombre_animal, id_especie, otro_especie, id_estado, sexo_animal, fecha_nacimiento_animal_aprox, id_raza, otro_raza, id_tamaño, descripcion_animal, ciudad, barrio, fotos_animal, correo_usuario, telefono_usuario, id_usuarios) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            // OJO: Quitamos correo_usuario y telefono_usuario de la tabla animal porque no existen ahí
+            const queryAnimal = "INSERT INTO animal (nombre_animal, id_especie, otro_especie, id_estado, sexo_animal, fecha_nacimiento_animal_aprox, id_raza, otro_raza, id_tamaño, descripcion_animal, ciudad, barrio, fotos_animal, id_usuarios) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             
-            // Usamos telefonoFinal aquí para la tabla animal
-            db.query(queryAnimal, [nombre_animal, id_especie, otro_especie, id_estado, sexo_animal, fecha_nacimiento_animal_aprox, id_raza, otro_raza, id_tamaño, descripcion_animal, ciudad, barrio, fotos_animal, correo_usuario, telefonoFinal, id_usuarios], (errAnim, resultadoAnimal) => {
+            db.query(queryAnimal, [nombre_animal, id_especie, otro_especie, id_estado, sexo_animal, fecha_nacimiento_animal_aprox, id_raza, otro_raza, id_tamaño, descripcion_animal, ciudad, barrio, fotos_animal, id_usuarios], (errAnim, resultadoAnimal) => {
                 if (errAnim) {
                     return db.rollback(() => {
                         res.status(500).json({ error: "Error al guardar el animal: " + errAnim.message });
@@ -1027,10 +1034,10 @@ app.post('/api/crear-adopcion', (req, res) => {
                 
                 const idAnimalGenerado = resultadoAnimal.insertId;
 
+                // Aquí es donde SÍ guardamos los datos de contacto (el predeterminado o el modificado por el usuario)
                 const queryAdopcion = "INSERT INTO publicaciones_adopcion (id_animal, id_usuarios, telefono_contacto, correo_contacto) VALUES (?, ?, ?, ?)";
                 
-                // Usamos telefonoFinal aquí también para la tabla publicaciones_adopcion
-                db.query(queryAdopcion, [idAnimalGenerado, id_usuarios, telefonoFinal, correo_usuario], (errAdop, resultadoAdopcion) => {
+                db.query(queryAdopcion, [idAnimalGenerado, id_usuarios, telefonoFinal, correoFinal], (errAdop, resultadoAdopcion) => {
                     if (errAdop) {
                         return db.rollback(() => {
                             res.status(500).json({ error: "Error al guardar la adopción: " + errAdop.message });
