@@ -585,19 +585,37 @@ if (btnVerificarCorreo) {
             return;
         }
 
+        if (!user) {
+            if (errorOtp) {
+                errorOtp.textContent = "No hay una sesión activa en Firebase.";
+                errorOtp.style.display = 'block';
+            }
+            return;
+        }
+
+        btnVerificarCorreo.disabled = true;
+        btnVerificarCorreo.textContent = "Actualizando...";
+
         try {
+            // 1. Guardar el correo viejo para buscar el registro en la BD
+            const correoAnterior = user.email;
+
+            // 2. Actualizar el correo en Firebase Auth primero
+            await user.updateEmail(nuevoCorreoDestino);
+
+            // 3. Actualizar la base de datos MySQL mediante el backend
             const respuesta = await fetch('/actualizar-correo-usuario', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    correo_actual: user.email,
+                    correo_actual: correoAnterior,
                     nuevo_correo: nuevoCorreoDestino
                 })
             });
 
             const resultado = await respuesta.json();
 
-            if (respuesta.ok) {
+            if (respuesta.ok && resultado.success) {
                 alert("¡Correo electrónico actualizado con éxito!");
                 sessionStorage.removeItem('otp_cambio_correo');
                 sessionStorage.removeItem('nuevo_correo_temporal');
@@ -609,9 +627,17 @@ if (btnVerificarCorreo) {
         } catch (error) {
             console.error("Error al actualizar correo:", error);
             if (errorOtp) {
-                errorOtp.textContent = error.message || "Error al procesar el cambio.";
+                // Manejo de requerimiento de reautenticación por seguridad de Firebase
+                if (error.code === 'auth/requires-recent-login') {
+                    errorOtp.textContent = "Por seguridad, debes cerrar sesión y volver a iniciarla para realizar este cambio.";
+                } else {
+                    errorOtp.textContent = error.message || "Error al procesar el cambio.";
+                }
                 errorOtp.style.display = 'block';
             }
+        } finally {
+            btnVerificarCorreo.disabled = false;
+            btnVerificarCorreo.textContent = "Verificar y cambiar correo";
         }
     };
 }

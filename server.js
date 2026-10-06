@@ -402,19 +402,27 @@ app.post('/actualizar-correo-usuario', async (req, res) => {
         return res.status(400).json({ success: false, mensaje: "Faltan datos requeridos." });
     }
 
-    try {
-        // Aquí ejecutas tu consulta SQL para actualizar el correo
-        const query = 'UPDATE usuarios SET correo_usuario = ? WHERE correo_usuario = ?';
-        // Ejemplo con pool de MySQL:
-        // await pool.query(query, [nuevo_correo, correo_actual]);
+    // Normalizar correos
+    const correoActualLimpio = correo_actual.trim().toLowerCase();
+    const nuevoCorreoLimpio = nuevo_correo.trim().toLowerCase();
 
-        res.json({ success: true, mensaje: "Correo actualizado con éxito" });
+    try {
+        const query = 'UPDATE usuarios SET correo_usuario = ? WHERE LOWER(TRIM(correo_usuario)) = ?';
+        
+        // Ejecución de la consulta (asegúrate de usar la variable de tu conexión o pool)
+        const [result] = await pool.query(query, [nuevoCorreoLimpio, correoActualLimpio]);
+
+        // Verificar si realmente se actualizó alguna fila
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, mensaje: "No se encontró ningún usuario registrado con el correo actual." });
+        }
+
+        res.json({ success: true, mensaje: "Correo actualizado con éxito." });
     } catch (error) {
-        console.error("Error en base de datos:", error);
+        console.error("Error en base de datos al actualizar correo:", error);
         res.status(500).json({ success: false, mensaje: "Error interno del servidor." });
     }
 });
-
 // ==========================================
 // REPORTES Y ESTADÍSTICAS
 // ==========================================
