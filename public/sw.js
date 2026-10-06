@@ -68,27 +68,25 @@ self.addEventListener('fetch', (e) => {
     }
 
     e.respondWith(
-        fetch(e.request)
-            .then((respuestaRed) => {
-                // Si la red responde bien, guardamos una copia actualizada en caché y la devolvemos
-                if (respuestaRed && respuestaRed.status === 200) {
-                    const copiaRespuesta = respuestaRed.clone();
-                    caches.open(NOMBRE_CACHE).then((cache) => cache.put(e.request, copiaRespuesta));
+    fetch(e.request)
+        .then((respuestaRed) => {
+            // Si la red responde bien Y la petición es GET, guardamos en caché
+            if (respuestaRed && respuestaRed.status === 200 && e.request.method === 'GET') {
+                const copiaRespuesta = respuestaRed.clone();
+                caches.open(NOMBRE_CACHE).then((cache) => cache.put(e.request, copiaRespuesta));
+            }
+            return respuestaRed;
+        })
+        .catch(() => {
+            // SI NO HAY INTERNET: Buscamos en la caché como respaldo
+            return caches.match(e.request).then((respuestaCached) => {
+                if (respuestaCached) {
+                    return respuestaCached;
                 }
-                return respuestaRed;
-            })
-            .catch(() => {
-                // SI NO HAY INTERNET: Buscamos en la caché como respaldo
-                return caches.match(e.request).then((respuestaCached) => {
-                    if (respuestaCached) {
-                        return respuestaCached;
-                    }
-                    return new Response("No tienes conexión a Internet y este recurso no está en caché.", {
-                        status: 533,
-                        headers: { 'Content-Type': 'text/plain; charset=utf-8' }
-                    });
+                return new Response("No tienes conexión a Internet y este recurso no está en caché.", {
+                    status: 533,
+                    headers: { 'Content-Type': 'text/plain; charset=utf-8' }
                 });
-            })
-    );
-});
-
+            });
+        })
+);
