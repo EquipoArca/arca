@@ -759,7 +759,7 @@ app.get('/api/mis-reportes', (req, res) => {
     });
     db.query(sql, [correoUsuario, correoUsuario], (err, rows) => {
         if (err) {
-            console.error("❌ ERROR REAL DE MYSQL EN UNIÓN:", err.message); // <-- Añade esto
+            console.error("❌ ERROR REAL EN ADOPCIONES/REPORTES:", err.message); // <-- ¡MIRA ESTO EN LA TERMINAL!
             return res.status(500).json({ error: 'Hubo un error al obtener las publicaciones', detalle: err.message });
         }
         res.json(rows);
