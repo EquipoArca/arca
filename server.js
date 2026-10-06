@@ -733,39 +733,6 @@ app.post('/api/guardar-adoptante', (req, res) => {
 // GESTIÓN DE PUBLICACIONES Y GUARDADOS
 // ==========================================
 
-app.get('/api/mis-reportes', (req, res) => {
-    const correoUsuario = req.query.correo;
-
-    if (!correoUsuario) {
-        return res.status(400).json({ error: "Se requiere el correo del usuario" });
-    }
-
-    const sql = `
-        SELECT r.*, p.id_publicacion, tr.Nombre_tipo_reporte AS nombre_tipo_reporte
-        FROM reportes r
-        INNER JOIN usuarios u ON r.id_usuarios = u.id_usuarios
-        LEFT JOIN publicaciones p ON r.id_reporte = p.id_reporte
-        LEFT JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
-        WHERE LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(?))
-        ORDER BY r.Fecha_reporte DESC
-    `;
-
-    db.query(sql, [correoUsuario], (err, rows) => {
-        if (err) {
-            console.error("❌ Error al consultar los reportes:", err);
-            return res.status(500).json({ error: 'Hubo un error al obtener las publicaciones' });
-        }
-        res.json(rows);
-    });
-    db.query(sql, [correoUsuario, correoUsuario], (err, rows) => {
-        if (err) {
-            console.error("❌ ERROR REAL EN ADOPCIONES/REPORTES:", err.message); // <-- ¡MIRA ESTO EN LA TERMINAL!
-            return res.status(500).json({ error: 'Hubo un error al obtener las publicaciones', detalle: err.message });
-        }
-        res.json(rows);
-    });
-});
-
 app.post('/api/guardar-publicacion', (req, res) => {
     const { correo, id_publicacion } = req.body;
 
@@ -1093,7 +1060,6 @@ app.post('/api/crear-adopcion', (req, res) => {
         });
     });
 });
-
 // ==========================================
 // GET: Mis Publicaciones (Reportes + Adopciones unificadas)
 // ==========================================
@@ -1148,8 +1114,8 @@ app.get('/api/mis-reportes', (req, res) => {
 
     db.query(sql, [correoUsuario, correoUsuario], (err, rows) => {
         if (err) {
-            console.error("❌ Error al consultar las publicaciones unificadas:", err);
-            return res.status(500).json({ error: 'Hubo un error al obtener las publicaciones' });
+            console.error("❌ ERROR REAL EN ADOPCIONES/REPORTES:", err.message);
+            return res.status(500).json({ error: 'Hubo un error al obtener las publicaciones', detalle: err.message });
         }
         res.json(rows);
     });
