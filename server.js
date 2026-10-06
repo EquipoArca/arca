@@ -980,7 +980,7 @@ app.post('/api/crear-adopcion', (req, res) => {
         id_raza,
         otro_raza,
         id_tamaño,
-        descripcion_adopcion,
+        descripcion,
         ubicacion_adopcion,
         telefono_contacto,
         correo_contacto,
@@ -1003,8 +1003,8 @@ app.post('/api/crear-adopcion', (req, res) => {
         const id_estado = 2; // 2 = En adopción según tu tabla estado_animal
 
         // 1. Insertar el Animal (Ya tenemos id_usuarios disponible)
-        const queryAnimal = "INSERT INTO animal (nombre_animal, id_especie, sexo_animal, fecha_nacimiento_animal_aprox, id_raza, otro_raza, id_tamaño, descripcion_animal, foto_animal, id_estado, id_usuarios) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        db.query(queryAnimal, [nombre_animal, id_especie, sexo_animal, edad_aprox, id_raza, otro_raza, id_tamaño, descripcion_adopcion, fotos_animal, id_estado, id_usuarios], (err, resultadoAnimal) => {
+        const queryAnimal = "INSERT INTO animal (nombre_animal, id_especie, sexo_animal, fecha_nacimiento_animal_aprox, id_raza, otro_raza, id_tamaño, descripcion, foto_animal, id_estado, id_usuarios) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        db.query(queryAnimal, [nombre_animal, id_especie, sexo_animal, edad_aprox, id_raza, otro_raza, id_tamaño, descripcion, fotos_animal, id_estado, id_usuarios], (err, resultadoAnimal) => {
             if (err) return res.status(500).json({ error: "Error al guardar el animal: " + err.message });
             
             const idAnimalGenerado = resultadoAnimal.insertId;
