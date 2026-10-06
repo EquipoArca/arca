@@ -966,7 +966,6 @@ app.put('/api/reportes/:id', (req, res) => {
         res.json({ mensaje: "¡Reporte actualizado con éxito!" });
     });
 });
-
 // ==========================================
 // MÓDULO CREACIÓN DE ADOPCIONES
 // ==========================================
@@ -976,24 +975,33 @@ app.post('/api/crear-adopcion', (req, res) => {
         id_especie,
         otro_especie,
         sexo_animal,
-        fecha_nacimiento_animal_aprox,
+        edad_aprox,           // Recibe directo "mes/año" desde tu JavaScript del frontend
         id_raza,
         otro_raza,
         id_tamaño,
-        descripcion_animal, 
-        ciudad,
-        barrio,   
-        fotos_animal,
-        correo_usuario,    // Correo del usuario autenticado (para buscar su ID)
-        correo_contacto,   // Correo que se mostrará en la adopción (viene del input, editable)
-        telefono_contacto  // Teléfono que se mostrará en la adopción (viene del input, editable)
+        descripcion_adopcion, // Coincide con el name del HTML
+        ubicacion_adopcion,   // Coincide con el input de texto "Medellín, Castilla"
+        fotos_animal,         // Recibe el JSON de imágenes procesadas
+        correo_usuario,       // Inyectado por tu JS del cliente antes de enviar
+        correo_contacto,
+        telefono_contacto
     } = req.body;
+
+    // Separamos la ubicación "Ciudad, Barrio" de forma limpia
+    let ciudad = "Medellín";
+    let barrio = "Desconocido";
+    if (ubicacion_adopcion && ubicacion_adopcion.includes(',')) {
+        const partes = ubicacion_adopcion.split(',');
+        ciudad = partes[0].trim();
+        barrio = partes[1].trim();
+    } else if (ubicacion_adopcion) {
+        barrio = ubicacion_adopcion.trim();
+    }
 
     if (!nombre_animal || !id_especie || !correo_usuario) {
         return res.status(400).json({ error: "Faltan campos obligatorios para registrar la adopción." });
     }
 
-    // Buscamos el ID del usuario en la base de datos a partir de su correo
     db.query("SELECT id_usuarios, correo_usuario AS correo_bd, telefono_usuario AS telefono_bd FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))", [correo_usuario], (err, results) => {
         if (err || results.length === 0) {
             console.error("❌ Error al buscar el usuario:", err);
@@ -1004,28 +1012,38 @@ app.post('/api/crear-adopcion', (req, res) => {
         const correoRegistrado = results[0].correo_bd;
         const telefonoRegistrado = results[0].telefono_bd;
         
-        // Lógica: Si el input viene con texto usamos ese (por si el usuario lo cambió), 
-        // de lo contrario usamos el que tiene por defecto en su perfil de la base de datos.
-        const correoFinal = (correo_contacto && correo_contacto.trim() !== "") 
-            ? correo_contacto 
-            : correoRegistrado;
-
-        const telefonoFinal = (telefono_contacto && telefono_contacto.trim() !== "") 
-            ? telefono_contacto 
-            : telefonoRegistrado;
-
+        const correoFinal = (correo_contacto && correo_contacto.trim() !== "") ? correo_contacto : correoRegistrado;
+        const telefonoFinal = (telefono_contacto && telefono_contacto.trim() !== "") ? telefono_contacto : telefonoRegistrado;
         const id_estado = 2; // 2 = En adopción
 
-        // INICIAR TRANSACCIÓN PARA EVITAR GUARDADOS PARCIALES SI OCURRE UN ERROR
         db.beginTransaction(errTrans => {
             if (errTrans) {
                 return res.status(500).json({ error: "Error al iniciar la transacción." });
             }
 
-            // OJO: Quitamos correo_usuario y telefono_usuario de la tabla animal porque no existen ahí
-            const queryAnimal = "INSERT INTO animal (nombre_animal, id_especie, otro_especie, id_estado, sexo_animal, fecha_nacimiento_animal_aprox, id_raza, otro_raza, id_tamaño, descripcion_animal, ciudad, barrio, fotos_animal, id_usuarios) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            // Insertamos usando los nombres reales y guardando edad_aprox como texto
+            const queryAnimal = `
+                INSERT INTO animal 
+                (nombre_animal, id_especie, otro_especie, id_estado, sexo_animal, fecha_nacimiento_animal_aprox, id_raza, otro_raza, id_tamaño, descripcion_animal, ciudad, barrio, fotos_animal, id_usuarios) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `;
             
-            db.query(queryAnimal, [nombre_animal, id_especie, otro_especie, id_estado, sexo_animal, fecha_nacimiento_animal_aprox, id_raza, otro_raza, id_tamaño, descripcion_animal, ciudad, barrio, fotos_animal, id_usuarios], (errAnim, resultadoAnimal) => {
+            db.query(queryAnimal, [
+                nombre_animal, 
+                id_especie, 
+                otro_especie || null, 
+                id_estado, 
+                sexo_animal, 
+                edad_aprox,           // Se guarda el formato "mes/año" directo (ej. "06/2026")
+                id_raza, 
+                otro_raza || null, 
+                id_tamaño, 
+                descripcion_adopcion, // Mapeado correctamente desde el HTML
+                ciudad, 
+                barrio, 
+                fotos_animal || '', 
+                id_usuarios
+            ], (errAnim, resultadoAnimal) => {
                 if (errAnim) {
                     return db.rollback(() => {
                         res.status(500).json({ error: "Error al guardar el animal: " + errAnim.message });
@@ -1034,7 +1052,6 @@ app.post('/api/crear-adopcion', (req, res) => {
                 
                 const idAnimalGenerado = resultadoAnimal.insertId;
 
-                // Aquí es donde SÍ guardamos los datos de contacto (el predeterminado o el modificado por el usuario)
                 const queryAdopcion = "INSERT INTO publicaciones_adopcion (id_animal, id_usuarios, telefono_contacto, correo_contacto) VALUES (?, ?, ?, ?)";
                 
                 db.query(queryAdopcion, [idAnimalGenerado, id_usuarios, telefonoFinal, correoFinal], (errAdop, resultadoAdopcion) => {
@@ -1046,7 +1063,7 @@ app.post('/api/crear-adopcion', (req, res) => {
 
                     const idAdopcionGenerado = resultadoAdopcion.insertId;
 
-                    const queryPublicacion = "INSERT INTO publicaciones ( id_animal, id_publicaciones_adopcion) VALUES (?, ?)";
+                    const queryPublicacion = "INSERT INTO publicaciones (id_animal, id_publicaciones_adopcion) VALUES (?, ?)";
                     
                     db.query(queryPublicacion, [idAnimalGenerado, idAdopcionGenerado], (errPub) => {
                         if (errPub) {
@@ -1055,7 +1072,6 @@ app.post('/api/crear-adopcion', (req, res) => {
                             });
                         }
 
-                        // Si todo sale bien, confirmamos los cambios
                         db.commit(errCommit => {
                             if (errCommit) {
                                 return db.rollback(() => {
