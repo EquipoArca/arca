@@ -1132,7 +1132,7 @@ app.get('/api/mis-reportes', (req, res) => {
             a.nombre_animal
         FROM publicaciones p
         INNER JOIN publicaciones_adopcion pa ON p.id_publicaciones_adopcion = pa.id_publicaciones_adopcion
-        INNER JS JOIN animal a ON pa.id_animal = a.id_animal
+        INNER JOIN animal a ON pa.id_animal = a.id_animal
         INNER JOIN usuarios u ON pa.id_usuarios = u.id_usuarios
         WHERE LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(?))
 
