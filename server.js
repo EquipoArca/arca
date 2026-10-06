@@ -966,26 +966,161 @@ app.put('/api/reportes/:id', (req, res) => {
         res.json({ mensaje: "¡Reporte actualizado con éxito!" });
     });
 });
+// ==========================================
+// MÓDULO DE PUBLICACIÓN DE ADOPCIONES
+// ==========================================
+
+app.post('/api/crear-adopcion', (req, res) => {
+    const {
+        nombre_animal,
+        id_especie,
+        otro_especie,
+        sexo_animal,
+        edad_aprox,
+        id_raza,
+        otro_raza,
+        id_tamaño,
+        descripcion_adopcion,
+        ubicacion_adopcion,
+        foto_animal,
+        correo_usuario
+    } = req.body;
+
+    if (!nombre_animal || !id_especie || !correo_usuario) {
+        return res.status(400).json({ error: "Faltan campos obligatorios para registrar la adopción." });
+    }
+
+    // 1. Buscar el id_usuarios usando el correo del usuario logueado
+    db.query("SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))", [correo_usuario], (err, results) => {
+        if (err || results.length === 0) {
+            console.error("❌ Error al buscar ID del usuario:", err);
+            return res.status(500).json({ error: "No se pudo asociar el usuario a la adopción." });
+        }
+
+        const id_usuarios = results[0].id_usuarios;
+        const id_estado = 2; // 2 = En adopción según tu tabla estado_animal
+
+        // Separar ciudad y barrio si vienen combinados (ej: "Medellín, Castilla")
+        let ciudad = "Medellín";
+        let barrio = ubicacion_adopcion;
+        if (ubicacion_adopcion && ubicacion_adopcion.includes(',')) {
+            const partes = ubicacion_adopcion.split(',');
+            ciudad = partes[0].trim();
+            barrio = partes[1].trim();
+        }
+
+        // 2. Insertar en la tabla 'animal' (id_fundacion queda en NULL porque lo publica un usuario)
+        const queryAnimal = `
+            INSERT INTO animal 
+            (nombre_animal, id_especie, otro_especie, id_estado, sexo_animal, fecha_nacimiento_animal_aprox, id_raza, otro_raza, id_tamaño, descripcion, ciudad, barrio, foto_animal, id_usuarios, id_fundacion) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)
+        `;
+
+        const valoresAnimal = [
+            nombre_animal,
+            id_especie,
+            otro_especie || null,
+            id_estado,
+            sexo_animal,
+            edad_aprox || null,
+            id_raza,
+            otro_raza || null,
+            id_tamaño,
+            descripcion_adopcion,
+            ciudad,
+            barrio,
+            foto_animal || null,
+            id_usuarios
+        ];
+
+        db.query(queryAnimal, valoresAnimal, (errAnimal, resultadoAnimal) => {
+            if (errAnimal) {
+                console.error("❌ Error al insertar animal:", errAnimal.message);
+                return res.status(500).json({ error: "Error al guardar el animal en la base de datos: " + errAnimal.message });
+            }
+
+            const id_animal = resultadoAnimal.insertId;
+
+            // 3. Insertar en la tabla 'publicaciones_adopcion'
+            const queryPubAdopcion = `
+                INSERT INTO publicaciones_adopcion (id_animal, id_usuarios) 
+                VALUES (?, ?)
+            `;
+
+            db.query(queryPubAdopcion, [id_animal, id_usuarios], (errPubAdop, resPubAdop) => {
+                if (errPubAdop) {
+                    console.error("⚠️ Error al registrar en publicaciones_adopcion:", errPubAdop.message);
+                }
+
+                const id_publicaciones_adopcion = resPubAdop ? resPubAdop.insertId : null;
+
+                // 4. Registrar en la tabla general 'publicaciones' para que se una al feed global
+                const queryPubGeneral = `
+                    INSERT INTO publicaciones (id_animal, id_publicaciones_adopcion) 
+                    VALUES (?, ?)
+                `;
+
+                db.query(queryPubGeneral, [id_animal, id_publicaciones_adopcion], (errPubGen) => {
+                    if (errPubGen) {
+                        console.error("⚠️ Advertencia en publicaciones generales:", errPubGen.message);
+                    }
+
+                    res.status(201).json({ 
+                        exito: true, 
+                        mensaje: "¡Animal registrado y publicado en adopción con éxito!", 
+                        id_animal: id_animal 
+                    });
+                });
+            });
+        });
+    });
+});
 
 app.get('/api/publicaciones-globales', (req, res) => {
+    // Consulta unificada para traer publicaciones de reportes y de adopción juntas
     const sql = `
-        SELECT r.*, p.id_publicacion, tr.Nombre_tipo_reporte AS nombre_tipo_reporte, u.nombre_usuario, u.foto_perfil 
-        FROM reportes r
+        SELECT 
+            p.id_publicacion,
+            'reporte' AS tipo_publicacion,
+            r.id_reporte AS id_origen,
+            r.Descripcion AS descripcion,
+            r.Ubicacion AS ubicacion,
+            r.img_reporte AS imagen,
+            r.Fecha_reporte AS fecha,
+            u.nombre_usuario, 
+            u.foto_perfil
+        FROM publicaciones p
+        INNER JOIN reportes r ON p.id_reporte = r.id_reporte
         INNER JOIN usuarios u ON r.id_usuarios = u.id_usuarios
-        LEFT JOIN publicaciones p ON r.id_reporte = p.id_reporte
-        LEFT JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
-        ORDER BY r.Fecha_reporte DESC
+        
+        UNION ALL
+        
+        SELECT 
+            p.id_publicacion,
+            'adopcion' AS tipo_publicacion,
+            pa.id_publicaciones_adopcion AS id_origen,
+            a.descripcion,
+            CONCAT(a.ciudad, ', ', a.barrio) AS ubicacion,
+            a.foto_animal AS imagen,
+            a.fecha_creacion AS fecha, /* (Asegúrate de tener un campo de fecha o timestamp en tu tabla animal, o usa el id) */
+            u.nombre_usuario, 
+            u.foto_perfil
+        FROM publicaciones p
+        INNER JOIN publicaciones_adopcion pa ON p.id_publicaciones_adopcion = pa.id_publicaciones_adopcion
+        INNER JOIN animal a ON pa.id_animal = a.id_animal
+        INNER JOIN usuarios u ON pa.id_usuarios = u.id_usuarios
+
+        ORDER BY fecha DESC
     `;
 
     db.query(sql, (err, rows) => {
         if (err) {
-            console.error("❌ Error al obtener publicaciones globales:", err);
+            console.exports?.error ? console.error("❌ Error al obtener publicaciones globales:", err) : console.log("❌ Error:", err);
             return res.status(500).json({ error: 'Hubo un error al obtener las novedades' });
         }
         res.json(rows);
     });
 });
-
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
