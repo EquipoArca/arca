@@ -966,8 +966,7 @@ app.put('/api/reportes/:id', (req, res) => {
         res.json({ mensaje: "¡Reporte actualizado con éxito!" });
     });
 });
-// ==========================================
-// MÓDULO CREACIÓN DE ADOPCIONES
+
 // ==========================================
 // MÓDULO CREACIÓN DE ADOPCIONES
 // ==========================================
@@ -985,21 +984,29 @@ app.post('/api/crear-adopcion', (req, res) => {
         ciudad,
         barrio,   
         fotos_animal,
-        correo_usuario,
-        telefono_usuario
+        correo_usuario,  // Aseguramos capturar el correo del usuario
+        telefono_contacto // El teléfono que viene del formulario (opcional/modificable)
     } = req.body;
 
-    if (!nombre_animal || !id_especie || !correo_usuario || !telefono_usuario) {
+    if (!nombre_animal || !id_especie || !correo_usuario) {
         return res.status(400).json({ error: "Faltan campos obligatorios para registrar la adopción." });
     }
 
-    db.query("SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))", [correo_usuario], (err, results) => {
+    db.query("SELECT id_usuarios, telefono_usuario FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))", [correo_usuario], (err, results) => {
         if (err || results.length === 0) {
-            console.error("❌ Error al buscar ID del usuario:", err);
+            console.error("❌ Error al buscar ID y teléfono del usuario:", err);
             return res.status(500).json({ error: "No se pudo asociar el usuario a la adopción." });
         }
 
         const id_usuarios = results[0].id_usuarios;
+        const telefonoRegistrado = results[0].telefono_usuario;
+        
+        // Lógica: Si el usuario escribió un teléfono en el formulario lo usamos, 
+        // de lo contrario usamos el que está por defecto en su perfil de la base de datos.
+        const telefonoFinal = (telefono_contacto && telefono_contacto.trim() !== "") 
+            ? telefono_contacto 
+            : telefonoRegistrado;
+
         const id_estado = 2; // 2 = En adopción
 
         // INICIAR TRANSACCIÓN PARA EVITAR GUARDADOS PARCIALES SI OCURRE UN ERROR
@@ -1010,7 +1017,8 @@ app.post('/api/crear-adopcion', (req, res) => {
 
             const queryAnimal = "INSERT INTO animal (nombre_animal, id_especie, otro_especie, id_estado, sexo_animal, fecha_nacimiento_animal_aprox, id_raza, otro_raza, id_tamaño, descripcion_animal, ciudad, barrio, fotos_animal, correo_usuario, telefono_usuario, id_usuarios) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             
-            db.query(queryAnimal, [nombre_animal, id_especie, otro_especie, id_estado, sexo_animal, fecha_nacimiento_animal_aprox, id_raza, otro_raza, id_tamaño, descripcion_animal, ciudad, barrio, fotos_animal, correo_usuario, telefono_usuario, id_usuarios], (errAnim, resultadoAnimal) => {
+            // Usamos telefonoFinal aquí para la tabla animal
+            db.query(queryAnimal, [nombre_animal, id_especie, otro_especie, id_estado, sexo_animal, fecha_nacimiento_animal_aprox, id_raza, otro_raza, id_tamaño, descripcion_animal, ciudad, barrio, fotos_animal, correo_usuario, telefonoFinal, id_usuarios], (errAnim, resultadoAnimal) => {
                 if (errAnim) {
                     return db.rollback(() => {
                         res.status(500).json({ error: "Error al guardar el animal: " + errAnim.message });
@@ -1021,7 +1029,8 @@ app.post('/api/crear-adopcion', (req, res) => {
 
                 const queryAdopcion = "INSERT INTO publicaciones_adopcion (id_animal, id_usuarios, telefono_contacto, correo_contacto) VALUES (?, ?, ?, ?)";
                 
-                db.query(queryAdopcion, [idAnimalGenerado, id_usuarios, telefono_usuario, correo_usuario], (errAdop, resultadoAdopcion) => {
+                // Usamos telefonoFinal aquí también para la tabla publicaciones_adopcion
+                db.query(queryAdopcion, [idAnimalGenerado, id_usuarios, telefonoFinal, correo_usuario], (errAdop, resultadoAdopcion) => {
                     if (errAdop) {
                         return db.rollback(() => {
                             res.status(500).json({ error: "Error al guardar la adopción: " + errAdop.message });
