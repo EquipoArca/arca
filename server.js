@@ -1125,7 +1125,7 @@ app.get('/api/mis-reportes', (req, res) => {
             a.descripcion_animal AS Descripcion,
             CONCAT(a.ciudad, ', ', a.barrio) AS Ubicacion,
             a.fotos_animal AS img_reporte,
-            a.fecha_creacion AS Fecha_reporte,
+            NULL AS Fecha_reporte,
             CONCAT('Adopción: ', a.nombre_animal) AS nombre_tipo_reporte,
             pa.telefono_contacto,
             pa.correo_contacto,
@@ -1136,7 +1136,7 @@ app.get('/api/mis-reportes', (req, res) => {
         INNER JOIN usuarios u ON pa.id_usuarios = u.id_usuarios
         WHERE LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(?))
 
-        ORDER BY Fecha_reporte DESC
+        ORDER BY id_publicacion DESC
     `;
 
     db.query(sql, [correoUsuario, correoUsuario], (err, rows) => {
