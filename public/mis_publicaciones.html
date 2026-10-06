@@ -356,7 +356,10 @@
                         }
 
                         const tipoReporte = reporte.nombre_tipo_reporte || reporte.NOMBRE_TIPO_REPORTE || reporte.tipo_emergencia || (esAdopcion ? 'Adopción de Mascota' : 'Reporte General');
+                        
                         const idUnico = reporte.id_publicacion || reporte.id_origen;
+                        const estaGuardado = Array.isArray(idsGuardados) && idsGuardados.includes(idUnico);
+                        
                         const colorIcono = estaGuardado ? '#d97736' : '#e8a87c';
                         const fondoBoton = estaGuardado ? '#faedcd' : 'transparent';
 
@@ -438,7 +441,7 @@
             }
 
             const tipoReporte = item.nombre_tipo_reporte || item.NOMBRE_TIPO_REPORTE || item.tipo_emergencia || (esAdopcion ? 'Adopción de Mascota' : 'Publicación');
-            const idReal = esAdopcion ? (item.id_adopcion || item.id_publicacion) : (item.id_reporte || item.id_publicacion);
+            const idReal = item.id_origen || item.id_publicacion;
 
             let fotoDetalle = item.img_reporte || '';
             if (esAdopcion && fotoDetalle.startsWith('[')) {
