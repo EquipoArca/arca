@@ -59,34 +59,41 @@ self.addEventListener('activate', (e) => {
         }).then(() => self.clients.claim())
     );
 });
-
 // 3. ESTRATEGIA NETWORK-FIRST (Primero la red para ver cambios en Render, luego la caché)
 self.addEventListener('fetch', (e) => {
+    // Si la petición NO es GET (ej. POST, PUT, DELETE), déjala pasar directamente a la red sin interceptarla
+    if (e.request.method !== 'GET') {
+        return;
+    }
+
     // Si la petición es externa o a la API de tu backend, déjala pasar a la red directamente
     if (!e.request.url.startsWith(self.location.origin) || e.request.url.includes('/api/')) {
         return;
     }
 
     e.respondWith(
-    fetch(e.request)
-        .then((respuestaRed) => {
-            // Si la red responde bien Y la petición es GET, guardamos en caché
-            if (respuestaRed && respuestaRed.status === 200 && e.request.method === 'GET') {
-                const copiaRespuesta = respuestaRed.clone();
-                caches.open(NOMBRE_CACHE).then((cache) => cache.put(e.request, copiaRespuesta));
-            }
-            return respuestaRed;
-        })
-        .catch(() => {
-            // SI NO HAY INTERNET: Buscamos en la caché como respaldo
-            return caches.match(e.request).then((respuestaCached) => {
-                if (respuestaCached) {
-                    return respuestaCached;
+        fetch(e.request)
+            .then((respuestaRed) => {
+                // Solo guardamos en caché si la respuesta es exitosa (200) y de tipo básico (mismo origen)
+                if (respuestaRed && respuestaRed.status === 200 && respuestaRed.type === 'basic') {
+                    const copiaRespuesta = respuestaRed.clone();
+                    caches.open(NOMBRE_CACHE).then((cache) => {
+                        cache.put(e.request, copiaRespuesta);
+                    });
                 }
-                return new Response("No tienes conexión a Internet y este recurso no está en caché.", {
-                    status: 533,
-                    headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+                return respuestaRed;
+            })
+            .catch(() => {
+                // SI NO HAY INTERNET: Buscamos en la caché como respaldo
+                return caches.match(e.request).then((respuestaCached) => {
+                    if (respuestaCached) {
+                        return respuestaCached;
+                    }
+                    return new Response("No tienes conexión a Internet y este recurso no está en caché.", {
+                        status: 533,
+                        headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+                    });
                 });
-            });
-        })
-);
+            })
+    );
+});

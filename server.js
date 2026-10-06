@@ -395,33 +395,31 @@ app.post('/verificar-telefono-usuario', (req, res) => {
     });
 });
 // Ruta para actualizar el correo del usuario en la base de datos
-app.post('/actualizar-correo-usuario', async (req, res) => {
+app.post('/actualizar-correo-usuario', (req, res) => {
     const { correo_actual, nuevo_correo } = req.body;
 
     if (!correo_actual || !nuevo_correo) {
         return res.status(400).json({ success: false, mensaje: "Faltan datos requeridos." });
     }
 
-    // Normalizar correos
     const correoActualLimpio = correo_actual.trim().toLowerCase();
     const nuevoCorreoLimpio = nuevo_correo.trim().toLowerCase();
 
-    try {
-        const query = 'UPDATE usuarios SET correo_usuario = ? WHERE LOWER(TRIM(correo_usuario)) = ?';
-        
-        // Ejecución de la consulta (asegúrate de usar la variable de tu conexión o pool)
-        const [result] = await pool.query(query, [nuevoCorreoLimpio, correoActualLimpio]);
+    const query = 'UPDATE usuarios SET correo_usuario = ? WHERE LOWER(TRIM(correo_usuario)) = ?';
 
-        // Verificar si realmente se actualizó alguna fila
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ success: false, mensaje: "No se encontró ningún usuario registrado con el correo actual." });
+    // Asegúrate de cambiar 'db' por el nombre de tu variable de conexión a MySQL
+    db.query(query, [nuevoCorreoLimpio, correoActualLimpio], (err, result) => {
+        if (err) {
+            console.error("❌ Error en base de datos al cambiar correo:", err);
+            return res.status(500).json({ success: false, mensaje: "Error interno del servidor." });
         }
 
-        res.json({ success: true, mensaje: "Correo actualizado con éxito." });
-    } catch (error) {
-        console.error("Error en base de datos al actualizar correo:", error);
-        res.status(500).json({ success: false, mensaje: "Error interno del servidor." });
-    }
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, mensaje: "No se encontró ningún usuario con el correo actual." });
+        }
+
+        res.json({ success: true, mensaje: "Correo actualizado con éxito en la base de datos." });
+    });
 });
 // ==========================================
 // REPORTES Y ESTADÍSTICAS
