@@ -92,22 +92,38 @@
 </nav>
 
 <main class="main-content">
-    <section class="feed-notificaciones">
+  <section class="feed-notificaciones" id="contenedor-notificaciones">
+    <div class="estado-vacio">
+      
+      <!-- Ilustración de Cielo Despejado Kawaii -->
+      <div class="escena-cielo-kawaii">
         
-        <!-- 1. LOS BOTONES (Al JS no le importa esta clase, así que NUNCA los borrará) -->
-        <div class="filtros-notificaciones">
-            <button class="chip-filtro activo">Todas</button>
-            <button class="chip-filtro">Adopciones</button>
-            <button class="chip-filtro">Reportes</button>
-            <button class="chip-filtro">Sistema</button>
+        <!-- Nube izquierda flotando -->
+        <div class="nube-kawaii nube-izq"></div>
+        
+        <!-- Sol sonriente centrado -->
+        <div class="sol-kawaii">
+          <div class="ojo-sol izq"></div>
+          <div class="ojo-sol der"></div>
+          <div class="boca-sol"></div>
+          <div class="rubor-sol izq"></div>
+          <div class="rubor-sol der"></div>
         </div>
 
-        <!-- 2. EL CONTENEDOR DINÁMICO (Aquí es donde tu JS meterá las notificaciones o el perrito) -->
-        <div id="contenedorNotificaciones" class="zona-notificaciones-dinamica"></div>
+        <!-- Nube derecha flotando -->
+        <div class="nube-kawaii nube-der"></div>
+        
+        <!-- Destello brillante -->
+        <span class="destello d1">✦</span>
+        <span class="destello d2">✦</span>
 
-    </section>
+      </div>
+
+      <h2>¡Aún no hay notificaciones!</h2>
+      <p> &lt;3 </p>
+    </div>
+  </section>
 </main>
-
 
 <aside class="sidebar" id="sidebar">
     <div class="side-icons">
@@ -235,3 +251,4 @@
 
 
 </body>
+</html>
