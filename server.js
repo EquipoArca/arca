@@ -932,10 +932,12 @@ app.get('/api/publicaciones-globales', (req, res) => {
             CONCAT('Adopción: ', a.nombre_animal) AS nombre_tipo_reporte,
             pa.telefono_contacto,
             pa.correo_contacto,
-            a.nombre_animal
+            a.nombre_animal,
+            u.nombre_usuario AS nombre_usuario -- 👈 Asegúrate de incluir esto
         FROM publicaciones p
         INNER JOIN publicaciones_adopcion pa ON p.id_publicaciones_adopcion = pa.id_publicaciones_adopcion
         INNER JOIN animal a ON pa.id_animal = a.id_animal
+        INNER JOIN usuarios u ON pa.id_usuarios = u.id_usuarios -- o el campo de relación que uses
 
         ORDER BY id_publicacion DESC
     `;

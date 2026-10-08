@@ -759,7 +759,8 @@
               }
               document.getElementById('lbl-contacto').innerHTML = contactoHTML;
 
-              const nombreUsuario = adopcion.nombre_usuario || 'usuario';
+              // Nombre del autor de la publicación
+              const nombreUsuario = adopcion.nombre_usuario || adopcion.nombre || 'usuario';
               document.getElementById('nombre-autor-texto').textContent = `@${nombreUsuario}`;
 
           } catch (error) {
