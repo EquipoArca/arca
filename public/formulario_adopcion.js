@@ -1,3 +1,7 @@
+// Hacemos que la variable y la función sean globales para que el HTML pueda usarlas al editar
+let imagenesBase64 = [];
+let renderizarPrevisualizaciones;
+
 document.addEventListener('DOMContentLoaded', () => {
     const formAdopcion = document.getElementById('formAdopcionArca');
     const inputArchivo = document.getElementById('input-archivo-oculto');
@@ -8,24 +12,68 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputTelefono = document.getElementById('contacto-telefono');
     const inputCorreo = document.getElementById('contacto-correo');
 
-    let imagenesBase64 = [];
+    // Función global para renderizar las imágenes con su botón "X" de eliminación
+    renderizarPrevisualizaciones = function() {
+        if (!previewContainer) return;
+        previewContainer.innerHTML = '';
+
+        if (imagenesBase64.length === 0) {
+            if (placeholderDrop) placeholderDrop.style.display = 'flex';
+            return;
+        }
+
+        if (placeholderDrop) placeholderDrop.style.display = 'none';
+
+        imagenesBase64.forEach((url, index) => {
+            const wrapper = document.createElement('div');
+            wrapper.style.cssText = 'position: relative; display: inline-block;';
+
+            const imgPreview = document.createElement('img');
+            imgPreview.src = url;
+            imgPreview.style.width = '70px';
+            imgPreview.style.height = '70px';
+            imgPreview.style.objectFit = 'cover';
+            imgPreview.style.borderRadius = '8px';
+            imgPreview.style.border = '2px solid #ccc';
+
+            // Botón de eliminar (X)
+            const btnEliminar = document.createElement('button');
+            btnEliminar.innerHTML = '&times;';
+            btnEliminar.type = 'button';
+            btnEliminar.style.cssText = `
+                position: absolute; top: -5px; right: -5px;
+                background: #ff5252; color: white; border: none;
+                border-radius: 50%; width: 20px; height: 20px;
+                font-size: 14px; cursor: pointer; display: flex;
+                align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            `;
+
+            btnEliminar.onclick = () => {
+                imagenesBase64.splice(index, 1); // Borra la imagen del arreglo
+                renderizarPrevisualizaciones(); // Vuelve a pintar la galería
+            };
+
+            wrapper.appendChild(imgPreview);
+            wrapper.appendChild(btnEliminar);
+            previewContainer.appendChild(wrapper);
+        });
+    };
 
     // Autocompletar datos de contacto del usuario al iniciar
     firebase.auth().onAuthStateChanged(async (user) => {
         if (user) {
             if (inputCorreo) inputCorreo.value = user.email || '';
             
-            // Consultar el teléfono del usuario en tu backend
             try {
-                const response = await fetch(`/api/obtener-rol?correo=${encodeURIComponent(user.email)}`);
+                const response = await fetch(`/api/datos-usuario-registro?correo=${encodeURIComponent(user.email)}`);
                 if (response.ok) {
                     const data = await response.json();
-                    if (data.telefono && inputTelefono) {
-                        inputTelefono.value = data.telefono;
+                    if (data.telefono_usuario && inputTelefono) {
+                        inputTelefono.value = data.telefono_usuario;
                     }
                 }
             } catch (error) {
-                console.error("No se pudo cargar el teléfono de contacto automáticamente:", error);
+                console.error("No se pudo cargar el teléfono automáticamente:", error);
             }
         }
     });
@@ -33,7 +81,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Procesar múltiples archivos de imágenes
     function procesarArchivos(archivos) {
         if (!archivos || archivos.length === 0) return;
-        placeholderDrop.style.display = 'none';
 
         Array.from(archivos).forEach(archivo => {
             if (archivo.type.startsWith('image/')) {
@@ -41,15 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 lector.onload = function(uploadEvent) {
                     const base64String = uploadEvent.target.result;
                     imagenesBase64.push(base64String);
-
-                    const imgPreview = document.createElement('img');
-                    imgPreview.src = base64String;
-                    imgPreview.style.width = '70px';
-                    imgPreview.style.height = '70px';
-                    imgPreview.style.objectFit = 'cover';
-                    imgPreview.style.borderRadius = '8px';
-                    imgPreview.style.border = '2px solid #ccc';
-                    previewContainer.appendChild(imgPreview);
+                    renderizarPrevisualizaciones(); // Actualiza la vista con la "X"
                 };
                 lector.readAsDataURL(archivo);
             }
@@ -73,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-// Envío del formulario (Crear o Editar)
+    // Envío del formulario (Crear o Editar)
     if (formAdopcion) {
         formAdopcion.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -104,7 +143,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 correo_usuario: user.email
             };
 
-            // Detectamos si estamos editando mediante los parámetros de la URL
             const urlParams = new URLSearchParams(window.location.search);
             const idAdopcionEditar = urlParams.get('editar');
             

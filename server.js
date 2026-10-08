@@ -915,50 +915,6 @@ app.delete('/api/adopciones/:id', (req, res) => {
         }
     });
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 app.get('/api/reportes/:id', (req, res) => {
     const idReporte = req.params.id;
 
@@ -1243,7 +1199,93 @@ app.get('/api/adopciones/:id', (req, res) => {
         res.json(results[0]);
     });
 });
+// ==========================================
+// MÓDULO ACTUALIZACIÓN DE ADOPCIONES
+// ==========================================
+app.put('/api/actualizar-adopcion/:id', (req, res) => {
+    const idAdopcion = req.params.id;
+    const {
+        nombre_animal,
+        id_especie,
+        otro_especie,
+        sexo_animal,
+        edad_aprox,
+        id_raza,
+        otro_raza,
+        id_tamaño,
+        descripcion_adopcion,
+        ubicacion_adopcion,
+        fotos_animal,
+        correo_contacto,
+        telefono_contacto
+    } = req.body;
 
+    if (!idAdopcion || !nombre_animal || !id_especie) {
+        return res.status(400).json({ error: "Faltan campos obligatorios para actualizar la adopción." });
+    }
+
+    let ciudad = "Medellín";
+    let barrio = "Desconocido";
+    if (ubicacion_adopcion && ubicacion_adopcion.includes(',')) {
+        const partes = ubicacion_adopcion.split(',');
+        ciudad = partes[0].trim();
+        barrio = partes[1].trim();
+    } else if (ubicacion_adopcion) {
+        barrio = ubicacion_adopcion.trim();
+    }
+
+    // Buscamos el id_animal asociado a esta adopción
+    db.query("SELECT id_animal FROM publicaciones_adopcion WHERE id_publicaciones_adopcion = ?", [idAdopcion], (err, rows) => {
+        if (err || rows.length === 0) {
+            return res.status(404).json({ error: "No se encontró la adopción a actualizar." });
+        }
+
+        const idAnimal = rows[0].id_animal;
+
+        db.beginTransaction(errTrans => {
+            if (errTrans) return res.status(500).json({ error: "Error en la transacción." });
+
+            // 1. Actualizar tabla animal
+            const queryUpdateAnimal = `
+                UPDATE animal 
+                SET nombre_animal = ?, id_especie = ?, otro_especie = ?, sexo_animal = ?, 
+                    fecha_nacimiento_animal_aprox = ?, id_raza = ?, otro_raza = ?, id_tamaño = ?, 
+                    descripcion_animal = ?, ciudad = ?, barrio = ?, fotos_animal = ?
+                WHERE id_animal = ?
+            `;
+
+            db.query(queryUpdateAnimal, [
+                nombre_animal, id_especie, otro_especie || null, sexo_animal,
+                edad_aprox, id_raza, otro_raza || null, id_tamaño,
+                descripcion_adopcion, ciudad, barrio, fotos_animal || '', idAnimal
+            ], (errAnim) => {
+                if (errAnim) {
+                    return db.rollback(() => res.status(500).json({ error: "Error al actualizar el animal: " + errAnim.message }));
+                }
+
+                // 2. Actualizar tabla publicaciones_adopcion
+                const queryUpdatePub = `
+                    UPDATE publicaciones_adopcion 
+                    SET telefono_contacto = ?, correo_contacto = ?
+                    WHERE id_publicaciones_adopcion = ?
+                `;
+
+                db.query(queryUpdatePub, [telefono_contacto || null, correo_contacto || null, idAdopcion], (errPub) => {
+                    if (errPub) {
+                        return db.rollback(() => res.status(500).json({ error: "Error al actualizar el contacto: " + errPub.message }));
+                    }
+
+                    db.commit(errCommit => {
+                        if (errCommit) {
+                            return db.rollback(() => res.status(500).json({ error: "Error al confirmar los cambios." }));
+                        }
+                        res.json({ mensaje: "¡Adopción actualizada con éxito!" });
+                    });
+                });
+            });
+        });
+    });
+});
 
 // ==========================================
 // INICIALIZACIÓN DEL SERVIDOR (Siempre al final)

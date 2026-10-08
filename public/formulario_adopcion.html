@@ -339,46 +339,25 @@
                         }
                     }
                 }
-
-                // 6. Cargar y mostrar la fotografía existente
                 if (data.fotos_animal) {
                     let urlsFotos = [];
                     try {
-                        // Si está guardado como JSON string (ej: '["data:image/..."]')
                         if (data.fotos_animal.startsWith('[')) {
                             urlsFotos = JSON.parse(data.fotos_animal);
                         } else {
-                            urlsFotos = [data.fotos_animal]; // Si es una sola URL o texto plano
+                            urlsFotos = [data.fotos_animal];
                         }
                     } catch (e) {
                         urlsFotos = [data.fotos_animal];
                     }
 
-                    const previewContainer = document.getElementById('preview-container');
-                    const placeholderDrop = document.getElementById('contenido-drop-placeholder');
-
-                    if (urlsFotos.length > 0 && previewContainer) {
-                        if (placeholderDrop) placeholderDrop.style.display = 'none';
-                        previewContainer.innerHTML = ''; // Limpiar por si acaso
-
-                        // Si tienes una variable global imagenesBase64 en tu script principal, la alimentamos:
-                        if (typeof imagenesBase64 !== 'undefined') {
-                            imagenesBase64 = urlsFotos;
+                    if (urlsFotos.length > 0) {
+                        imagenesBase64 = urlsFotos; // Asignamos al arreglo global del JS
+                        if (typeof renderizarPrevisualizaciones === 'function') {
+                            renderizarPrevisualizaciones(); // Pinta las fotos con su botoncito 'X'
                         }
-
-                        urlsFotos.forEach(url => {
-                            const imgPreview = document.createElement('img');
-                            imgPreview.src = url;
-                            imgPreview.style.width = '70px';
-                            imgPreview.style.height = '70px';
-                            imgPreview.style.objectFit = 'cover';
-                            imgPreview.style.borderRadius = '8px';
-                            imgPreview.style.border = '2px solid #ccc';
-                            previewContainer.appendChild(imgPreview);
-                        });
                     }
                 }
-
                 console.log("✅ Datos y foto cargados correctamente para edición:", data);
             } catch (error) {
                 console.error("❌ Error al precargar datos:", error);
