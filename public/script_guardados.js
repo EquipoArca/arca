@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function mostrarMensajeIniciaSesion() {
-    const contenedor = document.getElementById('grid-publicaciones-guardadas');
+    const contenedor = document.getElementById('contenedorGuardados');
     if (contenedor) {
         contenedor.innerHTML = `
             <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
@@ -40,7 +40,7 @@ async function cargarPublicacionesGuardadas(correo) {
         if (!response.ok) throw new Error("No se pudieron cargar los guardados");
 
         const publicacionesGuardadas = await response.json();
-        const contenedor = document.getElementById('grid-publicaciones-guardadas');
+        const contenedor = document.getElementById('contenedorGuardados'); // ✅ ID corregido
         
         if (!contenedor) return;
         contenedor.innerHTML = ''; 
@@ -138,8 +138,7 @@ async function cargarPublicacionesGuardadas(correo) {
     }
 }
 
-// Escucha global para el botón de "Ver detalles" de las tarjetas guardadas (igual que en novedades)
-// ✅ CÓMO DEBE QUEDAR:
+// Escucha global para el botón de "Ver detalles" de las tarjetas guardadas
 document.addEventListener('click', (event) => {
     const botonDetalle = event.target.closest('.btn-detalles-guardado');
     if (botonDetalle) {
