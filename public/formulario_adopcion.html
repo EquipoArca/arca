@@ -279,74 +279,114 @@
     <script src="formulario_adopcion.js"></script>
     
     <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const idAdopcionEditar = urlParams.get('editar');
+    document.addEventListener('DOMContentLoaded', async () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const idAdopcionEditar = urlParams.get('editar');
 
-            if (idAdopcionEditar) {
-                const tituloForm = document.querySelector('.header-formulario-adopcion h2');
-                if (tituloForm) tituloForm.innerHTML = '<i class="fa-solid fa-paw"></i> Editar Publicación de Adopción 🐾';
+        if (idAdopcionEditar) {
+            const tituloForm = document.querySelector('.header-formulario-adopcion h2');
+            if (tituloForm) tituloForm.innerHTML = '<i class="fa-solid fa-paw"></i> Editar Publicación de Adopción 🐾';
 
-                try {
-                    const respuesta = await fetch(`/api/adopciones/${idAdopcionEditar}`);
-                    if (!respuesta.ok) throw new Error("No se pudo cargar la información para editar");
+            try {
+                const respuesta = await fetch(`/api/adopciones/${idAdopcionEditar}`);
+                if (!respuesta.ok) throw new Error("No se pudo cargar la información para editar");
 
-                    const data = await respuesta.json();
+                const data = await respuesta.json();
 
-                    // 1. Textos básicos
-                    if (document.getElementById('nombre-animal')) document.getElementById('nombre-animal').value = data.nombre_animal || '';
-                    if (document.getElementById('descripcion-adopcion')) document.getElementById('descripcion-adopcion').value = data.descripcion_animal || '';
-                    if (document.getElementById('contacto-telefono')) document.getElementById('contacto-telefono').value = data.telefono_contacto || '';
-                    if (document.getElementById('contacto-correo')) document.getElementById('contacto-correo').value = data.correo_contacto || '';
+                // 1. Textos básicos
+                if (document.getElementById('nombre-animal')) document.getElementById('nombre-animal').value = data.nombre_animal || '';
+                if (document.getElementById('descripcion-adopcion')) document.getElementById('descripcion-adopcion').value = data.descripcion_animal || '';
+                if (document.getElementById('contacto-telefono')) document.getElementById('contacto-telefono').value = data.telefono_contacto || '';
+                if (document.getElementById('contacto-correo')) document.getElementById('contacto-correo').value = data.correo_contacto || '';
 
-                    // 2. Ubicación combinada (Ciudad, Barrio)
-                    const inputUbi = document.getElementById('input-direccion-adopcion');
-                    if (inputUbi) {
-                        inputUbi.value = `${data.ciudad || 'Medellín'}, ${data.barrio || ''}`;
-                    }
+                // 2. Ubicación combinada (Ciudad, Barrio)
+                const inputUbi = document.getElementById('input-direccion-adopcion');
+                if (inputUbi) {
+                    inputUbi.value = `${data.ciudad || 'Medellín'}, ${data.barrio || ''}`;
+                }
 
-                    // 3. Edad aproximada (Separar mes y año si viene en formato MM/AAAA o similar)
-                    if (data.fecha_nacimiento_animal_aprox && data.fecha_nacimiento_animal_aprox.includes('/')) {
-                        const partesFecha = data.fecha_nacimiento_animal_aprox.split('/');
-                        if (document.getElementById('edad-mes')) document.getElementById('edad-mes').value = partesFecha[0];
-                        if (document.getElementById('edad-anio')) document.getElementById('edad-anio').value = partesFecha[1];
-                    }
+                // 3. Edad aproximada (Separar mes y año)
+                if (data.fecha_nacimiento_animal_aprox && data.fecha_nacimiento_animal_aprox.includes('/')) {
+                    const partesFecha = data.fecha_nacimiento_animal_aprox.split('/');
+                    if (document.getElementById('edad-mes')) document.getElementById('edad-mes').value = partesFecha[0];
+                    if (document.getElementById('edad-anio')) document.getElementById('edad-anio').value = partesFecha[1];
+                }
 
-                    // 4. Radio Buttons (Especie, Sexo, Tamaño)
-                    if (data.id_especie) {
-                        const radioEspecie = document.querySelector(`input[name="id_especie"][value="${data.id_especie}"]`);
-                        if (radioEspecie) radioEspecie.checked = true;
-                    }
-                    if (data.sexo_animal !== undefined && data.sexo_animal !== null) {
-                        const radioSexo = document.querySelector(`input[name="sexo_animal"][value="${data.sexo_animal}"]`);
-                        if (radioSexo) radioSexo.checked = true;
-                    }
-                    if (data.id_tamaño) {
-                        const radioTamano = document.querySelector(`input[name="id_tamaño"][value="${data.id_tamaño}"]`);
-                        if (radioTamano) radioTamano.checked = true;
-                    }
+                // 4. Radio Buttons (Especie, Sexo, Tamaño)
+                if (data.id_especie) {
+                    const radioEspecie = document.querySelector(`input[name="id_especie"][value="${data.id_especie}"]`);
+                    if (radioEspecie) radioEspecie.checked = true;
+                }
+                if (data.sexo_animal !== undefined && data.sexo_animal !== null) {
+                    const radioSexo = document.querySelector(`input[name="sexo_animal"][value="${data.sexo_animal}"]`);
+                    if (radioSexo) radioSexo.checked = true;
+                }
+                if (data.id_tamaño) {
+                    const radioTamano = document.querySelector(`input[name="id_tamaño"][value="${data.id_tamaño}"]`);
+                    if (radioTamano) radioTamano.checked = true;
+                }
 
-                    // 5. Raza (Select)
-                    const selectRaza = document.getElementById('select-raza');
-                    if (selectRaza && data.id_raza) {
-                        selectRaza.value = data.id_raza;
-                        if (data.id_raza.toString() === '9') {
-                            const inputOtroRaza = document.getElementById('otro-raza');
-                            if (inputOtroRaza) {
-                                inputOtroRaza.style.display = 'block';
-                                inputOtroRaza.value = data.otro_raza || '';
-                                inputOtroRaza.required = true;
-                            }
+                // 5. Raza (Select)
+                const selectRaza = document.getElementById('select-raza');
+                if (selectRaza && data.id_raza) {
+                    selectRaza.value = data.id_raza;
+                    if (data.id_raza.toString() === '9') {
+                        const inputOtroRaza = document.getElementById('otro-raza');
+                        if (inputOtroRaza) {
+                            inputOtroRaza.style.display = 'block';
+                            inputOtroRaza.value = data.otro_raza || '';
+                            inputOtroRaza.required = true;
                         }
                     }
-
-                    console.log("✅ Datos cargados correctamente para edición:", data);
-                } catch (error) {
-                    console.error("❌ Error al precargar datos:", error);
-                    alert("Hubo un error al cargar los datos para editar.");
                 }
+
+                // 6. Cargar y mostrar la fotografía existente
+                if (data.fotos_animal) {
+                    let urlsFotos = [];
+                    try {
+                        // Si está guardado como JSON string (ej: '["data:image/..."]')
+                        if (data.fotos_animal.startsWith('[')) {
+                            urlsFotos = JSON.parse(data.fotos_animal);
+                        } else {
+                            urlsFotos = [data.fotos_animal]; // Si es una sola URL o texto plano
+                        }
+                    } catch (e) {
+                        urlsFotos = [data.fotos_animal];
+                    }
+
+                    const previewContainer = document.getElementById('preview-container');
+                    const placeholderDrop = document.getElementById('contenido-drop-placeholder');
+
+                    if (urlsFotos.length > 0 && previewContainer) {
+                        if (placeholderDrop) placeholderDrop.style.display = 'none';
+                        previewContainer.innerHTML = ''; // Limpiar por si acaso
+
+                        // Si tienes una variable global imagenesBase64 en tu script principal, la alimentamos:
+                        if (typeof imagenesBase64 !== 'undefined') {
+                            imagenesBase64 = urlsFotos;
+                        }
+
+                        urlsFotos.forEach(url => {
+                            const imgPreview = document.createElement('img');
+                            imgPreview.src = url;
+                            imgPreview.style.width = '70px';
+                            imgPreview.style.height = '70px';
+                            imgPreview.style.objectFit = 'cover';
+                            imgPreview.style.borderRadius = '8px';
+                            imgPreview.style.border = '2px solid #ccc';
+                            previewContainer.appendChild(imgPreview);
+                        });
+                    }
+                }
+
+                console.log("✅ Datos y foto cargados correctamente para edición:", data);
+            } catch (error) {
+                console.error("❌ Error al precargar datos:", error);
+                alert("Hubo un error al cargar los datos para editar.");
             }
-        });
+        }
+    });
+
 
         document.addEventListener('DOMContentLoaded', () => {
             const btnToggleMenu = document.getElementById('btn-toggle-menu');
