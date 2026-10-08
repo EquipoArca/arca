@@ -59,9 +59,13 @@ self.addEventListener('activate', (e) => {
         }).then(() => self.clients.claim())
     );
 });
-
 // 3. ESTRATEGIA NETWORK-FIRST (Primero la red para ver cambios en Render, luego la caché)
 self.addEventListener('fetch', (e) => {
+    // Si la petición NO es GET (ej. POST, PUT, DELETE), déjala pasar directamente a la red sin interceptarla
+    if (e.request.method !== 'GET') {
+        return;
+    }
+
     // Si la petición es externa o a la API de tu backend, déjala pasar a la red directamente
     if (!e.request.url.startsWith(self.location.origin) || e.request.url.includes('/api/')) {
         return;
@@ -70,10 +74,12 @@ self.addEventListener('fetch', (e) => {
     e.respondWith(
         fetch(e.request)
             .then((respuestaRed) => {
-                // Si la red responde bien, guardamos una copia actualizada en caché y la devolvemos
-                if (respuestaRed && respuestaRed.status === 200) {
+                // Solo guardamos en caché si la respuesta es exitosa (200) y de tipo básico (mismo origen)
+                if (respuestaRed && respuestaRed.status === 200 && respuestaRed.type === 'basic') {
                     const copiaRespuesta = respuestaRed.clone();
-                    caches.open(NOMBRE_CACHE).then((cache) => cache.put(e.request, copiaRespuesta));
+                    caches.open(NOMBRE_CACHE).then((cache) => {
+                        cache.put(e.request, copiaRespuesta);
+                    });
                 }
                 return respuestaRed;
             })
@@ -91,4 +97,3 @@ self.addEventListener('fetch', (e) => {
             })
     );
 });
-

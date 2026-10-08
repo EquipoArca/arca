@@ -240,7 +240,7 @@ app.post('/guardar-foto-perfil', (req, res) => {
 
     const query = "UPDATE usuarios SET foto_perfil = ? WHERE correo_usuario = ?";
 
-    db.query(query, [fotoBase64 || null, correo_usuario], (err, result) => {
+    db.query(query, [fotoBase64 || null, correo_usuario], (err) => {
         if (err) {
             console.error("❌ Error al guardar foto:", err.message);
             return res.status(500).json({ error: "Error al actualizar en la base de datos." });
@@ -370,7 +370,7 @@ app.post('/actualizar-telefono-usuario', (req, res) => {
     }
 
     const query = "UPDATE usuarios SET Telefono_usuario = ?, telefono_verificado = 0 WHERE correo_usuario = ?";
-    db.query(query, [nuevo_telefono, correo_usuario], (err, result) => {
+    db.query(query, [nuevo_telefono, correo_usuario], (err) => {
         if (err) {
             console.error("❌ Error al actualizar teléfono:", err.message);
             return res.status(500).json({ error: "Error al actualizar en la base de datos." });
@@ -387,7 +387,7 @@ app.post('/verificar-telefono-usuario', (req, res) => {
     }
 
     const query = "UPDATE usuarios SET telefono_verificado = 1 WHERE correo_usuario = ?";
-    db.query(query, [correo_usuario], (err, result) => {
+    db.query(query, [correo_usuario], (err) => {
         if (err) {
             return res.status(500).json({ error: "Error al verificar en la base de datos." });
         }
@@ -395,26 +395,47 @@ app.post('/verificar-telefono-usuario', (req, res) => {
     });
 });
 // Ruta para actualizar el correo del usuario en la base de datos
-app.post('/actualizar-correo-usuario', async (req, res) => {
+app.post('/actualizar-correo-usuario', (req, res) => {
     const { correo_actual, nuevo_correo } = req.body;
 
     if (!correo_actual || !nuevo_correo) {
         return res.status(400).json({ success: false, mensaje: "Faltan datos requeridos." });
     }
 
-    try {
-        // Aquí ejecutas tu consulta SQL para actualizar el correo
-        const query = 'UPDATE usuarios SET correo_usuario = ? WHERE correo_usuario = ?';
-        // Ejemplo con pool de MySQL:
-        // await pool.query(query, [nuevo_correo, correo_actual]);
+    const correoActualLimpio = correo_actual.trim().toLowerCase();
+    const nuevoCorreoLimpio = nuevo_correo.trim().toLowerCase();
 
-        res.json({ success: true, mensaje: "Correo actualizado con éxito" });
-    } catch (error) {
-        console.error("Error en base de datos:", error);
-        res.status(500).json({ success: false, mensaje: "Error interno del servidor." });
-    }
+    // 1. Validamos que el nuevo correo no lo tenga otro usuario registrado
+    const sqlVerificar = "SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = ?";
+    db.query(sqlVerificar, [nuevoCorreoLimpio], (errVerif, filas) => {
+        if (errVerif) {
+            console.error("❌ Error al verificar correo nuevo:", errVerif);
+            return res.status(500).json({ success: false, mensaje: "Error en el servidor." });
+        }
+
+        if (filas.length > 0) {
+            return res.status(400).json({ success: false, mensaje: "El nuevo correo ya está registrado en otra cuenta." });
+        }
+
+        // 2. Si está disponible, actualizamos en la tabla usuarios
+        const queryUpdate = 'UPDATE usuarios SET correo_usuario = ? WHERE LOWER(TRIM(correo_usuario)) = ?';
+        db.query(queryUpdate, [nuevoCorreoLimpio, correoActualLimpio], (err, result) => {
+            if (err) {
+                console.error("❌ Error en base de datos al cambiar correo:", err);
+                return res.status(500).json({ success: false, mensaje: "Error interno del servidor." });
+            }
+
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ success: false, mensaje: "No se encontró ningún usuario con el correo actual." });
+            }
+
+            // 3. También actualizamos el correo en la tabla adoptante por si tiene ficha creada
+            db.query('UPDATE adoptante SET correo = ? WHERE LOWER(TRIM(correo)) = ?', [nuevoCorreoLimpio, correoActualLimpio], () => {
+                res.json({ success: true, mensaje: "Correo actualizado con éxito en la base de datos." });
+            });
+        });
+    });
 });
-
 // ==========================================
 // REPORTES Y ESTADÍSTICAS
 // ==========================================
@@ -712,32 +733,6 @@ app.post('/api/guardar-adoptante', (req, res) => {
 // GESTIÓN DE PUBLICACIONES Y GUARDADOS
 // ==========================================
 
-app.get('/api/mis-reportes', (req, res) => {
-    const correoUsuario = req.query.correo;
-
-    if (!correoUsuario) {
-        return res.status(400).json({ error: "Se requiere el correo del usuario" });
-    }
-
-    const sql = `
-        SELECT r.*, p.id_publicacion, tr.Nombre_tipo_reporte AS nombre_tipo_reporte
-        FROM reportes r
-        INNER JOIN usuarios u ON r.id_usuarios = u.id_usuarios
-        LEFT JOIN publicaciones p ON r.id_reporte = p.id_reporte
-        LEFT JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
-        WHERE LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(?))
-        ORDER BY r.Fecha_reporte DESC
-    `;
-
-    db.query(sql, [correoUsuario], (err, rows) => {
-        if (err) {
-            console.error("❌ Error al consultar los reportes:", err);
-            return res.status(500).json({ error: 'Hubo un error al obtener las publicaciones' });
-        }
-        res.json(rows);
-    });
-});
-
 app.post('/api/guardar-publicacion', (req, res) => {
     const { correo, id_publicacion } = req.body;
 
@@ -753,7 +748,7 @@ app.post('/api/guardar-publicacion', (req, res) => {
         const id_usuarios = results[0].id_usuarios;
         const query = `INSERT INTO guardados (id_usuarios, id_publicacion) VALUES (?, ?)`;
 
-        db.query(query, [id_usuarios, id_publicacion], (errInsert, result) => {
+        db.query(query, [id_usuarios, id_publicacion], (errInsert) => {
             if (errInsert) {
                 if (errInsert.code === 'ER_DUP_ENTRY') {
                     return res.status(400).json({ error: "Ya tienes esta publicación en tus guardados." });
@@ -804,7 +799,7 @@ app.post('/api/quitar-guardado', (req, res) => {
         WHERE LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(?)) AND g.id_publicacion = ?
     `;
 
-    db.query(query, [correo, id_publicacion], (err, result) => {
+    db.query(query, [correo, id_publicacion], (err) => {
         if (err) {
             console.error("❌ ERROR AL ELIMINAR GUARDADO:", err.message);
             return res.status(500).json({ error: "Error al eliminar de la base de datos" });
@@ -870,7 +865,106 @@ app.delete('/api/reportes/:id', (req, res) => {
         }
     });
 });
+// ==========================================
+// GET: Publicaciones Globales (Para detalles y feeds)
+// ==========================================
+app.get('/api/publicaciones-globales', (req, res) => {
+    const sql = `
+        SELECT 
+            p.id_publicacion,
+            'reporte' AS tipo_publicacion,
+            r.id_reporte AS id_origen,
+            r.Descripcion,
+            r.Ubicacion,
+            r.img_reporte,
+            r.Fecha_reporte,
+            tr.Nombre_tipo_reporte AS nombre_tipo_reporte,
+            r.telefono_contacto,
+            r.correo_contacto,
+            NULL AS nombre_animal
+        FROM publicaciones p
+        INNER JOIN reportes r ON p.id_reporte = r.id_reporte
+        LEFT JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
+        
+        UNION ALL
+        
+        SELECT 
+            p.id_publicacion,
+            'adopcion' AS tipo_publicacion,
+            pa.id_publicaciones_adopcion AS id_origen,
+            a.descripcion_animal AS Descripcion,
+            CONCAT(a.ciudad, ', ', a.barrio) AS Ubicacion,
+            a.fotos_animal AS img_reporte,
+            NOW() AS Fecha_reporte,
+            CONCAT('Adopción: ', a.nombre_animal) AS nombre_tipo_reporte,
+            pa.telefono_contacto,
+            pa.correo_contacto,
+            a.nombre_animal
+        FROM publicaciones p
+        INNER JOIN publicaciones_adopcion pa ON p.id_publicaciones_adopcion = pa.id_publicaciones_adopcion
+        INNER JOIN animal a ON pa.id_animal = a.id_animal
 
+        ORDER BY id_publicacion DESC
+    `;
+
+    db.query(sql, (err, rows) => {
+        if (err) {
+            console.error("❌ ERROR AL OBTENER PUBLICACIONES GLOBALES:", err.message);
+            return res.status(500).json({ error: 'Hubo un error al obtener las publicaciones globales', detalle: err.message });
+        }
+        res.json(rows);
+    });
+});
+app.delete('/api/adopciones/:id', (req, res) => {
+    const idAdopcion = req.params.id;
+
+    if (!idAdopcion || idAdopcion === 'undefined') {
+        return res.status(400).json({ error: "ID de adopción inválido." });
+    }
+
+    // 1. Buscamos el id_animal asociado a esta publicación de adopción
+    db.query(`SELECT id_animal FROM publicaciones_adopcion WHERE id_publicaciones_adopcion = ?`, [idAdopcion], (err, rows) => {
+        if (err) {
+            console.error("❌ Error al buscar adopción:", err.message);
+            return res.status(500).json({ error: "Error en el servidor" });
+        }
+
+        let idAnimal = rows && rows.length > 0 ? rows[0].id_animal : null;
+
+        const ejecutarBorradoAdopcionFinal = () => {
+            // Borramos de publicaciones generales usando el id_publicaciones_adopcion o id_animal
+            db.query(`DELETE FROM publicaciones WHERE id_publicaciones_adopcion = ? OR id_animal = ?`, [idAdopcion, idAnimal], () => {
+                // Borramos de publicaciones_adopcion
+                db.query(`DELETE FROM publicaciones_adopcion WHERE id_publicaciones_adopcion = ?`, [idAdopcion], () => {
+                    // Borramos el animal si existía
+                    const queryDeleteAnimal = idAnimal ? `DELETE FROM animal WHERE id_animal = ?` : null;
+                    const callbackBorrado = (errDel) => {
+                        if (errDel) {
+                            console.error("❌ Error al eliminar el animal:", errDel.message);
+                            return res.status(500).json({ error: "Error al eliminar los datos de la mascota" });
+                        }
+                        return res.json({ mensaje: "¡Publicación de adopción eliminada con éxito!" });
+                    };
+
+                    if (queryDeleteAnimal) {
+                        db.query(queryDeleteAnimal, [idAnimal], callbackBorrado);
+                    } else {
+                        res.json({ mensaje: "¡Publicación de adopción eliminada con éxito!" });
+                    }
+                });
+            });
+        };
+
+        if (idAnimal) {
+            // Borrar primero si está en guardados
+            db.query(`DELETE g FROM guardados g INNER JOIN publicaciones p ON g.id_publicacion = p.id_publicacion WHERE p.id_animal = ?`, [idAnimal], () => {
+                ejecutarBorradoAdopcionFinal();
+            });
+        } else {
+            ejecutarBorradoAdopcionFinal();
+        }
+    });
+});
 app.get('/api/reportes/:id', (req, res) => {
     const idReporte = req.params.id;
 
@@ -945,64 +1039,308 @@ app.put('/api/reportes/:id', (req, res) => {
         res.json({ mensaje: "¡Reporte actualizado con éxito!" });
     });
 });
+// ==========================================
+// MÓDULO CREACIÓN DE ADOPCIONES
+// ==========================================
+app.post('/api/crear-adopcion', (req, res) => {
+    const {
+        nombre_animal,
+        id_especie,
+        otro_especie,
+        sexo_animal,
+        edad_aprox,           // Recibe directo "mes/año" desde tu JavaScript del frontend
+        id_raza,
+        otro_raza,
+        id_tamaño,
+        descripcion_adopcion, // Coincide con el name del HTML
+        ubicacion_adopcion,   // Coincide con el input de texto "Medellín, Castilla"
+        fotos_animal,         // Recibe el JSON de imágenes procesadas
+        correo_usuario,       // Inyectado por tu JS del cliente antes de enviar
+        correo_contacto,
+        telefono_contacto
+    } = req.body;
 
-app.get('/api/publicaciones-globales', (req, res) => {
+    // Separamos la ubicación "Ciudad, Barrio" de forma limpia
+    let ciudad = "Medellín";
+    let barrio = "Desconocido";
+    if (ubicacion_adopcion && ubicacion_adopcion.includes(',')) {
+        const partes = ubicacion_adopcion.split(',');
+        ciudad = partes[0].trim();
+        barrio = partes[1].trim();
+    } else if (ubicacion_adopcion) {
+        barrio = ubicacion_adopcion.trim();
+    }
+
+    if (!nombre_animal || !id_especie || !correo_usuario) {
+        return res.status(400).json({ error: "Faltan campos obligatorios para registrar la adopción." });
+    }
+
+    db.query("SELECT id_usuarios, correo_usuario AS correo_bd, telefono_usuario AS telefono_bd FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))", [correo_usuario], (err, results) => {
+        if (err || results.length === 0) {
+            console.error("❌ Error al buscar el usuario:", err);
+            return res.status(500).json({ error: "No se pudo asociar el usuario a la adopción." });
+        }
+
+        const id_usuarios = results[0].id_usuarios;
+        const correoRegistrado = results[0].correo_bd;
+        const telefonoRegistrado = results[0].telefono_bd;
+        
+        const correoFinal = (correo_contacto && correo_contacto.trim() !== "") ? correo_contacto : correoRegistrado;
+        const telefonoFinal = (telefono_contacto && telefono_contacto.trim() !== "") ? telefono_contacto : telefonoRegistrado;
+        const id_estado = 2; // 2 = En adopción
+
+        db.beginTransaction(errTrans => {
+            if (errTrans) {
+                return res.status(500).json({ error: "Error al iniciar la transacción." });
+            }
+
+            // Insertamos usando los nombres reales y guardando edad_aprox como texto
+            const queryAnimal = `
+                INSERT INTO animal 
+                (nombre_animal, id_especie, otro_especie, id_estado, sexo_animal, fecha_nacimiento_animal_aprox, id_raza, otro_raza, id_tamaño, descripcion_animal, ciudad, barrio, fotos_animal, id_usuarios) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `;
+            
+            db.query(queryAnimal, [
+                nombre_animal, 
+                id_especie, 
+                otro_especie || null, 
+                id_estado, 
+                sexo_animal, 
+                edad_aprox,           // Se guarda el formato "mes/año" directo (ej. "06/2026")
+                id_raza, 
+                otro_raza || null, 
+                id_tamaño, 
+                descripcion_adopcion, // Mapeado correctamente desde el HTML
+                ciudad, 
+                barrio, 
+                fotos_animal || '', 
+                id_usuarios
+            ], (errAnim, resultadoAnimal) => {
+                if (errAnim) {
+                    return db.rollback(() => {
+                        res.status(500).json({ error: "Error al guardar el animal: " + errAnim.message });
+                    });
+                }
+                
+                const idAnimalGenerado = resultadoAnimal.insertId;
+
+                const queryAdopcion = "INSERT INTO publicaciones_adopcion (id_animal, id_usuarios, telefono_contacto, correo_contacto) VALUES (?, ?, ?, ?)";
+                
+                db.query(queryAdopcion, [idAnimalGenerado, id_usuarios, telefonoFinal, correoFinal], (errAdop, resultadoAdopcion) => {
+                    if (errAdop) {
+                        return db.rollback(() => {
+                            res.status(500).json({ error: "Error al guardar la adopción: " + errAdop.message });
+                        });
+                    }
+
+                    const idAdopcionGenerado = resultadoAdopcion.insertId;
+
+                    const queryPublicacion = "INSERT INTO publicaciones (id_animal, id_publicaciones_adopcion) VALUES (?, ?)";
+                    
+                    db.query(queryPublicacion, [idAnimalGenerado, idAdopcionGenerado], (errPub) => {
+                        if (errPub) {
+                            return db.rollback(() => {
+                                res.status(500).json({ error: "Error al registrar la publicación general: " + errPub.message });
+                            });
+                        }
+
+                        db.commit(errCommit => {
+                            if (errCommit) {
+                                return db.rollback(() => {
+                                    res.status(500).json({ error: "Error al confirmar la transacción." });
+                                });
+                            }
+                            res.status(200).json({ mensaje: "¡Adopción publicada con éxito!" });
+                        });
+                    });
+                });
+            });
+        });
+    });
+});
+// ==========================================
+// GET: Mis Publicaciones (Reportes + Adopciones unificadas)
+// ==========================================
+app.get('/api/mis-reportes', (req, res) => {
+    const correoUsuario = req.query.correo;
+
+    if (!correoUsuario) {
+        return res.status(400).json({ error: "Se requiere el correo del usuario" });
+    }
+
     const sql = `
-        SELECT r.*, p.id_publicacion, tr.Nombre_tipo_reporte AS nombre_tipo_reporte, u.nombre_usuario, u.foto_perfil 
-        FROM reportes r
+        SELECT 
+            p.id_publicacion,
+            'reporte' AS tipo_publicacion,
+            r.id_reporte AS id_origen,
+            r.Descripcion,
+            r.Ubicacion,
+            r.img_reporte,
+            r.Fecha_reporte,
+            tr.Nombre_tipo_reporte AS nombre_tipo_reporte,
+            r.telefono_contacto,
+            r.correo_contacto,
+            NULL AS nombre_animal
+        FROM publicaciones p
+        INNER JOIN reportes r ON p.id_reporte = r.id_reporte
         INNER JOIN usuarios u ON r.id_usuarios = u.id_usuarios
-        LEFT JOIN publicaciones p ON r.id_reporte = p.id_reporte
         LEFT JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
-        ORDER BY r.Fecha_reporte DESC
+        WHERE LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(?))
+        
+        UNION ALL
+        
+        SELECT 
+            p.id_publicacion,
+            'adopcion' AS tipo_publicacion,
+            pa.id_publicaciones_adopcion AS id_origen,
+            a.descripcion_animal AS Descripcion,
+            CONCAT(a.ciudad, ', ', a.barrio) AS Ubicacion,
+            a.fotos_animal AS img_reporte,
+            NOW() AS Fecha_reporte,
+            CONCAT('Adopción: ', a.nombre_animal) AS nombre_tipo_reporte,
+            pa.telefono_contacto,
+            pa.correo_contacto,
+            a.nombre_animal
+        FROM publicaciones p
+        INNER JOIN publicaciones_adopcion pa ON p.id_publicaciones_adopcion = pa.id_publicaciones_adopcion
+        INNER JOIN animal a ON pa.id_animal = a.id_animal
+        INNER JOIN usuarios u ON pa.id_usuarios = u.id_usuarios
+        WHERE LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(?))
+
+        ORDER BY id_publicacion DESC
     `;
 
-    db.query(sql, (err, rows) => {
+    db.query(sql, [correoUsuario, correoUsuario], (err, rows) => {
         if (err) {
-            console.error("❌ Error al obtener publicaciones globales:", err);
-            return res.status(500).json({ error: 'Hubo un error al obtener las novedades' });
+            console.error("❌ ERROR REAL EN ADOPCIONES/REPORTES:", err.message);
+            return res.status(500).json({ error: 'Hubo un error al obtener las publicaciones', detalle: err.message });
         }
         res.json(rows);
     });
 });
+// ==========================================
+// GET: Obtener datos de una adopción para editar
+// ==========================================
+app.get('/api/adopciones/:id', (req, res) => {
+    const idAdopcion = req.params.id;
 
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-    console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
-});
-
-// GET: Obtener rol de usuario por correo
-app.get('/api/obtener-rol', (req, res) => {
-    const { correo } = req.query;
-
-    if (!correo) {
-        return res.status(400).json({ error: "El correo es requerido." });
-    }
-
-    const query = `
-        SELECT u.id_usuarios, u.nombre_usuario, u.correo_usuario, r.nombre_rol, u.id_rol
-        FROM usuarios u
-        LEFT JOIN roles r ON u.id_rol = r.id_rol
-        WHERE LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(?))
+    const sql = `
+        SELECT 
+            pa.id_publicaciones_adopcion,
+            pa.telefono_contacto,
+            pa.correo_contacto,
+            a.*
+        FROM publicaciones_adopcion pa
+        INNER JOIN animal a ON pa.id_animal = a.id_animal
+        WHERE pa.id_publicaciones_adopcion = ?
     `;
 
-    db.query(query, [correo], (err, results) => {
+    db.query(sql, [idAdopcion], (err, results) => {
         if (err) {
-            console.error("❌ Error al consultar rol de usuario:", err);
-            return res.status(500).json({ error: "Error interno del servidor." });
+            console.error("❌ Error al consultar la adopción para editar:", err);
+            return res.status(500).json({ error: "Error en el servidor" });
         }
 
         if (results.length === 0) {
-            return res.status(404).json({ error: "Usuario no encontrado." });
+            return res.status(404).json({ error: "Publicación de adopción no encontrada" });
         }
 
-        res.json({
-            id_usuario: results[0].id_usuarios,
-            nombre_usuario: results[0].nombre_usuario,
-            correo: results[0].correo_usuario,
-            id_rol: results[0].id_rol,
-            rol: results[0].nombre_rol || 'Usuario' // Rol por defecto si es null
+        res.json(results[0]);
+    });
+});
+// ==========================================
+// MÓDULO ACTUALIZACIÓN DE ADOPCIONES
+// ==========================================
+app.put('/api/actualizar-adopcion/:id', (req, res) => {
+    const idAdopcion = req.params.id;
+    const {
+        nombre_animal,
+        id_especie,
+        otro_especie,
+        sexo_animal,
+        edad_aprox,
+        id_raza,
+        otro_raza,
+        id_tamaño,
+        descripcion_adopcion,
+        ubicacion_adopcion,
+        fotos_animal,
+        correo_contacto,
+        telefono_contacto
+    } = req.body;
+
+    if (!idAdopcion || !nombre_animal || !id_especie) {
+        return res.status(400).json({ error: "Faltan campos obligatorios para actualizar la adopción." });
+    }
+
+    let ciudad = "Medellín";
+    let barrio = "Desconocido";
+    if (ubicacion_adopcion && ubicacion_adopcion.includes(',')) {
+        const partes = ubicacion_adopcion.split(',');
+        ciudad = partes[0].trim();
+        barrio = partes[1].trim();
+    } else if (ubicacion_adopcion) {
+        barrio = ubicacion_adopcion.trim();
+    }
+
+    // Buscamos el id_animal asociado a esta adopción
+    db.query("SELECT id_animal FROM publicaciones_adopcion WHERE id_publicaciones_adopcion = ?", [idAdopcion], (err, rows) => {
+        if (err || rows.length === 0) {
+            return res.status(404).json({ error: "No se encontró la adopción a actualizar." });
+        }
+
+        const idAnimal = rows[0].id_animal;
+
+        db.beginTransaction(errTrans => {
+            if (errTrans) return res.status(500).json({ error: "Error en la transacción." });
+
+            // 1. Actualizar tabla animal
+            const queryUpdateAnimal = `
+                UPDATE animal 
+                SET nombre_animal = ?, id_especie = ?, otro_especie = ?, sexo_animal = ?, 
+                    fecha_nacimiento_animal_aprox = ?, id_raza = ?, otro_raza = ?, id_tamaño = ?, 
+                    descripcion_animal = ?, ciudad = ?, barrio = ?, fotos_animal = ?
+                WHERE id_animal = ?
+            `;
+
+            db.query(queryUpdateAnimal, [
+                nombre_animal, id_especie, otro_especie || null, sexo_animal,
+                edad_aprox, id_raza, otro_raza || null, id_tamaño,
+                descripcion_adopcion, ciudad, barrio, fotos_animal || '', idAnimal
+            ], (errAnim) => {
+                if (errAnim) {
+                    return db.rollback(() => res.status(500).json({ error: "Error al actualizar el animal: " + errAnim.message }));
+                }
+
+                // 2. Actualizar tabla publicaciones_adopcion
+                const queryUpdatePub = `
+                    UPDATE publicaciones_adopcion 
+                    SET telefono_contacto = ?, correo_contacto = ?
+                    WHERE id_publicaciones_adopcion = ?
+                `;
+
+                db.query(queryUpdatePub, [telefono_contacto || null, correo_contacto || null, idAdopcion], (errPub) => {
+                    if (errPub) {
+                        return db.rollback(() => res.status(500).json({ error: "Error al actualizar el contacto: " + errPub.message }));
+                    }
+
+                    db.commit(errCommit => {
+                        if (errCommit) {
+                            return db.rollback(() => res.status(500).json({ error: "Error al confirmar los cambios." }));
+                        }
+                        res.json({ mensaje: "¡Adopción actualizada con éxito!" });
+                    });
+                });
+            });
         });
     });
 });
 
+// ==========================================
+// INICIALIZACIÓN DEL SERVIDOR (Siempre al final)
+// ==========================================
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
+});

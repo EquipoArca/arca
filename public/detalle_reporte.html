@@ -725,10 +725,40 @@
               if (!respuesta.ok) throw new Error("No se pudo cargar la información.");
               
               const publicaciones = await respuesta.json();
-              const reporte = publicaciones.find(r =>
-               Number(r.id_reporte) === Number(reporteId) || Number(r.id_publicacion) === Number(reporteId));
-              if (!reporte) {
+              
+              // Buscamos el reporte evaluando todas las combinaciones posibles de ID para reportes
+              const reporte = publicaciones.find(r => 
+                  Number(r.id_reporte) === Number(reporteId) || 
+                  Number(r.id_publicacion) === Number(reporteId) || 
+                  Number(r.id_origen) === Number(reporteId)
+              );
+
+              // Respaldo directo por si viene de un fetch individual de reporte
+              let datosReporteFinal = reporte;
+              if (!datosReporteFinal) {
+                  try {
+                      const resIndividual = await fetch(`/api/reportes/${reporteId}`);
+                      if (resIndividual.ok) {
+                          datosReporteFinal = await resIndividual.json();
+                      }
+                  } catch (e) {
+                      console.warn("No se pudo obtener por ruta individual, usando lista global.");
+                  }
+              }
+
+              if (!datosReporteFinal) {
                   throw new Error("Reporte no encontrado.");
+              }
+              
+              // Usamos 'datosReporteFinal' para pintar la interfaz...
+              const reporteData = datosReporteFinal;
+
+              document.getElementById('lbl-fecha').textContent = `Publicado el ${reporteData.Fecha_reporte ? reporteData.Fecha_reporte.split('T')[0] : ''}`;
+              document.getElementById('lbl-tipo-reporte').textContent = reporteData.nombre_tipo_reporte || reporteData.Nombre_tipo_reporte || 'Reporte General';
+              document.getElementById('lbl-descripcion').textContent = reporteData.Descripcion || 'Sin descripción proporcionada.';
+              
+              if (reporteData.img_reporte) {
+                  document.getElementById('img-reporte').src = reporteData.img_reporte;
               }
 
               document.getElementById('lbl-fecha').textContent = `Publicado el ${reporte.Fecha_reporte ? reporte.Fecha_reporte.split('T')[0] : ''}`;

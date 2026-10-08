@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Publicar en Adopción - ARCA</title>
+    <link rel="stylesheet" href="style_home.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="dark-mode.css">
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        if (localStorage.getItem("modo_oscuro") === "true") {
+            document.body.classList.add("dark-mode");
+        }
+    });
+</script>
+</head>
+<body class="pagina-adopcion-body">
+
+  <!-- Barra de Navegación Superior -->
+  <nav class="top-nav">
+    <div class="top-left">
+        <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu"></i>
+        <div class="mini-logo-circle">
+            <img src="logo.png" alt="Logo">
+        </div>
+        <span class="page-title" id="titulo-pagina">Publicar Adopción</span>
+    </div>
+
+    <div class="search-bar">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="input-busqueda-nav" name="busqueda" placeholder="Busca algo" aria-label="Buscar en la aplicación">
+        <i class="fa-solid fa-microphone"></i>
+    </div>
+
+    <div class="top-right">
+        <div class="user-header-info">
+            <div class="user-profile-menu" id="user-profile-menu">
+                <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
+                    <img src="logo.png" id="user-avatar-img" alt="Perfil">
+                </div>
+                <div class="mini-menu-card" id="mini-menu-card">
+                    <div class="mini-menu-header">
+                        <span id="mini-menu-username">Usuario</span>
+                    </div>
+                    <hr class="mini-menu-divider">
+                    <a href="configuracion.html" class="mini-menu-item btn-ajustes">
+                        <i class="fa-solid fa-gear"></i>
+                        <span>Ajustes</span>
+                    </a>
+                    <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Cerrar sesión</span>
+                    </a>
+                </div>
+            </div>
+            <div class="notif-circle">
+                <a href="notificaciones.html" aria-label="Notificaciones"><i class="fa-solid fa-bell"></i></a>
+            </div>
+        </div>
+    </div>
+  </nav>
+
+    <!-- Barra Lateral (Sidebar) -->
+    <aside class="sidebar" id="sidebar">
+        <div class="side-icons">
+            <a href="home.html" class="menu-fila">
+                <i class="fa-solid fa-house"></i>
+                <span class="menu-text">Inicio</span>
+            </a>
+            <a href="perfil_usuario.html" class="menu-fila">
+                <i class="fa-solid fa-circle-user"></i>
+                <span class="menu-text">Perfil</span>
+            </a>
+            <a href="guardados_usuario.html" class="menu-fila">
+                <i class="fa-solid fa-bookmark"></i>
+                <span class="menu-text">Guardado</span>
+            </a>
+            <a href="mapa.html" class="menu-fila">
+                <i class="fa-solid fa-location-dot"></i>
+                <span class="menu-text">Mapa</span>
+            </a>
+            <a href="configuracion.html" class="menu-fila">
+                <i class="fa-solid fa-gear"></i>
+                <span class="menu-text">Ajustes</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Contenido Principal -->
+    <main class="main-content">
+        <div class="contenedor-adopcion-principal">
+            
+            <div class="header-formulario-adopcion">
+                <h2><i class="fa-solid fa-paw"></i> Encuéntrale un nuevo hogar</h2>
+                <p>Publica los datos con claridad para que más personas se enamoren de él o ella de forma segura.</p>
+            </div>
+
+            <form id="formAdopcionArca" class="grid-adopcion-tarjetas">
+                
+                <!-- Tarjeta 1: Información básica y Normas -->
+                <div class="card-adopcion-seccion">
+                    <div class="normas-adopcion-box">
+                        <div class="normas-titulo"><i class="fa-solid fa-shield-heart"></i> Normas de adopción:</div>
+                        <ul>
+                            <li>Solo publica animales bajo tu cuidado directo.</li>
+                            <li>Prohibida la venta o intercambio comercial.</li>
+                            <li>Garantiza condiciones óptimas de salud.</li>
+                            <li>Incluye fotos claras y recientes.</li>
+                            <li>Proporciona información veraz y completa.</li>
+                            <li>Animales ilegales serán reportados.</li>
+                        </ul>
+                    </div>
+
+                    <div class="campo-grupo">
+                        <label class="label-adopcion" for="nombre-animal">Nombre del animal</label>
+                        <input type="text" id="nombre-animal" name="nombre_animal" placeholder="Ej. Firulais" class="input-custom-adopcion" required>
+                    </div>
+
+                    <div class="campo-grupo">
+                        <label class="label-adopcion">Especie</label>
+                        <div class="opciones-grid-chips">
+                            <label class="chip-opcion">
+                                <input type="radio" name="id_especie" value="1" required>
+                                <span>Perro</span>
+                            </label>
+                            <label class="chip-opcion">
+                                <input type="radio" name="id_especie" value="2">
+                                <span>Gato</span>
+                            </label>
+                            <label class="chip-opcion">
+                                <input type="radio" name="id_especie" value="5">
+                                <span>Otro</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="campo-grupo">
+                        <label class="label-adopcion" for="select-raza">Raza</label>
+                        <select id="select-raza" name="id_raza" class="input-custom-adopcion" required>
+                            <option value="">Selecciona una raza...</option>
+                            <option value="1">Criollo</option>
+                            <option value="2">Pitbull</option>
+                            <option value="3">Golden</option>
+                            <option value="4">Labrador</option>
+                            <option value="5">Angora</option>
+                            <option value="6">Esfinge</option>
+                            <option value="7">Canario</option>
+                            <option value="8">Perico</option>
+                            <option value="9">Otro</option>
+                            <option value="10">No sabe</option>
+                        </select>
+                        <input type="text" id="otro-raza" name="otro_raza" placeholder="Si elegiste 'Otro', especifícala aquí" class="input-custom-adopcion mt-2" style="display:none;">
+                    </div>
+                </div>
+
+                <!-- Tarjeta 2: Edad, Sexo, Tamaño y Personalidad -->
+                <div class="card-adopcion-seccion">
+                    <div class="campo-grupo">
+                        <label class="label-adopcion">Edad aproximada (Mes y Año)</label>
+                        <div style="display: flex; gap: 10px;">
+                            <select id="edad-mes" class="input-custom-adopcion" required>
+                                <option value="" disabled selected>Mes</option>
+                                <option value="01">Enero</option>
+                                <option value="02">Febrero</option>
+                                <option value="03">Marzo</option>
+                                <option value="04">Abril</option>
+                                <option value="05">Mayo</option>
+                                <option value="06">Junio</option>
+                                <option value="07">Julio</option>
+                                <option value="08">Agosto</option>
+                                <option value="09">Septiembre</option>
+                                <option value="10">Octubre</option>
+                                <option value="11">Noviembre</option>
+                                <option value="12">Diciembre</option>
+                            </select>
+                            <select id="edad-anio" class="input-custom-adopcion" required>
+                                <option value="" disabled selected>Año</option>
+                                <option value="2026">2026</option>
+                                <option value="2025">2025</option>
+                                <option value="2024">2024</option>
+                                <option value="2023">2023</option>
+                                <option value="2022">2022</option>
+                                <option value="2021">2021</option>
+                                <option value="2020">2020</option>
+                                <option value="Más antiguo">Más antiguo</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="campo-grupo">
+                        <label class="label-adopcion">Sexo</label>
+                        <div class="opciones-grid-chips">
+                            <label class="chip-opcion">
+                                <input type="radio" name="sexo_animal" value="1" required>
+                                <span>Macho</span>
+                            </label>
+                            <label class="chip-opcion">
+                                <input type="radio" name="sexo_animal" value="0">
+                                <span>Hembra</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="campo-grupo">
+                        <label class="label-adopcion">Tamaño</label>
+                        <div class="opciones-grid-chips tres-cols">
+                            <label class="chip-opcion">
+                                <input type="radio" name="id_tamaño" value="1" required>
+                                <span>Pequeño</span>
+                            </label>
+                            <label class="chip-opcion">
+                                <input type="radio" name="id_tamaño" value="2">
+                                <span>Mediano</span>
+                            </label>
+                            <label class="chip-opcion">
+                                <input type="radio" name="id_tamaño" value="3">
+                                <span>Grande</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="campo-grupo">
+                        <label class="label-adopcion" for="descripcion-adopcion">Personalidad y salud</label>
+                        <textarea id="descripcion-adopcion" name="descripcion_adopcion" placeholder="¿Cómo es su comportamiento? ¿Está vacunado?" class="textarea-custom-adopcion" required></textarea>
+                    </div>
+                </div>
+
+                <!-- Tarjeta 3: Ubicación, Fotos y Publicación -->
+                <div class="card-adopcion-seccion">
+                    <div class="campo-grupo">
+                        <label class="label-adopcion" for="input-direccion-adopcion">Ubicación (Ciudad, Barrio)</label>
+                        <input type="text" id="input-direccion-adopcion" name="ubicacion_adopcion" placeholder="Ej. Medellín, Castilla" class="input-custom-adopcion" required>
+                    </div>
+
+                    <div class="campo-grupo">
+                        <label class="label-adopcion">Fotografía del animal</label>
+                        <div class="zona-drop-adopcion" id="zona-arrastre">
+                            <input type="file" id="input-archivo-oculto" name="fotos_adopcion" accept="image/*" multiple style="display: none;">
+                            <div class="preview-container-adopcion" id="preview-container" style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px;"></div>
+                            <div class="contenido-drop" id="contenido-drop-placeholder">
+                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                                <span>Haz clic o arrastra una foto aquí</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="campo-grupo">
+                        <label class="label-adopcion">Datos de contacto</label>
+                        <div class="input-contacto-wrapper" style="margin-bottom: 10px; position: relative;">
+                            <i class="fa-solid fa-phone" style="position: absolute; left: 12px; top: 14px; color: #888;"></i>
+                            <input type="tel" id="contacto-telefono" name="telefono_contacto" placeholder="Teléfono" class="input-custom-adopcion" style="padding-left: 35px;">
+                        </div>
+                        <div class="input-contacto-wrapper" style="position: relative;">
+                            <i class="fa-solid fa-envelope" style="position: absolute; left: 12px; top: 14px; color: #888;"></i>
+                            <input type="email" id="contacto-correo" name="correo_contacto" placeholder="Correo" class="input-custom-adopcion" style="padding-left: 35px;">
+                        </div>
+                    </div>
+
+
+                    <button type="submit" class="btn-enviar-adopcion-final">
+                        <i class="fa-solid fa-heart-circle-plus"></i> Publicar en adopciones
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </main>
+
+    <!-- Firebase v8 Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <!-- Scripts principales -->
+    <script src="script.js"></script>
+    <script src="formulario_adopcion.js"></script>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const idAdopcionEditar = urlParams.get('editar');
+
+        if (idAdopcionEditar) {
+            const tituloForm = document.querySelector('.header-formulario-adopcion h2');
+            if (tituloForm) tituloForm.innerHTML = '<i class="fa-solid fa-paw"></i> Editar Publicación de Adopción 🐾';
+
+            try {
+                const respuesta = await fetch(`/api/adopciones/${idAdopcionEditar}`);
+                if (!respuesta.ok) throw new Error("No se pudo cargar la información para editar");
+
+                const data = await respuesta.json();
+
+                // 1. Textos básicos
+                if (document.getElementById('nombre-animal')) document.getElementById('nombre-animal').value = data.nombre_animal || '';
+                if (document.getElementById('descripcion-adopcion')) document.getElementById('descripcion-adopcion').value = data.descripcion_animal || '';
+                if (document.getElementById('contacto-telefono')) document.getElementById('contacto-telefono').value = data.telefono_contacto || '';
+                if (document.getElementById('contacto-correo')) document.getElementById('contacto-correo').value = data.correo_contacto || '';
+
+                // 2. Ubicación combinada (Ciudad, Barrio)
+                const inputUbi = document.getElementById('input-direccion-adopcion');
+                if (inputUbi) {
+                    inputUbi.value = `${data.ciudad || 'Medellín'}, ${data.barrio || ''}`;
+                }
+
+                // 3. Edad aproximada (Separar mes y año)
+                if (data.fecha_nacimiento_animal_aprox && data.fecha_nacimiento_animal_aprox.includes('/')) {
+                    const partesFecha = data.fecha_nacimiento_animal_aprox.split('/');
+                    if (document.getElementById('edad-mes')) document.getElementById('edad-mes').value = partesFecha[0];
+                    if (document.getElementById('edad-anio')) document.getElementById('edad-anio').value = partesFecha[1];
+                }
+
+                // 4. Radio Buttons (Especie, Sexo, Tamaño)
+                if (data.id_especie) {
+                    const radioEspecie = document.querySelector(`input[name="id_especie"][value="${data.id_especie}"]`);
+                    if (radioEspecie) radioEspecie.checked = true;
+                }
+                if (data.sexo_animal !== undefined && data.sexo_animal !== null) {
+                    const radioSexo = document.querySelector(`input[name="sexo_animal"][value="${data.sexo_animal}"]`);
+                    if (radioSexo) radioSexo.checked = true;
+                }
+                if (data.id_tamaño) {
+                    const radioTamano = document.querySelector(`input[name="id_tamaño"][value="${data.id_tamaño}"]`);
+                    if (radioTamano) radioTamano.checked = true;
+                }
+
+                // 5. Raza (Select)
+                const selectRaza = document.getElementById('select-raza');
+                if (selectRaza && data.id_raza) {
+                    selectRaza.value = data.id_raza;
+                    if (data.id_raza.toString() === '9') {
+                        const inputOtroRaza = document.getElementById('otro-raza');
+                        if (inputOtroRaza) {
+                            inputOtroRaza.style.display = 'block';
+                            inputOtroRaza.value = data.otro_raza || '';
+                            inputOtroRaza.required = true;
+                        }
+                    }
+                }
+                if (data.fotos_animal) {
+                    let urlsFotos = [];
+                    try {
+                        if (data.fotos_animal.startsWith('[')) {
+                            urlsFotos = JSON.parse(data.fotos_animal);
+                        } else {
+                            urlsFotos = [data.fotos_animal];
+                        }
+                    } catch (e) {
+                        urlsFotos = [data.fotos_animal];
+                    }
+
+                    if (urlsFotos.length > 0) {
+                        imagenesBase64 = urlsFotos; // Asignamos al arreglo global del JS
+                        if (typeof renderizarPrevisualizaciones === 'function') {
+                            renderizarPrevisualizaciones(); // Pinta las fotos con su botoncito 'X'
+                        }
+                    }
+                }
+                console.log("✅ Datos y foto cargados correctamente para edición:", data);
+            } catch (error) {
+                console.error("❌ Error al precargar datos:", error);
+                alert("Hubo un error al cargar los datos para editar.");
+            }
+        }
+    });
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const btnToggleMenu = document.getElementById('btn-toggle-menu');
+            const sidebar = document.getElementById('sidebar');
+            if (btnToggleMenu && sidebar) {
+                btnToggleMenu.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    sidebar.classList.toggle('sidebar-abierta');
+                });
+            }
+
+            // Mostrar/Ocultar campo "Otro" en razas de forma dinámica
+            const selectRaza = document.getElementById('select-raza');
+            const inputOtroRaza = document.getElementById('otro-raza');
+            if(selectRaza && inputOtroRaza) {
+                selectRaza.addEventListener('change', (e) => {
+                    if(e.target.value === '9') {
+                        inputOtroRaza.style.display = 'block';
+                        inputOtroRaza.required = true;
+                    } else {
+                        inputOtroRaza.style.display = 'none';
+                        inputOtroRaza.required = false;
+                        inputOtroRaza.value = '';
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

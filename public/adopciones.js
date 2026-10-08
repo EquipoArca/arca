@@ -23,7 +23,7 @@ async function alHacerClicVerAnimales() {
     }
 
     try {
-        const respuesta = await fetch(`http://localhost:3000/api/verificar-adoptante?correo=${encodeURIComponent(user.email)}`, {
+        const respuesta = await fetch(`/api/verificar-adoptante?correo=${encodeURIComponent(user.email)}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -49,8 +49,6 @@ async function alHacerClicVerAnimales() {
         alert("Ocurrió un error al consultar tu perfil de adoptante. Revisa que el servidor Node.js esté corriendo.");
     }
 }
-
-// Manejador para el botón "Poner animal en adopción"
 function alHacerClicPonerEnAdopcion() {
     const user = usuarioActual || firebase.auth().currentUser;
     if (!user) {
@@ -61,9 +59,10 @@ function alHacerClicPonerEnAdopcion() {
         }
         return;
     }
-    alert("Próximamente: Formulario para registrar un animal en adopción.");
+    
+    // Redirige al formulario de adopción creado
+    window.location.href = "formulario_adopcion.html";
 }
-
 // CONTROLADORES DEL MODAL Y REDIRECCIÓN
 function abrirModalAviso() {
     const modal = document.getElementById('modal-aviso-adoptante');
