@@ -901,6 +901,9 @@ app.delete('/api/reportes/:id', (req, res) => {
 // ==========================================
 // GET: Publicaciones Globales (Para detalles y feeds)
 // ==========================================
+// ==========================================
+// GET: Publicaciones Globales (Para detalles y feeds)
+// ==========================================
 app.get('/api/publicaciones-globales', (req, res) => {
     const sql = `
         SELECT 
@@ -914,9 +917,11 @@ app.get('/api/publicaciones-globales', (req, res) => {
             tr.Nombre_tipo_reporte AS nombre_tipo_reporte,
             r.telefono_contacto,
             r.correo_contacto,
-            NULL AS nombre_animal
+            NULL AS nombre_animal,
+            u.nombre_usuario AS nombre_usuario
         FROM publicaciones p
         INNER JOIN reportes r ON p.id_reporte = r.id_reporte
+        INNER JOIN usuarios u ON r.id_usuarios = u.id_usuarios
         LEFT JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
         
         UNION ALL
@@ -933,11 +938,11 @@ app.get('/api/publicaciones-globales', (req, res) => {
             pa.telefono_contacto,
             pa.correo_contacto,
             a.nombre_animal,
-            u.nombre_usuario AS nombre_usuario -- 👈 Asegúrate de incluir esto
+            u.nombre_usuario AS nombre_usuario
         FROM publicaciones p
         INNER JOIN publicaciones_adopcion pa ON p.id_publicaciones_adopcion = pa.id_publicaciones_adopcion
         INNER JOIN animal a ON pa.id_animal = a.id_animal
-        INNER JOIN usuarios u ON pa.id_usuarios = u.id_usuarios -- o el campo de relación que uses
+        INNER JOIN usuarios u ON pa.id_usuarios = u.id_usuarios
 
         ORDER BY id_publicacion DESC
     `;
