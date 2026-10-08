@@ -865,6 +865,56 @@ app.delete('/api/reportes/:id', (req, res) => {
         }
     });
 });
+// ==========================================
+// GET: Publicaciones Globales (Para detalles y feeds)
+// ==========================================
+app.get('/api/publicaciones-globales', (req, res) => {
+    const sql = `
+        SELECT 
+            p.id_publicacion,
+            'reporte' AS tipo_publicacion,
+            r.id_reporte AS id_origen,
+            r.Descripcion,
+            r.Ubicacion,
+            r.img_reporte,
+            r.Fecha_reporte,
+            tr.Nombre_tipo_reporte AS nombre_tipo_reporte,
+            r.telefono_contacto,
+            r.correo_contacto,
+            NULL AS nombre_animal
+        FROM publicaciones p
+        INNER JOIN reportes r ON p.id_reporte = r.id_reporte
+        LEFT JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
+        
+        UNION ALL
+        
+        SELECT 
+            p.id_publicacion,
+            'adopcion' AS tipo_publicacion,
+            pa.id_publicaciones_adopcion AS id_origen,
+            a.descripcion_animal AS Descripcion,
+            CONCAT(a.ciudad, ', ', a.barrio) AS Ubicacion,
+            a.fotos_animal AS img_reporte,
+            NOW() AS Fecha_reporte,
+            CONCAT('Adopción: ', a.nombre_animal) AS nombre_tipo_reporte,
+            pa.telefono_contacto,
+            pa.correo_contacto,
+            a.nombre_animal
+        FROM publicaciones p
+        INNER JOIN publicaciones_adopcion pa ON p.id_publicaciones_adopcion = pa.id_publicaciones_adopcion
+        INNER JOIN animal a ON pa.id_animal = a.id_animal
+
+        ORDER BY id_publicacion DESC
+    `;
+
+    db.query(sql, (err, rows) => {
+        if (err) {
+            console.error("❌ ERROR AL OBTENER PUBLICACIONES GLOBALES:", err.message);
+            return res.status(500).json({ error: 'Hubo un error al obtener las publicaciones globales', detalle: err.message });
+        }
+        res.json(rows);
+    });
+});
 app.delete('/api/adopciones/:id', (req, res) => {
     const idAdopcion = req.params.id;
 
