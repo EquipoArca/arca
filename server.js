@@ -1265,9 +1265,11 @@ app.get('/api/adopciones/:id', (req, res) => {
             pa.id_publicaciones_adopcion,
             pa.telefono_contacto,
             pa.correo_contacto,
-            a.*
+            a.*,
+            u.nombre_usuario AS nombre_usuario
         FROM publicaciones_adopcion pa
         INNER JOIN animal a ON pa.id_animal = a.id_animal
+        INNER JOIN usuarios u ON pa.id_usuarios = u.id_usuarios
         WHERE pa.id_publicaciones_adopcion = ?
     `;
 
