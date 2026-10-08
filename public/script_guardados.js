@@ -40,7 +40,7 @@ async function cargarPublicacionesGuardadas(correo) {
         if (!response.ok) throw new Error("No se pudieron cargar los guardados");
 
         const publicacionesGuardadas = await response.json();
-        const contenedor = document.getElementById('contenedorGuardados'); // ✅ ID corregido
+        const contenedor = document.getElementById('contenedorGuardados'); 
         
         if (!contenedor) return;
         contenedor.innerHTML = ''; 
@@ -59,8 +59,7 @@ async function cargarPublicacionesGuardadas(correo) {
             return;
         }
 
-        // Usamos un bucle for...of para permitir el uso de 'await' al traducir la ubicación
-        for (const reporte of publicacionesGuardadas) {
+        for (const item of publicacionesGuardadas) {
             const card = document.createElement('div');
             card.className = 'publicacion-card';
             card.style.cssText = `
@@ -75,23 +74,23 @@ async function cargarPublicacionesGuardadas(correo) {
                 position: relative;
             `;
 
-            // Formatear la fecha correctamente igual que en mis publicaciones
+            // Formatear la fecha correctamente
             let fechaFormateada = "Fecha no disponible";
-            if (reporte.Fecha_reporte) {
-                const dateObj = new Date(reporte.Fecha_reporte);
+            if (item.Fecha_reporte) {
+                const dateObj = new Date(item.Fecha_reporte);
                 if (!isNaN(dateObj)) {
                     fechaFormateada = dateObj.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
                 }
             }
 
-            // Tipo de reporte seguro
-            const tipoReporte = reporte.nombre_tipo_reporte || reporte.Nombre_tipo_reporte || reporte.NOMBRE_TIPO_REPORTE || reporte.tipo_emergencia || 'Reporte Guardado';
+            const tipoReporte = item.nombre_tipo_reporte || item.Nombre_tipo_reporte || item.tipo_emergencia || 'Publicación Guardada';
             
-            // Extracción robusta del ID idéntica al estándar de novedades
-            const idUnico = reporte.id_reporte || reporte.id_publicacion || reporte.id;
+            // ID único y tipo de publicación para el botón
+            const idUnico = item.id_origen || item.id_reporte || item.id_publicacion || item.id;
+            const tipoPublicacion = item.tipo_publicacion || 'reporte';
 
             // Traducción automática de coordenadas a dirección legible
-            let textoUbicacionBruta = reporte.Ubicacion || '';
+            let textoUbicacionBruta = item.Ubicacion || '';
             let ubicacionBonita = await obtenerNombreUbicacionGlobal(textoUbicacionBruta);
 
             card.innerHTML = `
@@ -100,12 +99,12 @@ async function cargarPublicacionesGuardadas(correo) {
                         <i class="fa-regular fa-calendar" style="color: #e8a87c;"></i> ${fechaFormateada}
                     </span>
                     <span style="font-family: 'Itim', cursive; font-size: 12px; background: #faedcd; color: #8c6d3f; padding: 3px 10px; border-radius: 10px;">
-                        Guardado
+                        Guardado (${tipoPublicacion})
                     </span>
                 </div>
 
                 ${(() => {
-                    let fotoSrc = reporte.img_reporte || '';
+                    let fotoSrc = item.img_reporte || '';
                     if (fotoSrc.startsWith('[')) {
                         try {
                             const parsed = JSON.parse(fotoSrc);
@@ -124,7 +123,7 @@ async function cargarPublicacionesGuardadas(correo) {
                 </h3>
 
                 <p style="font-family: 'Itim', cursive; color: #555; font-size: 15px; margin: 0; line-height: 1.4;">
-                    ${reporte.Descripcion ? reporte.Descripcion : 'Sin descripción.'}
+                    ${item.Descripcion ? item.Descripcion : 'Sin descripción.'}
                 </p>
 
                 <div style="display: flex; align-items: center; gap: 6px; font-family: 'Itim', cursive; color: #666; font-size: 14px; margin-top: 2px;">
@@ -133,7 +132,7 @@ async function cargarPublicacionesGuardadas(correo) {
                 </div>
 
                 <div style="display: flex; gap: 8px; margin-top: 8px;">
-                    <button class="btn-detalles-guardado" data-id="${idUnico}" style="flex: 1; background: #e8a87c; border: 2px solid #e8a87c; color: white; font-family: 'Itim', cursive; padding: 8px 10px; border-radius: 15px; text-align: center; cursor: pointer; transition: background 0.2s;">
+                    <button class="btn-detalles-guardado" data-id="${idUnico}" data-tipo="${tipoPublicacion}" style="flex: 1; background: #e8a87c; border: 2px solid #e8a87c; color: white; font-family: 'Itim', cursive; padding: 8px 10px; border-radius: 15px; text-align: center; cursor: pointer; transition: background 0.2s;">
                         <i class="fa-solid fa-eye"></i> Ver detalles
                     </button>
                 </div>
@@ -147,15 +146,21 @@ async function cargarPublicacionesGuardadas(correo) {
     }
 }
 
-// Escucha global para el botón de "Ver detalles" de las tarjetas guardadas
+// Escucha global para el botón de "Ver detalles" de las tarjetas guardadas (soporta reportes y adopciones)
 document.addEventListener('click', (event) => {
     const botonDetalle = event.target.closest('.btn-detalles-guardado');
     if (botonDetalle) {
-        const reporteId = botonDetalle.getAttribute('data-id');
-        if (reporteId && reporteId !== "undefined" && reporteId !== "null") {
-            window.location.href = `detalle_reporte.html?id=${reporteId}&origen=guardados`;
+        const idPub = botonDetalle.getAttribute('data-id');
+        const tipoPub = botonDetalle.getAttribute('data-tipo');
+
+        if (idPub && idPub !== "undefined" && idPub !== "null") {
+            if (tipoPub === 'adopcion') {
+                window.location.href = `detalle_adopcion.html?id=${idPub}&origen=guardados`;
+            } else {
+                window.location.href = `detalle_reporte.html?id=${idPub}&origen=guardados`;
+            }
         } else {
-            console.error("El ID del reporte guardado no es válido:", reporteId);
+            console.error("El ID de la publicación guardada no es válido:", idPub);
         }
     }
 });
