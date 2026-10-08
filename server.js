@@ -766,17 +766,50 @@ app.get('/api/guardar-publicacion/:correo', (req, res) => {
     const correo = req.params.correo;
 
     const query = `
-        SELECT r.*, p.id_publicacion, tr.Nombre_tipo_reporte AS nombre_tipo_reporte 
+        SELECT 
+            p.id_publicacion,
+            'reporte' AS tipo_publicacion,
+            r.id_reporte AS id_origen,
+            r.Descripcion,
+            r.Ubicacion,
+            r.img_reporte,
+            r.Fecha_reporte,
+            tr.Nombre_tipo_reporte AS nombre_tipo_reporte,
+            r.telefono_contacto,
+            r.correo_contacto,
+            NULL AS nombre_animal
         FROM guardados g
         INNER JOIN usuarios u ON g.id_usuarios = u.id_usuarios
         INNER JOIN publicaciones p ON g.id_publicacion = p.id_publicacion
         INNER JOIN reportes r ON p.id_reporte = r.id_reporte
         LEFT JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
         WHERE LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(?))
-        ORDER BY r.Fecha_reporte DESC
+        
+        UNION ALL
+        
+        SELECT 
+            p.id_publicacion,
+            'adopcion' AS tipo_publicacion,
+            pa.id_publicaciones_adopcion AS id_origen,
+            a.descripcion_animal AS Descripcion,
+            CONCAT(a.ciudad, ', ', a.barrio) AS Ubicacion,
+            a.fotos_animal AS img_reporte,
+            NOW() AS Fecha_reporte,
+            CONCAT('Adopción: ', a.nombre_animal) AS nombre_tipo_reporte,
+            pa.telefono_contacto,
+            pa.correo_contacto,
+            a.nombre_animal
+        FROM guardados g
+        INNER JOIN usuarios u ON g.id_usuarios = u.id_usuarios
+        INNER JOIN publicaciones p ON g.id_publicacion = p.id_publicacion
+        INNER JOIN publicaciones_adopcion pa ON p.id_publicaciones_adopcion = pa.id_publicaciones_adopcion
+        INNER JOIN animal a ON pa.id_animal = a.id_animal
+        WHERE LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(?))
+
+        ORDER BY id_publicacion DESC
     `;
 
-    db.query(query, [correo], (err, results) => {
+    db.query(query, [correo, correo], (err, results) => {
         if (err) {
             console.error("❌ ERROR AL OBTENER GUARDADOS:", err.message);
             return res.status(500).json({ error: "Error al obtener las publicaciones guardadas" });

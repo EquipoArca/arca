@@ -104,11 +104,20 @@ async function cargarPublicacionesGuardadas(correo) {
                     </span>
                 </div>
 
-                ${reporte.img_reporte ? `
-                    <div style="width: 100%; height: 160px; border-radius: 12px; overflow: hidden;">
-                        <img src="${reporte.img_reporte}" alt="Imagen del reporte" style="width: 100%; height: 100%; object-fit: cover;">
-                    </div>
-                ` : ''}
+                ${(() => {
+                    let fotoSrc = reporte.img_reporte || '';
+                    if (fotoSrc.startsWith('[')) {
+                        try {
+                            const parsed = JSON.parse(fotoSrc);
+                            fotoSrc = parsed[0] || '';
+                        } catch (e) {}
+                    }
+                    return fotoSrc ? `
+                        <div style="width: 100%; height: 160px; border-radius: 12px; overflow: hidden;">
+                            <img src="${fotoSrc}" alt="Imagen de la publicación" style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                    ` : '';
+                })()}
 
                 <h3 style="font-family: 'Itim', cursive; color: #2c2c2c; font-size: 20px; margin: 0;">
                     ${tipoReporte}
