@@ -658,7 +658,7 @@
           cerrarModalArca();
       });
 
-      async function cargarDetalleAdopcion() {
+async function cargarDetalleAdopcion() {
           const params = new URLSearchParams(window.location.search);
           const adopcionId = params.get('id');
 
@@ -669,41 +669,37 @@
           }
 
           try {
-              // Consultamos las publicaciones globales que ya incluyen tanto reportes como adopciones
-              const respuesta = await fetch(`/api/publicaciones-globales`);
-              if (!respuesta.ok) throw new Error("No se pudo cargar la información.");
+              // Hacemos la petición directa al endpoint específico de adopciones
+              const respuesta = await fetch(`/api/adopciones/${adopcionId}`);
+              if (!respuesta.ok) throw new Error("No se pudo cargar la información de la adopción.");
               
-              const publicaciones = await respuesta.json();
-              
-              // Buscamos la adopción filtrando por su id o id_origen
-              const adopcion = publicaciones.find(p => 
-                  p.tipo_publicacion === 'adopcion' && 
-                  (Number(p.id_publicacion) === Number(adopcionId) || Number(p.id_origen) === Number(adopcionId))
-              );
+              const adopcion = await respuesta.json();
 
               if (!adopcion) {
                   throw new Error("Publicación de adopción no encontrada.");
               }
 
               // Nombre y tipo de mascota
-              document.getElementById('lbl-nombre-mascota').textContent = adopcion.nombre_tipo_reporte || `Adopción: ${adopcion.nombre_animal || 'Mascota'}`;
-              document.getElementById('lbl-info-extra').textContent = `${adopcion.nombre_animal ? 'Mascota: ' + adopcion.nombre_animal : 'Disponible para adopción'}`;
-              document.getElementById('lbl-descripcion').textContent = adopcion.Descripcion || 'Sin descripción proporcionada.';
+              const nombreAnimal = adopcion.nombre_animal || 'Mascota';
+              document.getElementById('lbl-nombre-mascota').textContent = `Adopción: ${nombreAnimal}`;
+              document.getElementById('lbl-info-extra').textContent = `Raza/Especie: ${adopcion.nombre_raza || adopcion.raza || 'No especificada'}`;
+              document.getElementById('lbl-descripcion').textContent = adopcion.descripcion_animal || adopcion.Descripcion || 'Sin descripción proporcionada.';
               
-              // Manejo de imagen (puede venir como string plano o JSON array)
-              if (adopcion.img_reporte) {
-                  let fotoSrc = adopcion.img_reporte;
-                  if (fotoSrc.startsWith('[')) {
-                      try {
-                          const parsed = JSON.parse(fotoSrc);
-                          fotoSrc = parsed[0] || 'logo.png';
-                      } catch (e) {}
-                  }
-                  document.getElementById('img-adopcion').src = fotoSrc;
+              // Manejo de imágenes (soporta string plano o arreglo JSON como ['url1', 'url2'])
+              let fotoSrc = adopcion.fotos_animal || adopcion.img_reporte || 'logo.png';
+              if (fotoSrc.startsWith('[')) {
+                  try {
+                      const parsed = JSON.parse(fotoSrc);
+                      fotoSrc = parsed[0] || 'logo.png';
+                  } catch (e) {}
               }
+              document.getElementById('img-adopcion').src = fotoSrc;
 
               // Ubicación
-              document.getElementById('lbl-ubicacion').innerHTML = `<span>${adopcion.Ubicacion || 'Medellín'}</span>`;
+              const ciudad = adopcion.ciudad || '';
+              const barrio = adopcion.barrio || '';
+              const textoUbicacion = [barrio, ciudad].filter(Boolean).join(', ') || adopcion.Ubicacion || 'Medellín';
+              document.getElementById('lbl-ubicacion').innerHTML = `<span>${textoUbicacion}</span>`;
 
               // Contacto
               let contactoHTML = "";
@@ -759,7 +755,7 @@
               }
               document.getElementById('lbl-contacto').innerHTML = contactoHTML;
 
-              // Nombre del autor de la publicación
+              // Nombre del autor real de la publicación
               const nombreUsuario = adopcion.nombre_usuario || adopcion.nombre || 'usuario';
               document.getElementById('nombre-autor-texto').textContent = `@${nombreUsuario}`;
 
