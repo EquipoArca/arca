@@ -678,15 +678,13 @@ async function cargarDetalleAdopcion() {
               if (!adopcion) {
                   throw new Error("Publicación de adopción no encontrada.");
               }
-
-              // Nombre y tipo de mascota
+            // Nombre y tipo de mascota
               const nombreAnimal = adopcion.nombre_animal || 'Mascota';
               document.getElementById('lbl-nombre-mascota').textContent = `Adopción: ${nombreAnimal}`;
-              document.getElementById('lbl-nombre-mascota').textContent = `Adopción: ${nombreAnimal}`;
               
-              // Lógica inteligente combinando especie y raza (incluyendo campo "Otro" si existe)
-              const especie = adopcion.especie_catalogo || adopcion.especie || adopcion.tipo_animal || '';
-              const raza = adopcion.otra_raza || adopcion.nombre_raza || adopcion.raza || '';
+              // Lógica inteligente combinando especie y raza de la tabla 'animal' (a.*)
+              const especie = adopcion.especie || adopcion.tipo_animal || '';
+              const raza = adopcion.otra_raza || adopcion.raza || '';
               
               let textoEspecieRaza = "No especificada";
               if (especie && raza) {
@@ -696,9 +694,9 @@ async function cargarDetalleAdopcion() {
               } else if (raza) {
                   textoEspecieRaza = raza;
               }
-              document.getElementById('lbl-info-extra').textContent = `Raza/Especie: ${adopcion.nombre_raza || adopcion.raza || 'No especificada'}`;
+
+              document.getElementById('lbl-info-extra').textContent = `Especie / Raza: ${textoEspecieRaza}`;
               document.getElementById('lbl-descripcion').textContent = adopcion.descripcion_animal || adopcion.Descripcion || 'Sin descripción proporcionada.';
-              
               // Manejo de imágenes (soporta string plano o arreglo JSON como ['url1', 'url2'])
               let fotoSrc = adopcion.fotos_animal || adopcion.img_reporte || 'logo.png';
               if (fotoSrc.startsWith('[')) {
