@@ -682,17 +682,24 @@
               // --- LÓGICA INTELIGENTE DE ESPECIE Y RAZA ---
               const especie = adopcion.especie_catalogo || adopcion.especie || adopcion.otro_especie || '';
               const raza = adopcion.raza_catalogo || adopcion.raza || adopcion.otra_raza || '';
-              
+             
+              let especieTexto = adopcion.especie || adopcion.otro_especie || '';
+              if (Number(adopcion.id_especie) === 1) especieTexto = 'Perro';
+              if (Number(adopcion.id_especie) === 2) especieTexto = 'Gato';
+              if (!especieTexto && adopcion.id_especie) especieTexto = `Especie ID: ${adopcion.id_especie}`;
+
+              let razaTexto = adopcion.raza || adopcion.otra_raza || '';
+              if (!razaTexto && adopcion.id_raza && adopcion.id_raza > 1) razaTexto = `Raza específica`;
+
               let textoEspecieRaza = "No especificada";
-              if (especie && raza) {
-                  textoEspecieRaza = `${especie} - ${raza}`;
-              } else if (especie) {
-                  textoEspecieRaza = especie;
-              } else if (raza) {
-                  textoEspecieRaza = raza;
+              if (especieTexto && razaTexto) {
+                  textoEspecieRaza = `${especieTexto} - ${razaTexto}`;
+              } else if (especieTexto) {
+                  textoEspecieRaza = especieTexto;
+              } else if (razaTexto) {
+                  textoEspecieRaza = razaTexto;
               }
               document.getElementById('lbl-info-extra').textContent = `Especie / Raza: ${textoEspecieRaza}`;
-
               // Descripción
               document.getElementById('lbl-descripcion').textContent = adopcion.descripcion_animal || adopcion.Descripcion || 'Sin descripción proporcionada.';
 
