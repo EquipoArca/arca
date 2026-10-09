@@ -1271,21 +1271,25 @@ app.get('/api/adopciones/:id', (req, res) => {
             pa.telefono_contacto,
             pa.correo_contacto,
             a.*,
-            u.nombre_usuario AS nombre_usuario
+            u.nombre_usuario AS nombre_usuario,
+            e.nombre_especie AS especie_catalogo,
+            r.nombre_raza AS raza_catalogo
         FROM publicaciones_adopcion pa
         INNER JOIN animal a ON pa.id_animal = a.id_animal
         INNER JOIN usuarios u ON pa.id_usuarios = u.id_usuarios
+        LEFT JOIN especie e ON a.id_especie = e.id_especie
+        LEFT JOIN raza r ON a.id_raza = r.id_raza
         WHERE pa.id_publicaciones_adopcion = ?
     `;
 
     db.query(sql, [idAdopcion], (err, results) => {
         if (err) {
             console.error("❌ Error al consultar la adopción:", err);
-            return res.status(500).json({ error: "Error en el servidor", detalle: err.message });
+            return res.status(500).json({ error: "Error en el servidor" });
         }
 
         if (results.length === 0) {
-            return res.status(404).json({ error: "Publicación de adopción no encontrada" });
+            return res.status(404).json({ error: "Publicación no encontrada" });
         }
 
         res.json(results[0]);

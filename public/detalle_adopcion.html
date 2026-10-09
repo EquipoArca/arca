@@ -178,9 +178,9 @@
         .detalle-foto-wrapper img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain; /* Muestra la foto completa sin recortar bordes */
+            background-color: #fff; /* Fondo limpio por si la foto es vertical u horizontal */
         }
-
         .detalle-caja-descripcion {
             background: rgba(255, 255, 255, 0.65);
             backdrop-filter: blur(12px);
@@ -658,7 +658,7 @@
           cerrarModalArca();
       });
 
-async function cargarDetalleAdopcion() {
+    async function cargarDetalleAdopcion() {
           const params = new URLSearchParams(window.location.search);
           const adopcionId = params.get('id');
 
@@ -669,22 +669,19 @@ async function cargarDetalleAdopcion() {
           }
 
           try {
-              // Hacemos la petición directa al endpoint específico de adopciones
               const respuesta = await fetch(`/api/adopciones/${adopcionId}`);
               if (!respuesta.ok) throw new Error("No se pudo cargar la información de la adopción.");
               
               const adopcion = await respuesta.json();
+              if (!adopcion) throw new Error("Publicación de adopción no encontrada.");
 
-              if (!adopcion) {
-                  throw new Error("Publicación de adopción no encontrada.");
-              }
-            // Nombre y tipo de mascota
+              // Nombre de la mascota
               const nombreAnimal = adopcion.nombre_animal || 'Mascota';
               document.getElementById('lbl-nombre-mascota').textContent = `Adopción: ${nombreAnimal}`;
-              
-              // Lógica inteligente combinando especie y raza de la tabla 'animal' (a.*)
-              const especie = adopcion.especie || adopcion.tipo_animal || '';
-              const raza = adopcion.otra_raza || adopcion.raza || '';
+
+              // --- LÓGICA INTELIGENTE DE ESPECIE Y RAZA ---
+              const especie = adopcion.especie_catalogo || adopcion.especie || adopcion.otro_especie || '';
+              const raza = adopcion.raza_catalogo || adopcion.raza || adopcion.otra_raza || '';
               
               let textoEspecieRaza = "No especificada";
               if (especie && raza) {
@@ -694,10 +691,12 @@ async function cargarDetalleAdopcion() {
               } else if (raza) {
                   textoEspecieRaza = raza;
               }
-
               document.getElementById('lbl-info-extra').textContent = `Especie / Raza: ${textoEspecieRaza}`;
+
+              // Descripción
               document.getElementById('lbl-descripcion').textContent = adopcion.descripcion_animal || adopcion.Descripcion || 'Sin descripción proporcionada.';
-              // Manejo de imágenes (soporta string plano o arreglo JSON como ['url1', 'url2'])
+
+              // Manejo de imágenes
               let fotoSrc = adopcion.fotos_animal || adopcion.img_reporte || 'logo.png';
               if (fotoSrc.startsWith('[')) {
                   try {
@@ -717,7 +716,6 @@ async function cargarDetalleAdopcion() {
               let contactoHTML = "";
               const tel = adopcion.telefono_contacto ? adopcion.telefono_contacto.trim() : "";
               const correo = adopcion.correo_contacto ? adopcion.correo_contacto.trim() : "";
-
               const urlGmail = correo ? `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(correo)}&su=${encodeURIComponent("Sobre la adopción en ARCA")}&body=${encodeURIComponent("Hola, vi la publicación de adopción en ARCA y me interesa adoptar...")}` : "";
               const urlWhatsapp = tel ? `https://wa.me/${tel.replace(/\D/g,'')}` : "";
 
@@ -727,17 +725,13 @@ async function cargarDetalleAdopcion() {
                           <a href="javascript:void(0)" onclick="abrirModalArca('Abrir WhatsApp', '¿Deseas abrir WhatsApp para escribir al número ${tel}?', '${urlWhatsapp}')" class="btn-contacto-link whatsapp">
                               <i class="fa-brands fa-whatsapp"></i> ${tel}
                           </a>
-                          <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${tel}')" title="Copiar teléfono">
-                              <i class="fa-solid fa-copy"></i> Copiar
-                          </button>
+                          <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${tel}')"><i class="fa-solid fa-copy"></i> Copiar</button>
                       </div>
                       <div class="contacto-fila-item">
                           <a href="javascript:void(0)" onclick="abrirModalArca('Abrir Gmail', '¿Deseas redactar un correo a ${correo} usando Gmail?', '${urlGmail}')" class="btn-contacto-link correo">
                               <i class="fa-solid fa-envelope"></i> ${correo}
                           </a>
-                          <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${correo}')" title="Copiar correo">
-                              <i class="fa-solid fa-copy"></i> Copiar
-                          </button>
+                          <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${correo}')"><i class="fa-solid fa-copy"></i> Copiar</button>
                       </div>
                   `;
               } else if (tel) {
@@ -746,9 +740,7 @@ async function cargarDetalleAdopcion() {
                           <a href="javascript:void(0)" onclick="abrirModalArca('Abrir WhatsApp', '¿Deseas abrir WhatsApp para escribir al número ${tel}?', '${urlWhatsapp}')" class="btn-contacto-link whatsapp">
                               <i class="fa-brands fa-whatsapp"></i> ${tel}
                           </a>
-                          <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${tel}')" title="Copiar teléfono">
-                              <i class="fa-solid fa-copy"></i> Copiar
-                          </button>
+                          <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${tel}')"><i class="fa-solid fa-copy"></i> Copiar</button>
                       </div>
                   `;
               } else if (correo) {
@@ -757,9 +749,7 @@ async function cargarDetalleAdopcion() {
                           <a href="javascript:void(0)" onclick="abrirModalArca('Abrir Gmail', '¿Deseas redactar un correo a ${correo} usando Gmail?', '${urlGmail}')" class="btn-contacto-link correo">
                               <i class="fa-solid fa-envelope"></i> ${correo}
                           </a>
-                          <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${correo}')" title="Copiar correo">
-                              <i class="fa-solid fa-copy"></i> Copiar
-                          </button>
+                          <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${correo}')"><i class="fa-solid fa-copy"></i> Copiar</button>
                       </div>
                   `;
               } else {
@@ -767,9 +757,73 @@ async function cargarDetalleAdopcion() {
               }
               document.getElementById('lbl-contacto').innerHTML = contactoHTML;
 
-              // Nombre del autor real de la publicación
-              const nombreUsuario = adopcion.nombre_usuario || adopcion.nombre || 'usuario';
+              // Autor
+              const nombreUsuario = adopcion.nombre_usuario || 'usuario';
               document.getElementById('nombre-autor-texto').textContent = `@${nombreUsuario}`;
+
+              // --- BOTÓN DE GUARDADO / QUITAR GUARDADO INTERACTIVO ---
+              const correoLogueado = localStorage.getItem('correo_usuario');
+              const contenedorAccion = document.getElementById('contenedor-boton-accion');
+
+              if (correoLogueado) {
+                  // Buscamos el ID general de la publicación correspondiente a esta adopción
+                  const resPubs = await fetch('/api/publicaciones-globales');
+                  const publicaciones = await resPubs.json();
+                  const pubEncontrada = publicaciones.find(p => p.tipo_publicacion === 'adopcion' && Number(p.id_origen) === Number(adopcionId));
+                  
+                  if (pubEncontrada) {
+                      const idPublicacionGlobal = pubEncontrada.id_publicacion;
+                      
+                      // Verificamos si ya está guardada
+                      const resGuards = await fetch(`/api/guardados/ids/${encodeURIComponent(correoLogueado)}`);
+                      const idsGuardados = await resGuards.json();
+                      const estaGuardada = idsGuardados.includes(idPublicacionGlobal);
+
+                      if (estaGuardada) {
+                          contenedorAccion.innerHTML = `
+                              <button class="detalle-btn-accion" id="btn-accion-guardado" style="background: #ffe5dd; color: #d9534f;">
+                                  <i class="fa-solid fa-bookmark"></i> Publicación guardada
+                              </button>
+                          `;
+                          
+                          // Al hacer clic, pregunta si desea quitarla de guardados
+                          document.getElementById('btn-accion-guardado').addEventListener('click', async () => {
+                              if (confirm("¿Deseas quitar esta publicación de tus guardados?")) {
+                                  const quitRes = await fetch('/api/quitar-guardado', {
+                                      method: 'POST',
+                                      headers: { 'Content-Type': 'application/json' },
+                                      body: JSON.stringify({ correo: correoLogueado, id_publicacion: idPublicacionGlobal })
+                                  });
+                                  if (quitRes.ok) {
+                                      alert("Publicación eliminada de guardados.");
+                                      location.reload();
+                                  } else {
+                                      alert("Error al quitar de guardados.");
+                                  }
+                              }
+                          });
+                      } else {
+                          contenedorAccion.innerHTML = `
+                              <button class="detalle-btn-accion" id="btn-accion-guardado">
+                                  <i class="fa-regular fa-bookmark"></i> Guardar publicación
+                              </button>
+                          `;
+                          document.getElementById('btn-accion-guardado').addEventListener('click', async () => {
+                              const saveRes = await fetch('/api/guardar-publicacion', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ correo: correoLogueado, id_publicacion: idPublicacionGlobal })
+                              });
+                              if (saveRes.ok) {
+                                  alert("¡Publicación guardada con éxito!");
+                                  location.reload();
+                              } else {
+                                  alert("Error al guardar la publicación.");
+                              }
+                          });
+                      }
+                  }
+              }
 
           } catch (error) {
               console.error("Error al cargar detalle de adopción:", error);
