@@ -755,7 +755,7 @@ body.dark-mode .leaflet-control-attribution a {
     color: #f7d6d0 !important;
 }
 
-body.dark-mode .main-content {
+body.dark-mode .main-content-notificaciones {
     background: transparent !important;
     position: relative !important;
     width: calc(100% - 60px) !important;
