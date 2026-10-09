@@ -682,6 +682,20 @@ async function cargarDetalleAdopcion() {
               // Nombre y tipo de mascota
               const nombreAnimal = adopcion.nombre_animal || 'Mascota';
               document.getElementById('lbl-nombre-mascota').textContent = `Adopción: ${nombreAnimal}`;
+              document.getElementById('lbl-nombre-mascota').textContent = `Adopción: ${nombreAnimal}`;
+              
+              // Lógica inteligente combinando especie y raza (incluyendo campo "Otro" si existe)
+              const especie = adopcion.especie_catalogo || adopcion.especie || adopcion.tipo_animal || '';
+              const raza = adopcion.otra_raza || adopcion.nombre_raza || adopcion.raza || '';
+              
+              let textoEspecieRaza = "No especificada";
+              if (especie && raza) {
+                  textoEspecieRaza = `${especie} - ${raza}`;
+              } else if (especie) {
+                  textoEspecieRaza = especie;
+              } else if (raza) {
+                  textoEspecieRaza = raza;
+              }
               document.getElementById('lbl-info-extra').textContent = `Raza/Especie: ${adopcion.nombre_raza || adopcion.raza || 'No especificada'}`;
               document.getElementById('lbl-descripcion').textContent = adopcion.descripcion_animal || adopcion.Descripcion || 'Sin descripción proporcionada.';
               
