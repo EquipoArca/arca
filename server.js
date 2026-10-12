@@ -1453,6 +1453,63 @@ app.post('/api/solicitar-ver-adoptante', (req, res) => {
         });
     });
 });
+// GET: Obtener notificaciones reales del usuario logueado
+app.get('/api/notificaciones/:correo', (req, res) => {
+    const { correo } = req.params;
+
+    const sql = `
+        SELECT n.id_notificacion, n.tipo, n.mensaje, n.leida, n.fecha_notificacion,
+               u_origen.nombre_usuario AS origen_nombre, u_origen.foto_perfil AS origen_foto,
+               s.id_solicitud, s.estado AS estado_solicitud
+        FROM notificaciones n
+        JOIN usuarios u_destino ON n.id_usuario_destino = u_destino.id_usuarios
+        LEFT JOIN usuarios u_origen ON n.id_usuario_origen = u_origen.id_usuarios
+        LEFT JOIN solicitudes_adoptante s ON (s.id_solicitante = n.id_usuario_origen AND s.id_propietario = n.id_usuario_destino)
+        WHERE LOWER(TRIM(u_destino.correo_usuario)) = LOWER(TRIM(?))
+        ORDER BY n.fecha_notificacion DESC
+    `;
+
+    db.query(sql, [correo], (err, results) => {
+        if (err) {
+            console.error("Error al obtener notificaciones:", err);
+            return res.status(500).json({ error: "Error interno" });
+        }
+        res.json(results);
+    });
+});
+
+// POST: Responder solicitud de adoptante (Aceptar / Rechazar)
+app.post('/api/responder-solicitud-adoptante', (req, res) => {
+    const { id_solicitud, accion, correo_propietario } = req.body; // accion: 'aceptada' o 'rechazada'
+
+    const nuevoEstado = accion === 'aceptar' ? 'aceptada' : 'rechazada';
+
+    const sqlUpdate = "UPDATE solicitudes_adoptante SET estado = ? WHERE id_solicitud = ?";
+    db.query(sqlUpdate, [nuevoEstado, id_solicitud], (err) => {
+        if (err) return res.status(500).json({ error: "Error al actualizar solicitud" });
+
+        if (nuevoEstado === 'aceptada') {
+            // Notificar al solicitante que le aceptaron la solicitud
+            const sqlNotif = `
+                INSERT INTO notificaciones (id_usuario_destino, id_usuario_origen, tipo, mensaje)
+                SELECT id_solicitante, id_propietario, 'solicitud_aceptada', 'aceptó tu solicitud para ver su perfil de adoptante.'
+                FROM solicitudes_adoptante WHERE id_solicitud = ?
+            `;
+            db.query(sqlNotif, [id_solicitud]);
+        }
+
+        res.json({ exito: true, mensaje: `Solicitud ${nuevoEstado} con éxito.` });
+    });
+});
+
+// DELETE: Borrar una notificación de MySQL
+app.delete('/api/notificaciones/:id', (req, res) => {
+    const { id } = req.params;
+    db.query("DELETE FROM notificaciones WHERE id_notificacion = ?", [id], (err) => {
+        if (err) return res.status(500).json({ error: "Error al borrar notificación" });
+        res.json({ exito: true });
+    });
+});
 
 // ==========================================
 // INICIALIZACIÓN DEL SERVIDOR (Siempre al final)

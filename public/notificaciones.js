@@ -1,27 +1,49 @@
-// 1. Cargar notificaciones desde localStorage
-let listaNotificaciones = JSON.parse(localStorage.getItem('arca_notificaciones')) || [
-    { id: 1, mensaje: "Inicio de sesión requerido", fecha: "16 Sep", origen: "Sistema ARCA" }
-];
-
+// Obtener el contenedor principal de notificaciones
 function obtenerContenedor() {
-    return document.getElementById('contenedorNotificaciones');
+    return document.getElementById('contenedor-notificaciones') || document.getElementById('contenedorNotificaciones');
 }
 
-// 2. Guardar en localStorage
-function guardarNotificaciones() {
-    localStorage.setItem('arca_notificaciones', JSON.stringify(listaNotificaciones));
+// Función auxiliar para detectar el correo del usuario logueado con Firebase / LocalStorage
+function obtenerCorreoUsuarioActivo() {
+    const authUser = typeof firebase !== 'undefined' && firebase.auth().currentUser;
+    if (authUser && authUser.email) return authUser.email;
+
+    return localStorage.getItem('correo_usuario') || 
+           localStorage.getItem('usuario_correo') || 
+           localStorage.getItem('user_email') || '';
 }
 
-// 3. Función unificada para borrar y guardar
-window.eliminarNotificacion = function(id) {
-    listaNotificaciones = listaNotificaciones.filter(notif => notif.id !== Number(id));
-    guardarNotificaciones(); // Guarda de verdad en todas las vistas
-    renderizarNotificaciones(listaNotificaciones);
-};
+// ==========================================
+// CARGAR Y RENDERIZAR NOTIFICACIONES REALES
+// ==========================================
+async function cargarNotificacionesServidor() {
+    const contenedor = obtenerContenedor();
+    if (!contenedor) return;
 
-// ==========================================
-// RENDERIZADO DE NOTIFICACIONES
-// ==========================================
+    const correo = obtenerCorreoUsuarioActivo();
+
+    if (!correo) {
+        contenedor.innerHTML = `
+            <div class="estado-vacio" style="text-align: center; padding: 40px;">
+                <h2>¡Inicia sesión para ver tus notificaciones!</h2>
+                <p>&lt;3</p>
+            </div>
+        `;
+        return;
+    }
+
+    try {
+        const respuesta = await fetch(`/api/notificaciones/${encodeURIComponent(correo)}`);
+        if (!respuesta.ok) throw new Error("Error al obtener notificaciones");
+
+        const notificaciones = await respuesta.json();
+        renderizarNotificaciones(notificaciones);
+
+    } catch (error) {
+        console.error("Error cargando notificaciones:", error);
+    }
+}
+
 function renderizarNotificaciones(lista) {
     const contenedor = obtenerContenedor();
     if (!contenedor) return;
@@ -29,187 +51,111 @@ function renderizarNotificaciones(lista) {
     contenedor.innerHTML = '';
 
     if (!lista || lista.length === 0) {
-        contenedor.style.justifyContent = 'center';
         contenedor.innerHTML = `
             <div class="estado-vacio">
-                <svg class="svg-perrito-vacio" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M15 82C25 80 35 83 45 81C55 83 65 80 85 82" stroke="#A8E6CF" stroke-width="4" stroke-linecap="round"/>
-                    <path d="M25 81L23 75M28 81L30 74M68 81L66 74M72 81L75 75" stroke="#A8E6CF" stroke-width="3" stroke-linecap="round"/>
-                    <path d="M35 32C22 32 18 48 24 60C28 68 36 68 38 60C40 52 38 42 35 32Z" fill="var(--perrito-orejas, #E8A598)"/>
-                    <path d="M65 32C78 32 82 48 76 60C72 68 64 68 62 60C60 52 62 42 65 32Z" fill="var(--perrito-orejas, #E8A598)"/>
-                    <circle cx="50" cy="46" r="20" fill="var(--perrito-cuerpo, #FCEADE)"/>
-                    <ellipse cx="50" cy="64" rx="21" ry="17" fill="var(--perrito-cuerpo, #FCEADE)"/>
-                    <rect x="39" y="66" width="9" height="15" rx="4.5" fill="var(--perrito-cuerpo, #FCEADE)" stroke="var(--perrito-orejas, #E8A598)" stroke-width="1.5"/>
-                    <rect x="52" y="66" width="9" height="15" rx="4.5" fill="var(--perrito-cuerpo, #FCEADE)" stroke="var(--perrito-orejas, #E8A598)" stroke-width="1.5"/>
-                    <circle cx="42" cy="44" r="2.5" fill="var(--perrito-detalles, #4A3E3D)"/>
-                    <circle cx="58" cy="44" r="2.5" fill="var(--perrito-detalles, #4A3E3D)"/>
-                    <ellipse cx="50" cy="49" rx="3.5" ry="2.2" fill="var(--perrito-detalles, #4A3E3D)"/>
-                    <path d="M46 52C48 54 52 54 54 52" stroke="var(--perrito-detalles, #4A3E3D)" stroke-width="1.5" stroke-linecap="round"/>
-                    <circle cx="38" cy="48" r="3.5" fill="#FFB7B2" opacity="0.6"/>
-                    <circle cx="62" cy="48" r="3.5" fill="#FFB7B2" opacity="0.6"/>
-                    <path d="M68 26C68 21 74 21 74 26C74 29 70 29 70 33" stroke="#F2A4AD" stroke-width="2.5" stroke-linecap="round"/>
-                    <circle cx="70" cy="37" r="1.5" fill="#F2A4AD"/>
-                </svg>
-                <h2>¡Sin notificaciones por aquí!</h2>
-                <p class="subtexto-vacio">Todo está tranquilo por ahora &lt;3</p>
+                <div class="escena-cielo-kawaii">
+                    <div class="nube-kawaii nube-izq"></div>
+                    <div class="sol-kawaii">
+                        <div class="ojo-sol izq"></div>
+                        <div class="ojo-sol der"></div>
+                        <div class="boca-sol"></div>
+                        <div class="rubor-sol izq"></div>
+                        <div class="rubor-sol der"></div>
+                    </div>
+                    <div class="nube-kawaii nube-der"></div>
+                    <span class="destello d1">✦</span>
+                    <span class="destello d2">✦</span>
+                </div>
+                <h2>¡Aún no hay notificaciones!</h2>
+                <p>&lt;3</p>
             </div>
         `;
         return;
     }
 
-    contenedor.style.justifyContent = 'flex-start';
     lista.forEach(notif => {
-        const tarjeta = document.createElement('div');
+        const tarjeta = document.createElement('article');
         tarjeta.classList.add('tarjeta-notificacion');
+        tarjeta.style.background = 'rgba(255, 255, 255, 0.7)';
+        tarjeta.style.borderRadius = '20px';
+        tarjeta.style.padding = '18px 24px';
+        tarjeta.style.marginBottom = '15px';
+        tarjeta.style.border = '2px solid #f9d5d3';
+        tarjeta.style.display = 'flex';
+        tarjeta.style.justifyContent = 'space-between';
+        tarjeta.style.alignItems = 'center';
+
+        const fechaStr = notif.fecha_notificacion ? notif.fecha_notificacion.split('T')[0] : 'Reciente';
+        const autorNombre = notif.origen_nombre ? `@${notif.origen_nombre}` : 'Sistema ARCA';
+
+        // Botones interactivos según el tipo de notificación
+        let htmlAccion = '';
+        if (notif.tipo === 'solicitud_adoptante' && notif.estado_solicitud === 'pendiente') {
+            htmlAccion = `
+                <div style="display: flex; gap: 8px; margin-top: 8px;">
+                    <button onclick="responderSolicitud(${notif.id_solicitud}, 'aceptar')" style="background: #25d366; color: white; border: none; padding: 6px 14px; border-radius: 12px; cursor: pointer; font-weight: bold; font-family: 'Itim';">Aceptar</button>
+                    <button onclick="responderSolicitud(${notif.id_solicitud}, 'rechazar')" style="background: #d9534f; color: white; border: none; padding: 6px 14px; border-radius: 12px; cursor: pointer; font-weight: bold; font-family: 'Itim';">Rechazar</button>
+                </div>
+            `;
+        } else if (notif.tipo === 'solicitud_adoptante' && notif.estado_solicitud === 'aceptada') {
+            htmlAccion = `<span style="color: #25d366; font-weight: bold; font-size: 13px;"> Solicitud aceptada ✓</span>`;
+        } else {
+            htmlAccion = `<button onclick="window.location.href='perfil_publico.html?user=${notif.origen_nombre}'" style="background: #fffde8; border: 1px solid #f0e6b8; padding: 6px 14px; border-radius: 12px; cursor: pointer; font-weight: bold; font-family: 'Itim';">Ver perfil</button>`;
+        }
 
         tarjeta.innerHTML = `
-            <div class="header-notificacion">
-                <span class="badge-mensaje">${notif.mensaje.toUpperCase()}</span>
-                <div class="header-notif-derecha">
-                    <span class="fecha-notificacion">${notif.fecha}</span>
-                    <button class="btn-borrar-notif" data-id="${notif.id}" title="Borrar notificación">
-                        <i class="fa-solid fa-trash-can"></i>
-                    </button>
+            <div class="info-notif-izq">
+                <div style="font-weight: bold; font-size: 16px; color: #2b2b2b;">
+                    <span style="color: #e06d53;">${autorNombre}</span> ${notif.mensaje}
                 </div>
+                <span style="font-size: 12px; color: #777;">${fechaStr}</span>
+                ${htmlAccion}
             </div>
-            <div class="cuerpo-notificacion">
-                <span class="etiqueta-origen">${notif.origen.toUpperCase()}</span>
-                <button class="btn-detalles-notif" onclick="verDetalles(${notif.id})">Ver detalles</button>
-            </div>
+            <button onclick="eliminarNotificacionBd(${notif.id_notificacion})" title="Borrar notificación" style="background: none; border: none; color: #d9534f; cursor: pointer; font-size: 18px;">
+                <i class="fa-solid fa-trash-can"></i>
+            </button>
         `;
 
         contenedor.appendChild(tarjeta);
     });
 }
 
-window.verDetalles = function(idNotificacion) {
-    if (!navigator.onLine) {
-        mostrarAlertaOffline();
-        return;
+// Función para responder solicitudes (Aceptar / Rechazar)
+window.responderSolicitud = async function(idSolicitud, accion) {
+    const correoPropietario = obtenerCorreoUsuarioActivo();
+    try {
+        const res = await fetch('/api/responder-solicitud-adoptante', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id_solicitud: idSolicitud, accion, correo_propietario: correoPropietario })
+        });
+        const data = await res.json();
+        alert(data.mensaje);
+        cargarNotificacionesServidor();
+    } catch (e) {
+        console.error("Error respondiendo solicitud:", e);
     }
+};
 
-    const contenedor = obtenerContenedor();
-    if (!contenedor) return;
-
-    contenedor.style.justifyContent = 'center';
-    contenedor.innerHTML = `
-        <div class="tarjeta-pasos-login">
-            <button class="btn-volver" onclick="renderizarNotificaciones(listaNotificaciones)">← Volver a notificaciones</button>
-            <h2>Inicia sesión en 3 sencillos pasos</h2>
-            <p class="subtexto-pasos">Completa este proceso para acceder a tu cuenta de ARCA</p>
-            <div class="contenedor-pasos">
-                <div class="paso-item">
-                    <div class="paso-numero">1</div>
-                    <div class="paso-contenido">
-                        <h3>Ingresa tu correo</h3>
-                        <p>Escribe el correo electrónico asociado a tu cuenta.</p>
-                    </div>
-                </div>
-                <div class="paso-item">
-                    <div class="paso-numero">2</div>
-                    <div class="paso-contenido">
-                        <h3>Verifica tu identidad</h3>
-                        <p>Ingresa el código de 6 dígitos enviado a tu e-mail.</p>
-                    </div>
-                </div>
-                <div class="paso-item">
-                    <div class="paso-numero">3</div>
-                    <div class="paso-contenido">
-                        <h3>Escribe tu contraseña</h3>
-                        <p>Introduce tu clave de acceso para ingresar al sistema.</p>
-                    </div>
-                </div>
-            </div>
-            <a href="login.html" class="btn-ir-login">Ir a Iniciar Sesión</a>
-        </div>
-    `;
+// Eliminar notificación directamente de la base de datos
+window.eliminarNotificacionBd = async function(idNotificacion) {
+    try {
+        await fetch(`/api/notificaciones/${idNotificacion}`, { method: 'DELETE' });
+        cargarNotificacionesServidor();
+    } catch (e) {
+        console.error("Error al eliminar notificación:", e);
+    }
 };
 
 // ==========================================
-// FUNCIONES AUXILIARES DE RED
-// ==========================================
-function mostrarAlertaOffline() {
-    const overlay = document.getElementById('offline-alert-overlay');
-    if (overlay) overlay.classList.remove('d-none');
-}
-
-function ocultarAlertaOffline() {
-    const overlay = document.getElementById('offline-alert-overlay');
-    if (overlay) overlay.classList.add('d-none');
-}
-
-window.addEventListener('offline', mostrarAlertaOffline);
-window.addEventListener('online', ocultarAlertaOffline);
-
-// ==========================================
-// INICIALIZACIÓN DE LA PÁGINA
+// INICIALIZACIÓN
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
-    const btnCerrar = document.getElementById('close-offline-alert');
-    const btnX = document.getElementById('close-x-btn');
-
-    if (btnCerrar) btnCerrar.addEventListener('click', ocultarAlertaOffline);
-    if (btnX) btnX.addEventListener('click', ocultarAlertaOffline);
-
-    if (!navigator.onLine) {
-        mostrarAlertaOffline();
-    }
-
-    const contenedor = obtenerContenedor();
-    if (contenedor) {
-        // Evento delegación para capturar clics en la caneca de basura
-        contenedor.addEventListener('click', (e) => {
-            const botonBorrar = e.target.closest('.btn-borrar-notif');
-            if (botonBorrar) {
-                const id = botonBorrar.getAttribute('data-id');
-                window.eliminarNotificacion(id);
-            }
+    if (typeof firebase !== 'undefined') {
+        firebase.auth().onAuthStateChanged(() => {
+            cargarNotificacionesServidor();
         });
-
-        inicializarFiltros();
-
-    // Dibujar pantalla inicial
-    renderizarNotificaciones(listaNotificaciones);
-    
+    } else {
+        cargarNotificacionesServidor();
     }
-
-    // Dibujar pantalla inicial
-    renderizarNotificaciones(listaNotificaciones);
 });
-
-// ==========================================
-// LÓGICA DE FILTROS POR CATEGORÍA
-// ==========================================
-function inicializarFiltros() {
-    const botonesFiltro = document.querySelectorAll('.chip-filtro');
-
-    botonesFiltro.forEach(boton => {
-        boton.addEventListener('click', (e) => {
-            // 1. Quitar la clase 'activo' de todos los botones
-            botonesFiltro.forEach(btn => btn.classList.remove('activo'));
-
-            // 2. Marcar el botón presionado como activo
-            e.target.classList.add('activo');
-
-            // 3. Obtener el texto de la categoría elegida
-            const categoria = e.target.textContent.trim().toLowerCase();
-
-            // 4. Filtrar la lista de notificaciones
-            filtrarNotificaciones(categoria);
-        });
-    });
-}
-
-function filtrarNotificaciones(categoria) {
-    if (categoria === 'todas') {
-        renderizarNotificaciones(listaNotificaciones);
-        return;
-    }
-
-    // Filtra según la propiedad 'origen' o el tipo de notificación
-    const listaFiltrada = listaNotificaciones.filter(notif => {
-        return notif.origen.toLowerCase().includes(categoria);
-    });
-
-    renderizarNotificaciones(listaFiltrada);
-}
