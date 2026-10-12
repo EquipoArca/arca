@@ -403,22 +403,23 @@
           });
       });
 
-      async function inicializarPerfil() {
-          const params = new URLSearchParams(window.location.search);
-          usernamePerfil = params.get('user');
-          const correoLogueado = obtenerCorreoSesion();
+     async function inicializarPerfil() {
+        const params = new URLSearchParams(window.location.search);
+        usernamePerfil = params.get('user'); // Aquí captura "Dulce"
+        const correoLogueado = obtenerCorreoSesion();
 
-          if (!usernamePerfil) {
-              alert("No se especificó un usuario.");
-              window.location.href = 'home.html';
-              return;
-          }
+        if (!usernamePerfil) {
+            alert("No se especificó un usuario.");
+            window.location.href = 'home.html';
+            return;
+        }
 
-          try {
-              const res = await fetch(`/api/perfil-publico/${encodeURIComponent(usernamePerfil)}?correo_visitante=${encodeURIComponent(correoLogueado)}`);
-              if (!res.ok) throw new Error("Usuario no encontrado");
+        try {
+            // CAMBIO CLAVE: Asegúrate de enviar 'usernamePerfil' y no el correo
+            const res = await fetch(`/api/perfil-publico/${encodeURIComponent(usernamePerfil)}?correo_visitante=${encodeURIComponent(correoLogueado)}`);
+            if (!res.ok) throw new Error("Usuario no encontrado");
 
-              const datos = await res.json();
+            const datos = await res.json();
               idUsuarioPerfil = datos.id_usuarios;
               usuarioSeguidoActual = datos.siguiendo;
               estadoSolicitudActual = datos.estado_solicitud || 'ninguna';
