@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ficha de Adoptante - ARCA</title>
+    <link rel="stylesheet" href="style_home.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="dark-mode.css">
+    <script>
+    if (localStorage.getItem("modo_oscuro") === "true") {
+        document.body.classList.add("dark-mode");
+    }
+    </script>
+    <style>
+        html, body {
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Itim', cursive, sans-serif;
+            background-color: #fce8e6;
+        }
+
+        .main-content {
+            height: calc(100vh - 70px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+
+        .ficha-container-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            border-radius: 28px;
+            padding: 30px 40px;
+            width: 100%;
+            max-width: 850px;
+            box-shadow: 0 12px 35px rgba(220, 150, 140, 0.15);
+            border: 2px solid #fca38d;
+            box-sizing: border-box;
+        }
+
+        .ficha-header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #f9d5d3;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .ficha-titulo-principal {
+            font-size: 26px;
+            color: #d9534f;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0;
+        }
+
+        .btn-volver-atras {
+            background: #fff;
+            border: 1px solid #f4c2c4;
+            padding: 8px 18px;
+            border-radius: 14px;
+            color: #d9534f;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .btn-volver-atras:hover {
+            background: #ffe5dd;
+        }
+
+        .seccion-ficha-bloque {
+            margin-bottom: 20px;
+        }
+
+        .titulo-subseccion {
+            font-size: 18px;
+            color: #b8432a;
+            border-left: 4px solid #fca38d;
+            padding-left: 10px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .grid-datos-ficha {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px 20px;
+            font-size: 15px;
+            color: #333;
+        }
+
+        .dato-item {
+            background: rgba(253, 203, 208, 0.25);
+            padding: 8px 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(252, 163, 141, 0.3);
+        }
+
+        .dato-item strong {
+            color: #555;
+        }
+
+        .caja-motivacion {
+            background: #fff3f0;
+            border-radius: 16px;
+            padding: 15px 20px;
+            border: 1px dashed #fca38d;
+            font-style: italic;
+            color: #444;
+            font-size: 15px;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+
+  <!-- Barra Superior -->
+  <nav class="top-nav">
+    <div class="top-left">
+        <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu"></i>        
+        <div class="mini-logo-circle">
+            <img src="logo.png" alt="Logo">
+        </div>
+        <span class="page-title">Ficha de Adoptante</span>
+    </div>
+
+    <div class="search-bar">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" placeholder="Busca algo">
+        <i class="fa-solid fa-microphone"></i>
+    </div>
+
+    <div class="top-right">
+        <div class="user-header-info">
+            <div class="user-profile-menu" id="user-profile-menu">
+                <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
+                    <img src="logo.png" id="user-avatar-img" alt="Perfil">
+                </div>
+                <div class="mini-menu-card" id="mini-menu-card">
+                    <div class="mini-menu-header">
+                        <span id="mini-menu-username">Usuario</span>
+                    </div>
+                    <hr class="mini-menu-divider">
+                    <a href="javascript:void(0)" onclick="mostrarSeccion('configuracion')" class="mini-menu-item btn-ajustes">
+                        <i class="fa-solid fa-gear"></i>
+                        <span>Ajustes</span>
+                    </a>
+                    <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Cerrar sesión</span>
+                    </a>
+                </div>
+            </div>
+            <div class="notif-circle">
+                <a href="notificaciones.html"><i class="fa-solid fa-bell"></i></a>
+            </div>
+        </div>
+    </div>
+  </nav>
+
+  <!-- Sidebar Lateral -->
+  <aside class="sidebar" id="sidebar">
+      <div class="side-icons">
+          <a href="home.html" class="menu-fila"><i class="fa-solid fa-house"></i><span class="menu-text">Inicio</span></a>
+          <a href="perfil_usuario.html" class="menu-fila"><i class="fa-solid fa-circle-user"></i><span class="menu-text">Perfil</span></a>
+          <a href="guardados_usuario.html" class="menu-fila"><i class="fa-solid fa-bookmark"></i><span class="menu-text">Guardado</span></a>
+          <a href="mapa.html" class="menu-fila"><i class="fa-solid fa-location-dot"></i><span class="menu-text">Mapa</span></a>
+          <a href="configuracion.html" class="menu-fila"><i class="fa-solid fa-gear"></i><span class="menu-text">Ajustes</span></a>
+      </div>
+  </aside>
+
+  <!-- Contenido Principal -->
+  <main class="main-content">
+      <div class="ficha-container-card">
+          
+          <div class="ficha-header-top">
+              <div>
+                  <h1 class="ficha-titulo-principal"><i class="fa-solid fa-id-card"></i> Ficha de Adoptante</h1>
+                  <h2 id="lbl-nombre-usuario" style="margin: 5px 0 0 0; font-size: 20px; color: #333;">Cargando...</h2>
+                  <span id="lbl-ubicacion" style="font-size: 13.5px; color: #666;"><i class="fa-solid fa-location-dot"></i> Medellín</span>
+              </div>
+              <a href="javascript:history.back()" class="btn-volver-atras"><i class="fa-solid fa-arrow-left"></i> Volver</a>
+          </div>
+
+          <!-- 1. Información General -->
+          <div class="seccion-ficha-bloque">
+              <div class="titulo-subseccion">Información General</div>
+              <div class="grid-datos-ficha">
+                  <div class="dato-item"><strong>Edad / Fecha Nacimiento:</strong> <span id="f-edad">--</span></div>
+                  <div class="dato-item"><strong>Teléfono de Contacto:</strong> <span id="f-tel">--</span></div>
+                  <div class="dato-item"><strong>Correo Electrónico:</strong> <span id="f-correo">--</span></div>
+                  <div class="dato-item"><strong>Ocupación:</strong> <span id="f-ocupacion">--</span></div>
+              </div>
+          </div>
+
+          <!-- 2. Condiciones del Hogar -->
+          <div class="seccion-ficha-bloque">
+              <div class="titulo-subseccion">Condiciones del Hogar</div>
+              <div class="grid-datos-ficha">
+                  <div class="dato-item"><strong>Tipo de Vivienda:</strong> <span id="f-vivienda">--</span></div>
+                  <div class="dato-item"><strong>¿Permiten Mascotas?:</strong> <span id="f-permiten">--</span></div>
+                  <div class="dato-item"><strong>Convivientes:</strong> <span id="f-convivientes">--</span></div>
+                  <div class="dato-item"><strong>¿Hay Niños en Casa?:</strong> <span id="f-ninos">--</span></div>
+              </div>
+          </div>
+
+          <!-- 3. Responsabilidad y Logística -->
+          <div class="seccion-ficha-bloque">
+              <div class="titulo-subseccion">Responsabilidad y Logística</div>
+              <div class="grid-datos-ficha">
+                  <div class="dato-item"><strong>Otras Mascotas en Casa:</strong> <span id="f-otras-mascotas">--</span></div>
+                  <div class="dato-item"><strong>Presupuesto Mensual Asegurado:</strong> <span id="f-presupuesto">--</span></div>
+                  <div class="dato-item"><strong>Tiempo que Estaría Solo al Día:</strong> <span id="f-tiempo-solo">--</span></div>
+                  <div class="dato-item"><strong>Cuidador Responsable:</strong> <span id="f-cuidador">--</span></div>
+              </div>
+          </div>
+
+          <!-- 4. Motivación -->
+          <div class="seccion-ficha-bloque">
+              <div class="titulo-subseccion">Motivación de Adopción</div>
+              <div class="caja-motivacion" id="f-motivacion">
+                  "..."
+              </div>
+          </div>
+
+      </div>
+  </main>
+
+  <!-- Scripts Firebase y Lógica -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="script.js"></script>
+
+  <script>
+      function obtenerCorreoSesion() {
+          const authUser = firebase.auth().currentUser;
+          if (authUser && authUser.email) return authUser.email;
+          return localStorage.getItem('correo_usuario') || localStorage.getItem('usuario_correo') || '';
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+          const btnToggleMenu = document.getElementById('btn-toggle-menu');
+          const sidebar = document.getElementById('sidebar');
+          if (btnToggleMenu && sidebar) {
+              btnToggleMenu.addEventListener('click', (e) => {
+                  e.stopPropagation();
+                  sidebar.classList.toggle('sidebar-abierta');
+              });
+          }
+
+          firebase.auth().onAuthStateChanged(() => {
+              cargarFichaPublica();
+          });
+      });
+
+      async function cargarFichaPublica() {
+          const params = new URLSearchParams(window.location.search);
+          const username = params.get('user');
+          const correoSolicitante = obtenerCorreoSesion();
+
+          if (!username) {
+              alert("No se especificó un usuario.");
+              window.location.href = 'home.html';
+              return;
+          }
+
+          try {
+              const res = await fetch(`/api/ficha-adoptante-publica/${encodeURIComponent(username)}?correo_solicitante=${encodeURIComponent(correoSolicitante)}`);
+              
+              if (res.status === 403) {
+                  alert("No tienes permiso para ver esta ficha de adoptante o aún no ha sido aceptada.");
+                  window.location.href = `perfil_publico.html?user=${username}`;
+                  return;
+              }
+
+              if (!res.ok) throw new Error("No se pudo cargar la ficha.");
+
+              const data = await res.json();
+              const u = data.usuario;
+              const f = data.ficha;
+
+              // Rellenar Cabecera
+              document.getElementById('lbl-nombre-usuario').textContent = u.nombre_usuario;
+
+              // Rellenar Datos
+              document.getElementById('f-edad').textContent = f.fecha_nacimiento || f.edad || 'No especificada';
+              document.getElementById('f-tel').textContent = u.Telefono_usuario || f.telefono || 'No registrado';
+              document.getElementById('f-correo').textContent = u.correo_usuario || 'No registrado';
+              document.getElementById('f-ocupacion').textContent = f.ocupacion || 'No especificada';
+
+              document.getElementById('f-vivienda').textContent = f.tipo_vivienda || 'Propia';
+              document.getElementById('f-permiten').textContent = f.permiten_mascotas || 'Sí';
+              document.getElementById('f-convivientes').textContent = f.convivientes || 'Vive solo';
+              document.getElementById('f-ninos').textContent = f.hay_ninos || 'No';
+
+              document.getElementById('f-otras-mascotas').textContent = f.otras_mascotas || 'No';
+              document.getElementById('f-presupuesto').textContent = f.presupuesto ? `$${f.presupuesto}` : 'Asegurado';
+              document.getElementById('f-tiempo-solo').textContent = f.tiempo_solo || 'Poco tiempo';
+              document.getElementById('f-cuidador').textContent = f.cuidador_responsable || 'El adoptante';
+
+              document.getElementById('f-motivacion').textContent = `"${f.motivacion || 'Deseo brindarle un hogar amoroso a una mascota.'}"`;
+
+          } catch (e) {
+              console.error("Error al cargar la ficha:", e);
+          }
+      }
+  </script>
+</body>
+</html>

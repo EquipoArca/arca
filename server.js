@@ -1510,7 +1510,45 @@ app.delete('/api/notificaciones/:id', (req, res) => {
         res.json({ exito: true });
     });
 });
+// GET: Obtener la Ficha de Adoptante para terceros (Solo si la solicitud fue aceptada)
+app.get('/api/ficha-adoptante-publica/:username', (req, res) => {
+    const { username } = req.params;
+    const correoSolicitante = req.query.correo_solicitante;
 
+    // 1. Buscamos al usuario por su username
+    const sqlUsuario = "SELECT id_usuarios, nombre_usuario, correo_usuario, Telefono_usuario FROM usuarios WHERE nombre_usuario = ?";
+    db.query(sqlUsuario, [username], (err, resUser) => {
+        if (err || resUser.length === 0) return res.status(404).json({ error: "Usuario no encontrado" });
+
+        const usuarioTarget = resUser[0];
+
+        // 2. Verificamos si la solicitud entre el visitante y el dueño está 'aceptada'
+        const sqlVerificarPermiso = `
+            SELECT estado FROM solicitudes_adoptante 
+            WHERE id_solicitante = (SELECT id_usuarios FROM usuarios WHERE correo_usuario = ?) 
+              AND id_propietario = ? AND estado = 'aceptada'
+        `;
+
+        db.query(sqlVerificarPermiso, [correoSolicitante, usuarioTarget.id_usuarios], (errPerm, resPerm) => {
+            if (errPerm || resPerm.length === 0) {
+                return res.status(403).json({ error: "No tienes permiso para ver esta ficha de adoptante." });
+            }
+
+            // 3. Traemos la información detallada de su ficha de adoptante
+            const sqlFicha = "SELECT * FROM perfil_adoptante WHERE id_usuario = ?";
+            db.query(sqlFicha, [usuarioTarget.id_usuarios], (errFicha, resFicha) => {
+                if (errFicha || resFicha.length === 0) {
+                    return res.status(404).json({ error: "El usuario aún no ha completado su ficha de adoptante." });
+                }
+
+                res.json({
+                    usuario: usuarioTarget,
+                    ficha: resFicha[0]
+                });
+            });
+        });
+    });
+});
 // ==========================================
 // INICIALIZACIÓN DEL SERVIDOR (Siempre al final)
 // ==========================================
