@@ -186,10 +186,6 @@
             transition: background 0.2s;
         }
 
-        .btn-ver-detalles-mini:hover {
-            background: #fff9c4;
-        }
-
         .columna-lateral-derecha {
             display: flex;
             flex-direction: column;
@@ -209,10 +205,6 @@
             box-shadow: 0 4px 15px rgba(252, 163, 141, 0.3);
             font-family: 'Itim', cursive, sans-serif;
             transition: background 0.2s;
-        }
-
-        .btn-solicitar-adoptante:hover {
-            background: #eb917b;
         }
 
         .bloque-contacto-perfil {
@@ -249,11 +241,6 @@
             width: 100%;
             text-align: center;
             font-family: 'Itim', cursive, sans-serif;
-            transition: background 0.2s;
-        }
-
-        .btn-accion-peligro:hover {
-            background: #ffe5dd;
         }
 
         #toast-seguimiento {
@@ -270,12 +257,6 @@
             z-index: 2000;
             border: 2px solid #fca38d;
             font-family: 'Itim', cursive, sans-serif;
-        }
-
-        #toast-seguimiento h3 {
-            margin: 0 0 10px 0;
-            color: #2b2b2b;
-            font-size: 20px;
         }
     </style>
 </head>
@@ -307,7 +288,7 @@
                         <span id="mini-menu-username">Usuario</span>
                     </div>
                     <hr class="mini-menu-divider">
-                    <a href="javascript:void(0)" onclick="mostrarSeccion('configuracion')" class="mini-menu-item btn-ajustes">
+                    <a href="configuracion.html" class="mini-menu-item btn-ajustes">
                         <i class="fa-solid fa-gear"></i>
                         <span>Ajustes</span>
                     </a>
@@ -397,6 +378,7 @@
       let idUsuarioPerfil = null;
       let usernamePerfil = null;
       let usuarioSeguidoActual = false;
+      let estadoSolicitudActual = 'ninguna';
 
       function obtenerCorreoSesion() {
           const authUser = firebase.auth().currentUser;
@@ -439,6 +421,7 @@
               const datos = await res.json();
               idUsuarioPerfil = datos.id_usuarios;
               usuarioSeguidoActual = datos.siguiendo;
+              estadoSolicitudActual = datos.estado_solicitud || 'ninguna';
 
               document.getElementById('usr-tag').textContent = `@${datos.nombre_usuario}`;
               if (datos.foto_perfil) document.getElementById('usr-foto').src = datos.foto_perfil;
@@ -449,7 +432,7 @@
                   document.getElementById('usr-ubicacion').innerHTML = `<i class="fa-solid fa-location-dot"></i> Ubicación aproximada: Medellín`;
               }
 
-              // Mostrar datos reales de contacto de la persona
+              // Mostrar datos reales de contacto
               const telefonoReal = datos.Telefono_usuario || datos.telefono || 'No registrado';
               const correoReal = datos.correo_usuario || datos.correo || 'No registrado';
 
@@ -457,20 +440,35 @@
               document.getElementById('contacto-correo').innerHTML = `<i class="fa-solid fa-envelope" style="color: #007bff; font-size: 16px;"></i> <span>${correoReal}</span>`;
 
               actualizarBotonSeguirUI(usuarioSeguidoActual);
+              actualizarEstadoBotonSolicitud(estadoSolicitudActual);
 
-              if (datos.estado_solicitud === 'aceptada') {
-                  document.getElementById('btn-solicitud-adoptante').textContent = "Perfil de adoptante desbloqueado ✓";
-                  document.getElementById('btn-solicitud-adoptante').style.background = "#25d366";
-              } else if (datos.estado_solicitud === 'pendiente') {
-                  document.getElementById('btn-solicitud-adoptante').textContent = "Solicitud pendiente...";
-                  document.getElementById('btn-solicitud-adoptante').style.background = "#ccc";
-              }
-
-              // Cargar sus publicaciones de forma robusta
               cargarPublicacionesDeUsuario(usernamePerfil, idUsuarioPerfil);
 
           } catch (error) {
               console.error("Error al cargar perfil:", error);
+          }
+      }
+
+      function actualizarEstadoBotonSolicitud(estado) {
+          const btnAdoptante = document.getElementById('btn-solicitud-adoptante');
+
+          if (estado === 'aceptada') {
+              btnAdoptante.textContent = "Ver ficha de adoptante ✓";
+              btnAdoptante.style.background = "#25d366";
+              btnAdoptante.disabled = false;
+              btnAdoptante.onclick = function() {
+                  window.location.href = `ver_ficha_adoptante.html?user=${encodeURIComponent(usernamePerfil)}`;
+              };
+          } else if (estado === 'pendiente') {
+              btnAdoptante.textContent = "Solicitud pendiente...";
+              btnAdoptante.style.background = "#ccc";
+              btnAdoptante.disabled = true; // IMPIDE REENVIAR MIENTRAS ESTÉ PENDIENTE
+              btnAdoptante.onclick = null;
+          } else {
+              btnAdoptante.textContent = "Solicitar ver perfil de adoptante";
+              btnAdoptante.style.background = "#fca38d";
+              btnAdoptante.disabled = false;
+              btnAdoptante.onclick = solicitarVerAdoptante;
           }
       }
 
@@ -521,6 +519,11 @@
               return;
           }
 
+          if (estadoSolicitudActual === 'pendiente') {
+              alert("Ya tienes una solicitud pendiente enviada a este usuario.");
+              return;
+          }
+
           try {
               const res = await fetch('/api/solicitar-ver-adoptante', {
                   method: 'POST',
@@ -529,7 +532,11 @@
               });
               const data = await res.json();
               alert(data.mensaje || "Solicitud enviada con éxito");
-              location.reload();
+
+              if (data.estado) {
+                  estadoSolicitudActual = data.estado;
+                  actualizarEstadoBotonSolicitud(estadoSolicitudActual);
+              }
           } catch (e) {
               console.error("Error al solicitar perfil", e);
           }
@@ -586,13 +593,5 @@
           }
       }
   </script>
-
-  <div id="google_translate_element" style="display:none;"></div>
-  <script type="text/javascript">
-      function googleTranslateElementInit() {
-          new google.translate.TranslateElement({ pageLanguage: 'es', autoDisplay: false }, 'google_translate_element');
-      }
-  </script>
-  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </body>
 </html>

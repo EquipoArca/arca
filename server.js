@@ -1384,27 +1384,32 @@ app.get('/api/perfil-publico/:username', (req, res) => {
     const correoVisitante = req.query.correo_visitante; // Para validar si ya lo sigue o si tiene acceso
 
     const sql = `
-        SELECT u.id_usuarios, u.nombre_usuario, u.foto_perfil, u.correo_usuario, u.Telefono_usuario
+        SELECT u.id_usuarios, u.nombre_usuario, u.foto_perfil, u.correo_usuario, u.Telefono_usuario, u.Ubicacion
         FROM usuarios u
-        WHERE u.nombre_usuario = ?
+        WHERE LOWER(TRIM(u.nombre_usuario)) = LOWER(TRIM(?))
     `;
 
     db.query(sql, [username], (err, results) => {
         if (err || results.length === 0) return res.status(404).json({ error: "Usuario no encontrado" });
         const usuario = results[0];
 
+        if (!correoVisitante) {
+            return res.json({ ...usuario, siguiendo: false, estado_solicitud: 'ninguna' });
+        }
+
         // Consultamos si el visitante actual ya lo sigue o solicitó acceso
         const sqlVerificaciones = `
             SELECT 
-                (SELECT COUNT(*) FROM seguidores WHERE id_usuario_seguidor = (SELECT id_usuarios FROM usuarios WHERE correo_usuario = ?) AND id_usuario_seguido = ?) AS siguiendo,
-                (SELECT estado FROM solicitudes_adoptante WHERE id_solicitante = (SELECT id_usuarios FROM usuarios WHERE correo_usuario = ?) AND id_propietario = ?) AS estado_solicitud
+                (SELECT COUNT(*) FROM seguidores WHERE id_usuario_seguidor = (SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))) AND id_usuario_seguido = ?) AS siguiendo,
+                (SELECT estado FROM solicitudes_adoptante WHERE id_solicitante = (SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))) AND id_propietario = ?) AS estado_solicitud
         `;
 
         db.query(sqlVerificaciones, [correoVisitante, usuario.id_usuarios, correoVisitante, usuario.id_usuarios], (errVerif, resVerif) => {
+            const estadoFinal = (resVerif && resVerif.length > 0 && resVerif[0].estado_solicitud) ? resVerif[0].estado_solicitud : 'ninguna';
             res.json({
                 ...usuario,
-                siguiendo: resVerif && resVerif[0].siguiendo > 0,
-                estado_solicitud: resVerif && resVerif[0].estado_solicitud ? resVerif[0].estado_solicitud : 'ninguna'
+                siguiendo: resVerif && resVerif.length > 0 && resVerif[0].siguiendo > 0,
+                estado_solicitud: estadoFinal
             });
         });
     });
@@ -1435,24 +1440,46 @@ app.post('/api/alternar-seguimiento', (req, res) => {
     });
 });
 
-// POST: Solicitar ver perfil de adoptante
+// POST: Solicitar ver perfil de adoptante (EVITA DUPLICADOS Y BLOQUEA REENVÍO)
 app.post('/api/solicitar-ver-adoptante', (req, res) => {
     const { correo_solicitante, id_propietario } = req.body;
 
     db.query("SELECT id_usuarios, nombre_usuario FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))", [correo_solicitante], (err, rows) => {
         if (err || rows.length === 0) return res.status(400).json({ error: "Error de usuario" });
+        
         const idSolicitante = rows[0].id_usuarios;
         const nombreSolicitante = rows[0].nombre_usuario;
 
-        const sql = "INSERT INTO solicitudes_adoptante (id_solicitante, id_propietario) VALUES (?, ?) ON DUPLICATE KEY UPDATE estado='pendiente'";
-        db.query(sql, [idSolicitante, id_propietario], () => {
-            // Notificación al dueño del perfil
-            const msg = `@${nombreSolicitante} quiere ver tu perfil de adoptante.`;
-            db.query("INSERT INTO notificaciones (id_usuario_destino, id_usuario_origen, tipo, mensaje) VALUES (?, ?, 'solicitud_adoptante', ?)", [id_propietario, idSolicitante, msg]);
-            res.json({ exito: true, mensaje: "Solicitud enviada correctamente." });
+        if (Number(idSolicitante) === Number(id_propietario)) {
+            return res.status(400).json({ error: "No puedes solicitar ver tu propio perfil." });
+        }
+
+        // Verificamos si ya existe una solicitud activa
+        db.query("SELECT estado FROM solicitudes_adoptante WHERE id_solicitante = ? AND id_propietario = ?", [idSolicitante, id_propietario], (errExist, exist) => {
+            if (exist && exist.length > 0) {
+                const est = exist[0].estado;
+                if (est === 'pendiente') return res.json({ exito: true, mensaje: "Ya tienes una solicitud pendiente.", estado: 'pendiente' });
+                if (est === 'aceptada') return res.json({ exito: true, mensaje: "Ya tienes permiso para ver este perfil.", estado: 'aceptada' });
+            }
+
+            const sql = "INSERT INTO solicitudes_adoptante (id_solicitante, id_propietario, estado) VALUES (?, ?, 'pendiente') ON DUPLICATE KEY UPDATE estado='pendiente'";
+            db.query(sql, [idSolicitante, id_propietario], () => {
+                
+                // Notificación al dueño del perfil (evitando duplicados activos)
+                const msg = `@${nombreSolicitante} quiere ver tu perfil de adoptante.`;
+                const checkNotif = "SELECT id_notificacion FROM notificaciones WHERE id_usuario_destino = ? AND id_usuario_origen = ? AND tipo = 'solicitud_adoptante' AND leida = 0";
+                
+                db.query(checkNotif, [id_propietario, idSolicitante], (errN, resN) => {
+                    if (!resN || resN.length === 0) {
+                        db.query("INSERT INTO notificaciones (id_usuario_destino, id_usuario_origen, tipo, mensaje) VALUES (?, ?, 'solicitud_adoptante', ?)", [id_propietario, idSolicitante, msg]);
+                    }
+                    res.json({ exito: true, mensaje: "Solicitud enviada correctamente.", estado: 'pendiente' });
+                });
+            });
         });
     });
 });
+
 // GET: Obtener notificaciones reales del usuario logueado
 app.get('/api/notificaciones/:correo', (req, res) => {
     const { correo } = req.params;
@@ -1480,8 +1507,7 @@ app.get('/api/notificaciones/:correo', (req, res) => {
 
 // POST: Responder solicitud de adoptante (Aceptar / Rechazar)
 app.post('/api/responder-solicitud-adoptante', (req, res) => {
-    const { id_solicitud, accion, correo_propietario } = req.body; // accion: 'aceptada' o 'rechazada'
-
+    const { id_solicitud, accion, correo_propietario } = req.body; // accion: 'aceptar' o 'rechazar'
     const nuevoEstado = accion === 'aceptar' ? 'aceptada' : 'rechazada';
 
     const sqlUpdate = "UPDATE solicitudes_adoptante SET estado = ? WHERE id_solicitud = ?";
@@ -1489,11 +1515,18 @@ app.post('/api/responder-solicitud-adoptante', (req, res) => {
         if (err) return res.status(500).json({ error: "Error al actualizar solicitud" });
 
         if (nuevoEstado === 'aceptada') {
-            // Notificar al solicitante que le aceptaron la solicitud
+            // Notificar al solicitante que le aceptaron la solicitud (sin duplicar si ya existe)
             const sqlNotif = `
                 INSERT INTO notificaciones (id_usuario_destino, id_usuario_origen, tipo, mensaje)
-                SELECT id_solicitante, id_propietario, 'solicitud_aceptada', 'aceptó tu solicitud para ver su perfil de adoptante.'
-                FROM solicitudes_adoptante WHERE id_solicitud = ?
+                SELECT s.id_solicitante, s.id_propietario, 'solicitud_aceptada', 'aceptó tu solicitud para ver su perfil de adoptante.'
+                FROM solicitudes_adoptante s
+                WHERE s.id_solicitud = ?
+                  AND NOT EXISTS (
+                      SELECT 1 FROM notificaciones n 
+                      WHERE n.id_usuario_destino = s.id_solicitante 
+                        AND n.id_usuario_origen = s.id_propietario 
+                        AND n.tipo = 'solicitud_aceptada'
+                  )
             `;
             db.query(sqlNotif, [id_solicitud]);
         }
@@ -1510,13 +1543,14 @@ app.delete('/api/notificaciones/:id', (req, res) => {
         res.json({ exito: true });
     });
 });
+
 // GET: Obtener la Ficha de Adoptante para terceros (Solo si la solicitud fue aceptada)
 app.get('/api/ficha-adoptante-publica/:username', (req, res) => {
     const { username } = req.params;
     const correoSolicitante = req.query.correo_solicitante;
 
     // 1. Buscamos al usuario por su username
-    const sqlUsuario = "SELECT id_usuarios, nombre_usuario, correo_usuario, Telefono_usuario FROM usuarios WHERE nombre_usuario = ?";
+    const sqlUsuario = "SELECT id_usuarios, nombre_usuario, correo_usuario, Telefono_usuario FROM usuarios WHERE LOWER(TRIM(nombre_usuario)) = LOWER(TRIM(?))";
     db.query(sqlUsuario, [username], (err, resUser) => {
         if (err || resUser.length === 0) return res.status(404).json({ error: "Usuario no encontrado" });
 
@@ -1525,7 +1559,7 @@ app.get('/api/ficha-adoptante-publica/:username', (req, res) => {
         // 2. Verificamos si la solicitud entre el visitante y el dueño está 'aceptada'
         const sqlVerificarPermiso = `
             SELECT estado FROM solicitudes_adoptante 
-            WHERE id_solicitante = (SELECT id_usuarios FROM usuarios WHERE correo_usuario = ?) 
+            WHERE id_solicitante = (SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))) 
               AND id_propietario = ? AND estado = 'aceptada'
         `;
 
