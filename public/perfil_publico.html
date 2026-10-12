@@ -47,7 +47,6 @@
             box-sizing: border-box;
         }
 
-        /* Cabecera del Perfil Público (Estilo Facebook / Prototipo) */
         .perfil-header-card {
             background: rgba(253, 203, 208, 0.55);
             backdrop-filter: blur(10px);
@@ -92,7 +91,6 @@
             border: 1px solid #f9cab5;
         }
 
-        /* Botón de seguir en la cabecera */
         .btn-icono-seguir {
             background: #fff;
             border: 2px solid #fca38d;
@@ -114,7 +112,6 @@
             transform: scale(1.05);
         }
 
-        /* Grid del Cuerpo */
         .perfil-body-grid {
             display: grid;
             grid-template-columns: 1.3fr 1fr;
@@ -141,7 +138,6 @@
             border: 1px solid rgba(255, 255, 255, 0.8);
         }
 
-        /* Tarjeta compacta de publicación propia dentro del perfil */
         .mini-tarjeta-pub {
             background: rgba(255, 255, 255, 0.7);
             border-radius: 18px;
@@ -194,7 +190,6 @@
             background: #fff9c4;
         }
 
-        /* Columna Derecha: Acciones y Contacto */
         .columna-lateral-derecha {
             display: flex;
             flex-direction: column;
@@ -261,7 +256,6 @@
             background: #ffe5dd;
         }
 
-        /* Toast flotante de tu prototipo ("Ahora sigues a este usuario") */
         #toast-seguimiento {
             position: fixed;
             top: 50%;
@@ -287,7 +281,6 @@
 </head>
 <body>
 
-  <!-- Barra Superior -->
   <nav class="top-nav">
     <div class="top-left">
         <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu"></i>        
@@ -331,7 +324,6 @@
     </div>
   </nav>
 
-  <!-- Sidebar Lateral -->
   <aside class="sidebar" id="sidebar">
       <div class="side-icons">
           <a href="home.html" class="menu-fila"><i class="fa-solid fa-house"></i><span class="menu-text">Inicio</span></a>
@@ -342,11 +334,9 @@
       </div>
   </aside>
 
-  <!-- Contenido Principal -->
   <main class="main-content">
       <div class="perfil-container-principal">
           
-          <!-- Cabecera Perfil -->
           <div class="perfil-header-card">
               <div class="perfil-info-izquierda">
                   <img id="usr-foto" src="logo.png" class="avatar-perfil-img" alt="Avatar">
@@ -355,16 +345,13 @@
                       <div class="ubicacion-pill" id="usr-ubicacion"><i class="fa-solid fa-location-dot"></i> Ubicación aproximada: Cargando...</div>
                   </div>
               </div>
-              <!-- Botón Seguir -->
               <button id="btn-seguir" class="btn-icono-seguir" onclick="alternarSeguir()" title="Seguir usuario">
                   <i class="fa-solid fa-user-plus"></i>
               </button>
           </div>
 
-          <!-- Grid Cuerpo -->
           <div class="perfil-body-grid">
               
-              <!-- Publicaciones del usuario -->
               <div class="columna-publicaciones">
                   <div class="seccion-titulo-caja">Publicaciones:</div>
                   <div id="contenedor-publicaciones-propias">
@@ -372,7 +359,6 @@
                   </div>
               </div>
 
-              <!-- Lado Derecho: Solicitud de adoptante y contactos -->
               <div class="columna-lateral-derecha">
                   <button id="btn-solicitud-adoptante" class="btn-solicitar-adoptante" onclick="solicitarVerAdoptante()">
                       Solicitar ver perfil de adoptante
@@ -381,10 +367,10 @@
                   <div class="bloque-contacto-perfil">
                       <div style="font-weight: bold; color: #333; font-size: 14px;">Contacto:</div>
                       <div class="contacto-fila" id="contacto-tel">
-                          <i class="fa-brands fa-whatsapp" style="color: #25d366; font-size: 16px;"></i> <span>3*********</span>
+                          <i class="fa-brands fa-whatsapp" style="color: #25d366; font-size: 16px;"></i> <span>Cargando...</span>
                       </div>
                       <div class="contacto-fila" id="contacto-correo">
-                          <i class="fa-solid fa-envelope" style="color: #007bff; font-size: 16px;"></i> <span>*******@gmail.com</span>
+                          <i class="fa-solid fa-envelope" style="color: #007bff; font-size: 16px;"></i> <span>Cargando...</span>
                       </div>
                   </div>
 
@@ -396,13 +382,11 @@
       </div>
   </main>
 
-  <!-- Toast Flotante de Seguimiento -->
   <div id="toast-seguimiento">
       <h3 id="texto-toast">Ahora sigues a este usuario</h3>
       <i class="fa-solid fa-check" style="color: #25d366; font-size: 38px; margin-top: 5px;"></i>
   </div>
 
-  <!-- Scripts Firebase y Generales -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -411,10 +395,18 @@
 
   <script>
       let idUsuarioPerfil = null;
+      let usernamePerfil = null;
       let usuarioSeguidoActual = false;
 
-      document.addEventListener('DOMContentLoaded', async () => {
-          // Toggle Sidebar
+      function obtenerCorreoSesion() {
+          const authUser = firebase.auth().currentUser;
+          if (authUser && authUser.email) return authUser.email;
+          return localStorage.getItem('correo_usuario') || 
+                 localStorage.getItem('usuario_correo') || 
+                 localStorage.getItem('user_email') || '';
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
           const btnToggleMenu = document.getElementById('btn-toggle-menu');
           const sidebar = document.getElementById('sidebar');
           if (btnToggleMenu && sidebar) {
@@ -424,19 +416,24 @@
               });
           }
 
-          // Cargar datos del perfil según parámetro URL (?user=...)
-          const params = new URLSearchParams(window.location.search);
-          const username = params.get('user');
-          const correoLogueado = localStorage.getItem('correo_usuario');
+          firebase.auth().onAuthStateChanged(() => {
+              inicializarPerfil();
+          });
+      });
 
-          if (!username) {
+      async function inicializarPerfil() {
+          const params = new URLSearchParams(window.location.search);
+          usernamePerfil = params.get('user');
+          const correoLogueado = obtenerCorreoSesion();
+
+          if (!usernamePerfil) {
               alert("No se especificó un usuario.");
               window.location.href = 'home.html';
               return;
           }
 
           try {
-              const res = await fetch(`/api/perfil-publico/${username}?correo_visitante=${encodeURIComponent(correoLogueado || '')}`);
+              const res = await fetch(`/api/perfil-publico/${encodeURIComponent(usernamePerfil)}?correo_visitante=${encodeURIComponent(correoLogueado)}`);
               if (!res.ok) throw new Error("Usuario no encontrado");
 
               const datos = await res.json();
@@ -446,17 +443,22 @@
               document.getElementById('usr-tag').textContent = `@${datos.nombre_usuario}`;
               if (datos.foto_perfil) document.getElementById('usr-foto').src = datos.foto_perfil;
               
-              if (datos.Ubicacion) {
-                  document.getElementById('usr-ubicacion').innerHTML = `<i class="fa-solid fa-location-dot"></i> Ubicación aproximada: ${datos.Ubicacion}`;
+              if (datos.Ubicacion || datos.ubicacion) {
+                  document.getElementById('usr-ubicacion').innerHTML = `<i class="fa-solid fa-location-dot"></i> Ubicación aproximada: ${datos.Ubicacion || datos.ubicacion}`;
+              } else {
+                  document.getElementById('usr-ubicacion').innerHTML = `<i class="fa-solid fa-location-dot"></i> Ubicación aproximada: Medellín`;
               }
 
-              // Actualizar icono de botón seguir
+              // Mostrar datos reales de contacto de la persona
+              const telefonoReal = datos.Telefono_usuario || datos.telefono || 'No registrado';
+              const correoReal = datos.correo_usuario || datos.correo || 'No registrado';
+
+              document.getElementById('contacto-tel').innerHTML = `<i class="fa-brands fa-whatsapp" style="color: #25d366; font-size: 16px;"></i> <span>${telefonoReal}</span>`;
+              document.getElementById('contacto-correo').innerHTML = `<i class="fa-solid fa-envelope" style="color: #007bff; font-size: 16px;"></i> <span>${correoReal}</span>`;
+
               actualizarBotonSeguirUI(usuarioSeguidoActual);
 
-              // Si aceptó ver perfil de adoptante, revelamos los datos de contacto reales
               if (datos.estado_solicitud === 'aceptada') {
-                  if (datos.Telefono_usuario) document.getElementById('contacto-tel').innerHTML = `<i class="fa-brands fa-whatsapp" style="color: #25d366; font-size: 16px;"></i> <span>${datos.Telefono_usuario}</span>`;
-                  if (datos.correo_usuario) document.getElementById('contacto-correo').innerHTML = `<i class="fa-solid fa-envelope" style="color: #007bff; font-size: 16px;"></i> <span>${datos.correo_usuario}</span>`;
                   document.getElementById('btn-solicitud-adoptante').textContent = "Perfil de adoptante desbloqueado ✓";
                   document.getElementById('btn-solicitud-adoptante').style.background = "#25d366";
               } else if (datos.estado_solicitud === 'pendiente') {
@@ -464,13 +466,13 @@
                   document.getElementById('btn-solicitud-adoptante').style.background = "#ccc";
               }
 
-              // Cargar publicaciones del usuario
-              cargarPublicacionesDeUsuario(idUsuarioPerfil);
+              // Cargar sus publicaciones de forma robusta
+              cargarPublicacionesDeUsuario(usernamePerfil, idUsuarioPerfil);
 
           } catch (error) {
               console.error("Error al cargar perfil:", error);
           }
-      });
+      }
 
       function actualizarBotonSeguirUI(siguiendo) {
           const btnSeguir = document.getElementById('btn-seguir');
@@ -484,7 +486,7 @@
       }
 
       async function alternarSeguir() {
-          const correoLogueado = localStorage.getItem('correo_usuario');
+          const correoLogueado = obtenerCorreoSesion();
           if (!correoLogueado) {
               alert("Debes iniciar sesión para seguir a otros usuarios.");
               return;
@@ -513,7 +515,7 @@
       }
 
       async function solicitarVerAdoptante() {
-          const correoLogueado = localStorage.getItem('correo_usuario');
+          const correoLogueado = obtenerCorreoSesion();
           if (!correoLogueado) {
               alert("Debes iniciar sesión para enviar una solicitud.");
               return;
@@ -526,21 +528,27 @@
                   body: JSON.stringify({ correo_solicitante: correoLogueado, id_propietario: idUsuarioPerfil })
               });
               const data = await res.json();
-              alert(data.mensaje);
+              alert(data.mensaje || "Solicitud enviada con éxito");
               location.reload();
           } catch (e) {
               console.error("Error al solicitar perfil", e);
           }
       }
 
-      async function cargarPublicacionesDeUsuario(idUser) {
+      async function cargarPublicacionesDeUsuario(username, idUser) {
           const contenedor = document.getElementById('contenedor-publicaciones-propias');
           try {
               const res = await fetch('/api/publicaciones-globales');
               const pubs = await res.json();
               
-              // Filtramos las publicaciones que pertenezcan a este ID de usuario
-              const propias = pubs.filter(p => Number(p.id_usuarios) === Number(idUser));
+              const nameTarget = username.toLowerCase().trim();
+
+              const propias = pubs.filter(p => {
+                  const autorPub = (p.nombre_usuario || p.autor || '').toLowerCase().trim();
+                  const matchUser = autorPub === nameTarget;
+                  const matchId = idUser && Number(p.id_usuarios) === Number(idUser);
+                  return matchUser || matchId;
+              });
 
               if (propias.length > 0) {
                   contenedor.innerHTML = '';
@@ -549,18 +557,19 @@
                       if (pub.img_reporte) {
                           try {
                               const parsed = JSON.parse(pub.img_reporte);
-                              img = Array.isArray(parsed) ? parsed[0] : pub.img_reporte;
+                              img = Array.isArray(parsed) && parsed.length > 0 ? parsed[0] : pub.img_reporte;
                           } catch(e) { img = pub.img_reporte; }
                       }
 
                       const esAdopcion = pub.tipo_publicacion === 'adopcion';
-                      const tituloTipo = esAdopcion ? 'Publicación de adopción' : 'Reporte';
-                      const linkDetalle = esAdopcion ? `detalle_adopcion.html?id=${pub.id_origen}` : `detalle_reporte.html?id=${pub.id_origen || pub.id_reporte}`;
+                      const tituloTipo = esAdopcion ? 'Publicación de adopción' : 'Nuevo Reporte';
+                      const idDestino = esAdopcion ? pub.id_origen : (pub.id_origen || pub.id_reporte);
+                      const linkDetalle = esAdopcion ? `detalle_adopcion.html?id=${idDestino}` : `detalle_reporte.html?id=${idDestino}`;
 
                       const tarjetaMini = document.createElement('div');
                       tarjetaMini.className = 'mini-tarjeta-pub';
                       tarjetaMini.innerHTML = `
-                          <img src="${img}" class="mini-pub-img" alt="Pub">
+                          <img src="${img}" class="mini-pub-img" alt="Publicación">
                           <div class="mini-pub-info">
                               <span class="mini-pub-titulo">${tituloTipo}</span>
                               <span style="font-size: 12px; color: #666;">${pub.Fecha_reporte ? pub.Fecha_reporte.split('T')[0] : ''}</span>
@@ -578,7 +587,6 @@
       }
   </script>
 
-  <!-- Traductor oculto Google -->
   <div id="google_translate_element" style="display:none;"></div>
   <script type="text/javascript">
       function googleTranslateElementInit() {
