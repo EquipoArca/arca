@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil de Usuario - ARCA</title>
+    <link rel="stylesheet" href="style_home.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="dark-mode.css">
+    <script>
+    if (localStorage.getItem("modo_oscuro") === "true") {
+        document.body.classList.add("dark-mode");
+    }
+    </script>
+    <style>
+        html, body {
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Itim', cursive, sans-serif;
+            background-color: #fce8e6;
+        }
+
+        .main-content {
+            height: calc(100vh - 70px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+
+        .perfil-container-principal {
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 28px;
+            padding: 25px 35px;
+            width: 100%;
+            max-width: 1050px;
+            box-shadow: 0 12px 35px rgba(220, 150, 140, 0.12);
+            border: 2px solid rgba(255, 255, 255, 0.7);
+            box-sizing: border-box;
+        }
+
+        /* Cabecera del Perfil Público (Estilo Facebook / Prototipo) */
+        .perfil-header-card {
+            background: rgba(253, 203, 208, 0.55);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            margin-bottom: 20px;
+        }
+
+        .perfil-info-izquierda {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .avatar-perfil-img {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #fca38d;
+            background: #fff;
+        }
+
+        .perfil-datos-usuario h2 {
+            margin: 0 0 5px 0;
+            font-size: 24px;
+            color: #2b2b2b;
+        }
+
+        .ubicacion-pill {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 6px 14px;
+            border-radius: 16px;
+            font-size: 13.5px;
+            color: #555;
+            display: inline-block;
+            border: 1px solid #f9cab5;
+        }
+
+        /* Botón de seguir en la cabecera */
+        .btn-icono-seguir {
+            background: #fff;
+            border: 2px solid #fca38d;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #d9534f;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(230, 150, 130, 0.15);
+        }
+
+        .btn-icono-seguir:hover {
+            background: #ffe5dd;
+            transform: scale(1.05);
+        }
+
+        /* Grid del Cuerpo */
+        .perfil-body-grid {
+            display: grid;
+            grid-template-columns: 1.3fr 1fr;
+            gap: 20px;
+        }
+
+        .columna-publicaciones {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 380px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .seccion-titulo-caja {
+            background: rgba(252, 185, 160, 0.65);
+            padding: 8px 16px;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #2b2b2b;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        /* Tarjeta compacta de publicación propia dentro del perfil */
+        .mini-tarjeta-pub {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 18px;
+            padding: 14px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            border: 1px solid #f9cab5;
+            box-shadow: 0 4px 12px rgba(230, 150, 130, 0.05);
+        }
+
+        .mini-pub-img {
+            width: 75px;
+            height: 75px;
+            border-radius: 14px;
+            object-fit: cover;
+            border: 2px solid #fca38d;
+        }
+
+        .mini-pub-info {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .mini-pub-titulo {
+            font-size: 14.5px;
+            font-weight: bold;
+            color: #2b2b2b;
+        }
+
+        .btn-ver-detalles-mini {
+            background: #fffde8;
+            border: 1px solid #f0e6b8;
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-size: 12.5px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #2b2b2b;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            font-family: 'Itim', cursive, sans-serif;
+            transition: background 0.2s;
+        }
+
+        .btn-ver-detalles-mini:hover {
+            background: #fff9c4;
+        }
+
+        /* Columna Derecha: Acciones y Contacto */
+        .columna-lateral-derecha {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .btn-solicitar-adoptante {
+            background: #fca38d;
+            color: #fff;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 18px;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 0 4px 15px rgba(252, 163, 141, 0.3);
+            font-family: 'Itim', cursive, sans-serif;
+            transition: background 0.2s;
+        }
+
+        .btn-solicitar-adoptante:hover {
+            background: #eb917b;
+        }
+
+        .bloque-contacto-perfil {
+            background: rgba(255, 255, 255, 0.65);
+            padding: 16px;
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .contacto-fila {
+            background: rgba(255, 255, 255, 0.85);
+            padding: 8px 12px;
+            border-radius: 14px;
+            border: 1px solid #f9cab5;
+            font-size: 13.5px;
+            color: #444;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-accion-peligro {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid #f4c2c4;
+            color: #d9534f;
+            padding: 10px;
+            border-radius: 16px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+            font-family: 'Itim', cursive, sans-serif;
+            transition: background 0.2s;
+        }
+
+        .btn-accion-peligro:hover {
+            background: #ffe5dd;
+        }
+
+        /* Toast flotante de tu prototipo ("Ahora sigues a este usuario") */
+        #toast-seguimiento {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #ffffff;
+            padding: 25px 40px;
+            border-radius: 24px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            text-align: center;
+            display: none;
+            z-index: 2000;
+            border: 2px solid #fca38d;
+            font-family: 'Itim', cursive, sans-serif;
+        }
+
+        #toast-seguimiento h3 {
+            margin: 0 0 10px 0;
+            color: #2b2b2b;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+
+  <!-- Barra Superior -->
+  <nav class="top-nav">
+    <div class="top-left">
+        <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu"></i>        
+        <div class="mini-logo-circle">
+            <img src="logo.png" alt="Logo">
+        </div>
+        <span class="page-title" id="titulo-pagina">Perfil de Usuario</span>
+    </div>
+
+    <div class="search-bar">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" placeholder="Busca algo">
+        <i class="fa-solid fa-microphone"></i>
+    </div>
+
+    <div class="top-right">
+        <div class="user-header-info">
+            <div class="user-profile-menu" id="user-profile-menu">
+                <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
+                    <img src="logo.png" id="user-avatar-img" alt="Perfil">
+                </div>
+                <div class="mini-menu-card" id="mini-menu-card">
+                    <div class="mini-menu-header">
+                        <span id="mini-menu-username">Usuario</span>
+                    </div>
+                    <hr class="mini-menu-divider">
+                    <a href="javascript:void(0)" onclick="mostrarSeccion('configuracion')" class="mini-menu-item btn-ajustes">
+                        <i class="fa-solid fa-gear"></i>
+                        <span>Ajustes</span>
+                    </a>
+                    <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Cerrar sesión</span>
+                    </a>
+                </div>
+            </div>
+            <div class="notif-circle">
+                <a href="notificaciones.html"><i class="fa-solid fa-bell"></i></a>
+            </div>
+        </div>
+    </div>
+  </nav>
+
+  <!-- Sidebar Lateral -->
+  <aside class="sidebar" id="sidebar">
+      <div class="side-icons">
+          <a href="home.html" class="menu-fila"><i class="fa-solid fa-house"></i><span class="menu-text">Inicio</span></a>
+          <a href="perfil_usuario.html" class="menu-fila"><i class="fa-solid fa-circle-user"></i><span class="menu-text">Perfil</span></a>
+          <a href="guardados_usuario.html" class="menu-fila"><i class="fa-solid fa-bookmark"></i><span class="menu-text">Guardado</span></a>
+          <a href="mapa.html" class="menu-fila"><i class="fa-solid fa-location-dot"></i><span class="menu-text">Mapa</span></a>
+          <a href="configuracion.html" class="menu-fila"><i class="fa-solid fa-gear"></i><span class="menu-text">Ajustes</span></a>
+      </div>
+  </aside>
+
+  <!-- Contenido Principal -->
+  <main class="main-content">
+      <div class="perfil-container-principal">
+          
+          <!-- Cabecera Perfil -->
+          <div class="perfil-header-card">
+              <div class="perfil-info-izquierda">
+                  <img id="usr-foto" src="logo.png" class="avatar-perfil-img" alt="Avatar">
+                  <div class="perfil-datos-usuario">
+                      <h2 id="usr-tag">@cargando</h2>
+                      <div class="ubicacion-pill" id="usr-ubicacion"><i class="fa-solid fa-location-dot"></i> Ubicación aproximada: Cargando...</div>
+                  </div>
+              </div>
+              <!-- Botón Seguir -->
+              <button id="btn-seguir" class="btn-icono-seguir" onclick="alternarSeguir()" title="Seguir usuario">
+                  <i class="fa-solid fa-user-plus"></i>
+              </button>
+          </div>
+
+          <!-- Grid Cuerpo -->
+          <div class="perfil-body-grid">
+              
+              <!-- Publicaciones del usuario -->
+              <div class="columna-publicaciones">
+                  <div class="seccion-titulo-caja">Publicaciones:</div>
+                  <div id="contenedor-publicaciones-propias">
+                      <p style="text-align: center; color: #666; font-style: italic;">Cargando publicaciones...</p>
+                  </div>
+              </div>
+
+              <!-- Lado Derecho: Solicitud de adoptante y contactos -->
+              <div class="columna-lateral-derecha">
+                  <button id="btn-solicitud-adoptante" class="btn-solicitar-adoptante" onclick="solicitarVerAdoptante()">
+                      Solicitar ver perfil de adoptante
+                  </button>
+
+                  <div class="bloque-contacto-perfil">
+                      <div style="font-weight: bold; color: #333; font-size: 14px;">Contacto:</div>
+                      <div class="contacto-fila" id="contacto-tel">
+                          <i class="fa-brands fa-whatsapp" style="color: #25d366; font-size: 16px;"></i> <span>3*********</span>
+                      </div>
+                      <div class="contacto-fila" id="contacto-correo">
+                          <i class="fa-solid fa-envelope" style="color: #007bff; font-size: 16px;"></i> <span>*******@gmail.com</span>
+                      </div>
+                  </div>
+
+                  <button class="btn-accion-peligro" onclick="alert('Funcionalidad de denuncia enviada.')">Denunciar perfil</button>
+                  <button class="btn-accion-peligro" onclick="alert('Usuario bloqueado correctamente.')">Bloquear usuario</button>
+              </div>
+
+          </div>
+      </div>
+  </main>
+
+  <!-- Toast Flotante de Seguimiento -->
+  <div id="toast-seguimiento">
+      <h3 id="texto-toast">Ahora sigues a este usuario</h3>
+      <i class="fa-solid fa-check" style="color: #25d366; font-size: 38px; margin-top: 5px;"></i>
+  </div>
+
+  <!-- Scripts Firebase y Generales -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="script.js"></script>
+
+  <script>
+      let idUsuarioPerfil = null;
+      let usuarioSeguidoActual = false;
+
+      document.addEventListener('DOMContentLoaded', async () => {
+          // Toggle Sidebar
+          const btnToggleMenu = document.getElementById('btn-toggle-menu');
+          const sidebar = document.getElementById('sidebar');
+          if (btnToggleMenu && sidebar) {
+              btnToggleMenu.addEventListener('click', (e) => {
+                  e.stopPropagation();
+                  sidebar.classList.toggle('sidebar-abierta');
+              });
+          }
+
+          // Cargar datos del perfil según parámetro URL (?user=...)
+          const params = new URLSearchParams(window.location.search);
+          const username = params.get('user');
+          const correoLogueado = localStorage.getItem('correo_usuario');
+
+          if (!username) {
+              alert("No se especificó un usuario.");
+              window.location.href = 'home.html';
+              return;
+          }
+
+          try {
+              const res = await fetch(`/api/perfil-publico/${username}?correo_visitante=${encodeURIComponent(correoLogueado || '')}`);
+              if (!res.ok) throw new Error("Usuario no encontrado");
+
+              const datos = await res.json();
+              idUsuarioPerfil = datos.id_usuarios;
+              usuarioSeguidoActual = datos.siguiendo;
+
+              document.getElementById('usr-tag').textContent = `@${datos.nombre_usuario}`;
+              if (datos.foto_perfil) document.getElementById('usr-foto').src = datos.foto_perfil;
+              
+              if (datos.Ubicacion) {
+                  document.getElementById('usr-ubicacion').innerHTML = `<i class="fa-solid fa-location-dot"></i> Ubicación aproximada: ${datos.Ubicacion}`;
+              }
+
+              // Actualizar icono de botón seguir
+              actualizarBotonSeguirUI(usuarioSeguidoActual);
+
+              // Si aceptó ver perfil de adoptante, revelamos los datos de contacto reales
+              if (datos.estado_solicitud === 'aceptada') {
+                  if (datos.Telefono_usuario) document.getElementById('contacto-tel').innerHTML = `<i class="fa-brands fa-whatsapp" style="color: #25d366; font-size: 16px;"></i> <span>${datos.Telefono_usuario}</span>`;
+                  if (datos.correo_usuario) document.getElementById('contacto-correo').innerHTML = `<i class="fa-solid fa-envelope" style="color: #007bff; font-size: 16px;"></i> <span>${datos.correo_usuario}</span>`;
+                  document.getElementById('btn-solicitud-adoptante').textContent = "Perfil de adoptante desbloqueado ✓";
+                  document.getElementById('btn-solicitud-adoptante').style.background = "#25d366";
+              } else if (datos.estado_solicitud === 'pendiente') {
+                  document.getElementById('btn-solicitud-adoptante').textContent = "Solicitud pendiente...";
+                  document.getElementById('btn-solicitud-adoptante').style.background = "#ccc";
+              }
+
+              // Cargar publicaciones del usuario
+              cargarPublicacionesDeUsuario(idUsuarioPerfil);
+
+          } catch (error) {
+              console.error("Error al cargar perfil:", error);
+          }
+      });
+
+      function actualizarBotonSeguirUI(siguiendo) {
+          const btnSeguir = document.getElementById('btn-seguir');
+          if (siguiendo) {
+              btnSeguir.innerHTML = '<i class="fa-solid fa-user-check" style="color:#25d366;"></i>';
+              btnSeguir.title = "Dejar de seguir";
+          } else {
+              btnSeguir.innerHTML = '<i class="fa-solid fa-user-plus"></i>';
+              btnSeguir.title = "Seguir usuario";
+          }
+      }
+
+      async function alternarSeguir() {
+          const correoLogueado = localStorage.getItem('correo_usuario');
+          if (!correoLogueado) {
+              alert("Debes iniciar sesión para seguir a otros usuarios.");
+              return;
+          }
+
+          try {
+              const res = await fetch('/api/alternar-seguimiento', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ correo_seguidor: correoLogueado, id_seguido: idUsuarioPerfil })
+              });
+              const data = await res.json();
+
+              usuarioSeguidoActual = data.siguiendo;
+              actualizarBotonSeguirUI(usuarioSeguidoActual);
+
+              if (usuarioSeguidoActual) {
+                  document.getElementById('texto-toast').textContent = "Ahora sigues a este usuario";
+                  const toast = document.getElementById('toast-seguimiento');
+                  toast.style.display = 'block';
+                  setTimeout(() => toast.style.display = 'none', 2000);
+              }
+          } catch (e) {
+              console.error("Error al alternar seguimiento", e);
+          }
+      }
+
+      async function solicitarVerAdoptante() {
+          const correoLogueado = localStorage.getItem('correo_usuario');
+          if (!correoLogueado) {
+              alert("Debes iniciar sesión para enviar una solicitud.");
+              return;
+          }
+
+          try {
+              const res = await fetch('/api/solicitar-ver-adoptante', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ correo_solicitante: correoLogueado, id_propietario: idUsuarioPerfil })
+              });
+              const data = await res.json();
+              alert(data.mensaje);
+              location.reload();
+          } catch (e) {
+              console.error("Error al solicitar perfil", e);
+          }
+      }
+
+      async function cargarPublicacionesDeUsuario(idUser) {
+          const contenedor = document.getElementById('contenedor-publicaciones-propias');
+          try {
+              const res = await fetch('/api/publicaciones-globales');
+              const pubs = await res.json();
+              
+              // Filtramos las publicaciones que pertenezcan a este ID de usuario
+              const propias = pubs.filter(p => Number(p.id_usuarios) === Number(idUser));
+
+              if (propias.length > 0) {
+                  contenedor.innerHTML = '';
+                  for (const pub of propias) {
+                      let img = 'logo.png';
+                      if (pub.img_reporte) {
+                          try {
+                              const parsed = JSON.parse(pub.img_reporte);
+                              img = Array.isArray(parsed) ? parsed[0] : pub.img_reporte;
+                          } catch(e) { img = pub.img_reporte; }
+                      }
+
+                      const esAdopcion = pub.tipo_publicacion === 'adopcion';
+                      const tituloTipo = esAdopcion ? 'Publicación de adopción' : 'Reporte';
+                      const linkDetalle = esAdopcion ? `detalle_adopcion.html?id=${pub.id_origen}` : `detalle_reporte.html?id=${pub.id_origen || pub.id_reporte}`;
+
+                      const tarjetaMini = document.createElement('div');
+                      tarjetaMini.className = 'mini-tarjeta-pub';
+                      tarjetaMini.innerHTML = `
+                          <img src="${img}" class="mini-pub-img" alt="Pub">
+                          <div class="mini-pub-info">
+                              <span class="mini-pub-titulo">${tituloTipo}</span>
+                              <span style="font-size: 12px; color: #666;">${pub.Fecha_reporte ? pub.Fecha_reporte.split('T')[0] : ''}</span>
+                              <a href="${linkDetalle}" class="btn-ver-detalles-mini">Ver detalles</a>
+                          </div>
+                      `;
+                      contenedor.appendChild(tarjetaMini);
+                  }
+              } else {
+                  contenedor.innerHTML = `<p style="text-align: center; color: #666; font-style: italic;">Este usuario aún no tiene publicaciones.</p>`;
+              }
+          } catch (e) {
+              console.error("Error cargando publicaciones del usuario", e);
+          }
+      }
+  </script>
+
+  <!-- Traductor oculto Google -->
+  <div id="google_translate_element" style="display:none;"></div>
+  <script type="text/javascript">
+      function googleTranslateElementInit() {
+          new google.translate.TranslateElement({ pageLanguage: 'es', autoDisplay: false }, 'google_translate_element');
+      }
+  </script>
+  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+</body>
+</html>

@@ -1378,6 +1378,81 @@ app.put('/api/actualizar-adopcion/:id', (req, res) => {
         });
     });
 });
+// GET: Obtener datos del perfil público de un usuario por su @username o id
+app.get('/api/perfil-publico/:username', (req, res) => {
+    const { username } = req.params;
+    const correoVisitante = req.query.correo_visitante; // Para validar si ya lo sigue o si tiene acceso
+
+    const sql = `
+        SELECT u.id_usuarios, u.nombre_usuario, u.foto_perfil, u.correo_usuario, u.Telefono_usuario
+        FROM usuarios u
+        WHERE u.nombre_usuario = ?
+    `;
+
+    db.query(sql, [username], (err, results) => {
+        if (err || results.length === 0) return res.status(404).json({ error: "Usuario no encontrado" });
+        const usuario = results[0];
+
+        // Consultamos si el visitante actual ya lo sigue o solicitó acceso
+        const sqlVerificaciones = `
+            SELECT 
+                (SELECT COUNT(*) FROM seguidores WHERE id_usuario_seguidor = (SELECT id_usuarios FROM usuarios WHERE correo_usuario = ?) AND id_usuario_seguido = ?) AS siguiendo,
+                (SELECT estado FROM solicitudes_adoptante WHERE id_solicitante = (SELECT id_usuarios FROM usuarios WHERE correo_usuario = ?) AND id_propietario = ?) AS estado_solicitud
+        `;
+
+        db.query(sqlVerificaciones, [correoVisitante, usuario.id_usuarios, correoVisitante, usuario.id_usuarios], (errVerif, resVerif) => {
+            res.json({
+                ...usuario,
+                siguiendo: resVerif && resVerif[0].siguiendo > 0,
+                estado_solicitud: resVerif && resVerif[0].estado_solicitud ? resVerif[0].estado_solicitud : 'ninguna'
+            });
+        });
+    });
+});
+
+// POST: Seguir / Dejar de seguir usuario
+app.post('/api/alternar-seguimiento', (req, res) => {
+    const { correo_seguidor, id_seguido } = req.body;
+
+    db.query("SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))", [correo_seguidor], (err, rows) => {
+        if (err || rows.length === 0) return res.status(400).json({ error: "Usuario no encontrado" });
+        const idSeguidor = rows[0].id_usuarios;
+
+        db.query("SELECT id_seguidor FROM seguidores WHERE id_usuario_seguidor = ? AND id_usuario_seguido = ?", [idSeguidor, id_seguido], (errExist, exist) => {
+            if (exist.length > 0) {
+                // Si ya lo sigue -> Dejar de seguir
+                db.query("DELETE FROM seguidores WHERE id_seguidor = ?", [exist[0].id_seguidor], () => {
+                    res.json({ siguiendo: false, mensaje: "Has dejado de seguir a este usuario." });
+                });
+            } else {
+                // Si no lo sigue -> Seguir y Notificar
+                db.query("INSERT INTO seguidores (id_usuario_seguidor, id_usuario_seguido) VALUES (?, ?)", [idSeguidor, id_seguido], () => {
+                    db.query("INSERT INTO notificaciones (id_usuario_destino, id_usuario_origen, tipo, mensaje) VALUES (?, ?, 'nuevo_seguidor', 'comenzó a seguirte.')", [id_seguido, idSeguidor]);
+                    res.json({ siguiendo: true, mensaje: "Ahora sigues a este usuario" });
+                });
+            }
+        });
+    });
+});
+
+// POST: Solicitar ver perfil de adoptante
+app.post('/api/solicitar-ver-adoptante', (req, res) => {
+    const { correo_solicitante, id_propietario } = req.body;
+
+    db.query("SELECT id_usuarios, nombre_usuario FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))", [correo_solicitante], (err, rows) => {
+        if (err || rows.length === 0) return res.status(400).json({ error: "Error de usuario" });
+        const idSolicitante = rows[0].id_usuarios;
+        const nombreSolicitante = rows[0].nombre_usuario;
+
+        const sql = "INSERT INTO solicitudes_adoptante (id_solicitante, id_propietario) VALUES (?, ?) ON DUPLICATE KEY UPDATE estado='pendiente'";
+        db.query(sql, [idSolicitante, id_propietario], () => {
+            // Notificación al dueño del perfil
+            const msg = `@${nombreSolicitante} quiere ver tu perfil de adoptante.`;
+            db.query("INSERT INTO notificaciones (id_usuario_destino, id_usuario_origen, tipo, mensaje) VALUES (?, ?, 'solicitud_adoptante', ?)", [id_propietario, idSolicitante, msg]);
+            res.json({ exito: true, mensaje: "Solicitud enviada correctamente." });
+        });
+    });
+});
 
 // ==========================================
 // INICIALIZACIÓN DEL SERVIDOR (Siempre al final)
