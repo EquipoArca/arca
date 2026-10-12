@@ -1379,17 +1379,20 @@ app.put('/api/actualizar-adopcion/:id', (req, res) => {
     });
 });
 // GET: Obtener datos del perfil público de un usuario por su @username o id
-app.get('/api/perfil-publico/:username', (req, res) => {
-    const { username } = req.params;
-    const correoVisitante = req.query.correo_visitante; // Para validar si ya lo sigue o si tiene acceso
+// GET: Obtener datos del perfil público de un usuario por su @username, id o correo
+app.get('/api/perfil-publico/:parametro', (req, res) => {
+    const { parametro } = req.params;
+    const correoVisitante = req.query.correo_visitante; 
 
+    // Buscamos si coincide por nombre_usuario O por correo_usuario
     const sql = `
         SELECT u.id_usuarios, u.nombre_usuario, u.foto_perfil, u.correo_usuario, u.Telefono_usuario, u.Ubicacion
         FROM usuarios u
-        WHERE LOWER(TRIM(u.nombre_usuario)) = LOWER(TRIM(?))
+        WHERE LOWER(TRIM(u.nombre_usuario)) = LOWER(TRIM(?)) 
+           OR LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(?))
     `;
 
-    db.query(sql, [username], (err, results) => {
+    db.query(sql, [parametro, parametro], (err, results) => {
         if (err || results.length === 0) return res.status(404).json({ error: "Usuario no encontrado" });
         const usuario = results[0];
 
