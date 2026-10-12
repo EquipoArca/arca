@@ -176,7 +176,7 @@
    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script> 
 
-  <script>
+<script>
     document.addEventListener('DOMContentLoaded', async () => {
         const contenedor = document.getElementById('contenedor-novedades');
         if (!contenedor) return;
@@ -191,7 +191,23 @@
                 contenedor.innerHTML = ''; 
 
                 for (const pub of publicaciones) {
-                    const imagenSrc = pub.img_reporte ? pub.img_reporte : 'logo.png';
+                    // --- LÓGICA INTELIGENTE PARA EXTRAER LA IMAGEN ---
+                    let imagenSrc = 'logo.png';
+                    if (pub.img_reporte) {
+                        try {
+                            // Intentamos parsear por si viene en formato JSON ['foto.jpg']
+                            const parsed = JSON.parse(pub.img_reporte);
+                            if (Array.isArray(parsed) && parsed.length > 0) {
+                                imagenSrc = parsed[0];
+                            } else {
+                                imagenSrc = pub.img_reporte;
+                            }
+                        } catch (e) {
+                            // Si no es JSON, se usa el texto plano directamente
+                            imagenSrc = pub.img_reporte;
+                        }
+                    }
+
                     const fechaFormateada = pub.Fecha_reporte ? pub.Fecha_reporte.split('T')[0] : '';
                     let ubicacionTextoBruta = pub.Ubicacion || pub.ubicacion || '';
                     let ubicacionBonita = await obtenerNombreUbicacionGlobal(ubicacionTextoBruta);
@@ -203,7 +219,6 @@
                     const tipoTitulo = esAdopcion ? 'Publicación de Adopción' : 'Nuevo Reporte';
                     const tipoSubPill = pub.nombre_tipo_reporte || (esAdopcion ? 'Adopción' : 'Animal en situación de calle');
                     
-                    // Usamos id_origen si es adopción o id_reporte si es reporte
                     const idDestino = esAdopcion ? pub.id_origen : (pub.id_origen || pub.id_reporte);
 
                     tarjeta.innerHTML = `
@@ -214,7 +229,7 @@
 
                         <div class="proto-card-body">
                             <div class="proto-img-wrapper">
-                                <img src="${imagenSrc}" alt="Publicación">
+                                <img src="${imagenSrc}" alt="Publicación" style="width:100%; height:100%; object-fit:cover;">
                             </div>
 
                             <div class="proto-content-right">
@@ -237,7 +252,6 @@
         }
     });
 
-    // Redirección inteligente al hacer clic en ver detalles
     document.addEventListener('click', (event) => {
         const botonDetalle = event.target.closest('.btn-accion-ir');
         if (botonDetalle) {
