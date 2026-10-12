@@ -178,7 +178,7 @@ body {
     opacity: 1;
     visibility: visible;
 }
-.main-content {
+.main-content-notificaciones {
     margin-left: 60px;
     width: calc(100% - 60px);
     height: calc(100vh - 60px);
@@ -186,10 +186,10 @@ body {
     flex-direction: row;
     overflow: hidden;
     transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
-                width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+     width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-body.sidebar-abierta .main-content {
+body.sidebar-abierta .main-content-notificaciones {
     margin-left: 200px;
     width: calc(100% - 200px);
 }

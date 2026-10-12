@@ -177,23 +177,6 @@
    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script> 
 
    <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const btnToggleMenu = document.getElementById('btn-toggle-menu');
-        const sidebar = document.getElementById('sidebar');
-
-        if (btnToggleMenu && sidebar) {
-            btnToggleMenu.addEventListener('click', (e) => {
-                e.stopPropagation(); 
-                sidebar.classList.toggle('sidebar-abierta'); 
-            });
-        }
-    });
-   </script>
-
-   <!-- Script único y limpio para cargar las publicaciones y enlazar correctamente al detalle -->
-   
-    <!-- Script único y limpio para cargar las publicaciones y enlazar correctamente al detalle -->
-   <script>
     document.addEventListener('DOMContentLoaded', async () => {
         const contenedor = document.getElementById('contenedor-novedades');
         if (!contenedor) return;
@@ -207,39 +190,41 @@
             if (publicaciones.length > 0) {
                 contenedor.innerHTML = ''; // Limpia el mensaje vacío
 
-                // Usamos un bucle clásico for...of para permitir el uso de 'await' en cada tarjeta
                 for (const pub of publicaciones) {
                     const imagenSrc = pub.img_reporte ? pub.img_reporte : 'logo.png';
                     const fechaFormateada = pub.Fecha_reporte ? pub.Fecha_reporte.split('T')[0] : '';
-                    
-                    // AQUÍ LLAMAMOS A NUESTRA FUNCIÓN GLOBAL DE SCRIPT.JS
                     let ubicacionTextoBruta = pub.Ubicacion || pub.ubicacion || '';
                     let ubicacionBonita = await obtenerNombreUbicacionGlobal(ubicacionTextoBruta);
 
                     const tarjeta = document.createElement('article');
                     tarjeta.className = 'tarjeta-prototipo-estilo';
                     
+                    // Validamos si es una adopción o un reporte para ajustar los textos y la redirección
+                    const esAdopcion = pub.tipo_publicacion === 'adopcion';
+                    const tipoTitulo = esAdopcion ? 'Publicación de Adopción' : 'Nuevo Reporte';
+                    const tipoSubPill = esAdopcion ? (pub.nombre_tipo_reporte || 'Adopción') : (pub.nombre_tipo_reporte || 'Animal en situación de calle');
+                    const idDestino = esAdopcion ? pub.id_origen : pub.id_origen; // id_origen guarda el ID específico de la adopción o reporte
+                    const claseBoton = esAdopcion ? 'proto-btn-detalles btn-ver-adopcion' : 'proto-btn-detalles';
+                    
                     tarjeta.innerHTML = `
                         <div class="proto-card-top">
-                            <div class="proto-titulo-pill">Nuevo Reporte</div>
+                            <div class="proto-titulo-pill">${tipoTitulo}</div>
                             <span class="proto-fecha">${fechaFormateada}</span>
                         </div>
 
                         <div class="proto-card-body">
                             <div class="proto-img-wrapper">
-                                <img src="${imagenSrc}" alt="Reporte">
+                                <img src="${imagenSrc}" alt="Publicación">
                             </div>
 
                             <div class="proto-content-right">
-                                <div class="proto-pill-tipo">${pub.nombre_tipo_reporte || 'Animal en situación de calle'}</div>
+                                <div class="proto-pill-tipo">${tipoSubPill}</div>
                                 <div class="proto-info-extra">
                                     <span class="proto-autor">Publicado por: <a href="perfil_usuario.html">@${pub.nombre_usuario || 'Usuario'}</a></span>
-                                    <!-- Aquí pintamos la ubicación ya traducida a calle y número -->
                                     <p class="proto-ubicacion"><i class="fa-solid fa-location-dot"></i> ${ubicacionBonita}</p>
                                 </div>
                                 <div class="proto-footer-row">
-                                    <!-- Botón que redirige correctamente pasando el id del reporte -->
-                                    <button class="proto-btn-detalles" data-id="${pub.id_reporte}">Ver detalles</button>
+                                    <button class="${claseBoton}" data-tipo="${pub.tipo_publicacion}" data-id="${idDestino}">Ver detalles</button>
                                 </div>
                             </div>
                         </div>
@@ -249,6 +234,23 @@
             }
         } catch (error) {
             console.error("No se pudieron cargar las novedades:", error);
+        }
+    });
+
+    // Escucha global inteligente para redirigir al detalle correcto (Reporte o Adopción)
+    document.addEventListener('click', (event) => {
+        const botonDetalle = event.target.closest('.proto-btn-detalles');
+        if (botonDetalle) {
+            const idItem = botonDetalle.getAttribute('data-id');
+            const tipoItem = botonDetalle.getAttribute('data-tipo');
+            
+            if (idItem) {
+                if (tipoItem === 'adopcion') {
+                    window.location.href = `detalle_adopcion.html?id=${idItem}`;
+                } else {
+                    window.location.href = `detalle_reporte.html?id=${idItem}`;
+                }
+            }
         }
     });
 

@@ -761,3 +761,91 @@ document.addEventListener('DOMContentLoaded', () => {
     // Si tienes botones de menú o clases que a veces no están en todas las páginas, 
     // puedes manejarlas aquí de forma segura sin que la consola explote.
 });
+// ==========================================
+// CARGAR Y FILTRAR ADOPCIONES EN NOVEDADES
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+    const contenedorNovedades = document.getElementById('contenedor-novedades');
+    
+    // Verificamos si estamos en la página de novedades de adopciones buscando el contenedor
+    if (contenedorNovedades && window.location.pathname.includes('novedades-adopciones.html')) {
+        cargarAdopcionesNovedades();
+    }
+});
+
+function cargarAdopcionesNovedades() {
+    fetch('http://localhost:3000/api/publicaciones-globales')
+        .then(res => res.json())
+        .then(publicaciones => {
+            const contenedor = document.getElementById('contenedor-novedades');
+            contenedor.innerHTML = ''; // Limpiamos el estado vacío de ejemplo
+
+            // Filtramos únicamente las publicaciones que sean de tipo 'adopcion'
+            const adopciones = publicaciones.filter(pub => pub.tipo_publicacion === 'adopcion');
+
+            if (adopciones.length === 0) {
+                contenedor.innerHTML = `
+                    <div class="estado-vacio">
+                        <div class="escena-cielo-kawaii">
+                            <div class="nube-kawaii nube-izq"></div>
+                            <div class="sol-kawaii">
+                                <div class="ojo-sol izq"></div>
+                                <div class="ojo-sol der"></div>
+                                <div class="boca-sol"></div>
+                                <div class="rubor-sol izq"></div>
+                                <div class="rubor-sol der"></div>
+                            </div>
+                            <div class="nube-kawaii nube-der"></div>
+                            <span class="destello d1">✦</span>
+                            <span class="destello d2">✦</span>
+                        </div>
+                        <h2>¡Aún no hay publicaciones de adopción!</h2>
+                        <p>&lt;3</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Pintamos cada adopción encontrada
+            adopciones.forEach(adopcion => {
+                let fotoSrc = 'logo.png';
+                try {
+                    const fotosArray = JSON.parse(adopcion.img_reporte); // En tu API unificada, fotos_animal se mapea aquí
+                    if (Array.isArray(fotosArray) && fotosArray.length > 0) {
+                        fotoSrc = fotosArray[0];
+                    }
+                } catch (e) {
+                    if (adopcion.img_reporte) fotoSrc = adopcion.img_reporte;
+                }
+
+                const fechaFormateada = new Date(adopcion.Fecha_reporte).toLocaleDateString();
+
+                const tarjeta = document.createElement('article');
+                tarjeta.classList.add('tarjeta-adopcion');
+                tarjeta.innerHTML = `
+                    <div class="columna-izquierda">
+                        <div class="badge-titulo-adopcion">${adopcion.nombre_tipo_reporte || 'Adopción'}</div>
+                        <div class="contenedor-foto-adopcion">
+                            <img src="${fotoSrc}" alt="Mascota" style="width:100%; height:100%; object-fit:cover; border-radius:12px;">
+                        </div>
+                    </div>
+                    <div class="columna-derecha-adopcion">
+                        <span class="fecha-adopcion">${fechaFormateada}</span>
+                        <div class="lista-capsulas-vacias">
+                            <div class="capsula-dato">📍 ${adopcion.Ubicacion}</div>
+                            <div class="capsula-dato">📝 ${adopcion.Descripcion ? adopcion.Descripcion.substring(0, 70) + '...' : 'Sin descripción'}</div>
+                            <button class="btn-detalles" onclick="verDetallesAdopcion('${adopcion.id_origen}')">Ver detalles</button>
+                        </div>
+                    </div>
+                `;
+                contenedor.appendChild(tarjeta);
+            });
+        })
+        .catch(err => console.error("Error al cargar las adopciones:", err));
+}
+
+// Función para abrir la sección de detalles de adopción
+function verDetallesAdopcion(idAdopcion) {
+    // Redirige a tu vista/archivo de detalles pasando el ID correspondiente
+    window.location.href = `detalles_adopcion.html?id=${idAdopcion}`;
+}
