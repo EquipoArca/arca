@@ -176,7 +176,7 @@
    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script> 
 
-   <script>
+  <script>
     document.addEventListener('DOMContentLoaded', async () => {
         const contenedor = document.getElementById('contenedor-novedades');
         if (!contenedor) return;
@@ -188,7 +188,7 @@
             const publicaciones = await respuesta.json();
 
             if (publicaciones.length > 0) {
-                contenedor.innerHTML = ''; // Limpia el mensaje vacío
+                contenedor.innerHTML = ''; 
 
                 for (const pub of publicaciones) {
                     const imagenSrc = pub.img_reporte ? pub.img_reporte : 'logo.png';
@@ -199,13 +199,13 @@
                     const tarjeta = document.createElement('article');
                     tarjeta.className = 'tarjeta-prototipo-estilo';
                     
-                    // Validamos si es una adopción o un reporte para ajustar los textos y la redirección
                     const esAdopcion = pub.tipo_publicacion === 'adopcion';
                     const tipoTitulo = esAdopcion ? 'Publicación de Adopción' : 'Nuevo Reporte';
-                    const tipoSubPill = esAdopcion ? (pub.nombre_tipo_reporte || 'Adopción') : (pub.nombre_tipo_reporte || 'Animal en situación de calle');
-                    const idDestino = esAdopcion ? pub.id_origen : pub.id_origen; // id_origen guarda el ID específico de la adopción o reporte
-                    const claseBoton = esAdopcion ? 'proto-btn-detalles btn-ver-adopcion' : 'proto-btn-detalles';
+                    const tipoSubPill = pub.nombre_tipo_reporte || (esAdopcion ? 'Adopción' : 'Animal en situación de calle');
                     
+                    // Usamos id_origen si es adopción o id_reporte si es reporte
+                    const idDestino = esAdopcion ? pub.id_origen : (pub.id_origen || pub.id_reporte);
+
                     tarjeta.innerHTML = `
                         <div class="proto-card-top">
                             <div class="proto-titulo-pill">${tipoTitulo}</div>
@@ -224,7 +224,7 @@
                                     <p class="proto-ubicacion"><i class="fa-solid fa-location-dot"></i> ${ubicacionBonita}</p>
                                 </div>
                                 <div class="proto-footer-row">
-                                    <button class="${claseBoton}" data-tipo="${pub.tipo_publicacion}" data-id="${idDestino}">Ver detalles</button>
+                                    <button class="proto-btn-detalles btn-accion-ir" data-tipo="${pub.tipo_publicacion}" data-id="${idDestino}">Ver detalles</button>
                                 </div>
                             </div>
                         </div>
@@ -237,9 +237,9 @@
         }
     });
 
-    // Escucha global inteligente para redirigir al detalle correcto (Reporte o Adopción)
+    // Redirección inteligente al hacer clic en ver detalles
     document.addEventListener('click', (event) => {
-        const botonDetalle = event.target.closest('.proto-btn-detalles');
+        const botonDetalle = event.target.closest('.btn-accion-ir');
         if (botonDetalle) {
             const idItem = botonDetalle.getAttribute('data-id');
             const tipoItem = botonDetalle.getAttribute('data-tipo');
@@ -250,17 +250,6 @@
                 } else {
                     window.location.href = `detalle_reporte.html?id=${idItem}`;
                 }
-            }
-        }
-    });
-
-    // Escucha global para el botón de "Ver detalles" de cada tarjeta
-    document.addEventListener('click', (event) => {
-        const botonDetalle = event.target.closest('.proto-btn-detalles');
-        if (botonDetalle) {
-            const reporteId = botonDetalle.getAttribute('data-id');
-            if (reporteId) {
-                window.location.href = `detalle_reporte.html?id=${reporteId}`;
             }
         }
     });

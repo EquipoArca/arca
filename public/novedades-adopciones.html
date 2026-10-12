@@ -206,6 +206,72 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
      <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        const contenedor = document.getElementById('contenedor-novedades');
+        if (!contenedor) return;
+
+        try {
+            const respuesta = await fetch('/api/publicaciones-globales');
+            if (!respuesta.ok) throw new Error("Error al obtener las publicaciones");
+            
+            const publicaciones = await respuesta.json();
+            // Filtramos únicamente las que sean de tipo 'adopcion'
+            const adopciones = publicaciones.filter(pub => pub.tipo_publicacion === 'adopcion');
+
+            if (adopciones.length > 0) {
+                contenedor.innerHTML = ''; 
+
+                for (const pub of adopciones) {
+                    const imagenSrc = pub.img_reporte ? pub.img_reporte : 'logo.png';
+                    const fechaFormateada = pub.Fecha_reporte ? pub.Fecha_reporte.split('T')[0] : '';
+                    let ubicacionTextoBruta = pub.Ubicacion || pub.ubicacion || '';
+                    let ubicacionBonita = await obtenerNombreUbicacionGlobal(ubicacionTextoBruta);
+
+                    const tarjeta = document.createElement('article');
+                    tarjeta.className = 'tarjeta-prototipo-estilo';
+                    
+                    tarjeta.innerHTML = `
+                        <div class="proto-card-top">
+                            <div class="proto-titulo-pill">Publicación de Adopción</div>
+                            <span class="proto-fecha">${fechaFormateada}</span>
+                        </div>
+
+                        <div class="proto-card-body">
+                            <div class="proto-img-wrapper">
+                                <img src="${imagenSrc}" alt="Adopción">
+                            </div>
+
+                            <div class="proto-content-right">
+                                <div class="proto-pill-tipo">${pub.nombre_tipo_reporte || 'Adopción'}</div>
+                                <div class="proto-info-extra">
+                                    <span class="proto-autor">Publicado por: <a href="perfil_usuario.html">@${pub.nombre_usuario || 'Usuario'}</a></span>
+                                    <p class="proto-ubicacion"><i class="fa-solid fa-location-dot"></i> ${ubicacionBonita}</p>
+                                </div>
+                                <div class="proto-footer-row">
+                                    <button class="proto-btn-detalles btn-ver-adopcion-ficha" data-id="${pub.id_origen}">Ver detalles</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    contenedor.appendChild(tarjeta);
+                }
+            }
+        } catch (error) {
+            console.error("Error al cargar adopciones:", error);
+        }
+    });
+
+    document.addEventListener('click', (event) => {
+        const botonDetalle = event.target.closest('.btn-ver-adopcion-ficha');
+        if (botonDetalle) {
+            const idItem = botonDetalle.getAttribute('data-id');
+            if (idItem) {
+                window.location.href = `detalle_adopcion.html?id=${idItem}`;
+            }
+        }
+    });
+   </script>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
