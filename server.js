@@ -4,6 +4,7 @@ const express = require('express');
 const cors = require('cors');
 const nodemailer = require('nodemailer');
 const path = require('path');
+const multer = require('multer');
 
 const { initializeApp, cert } = require('firebase-admin/app');
 const { getAuth } = require('firebase-admin/auth');
@@ -1597,6 +1598,79 @@ app.get('/api/ficha-adoptante-publica/:username', (req, res) => {
         });
     });
 });
+// ==========================================
+// MÓDULO DE REGISTRO DE FUNDACIONES (PDFs + MySQL)
+// ==========================================
+const upload = multer({ storage: multer.memoryStorage() });
+
+app.post('/api/registrar-fundacion', upload.fields([
+    { name: 'certificado_existencia', maxCount: 1 },
+    { name: 'estatuto', maxCount: 1 },
+    { name: 'registro_oficial', maxCount: 1 },
+    { name: 'estado_financiero', maxCount: 1 }
+], (req, res) => {
+    
+    const files = req.files || {};
+    const certBuffer = files.certificado_existencia ? files.certificado_existencia[0].buffer : null;
+    const estatutoBuffer = files.estatuto ? files.estatuto[0].buffer : null;
+    const registroBuffer = files.registro_oficial ? files.registro_oficial[0].buffer : null;
+    const financieroBuffer = files.estado_financiero ? files.estado_financiero[0].buffer : null;
+
+    const {
+        nombre_legal, nombre_comercial, nit_rut, id_representante,
+        pais, ciudad, direccion, telefono_fundacion, correo_fundacion, pagina_web,
+        rep_nombre, rep_documento, rep_cargo, rep_telefono, metodos_donacion,
+        descripcion_mision, descripcion_vision, programas_proyectos, pfp_fundacion, foto_portada, enfoque_otro
+    } = req.body;
+
+    // 1. Insertar primero en la tabla 'documentacion' para usar los tinyblobs
+    const queryDocumentacion = `
+        INSERT INTO documentacion (certificado_existencia, estatuto, estado_financiero, registro_oficial) 
+        VALUES (?, ?, ?, ?)
+    `;
+    
+    db.query(queryDocumentacion, [certBuffer, estatutoBuffer, financieroBuffer, registroBuffer], (err, resultadoDoc) => {
+        if (err) {
+            console.error("Error al guardar documentación:", err);
+            return res.status(500).json({ exito: false, mensaje: "Error al guardar los documentos legales." });
+        }
+
+        const idDocumentacionGenerado = resultadoDoc.insertId;
+        const fechaActual = new Date().toISOString().slice(0, 10);
+
+        // 2. Insertar en la tabla principal de usuarios/fundaciones con estado pendiente
+        const queryFundacion = `
+            INSERT INTO usuarios (
+                tipo_usuario, estado_aprobacion, id_documentacion, 
+                Nombre_Legal, Nombre_Comercial, id_representante, Nit_Rut, 
+                Pais, Ciudad, Direccion, Telefono_fundacion, Correo_fundacion, 
+                Pagina_web, Fecha_registro, Descripcion_mision, Descripcion_vision, 
+                PFP_Fundacion, Foto_Portada, Programas_Proyectos_Actuales, enfoque_otro
+            ) VALUES ('fundacion', 'pendiente', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+
+        const valoresFundacion = [
+            idDocumentacionGenerado,
+            nombre_legal, nombre_comercial, id_representante, nit_rut,
+            pais || 'Colombia', ciudad || 'Medellín', direccion, telefono_fundacion, correo_fundacion,
+            pagina_web, fechaActual, descripcion_mision, descripcion_vision,
+            pfp_fundacion, foto_portada, programas_proyectos, enfoque_otro
+        ];
+
+        db.query(queryFundacion, valoresFundacion, (err2) => {
+            if (err2) {
+                console.error("Error al registrar la fundación:", err2);
+                return res.status(500).json({ exito: false, mensaje: "Error al registrar la fundación en la base de datos." });
+            }
+
+            res.json({ 
+                exito: true, 
+                mensaje: "¡Fundación registrada con éxito! Quedó en estado pendiente de aprobación." 
+            });
+        });
+    });
+}));
+
 // ==========================================
 // INICIALIZACIÓN DEL SERVIDOR (Siempre al final)
 // ==========================================

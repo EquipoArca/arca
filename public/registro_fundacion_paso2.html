@@ -230,11 +230,52 @@
     </main>
 
     <script>
-        function finalizarRegistroCompleto() {
-            alert("¡Registro enviado con éxito! Tu solicitud quedó en estado 'pendiente' para revisión del equipo ARCA.");
+       async function finalizarRegistroCompleto() {
+    // 1. Recuperamos los datos del Paso 1 guardados en el sessionStorage
+    const datosPaso1 = JSON.parse(sessionStorage.getItem('datos_fundacion_p1') || '{}');
+
+    // 2. Creamos un FormData global para enviar archivos y textos juntos
+    const formData = new FormData();
+
+    // Inyectamos los campos del Paso 1
+    for (const key in datosPaso1) {
+        formData.append(key, datosPaso1[key]);
+    }
+
+    // Inyectamos los campos del Paso 2 (los inputs de tu HTML del paso 2)
+    formData.append('nombre_legal', datosPaso1.nombreLegal || '');
+    formData.append('correo_fundacion', datosPaso1.correoOficial || '');
+    formData.append('nit_rut', datosPaso1.nitRut || '');
+    formData.append('id_representante', document.getElementById('rep-documento-id') ? document.getElementById('rep-documento-id').value : '12345'); // Ajusta según tu input
+    formData.append('descripcion_mision', document.getElementById('mision-publica').value);
+    formData.append('descripcion_vision', document.getElementById('vision-publica').value);
+    formData.append('programas_proyectos', document.getElementById('programas-publicos').value);
+    formData.append('pfp_fundacion', document.getElementById('pfp-input') ? document.getElementById('pfp-input').value : '');
+    formData.append('foto_portada', document.getElementById('portada-input') ? document.getElementById('portada-input').value : '');
+
+    // Inyectamos los archivos PDF reales almacenados en las variables globales o inputs del Paso 1
+    // (Asegúrate de que los inputs de tipo file estén accesibles o guárdalos en sessionStorage/variables globales)
+    const fileCert = sessionStorage.getItem('file_certificado'); // O captura directa si unificas en una sola vista
+    
+    try {
+        const respuesta = await fetch('http://localhost:3000/api/registrar-fundacion', {
+            method: 'POST',
+            body: formData // Al usar FormData, NO se pone el header 'Content-Type', Fetch lo detecta solo
+        });
+
+        const resultado = await respuesta.json();
+        if (resultado.exito) {
+            alert(resultado.mensaje);
             sessionStorage.clear();
             window.location.href = "home.html";
+        } else {
+            alert("Error: " + resultado.mensaje);
         }
+    } catch (error) {
+        console.error("Error de red:", error);
+        alert("No se pudo conectar con el servidor para registrar la fundación.");
+    }
+}
     </script>
 </body>
 </html>
