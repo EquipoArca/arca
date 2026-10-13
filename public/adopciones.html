@@ -17,7 +17,7 @@
     }
     </script>
    <style>
-        /* CSS MEJORADO Y ESPACIOSO PARA EL CATÁLOGO DE ADOPCIÓN */
+        /* CSS ESPACIOSO Y ESTILIZADO PARA EL CATÁLOGO DE ADOPCIÓN */
         .seccion-catalogo-adopcion {
             max-width: 900px;
             margin: 0 auto;
@@ -59,7 +59,7 @@
             transform: translateY(-2px);
         }
 
-        /* TARJETA AMPLIADA Y ESPACIOSA */
+        /* TARJETA AMPLIADA Y ELEGANTE */
         .tarjeta-prototipo-estilo {
             background: rgba(253, 232, 229, 0.85); 
             backdrop-filter: blur(8px);
@@ -101,7 +101,6 @@
             color: #555;
         }
 
-        /* CUERPO DE LA TARJETA EN GRID O FLEX AMPLIO */
         .proto-card-body {
             display: flex;
             gap: 25px;
@@ -301,7 +300,8 @@
             </div>
 
             <div class="contenedor-botones-adopcion">
-                <button class="btn-adopcion-opcion" onclick="mostrarCatalogoAdopciones()">
+                <!-- LLAMA A LA VERIFICACIÓN DE PERFIL ANTES DE MOSTRAR EL CATÁLOGO -->
+                <button class="btn-adopcion-opcion" onclick="alHacerClicVerAnimales()">
                     Ver animales en adopción
                 </button>
                 <button class="btn-adopcion-opcion" onclick="alHacerClicPonerEnAdopcion()">
@@ -365,13 +365,6 @@
             });
         }
 
-        // Lógica para mostrar catálogo y cargar datos
-        async function mostrarCatalogoAdopciones() {
-            document.getElementById('pantalla-opciones-adopcion').style.display = 'none';
-            document.getElementById('seccion-catalogo-animales').style.display = 'block';
-            await cargarMascotasAdopcionOrdenadas();
-        }
-
         function volverAOpciones() {
             document.getElementById('seccion-catalogo-animales').style.display = 'none';
             document.getElementById('pantalla-opciones-adopcion').style.display = 'flex';
@@ -389,12 +382,12 @@
                 
                 const publicaciones = await respuesta.json();
 
-                // Obtenemos los datos de la sesión actual para excluir publicaciones propias
+                // Datos de sesión actual para filtrar publicaciones propias
                 const userActual = firebase.auth().currentUser;
                 const correoLogueado = userActual ? userActual.email : (localStorage.getItem('correo_usuario') || localStorage.getItem('correo'));
                 const nombreUsuarioLogueado = localStorage.getItem('nombre_usuario') || '';
 
-                // Filtramos adopciones OMITIENDO las publicadas por el usuario actual
+                // Filtramos las publicaciones excluyendo las del usuario logueado
                 let adopciones = publicaciones.filter(pub => {
                     const esAdopcion = pub.tipo_publicacion === 'adopcion';
                     
@@ -405,7 +398,7 @@
                     return esAdopcion && !esMio;
                 });
 
-                // Obtenemos la ubicación que guardó el usuario en su perfil de adoptante
+                // Ubicación del perfil de adoptante guardada previa verificación
                 const ubicacionUsuario = (localStorage.getItem('ubicacion_adoptante') || '').toLowerCase().trim();
 
                 // ALGORITMO DE CERCANÍA POR TEXTO
@@ -480,6 +473,7 @@
                 contenedor.innerHTML = '<p style="text-align:center;">Error al cargar las mascotas.</p>';
             }
         }
+
         document.addEventListener('click', (event) => {
             const botonDetalle = event.target.closest('.btn-ver-adopcion-ficha');
             if (botonDetalle) {
