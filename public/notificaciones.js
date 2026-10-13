@@ -94,7 +94,11 @@ function renderizarNotificaciones(lista) {
         tarjeta.style.alignItems = 'center';
 
         const fechaStr = notif.fecha_notificacion ? notif.fecha_notificacion.split('T')[0] : 'Reciente';
-        const autorNombre = notif.origen_nombre ? `@${notif.origen_nombre}` : 'Sistema ARCA';
+        
+        // MODIFICACIÓN CLAVE: Convertimos el nombre de usuario en un enlace interactivo <a>
+        const autorNombre = notif.origen_nombre 
+            ? `<a href="perfil_publico.html?user=${encodeURIComponent(notif.origen_nombre)}" style="color: #e06d53; font-weight: bold; text-decoration: none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">@${notif.origen_nombre}</a>` 
+            : 'Sistema ARCA';
 
         let htmlAccion = '';
         if (notif.tipo === 'solicitud_adoptante' && notif.estado_solicitud === 'pendiente') {
@@ -113,7 +117,7 @@ function renderizarNotificaciones(lista) {
         tarjeta.innerHTML = `
             <div class="info-notif-izq">
                 <div style="font-weight: bold; font-size: 16px; color: #2b2b2b;">
-                    <span style="color: #e06d53;">${autorNombre}</span> ${notif.mensaje}
+                    ${autorNombre} ${notif.mensaje}
                 </div>
                 <span style="font-size: 12px; color: #777;">${fechaStr}</span>
                 <div>${htmlAccion}</div>
@@ -125,8 +129,6 @@ function renderizarNotificaciones(lista) {
 
         contenedor.appendChild(tarjeta);
     });
-}
-
 window.responderSolicitud = async function(idSolicitud, accion) {
     const correoPropietario = obtenerCorreoUsuarioActivo();
     try {
