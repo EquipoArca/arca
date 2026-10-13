@@ -129,6 +129,8 @@ function renderizarNotificaciones(lista) {
 
         contenedor.appendChild(tarjeta);
     });
+}
+
 window.responderSolicitud = async function(idSolicitud, accion) {
     const correoPropietario = obtenerCorreoUsuarioActivo();
     try {
