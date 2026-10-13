@@ -403,52 +403,60 @@
           });
       });
 
-     async function inicializarPerfil() {
+    async function inicializarPerfil() {
+        // Capturamos la URL de forma segura
         const params = new URLSearchParams(window.location.search);
-        usernamePerfil = params.get('user'); // Aquí captura "Dulce"
+        usernamePerfil = params.get('user'); 
+
+        // Si no viene 'user', intentamos extraerlo manualmente de la URL por si acaso
+        if (!usernamePerfil) {
+            const urlParts = window.location.search.split('=');
+            if (urlParts.length > 1) {
+                usernamePerfil = decodeURIComponent(urlParts[1]);
+            }
+        }
+
         const correoLogueado = obtenerCorreoSesion();
 
-        if (!usernamePerfil) {
-            alert("No se especificó un usuario.");
+        if (!usernamePerfil || usernamePerfil === 'null' || usernamePerfil === 'undefined') {
+            alert("No se especificó un usuario válido.");
             window.location.href = 'home.html';
             return;
         }
 
         try {
-            // CAMBIO CLAVE: Asegúrate de enviar 'usernamePerfil' y no el correo
             const res = await fetch(`/api/perfil-publico/${encodeURIComponent(usernamePerfil)}?correo_visitante=${encodeURIComponent(correoLogueado)}`);
             if (!res.ok) throw new Error("Usuario no encontrado");
 
             const datos = await res.json();
-              idUsuarioPerfil = datos.id_usuarios;
-              usuarioSeguidoActual = datos.siguiendo;
-              estadoSolicitudActual = datos.estado_solicitud || 'ninguna';
+            idUsuarioPerfil = datos.id_usuarios;
+            usuarioSeguidoActual = datos.siguiendo;
+            estadoSolicitudActual = datos.estado_solicitud || 'ninguna';
 
-              document.getElementById('usr-tag').textContent = `@${datos.nombre_usuario}`;
-              if (datos.foto_perfil) document.getElementById('usr-foto').src = datos.foto_perfil;
-              
-              if (datos.Ubicacion || datos.ubicacion) {
-                  document.getElementById('usr-ubicacion').innerHTML = `<i class="fa-solid fa-location-dot"></i> Ubicación aproximada: ${datos.Ubicacion || datos.ubicacion}`;
-              } else {
-                  document.getElementById('usr-ubicacion').innerHTML = `<i class="fa-solid fa-location-dot"></i> Ubicación aproximada: Medellín`;
-              }
+            document.getElementById('usr-tag').textContent = `@${datos.nombre_usuario}`;
+            if (datos.foto_perfil) document.getElementById('usr-foto').src = datos.foto_perfil;
+            
+            if (datos.Ubicacion || datos.ubicacion) {
+                document.getElementById('usr-ubicacion').innerHTML = `<i class="fa-solid fa-location-dot"></i> Ubicación aproximada: ${datos.Ubicacion || datos.ubicacion}`;
+            } else {
+                document.getElementById('usr-ubicacion').innerHTML = `<i class="fa-solid fa-location-dot"></i> Ubicación aproximada: Medellín`;
+            }
 
-              // Mostrar datos reales de contacto
-              const telefonoReal = datos.Telefono_usuario || datos.telefono || 'No registrado';
-              const correoReal = datos.correo_usuario || datos.correo || 'No registrado';
+            const telefonoReal = datos.Telefono_usuario || datos.telefono || 'No registrado';
+            const correoReal = datos.correo_usuario || datos.correo || 'No registrado';
 
-              document.getElementById('contacto-tel').innerHTML = `<i class="fa-brands fa-whatsapp" style="color: #25d366; font-size: 16px;"></i> <span>${telefonoReal}</span>`;
-              document.getElementById('contacto-correo').innerHTML = `<i class="fa-solid fa-envelope" style="color: #007bff; font-size: 16px;"></i> <span>${correoReal}</span>`;
+            document.getElementById('contacto-tel').innerHTML = `<i class="fa-brands fa-whatsapp" style="color: #25d366; font-size: 16px;"></i> <span>${telefonoReal}</span>`;
+            document.getElementById('contacto-correo').innerHTML = `<i class="fa-solid fa-envelope" style="color: #007bff; font-size: 16px;"></i> <span>${correoReal}</span>`;
 
-              actualizarBotonSeguirUI(usuarioSeguidoActual);
-              actualizarEstadoBotonSolicitud(estadoSolicitudActual);
+            actualizarBotonSeguirUI(usuarioSeguidoActual);
+            actualizarEstadoBotonSolicitud(estadoSolicitudActual);
 
-              cargarPublicacionesDeUsuario(usernamePerfil, idUsuarioPerfil);
+            cargarPublicacionesDeUsuario(usernamePerfil, idUsuarioPerfil);
 
-          } catch (error) {
-              console.error("Error al cargar perfil:", error);
-          }
-      }
+        } catch (error) {
+            console.error("Error al cargar perfil:", error);
+        }
+    }
 
       function actualizarEstadoBotonSolicitud(estado) {
           const btnAdoptante = document.getElementById('btn-solicitud-adoptante');

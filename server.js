@@ -1378,8 +1378,7 @@ app.put('/api/actualizar-adopcion/:id', (req, res) => {
         });
     });
 });
-// GET: Obtener datos del perfil público de un usuario por su @username o id
-// GET: Obtener datos del perfil público de un usuario por su @username, id o correo
+
 app.get('/api/perfil-publico/:parametro', (req, res) => {
     const { parametro } = req.params;
     const correoVisitante = req.query.correo_visitante; 
