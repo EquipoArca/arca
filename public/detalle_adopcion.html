@@ -178,9 +178,10 @@
         .detalle-foto-wrapper img {
             width: 100%;
             height: 100%;
-            object-fit: contain; /* Muestra la foto completa sin recortar bordes */
-            background-color: #fff; /* Fondo limpio por si la foto es vertical u horizontal */
+            object-fit: contain;
+            background-color: #fff;
         }
+
         .detalle-caja-descripcion {
             background: rgba(255, 255, 255, 0.65);
             backdrop-filter: blur(12px);
@@ -287,23 +288,6 @@
 
         .btn-copiar-mini:hover {
             background: #ffe5dd;
-        }
-
-        .btn-ver-mapa-chiquito {
-            color: #e06d53;
-            font-weight: bold;
-            text-decoration: none;
-            font-size: 12.5px;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            margin-top: 4px;
-            transition: color 0.2s;
-        }
-
-        .btn-ver-mapa-chiquito:hover {
-            color: #b8432a;
-            text-decoration: underline;
         }
 
         .detalle-barra-inferior {
@@ -573,7 +557,7 @@
                   </a>
               </div>
               <div id="contenedor-boton-accion">
-                  <button class="detalle-btn-accion"><i class="fa-solid fa-bookmark"></i> Publicación guardada</button>
+                  <button class="detalle-btn-accion"><i class="fa-solid fa-bookmark"></i> Cargando...</button>
               </div>
           </div>
       </div>
@@ -612,7 +596,6 @@
               });
           }
 
-          // CONFIGURACIÓN DINÁMICA DEL BOTÓN "VOLVER"
           const urlParams = new URLSearchParams(window.location.search);
           const origen = urlParams.get('origen');
           const btnVolver = document.getElementById('btn-volver-dinamico');
@@ -675,11 +658,9 @@
               const adopcion = await respuesta.json();
               if (!adopcion) throw new Error("Publicación de adopción no encontrada.");
 
-              // Nombre de la mascota
               const nombreAnimal = adopcion.nombre_animal || 'Mascota';
               document.getElementById('lbl-nombre-mascota').textContent = `Adopción: ${nombreAnimal}`;
 
-              // --- LÓGICA INTELIGENTE DE ESPECIE Y RAZA ---
               const especie = adopcion.especie_catalogo || adopcion.especie || adopcion.otro_especie || '';
               const raza = adopcion.raza_catalogo || adopcion.raza || adopcion.otra_raza || '';
              
@@ -701,10 +682,8 @@
               }
               document.getElementById('lbl-info-extra').textContent = `Especie / Raza: ${textoEspecieRaza}`;
               
-              // Descripción
               document.getElementById('lbl-descripcion').textContent = adopcion.descripcion_animal || adopcion.Descripcion || 'Sin descripción proporcionada.';
 
-              // Manejo de imágenes
               let fotoSrc = adopcion.fotos_animal || adopcion.img_reporte || 'logo.png';
               if (fotoSrc.startsWith('[')) {
                   try {
@@ -714,13 +693,11 @@
               }
               document.getElementById('img-adopcion').src = fotoSrc;
 
-              // Ubicación
               const ciudad = adopcion.ciudad || '';
               const barrio = adopcion.barrio || '';
               const textoUbicacion = [barrio, ciudad].filter(Boolean).join(', ') || adopcion.Ubicacion || 'Medellín';
               document.getElementById('lbl-ubicacion').innerHTML = `<span>${textoUbicacion}</span>`;
 
-              // Contacto
               let contactoHTML = "";
               const tel = adopcion.telefono_contacto ? adopcion.telefono_contacto.trim() : "";
               const correo = adopcion.correo_contacto ? adopcion.correo_contacto.trim() : "";
@@ -765,7 +742,6 @@
               }
               document.getElementById('lbl-contacto').innerHTML = contactoHTML;
 
-              // --- CONFIGURACIÓN DINÁMICA DEL AUTOR Y SU PERFIL PÚBLICO ---
               const nombreUsuario = adopcion.nombre_usuario || 'usuario';
               document.getElementById('nombre-autor-texto').textContent = `@${nombreUsuario}`;
               
@@ -774,7 +750,7 @@
                   linkAutor.href = `perfil_publico.html?user=${encodeURIComponent(nombreUsuario)}`;
               }
 
-             // --- BOTÓN DE GUARDADO / QUITAR GUARDADO INTELIGENTE ---
+              // --- BOTÓN DE GUARDADO / QUITAR GUARDADO INTELIGENTE ---
               const correoLogueado = localStorage.getItem('correo_usuario');
               const contenedorAccion = document.getElementById('contenedor-boton-accion');
 
@@ -783,17 +759,16 @@
                       const resPubs = await fetch('/api/publicaciones-globales');
                       const publicaciones = await resPubs.json();
                       
-                      // Buscamos de manera flexible tanto por id_origen como por id_publicacion
-                      const pubEncontrada = publicaciones.find(p => 
+                      let pubEncontrada = publicaciones.find(p => 
                           (p.tipo_publicacion === 'adopcion' && Number(p.id_origen) === Number(adopcionId)) ||
-                          Number(p.id_publicacion) === Number(adopcionId)
+                          Number(p.id_publicacion) === Number(adopcionId) ||
+                          Number(p.id_adopcion) === Number(adopcionId)
                       );
                       
                       const idPublicacionGlobal = pubEncontrada ? pubEncontrada.id_publicacion : adopcionId;
                       
                       const resGuards = await fetch(`/api/guardados/ids/${encodeURIComponent(correoLogueado)}`);
                       const idsGuardados = await resGuards.json();
-                      // Aseguramos comparar números con números
                       const estaGuardada = idsGuardados.map(Number).includes(Number(idPublicacionGlobal));
 
                       if (estaGuardada) {
@@ -841,6 +816,8 @@
                   } catch (e) {
                       console.error("Error gestionando el guardado:", e);
                   }
+              } else {
+                  contenedorAccion.innerHTML = '';
               }
           } catch (error) {
               console.error("Error al cargar detalle de adopción:", error);

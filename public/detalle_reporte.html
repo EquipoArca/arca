@@ -536,7 +536,6 @@
           <div class="detalle-header-card">
               <h1>Reporte <img src="rlogo.png" class="detalle-header-icon" alt="Logo ARCA"></h1>
               <div class="header-acciones-derecha">
-                  <!-- Botón de volver dinámico con ID -->
                   <a href="novedades.html" id="btn-volver-dinamico" class="detalle-btn-volver"><i class="fa-solid fa-arrow-left"></i> Volver a novedades</a>
                   <span class="detalle-fecha-texto" id="lbl-fecha">Publicado el --/--/----</span>
               </div>
@@ -583,7 +582,7 @@
                   </a>
               </div>
               <div id="contenedor-boton-accion">
-                  <button class="detalle-btn-accion"><i class="fa-solid fa-bookmark"></i> Publicación guardada</button>
+                  <button class="detalle-btn-accion"><i class="fa-solid fa-bookmark"></i> Cargando...</button>
               </div>
           </div>
       </div>
@@ -622,7 +621,6 @@
               });
           }
 
-          // CONFIGURACIÓN DINÁMICA DEL BOTÓN "VOLVER"
           const urlParams = new URLSearchParams(window.location.search);
           const origen = urlParams.get('origen');
           const btnVolver = document.getElementById('btn-volver-dinamico');
@@ -685,7 +683,6 @@
               }
               return "San Cristóbal, Medellín (Ubicación aproximada)";
           } catch (error) {
-              console.warn("La API de mapas falló localmente, usando texto limpio de respaldo.");
               return "San Cristóbal, Medellín (Ubicación aproximada)";
           }
       }
@@ -833,7 +830,6 @@
               }
               document.getElementById('lbl-contacto').innerHTML = contactoHTML;
 
-              // --- CONFIGURACIÓN DINÁMICA DEL AUTOR Y SEGUIMIENTO DE PERFIL ---
               const nombreUsuario = reporteData.nombre_usuario || 'usuario';
               document.getElementById('nombre-autor-texto').textContent = `@${nombreUsuario}`;
               
@@ -854,13 +850,13 @@
                       </a>
                   `;
               } else if (correoLogueado) {
-                  // Buscamos de manera flexible el ID real de la publicación global correspondiente al reporte
-                  const pubEncontrada = publicaciones.find(p => 
+                  let pubEncontrada = publicaciones.find(p => 
                       (p.tipo_publicacion === 'reporte' && Number(p.id_origen) === Number(reporteId)) ||
-                      Number(p.id_publicacion) === Number(reporteId)
+                      Number(p.id_publicacion) === Number(reporteId) ||
+                      Number(p.id_reporte) === Number(reporteId)
                   );
                   
-                  const idPublicacionGlobal = pubEncontrada ? pubEncontrada.id_publicacion : (reporteData.id_publicacion || reporteId);
+                  const idPublicacionGlobal = pubEncontrada ? pubEncontrada.id_publicacion : reporteId;
 
                   const resGuards = await fetch(`/api/guardados/ids/${encodeURIComponent(correoLogueado)}`);
                   const idsGuardados = await resGuards.json();
@@ -908,6 +904,8 @@
                           }
                       });
                   }
+              } else {
+                  contenedorBoton.innerHTML = '';
               }
 
           } catch (error) {
@@ -916,35 +914,5 @@
           }
       }
   </script>
-  <!-- Motor oculto de Google Translate -->
-<div id="google_translate_element" style="display:none;"></div>
-<script type="text/javascript">
-    function googleTranslateElementInit() {
-        new google.translate.TranslateElement({ pageLanguage: 'es', autoDisplay: false }, 'google_translate_element');
-    }
-</script>
-<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-
-<!-- Script para aplicar el idioma guardado al cambiar de página -->
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const savedLang = localStorage.getItem('app_selected_lang');
-        if (savedLang && savedLang !== 'es') {
-            const interval = setInterval(() => {
-                const googleCombo = document.querySelector('.goog-te-combo');
-                if (googleCombo) {
-                    googleCombo.value = savedLang;
-                    googleCombo.dispatchEvent(new Event('change'));
-                    clearInterval(interval);
-                }
-            }, 200);
-        }
-    });
-</script>
-<style>
-    .goog-te-banner-frame { display: none !important; }
-    body { top: 0 !important; }
-    .skiptranslate { display: none !important; }
-</style>
 </body>
 </html>
