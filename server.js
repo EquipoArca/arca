@@ -1379,27 +1379,39 @@ app.put('/api/actualizar-adopcion/:id', (req, res) => {
     });
 });
 
+// GET: Obtener datos del perfil público de un usuario de forma flexible
 app.get('/api/perfil-publico/:parametro', (req, res) => {
-    const { parametro } = req.params;
+    const parametro = decodeURIComponent(req.params.parametro).trim();
     const correoVisitante = req.query.correo_visitante; 
 
-    // Buscamos si coincide por nombre_usuario O por correo_usuario
+    console.log("🔍 Buscando perfil público para el parámetro:", parametro);
+
+    // Consulta flexible usando LIKE y comodines para evitar problemas de espacios o mayúsculas
     const sql = `
         SELECT u.id_usuarios, u.nombre_usuario, u.foto_perfil, u.correo_usuario, u.Telefono_usuario, u.Ubicacion
         FROM usuarios u
-        WHERE LOWER(TRIM(u.nombre_usuario)) = LOWER(TRIM(?)) 
-           OR LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(?))
+        WHERE u.nombre_usuario LIKE ? 
+           OR u.correo_usuario LIKE ?
     `;
 
-    db.query(sql, [parametro, parametro], (err, results) => {
-        if (err || results.length === 0) return res.status(404).json({ error: "Usuario no encontrado" });
+    db.query(sql, [`%${parametro}%`, `%${parametro}%`], (err, results) => {
+        if (err) {
+            console.error("❌ Error en la base de datos:", err);
+            return res.status(500).json({ error: "Error en el servidor" });
+        }
+
+        if (results.length === 0) {
+            console.log("⚠️ Usuario no encontrado en la BD para:", parametro);
+            return res.status(404).json({ error: "Usuario no encontrado" });
+        }
+
         const usuario = results[0];
+        console.log("✅ Usuario encontrado:", usuario.nombre_usuario);
 
         if (!correoVisitante) {
             return res.json({ ...usuario, siguiendo: false, estado_solicitud: 'ninguna' });
         }
 
-        // Consultamos si el visitante actual ya lo sigue o solicitó acceso
         const sqlVerificaciones = `
             SELECT 
                 (SELECT COUNT(*) FROM seguidores WHERE id_usuario_seguidor = (SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))) AND id_usuario_seguido = ?) AS siguiendo,
