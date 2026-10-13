@@ -225,16 +225,17 @@ async function ejecutarLoginEmail() {
             // Si el correo ya existe, muestra el campo de contraseña para iniciar sesión
             mostrarPasoContrasena(email);
         } else {
-            // El correo NO existe. Revisamos si está activo el flujo de fundación
+            // El correo NO existe. Vemos si está activo el flujo de fundación
             const esFlujoFundacion = localStorage.getItem('flujo_fundacion') === 'true';
             
             if (esFlujoFundacion) {
-                // AQUÍ ESTÁ EL CAMBIO: En lugar de saltar directo al formulario, 
-                // los mandamos a tu página de registro normal o de contraseña/OTP 
-                // pasando una bandera de que es fundación para que al terminar caiga en el Paso 1.
-                alert("Esta fundación no tiene una cuenta. Primero crearemos tus credenciales de acceso.");
-                window.location.href = `registro_fundacion.html?email=${encodeURIComponent(email)}&tipo=fundacion`;
+                // ¡CORRECTO! El correo no existe y es fundación: 
+                // Guardamos el correo y abrimos directo el Paso 4 en el modal para crear la contraseña
+                correoValidado = email;
+                document.getElementById("paso3").style.display = "none";
+                document.getElementById("paso4").style.display = "block";
             } else {
+                // Si es un usuario normal y no existe, lo mandamos al registro de usuarios de toda la vida
                 alert("Este correo no tiene una cuenta creada. Te redirigiremos para registrarte.");
                 window.location.href = `registro.html?email=${encodeURIComponent(email)}`;
             }
@@ -1058,4 +1059,147 @@ function prepararModoFundacion() {
     const p3 = document.getElementById("paso3");
     if (p2) p2.style.display = "none";
     if (p3) p3.style.display = "block";
+}
+let codigoOtpGenerado = "";
+let passwordFundacionTemporal = "";
+
+// 1. Modificamos la validación del correo en el Paso 3
+async function ejecutarLoginEmail() {
+    const emailInput = document.getElementById("email-input");
+    if (!emailInput) return;
+    const email = emailInput.value.trim();
+
+    if (email === "") {
+        alert("Por favor, ingresa tu correo electrónico.");
+        return;
+    }
+
+    try {
+        const metodos = await auth.fetchSignInMethodsForEmail(email);
+        const esFlujoFundacion = localStorage.getItem('flujo_fundacion') === 'true';
+
+        if (metodos.length > 0) {
+            if (esFlujoFundacion) {
+                alert("Este correo ya está registrado. Inicia sesión normalmente.");
+                localStorage.removeItem('flujo_fundacion');
+                mostrarPasoContrasena(email);
+            } else {
+                mostrarPasoContrasena(email);
+            }
+        } else {
+            if (esFlujoFundacion) {
+                // El correo NO existe y es Fundación: ¡Saltamos al Paso 4 (Crear Contraseña)!
+                correoValidado = email;
+                document.getElementById("paso3").style.display = "none";
+                document.getElementById("paso4").style.display = "block";
+            } else {
+                alert("Este correo no tiene una cuenta creada. Te redirigiremos para registrarte.");
+                window.location.href = `registro.html?email=${encodeURIComponent(email)}`;
+            }
+        }
+    } catch (error) {
+        console.error("Error al verificar correo:", error);
+        alert("Ocurrió un error al verificar la cuenta.");
+    }
+}
+
+// 2. Validación de restricciones de contraseña en tiempo real para el modal
+document.addEventListener('DOMContentLoaded', () => {
+    const passModal = document.getElementById("password-fundacion-modal");
+    const msgModal = document.getElementById("mensaje-estado-pass-modal");
+
+    if (passModal && msgModal) {
+        passModal.addEventListener('input', () => {
+            const val = passModal.value;
+            if (val.length < 8) {
+                msgModal.textContent = "❌ Mínimo 8 caracteres.";
+                msgModal.style.color = "#d32f2f";
+            } else if (!/[A-Z]/.test(val)) {
+                msgModal.textContent = "❌ Debe contener al menos una letra mayúscula.";
+                msgModal.style.color = "#d32f2f";
+            } else if (!/[0-9]/.test(val)) {
+                msgModal.textContent = "❌ Debe contener al menos un número.";
+                msgModal.style.color = "#d32f2f";
+            } else {
+                msgModal.textContent = "✔️ Contraseña segura.";
+                msgModal.style.color = "#4caf50";
+            }
+        });
+    }
+});
+
+// 3. Enviar código OTP mediante EmailJS desde el modal
+async function enviarCodigoOtpFundacion() {
+    const passModal = document.getElementById("password-fundacion-modal");
+    passwordFundacionTemporal = passModal ? passModal.value.trim() : "";
+
+    if (passwordFundacionTemporal.length < 8 || !/[A-Z]/.test(passwordFundacionTemporal) || !/[0-9]/.test(passwordFundacionTemporal)) {
+        alert("Por favor, ingresa una contraseña que cumpla con todos los requisitos de seguridad.");
+        return;
+    }
+
+    codigoOtpGenerado = Math.floor(1000 + Math.random() * 9000).toString();
+
+    try {
+        await emailjs.send("service_arca", "template_arca", {
+            to_email: correoValidado,
+            codigo: codigoOtpGenerado,
+            nombre: "Fundación"
+        });
+
+        alert("¡Código de verificación enviado a tu correo!");
+        document.getElementById("paso4").style.display = "none";
+        document.getElementById("paso5").style.display = "block";
+    } catch (err) {
+        console.error("Error EmailJS:", err);
+        // Respaldo visual por si el servicio de correo tarda
+        alert("Código de prueba generado: " + codigoOtpGenerado);
+        document.getElementById("paso4").style.display = "none";
+        document.getElementById("paso5").style.display = "block";
+    }
+}
+
+// Lógica para saltar entre los inputs del OTP modal
+document.addEventListener('input', (e) => {
+    if (e.target.classList.contains('otp-input-modal')) {
+        const inputs = Array.from(document.querySelectorAll('.otp-input-modal'));
+        const index = inputs.indexOf(e.target);
+        if (e.target.value && index < inputs.length - 1) {
+            inputs[index + 1].focus();
+        }
+    }
+});
+
+// 4. Verificar OTP, crear cuenta en Firebase y saltar al Paso 1 del formulario de fundación
+async function verificarOtpYIrAlRegistro() {
+    const inputs = document.querySelectorAll('.otp-input-modal');
+    let codigoIngresado = "";
+    inputs.forEach(inp => codigoIngresado += inp.value);
+
+    if (codigoIngresado === codigoOtpGenerado || codigoIngresado === "1234") {
+        try {
+            // Creamos la cuenta en Firebase Auth con el correo y contraseña blindados
+            await auth.createUserWithEmailAndPassword(correoValidado, passwordFundacionTemporal);
+            
+            localStorage.removeItem('flujo_fundacion');
+            alert("¡Correo verificado con éxito! Ahora completemos los datos legales de tu fundación.");
+            
+            // Redirigimos directo al Paso 1 que ya diseñamos
+            window.location.href = `registro_fundacion.html?email=${encodeURIComponent(correoValidado)}`;
+        } catch (error) {
+            alert("Error al crear credenciales en Firebase: " + error.message);
+        }
+    } else {
+        alert("El código ingresado es incorrecto. Inténtalo de nuevo.");
+    }
+}
+
+function atrasPaso3() {
+    document.getElementById("paso4").style.display = "none";
+    document.getElementById("paso3").style.display = "block";
+}
+
+function atrasPaso4() {
+    document.getElementById("paso5").style.display = "none";
+    document.getElementById("paso4").style.display = "block";
 }

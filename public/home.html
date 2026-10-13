@@ -260,6 +260,54 @@
                     </div>
                 </div>
             </div>
+            <!-- PASO 3: Correo (Ya lo tienes) -->
+            <div id="paso3" style="display: none;">
+                <p class="texto-registro"><strong>Ingresa tus datos</strong></p>
+                <div class="formulario-correo">
+                    <input type="email" id="email-input" placeholder="Correo electrónico" class="input-arca">
+                    <div class="botones-registro">
+                        <button class="btn-login" onclick="ejecutarLoginEmail()">Siguiente</button>
+                        <button class="btn-cerrar" onclick="volverAlPaso2()">Atrás</button>
+                    </div>
+                </div>
+            </div>
+
+           
+            <div id="paso4" style="display: none;">
+                <p class="texto-registro"><strong>Crea una contraseña segura</strong></p>
+                <div class="formulario-correo">
+                    <div style="position: relative; width: 90%; margin: 0 auto;">
+                        <input type="password" id="password-fundacion-modal" placeholder="Mínimo 8 carac., una mayúscula y número" class="input-arca" style="width: 100%;">
+                        <button type="button" id="togglePassModal" style="position: absolute; right: 15px; top: 12px; background: none; border: none; cursor: pointer; color: #777;">
+                            <i class="fa-solid fa-eye" id="iconoOjitoModal"></i>
+                        </button>
+                    </div>
+                    <p id="mensaje-estado-pass-modal" style="font-size: 0.8rem; text-align: left; width: 90%; margin: 5px auto 10px auto;"></p>
+                    
+                    <div class="botones-registro">
+                        <button class="btn-login" onclick="enviarCodigoOtpFundacion()">Enviar código</button>
+                        <button class="btn-cerrar" onclick="atrasPaso3()">Atrás</button>
+                    </div>
+                </div>
+            </div>
+
+            
+            <div id="paso5" style="display: none;">
+                <p class="texto-registro"><strong>Verificación de Correo</strong></p>
+                <p style="font-size: 0.85rem; color: #555; margin-bottom: 10px;">Ingresa el código de 4 dígitos enviado a tu correo.</p>
+                <div class="formulario-correo" style="align-items: center;">
+                    <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 15px;">
+                        <input type="text" maxlength="1" class="otp-input-modal input-arca" style="width: 45px; text-align: center; font-size: 1.2rem;" />
+                        <input type="text" maxlength="1" class="otp-input-modal input-arca" style="width: 45px; text-align: center; font-size: 1.2rem;" />
+                        <input type="text" maxlength="1" class="otp-input-modal input-arca" style="width: 45px; text-align: center; font-size: 1.2rem;" />
+                        <input type="text" maxlength="1" class="otp-input-modal input-arca" style="width: 45px; text-align: center; font-size: 1.2rem;" />
+                    </div>
+                    <div class="botones-registro">
+                        <button class="btn-login" onclick="verificarOtpYIrAlRegistro()">Verificar y Continuar</button>
+                        <button class="btn-cerrar" onclick="atrasPaso4()">Atrás</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <div id="modal-recuperar-pass" class="modal-overlay hidden">
