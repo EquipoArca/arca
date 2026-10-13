@@ -230,8 +230,8 @@
     </main>
 
     <script>
-    async function finalizarRegistroCompleto() {
-    // 1. Recuperamos las credenciales temporales del correo y contraseña creadas en el modal
+   async function finalizarRegistroCompleto() {
+    // 1. Recuperamos las credenciales temporales del correo y contraseña guardadas en sessionStorage
     const correo = sessionStorage.getItem('correo_fundacion_temp');
     const password = sessionStorage.getItem('pass_fundacion_temp');
 
@@ -255,7 +255,7 @@
     // Inyectamos el correo oficial por seguridad
     formData.append('correo_fundacion', correo);
 
-    // Inyectamos los campos del Paso 2 (los inputs de tu HTML del paso 2)
+    // Inyectamos los campos del Paso 2
     formData.append('nombre_legal', datosPaso1.nombreLegal || document.getElementById('nombre-publico-fundacion').value);
     formData.append('nit_rut', datosPaso1.nitRut || '');
     formData.append('id_representante', document.getElementById('rep-documento-id') ? document.getElementById('rep-documento-id').value : '12345');
@@ -265,8 +265,7 @@
     formData.append('pfp_fundacion', document.getElementById('pfp-input') ? document.getElementById('pfp-input').value : '');
     formData.append('foto_portada', document.getElementById('portada-input') ? document.getElementById('portada-input').value : '');
 
-    // 4. Inyectamos los archivos PDF reales capturados en el Paso 1 (si los guardaste en inputs o variables globales)
-    // Ejemplo si guardaste los archivos en el input file del Paso 1:
+    // 4. Inyectamos los archivos PDF reales capturados en el Paso 1
     const inputCert = document.getElementById('file-cert');
     const inputEstatutos = document.getElementById('file-estatutos');
     const inputRegistro = document.getElementById('file-registro');
@@ -277,37 +276,31 @@
     if (inputRegistro && inputRegistro.files[0]) formData.append('registro_oficial', inputRegistro.files[0]);
     if (inputFinanciero && inputFinanciero.files[0]) formData.append('estado_financiero', inputFinanciero.files[0]);
 
-    let userFirebase = null;
-
     try {
-        // PASO A: Creamos la cuenta en Firebase Auth en este preciso momento (al finalizar todo con éxito)
-        const userCredential = await auth.createUserWithEmailAndPassword(correo, password);
-        userFirebase = userCredential.user;
-
-        // PASO B: Enviamos todo a Node.js/MySQL para guardar los datos y los tinyblobs de los PDFs
+        // PASO 1: Primero enviamos los datos al servidor y MySQL. 
+        // Si el servidor falla, el código se detiene aquí y NUNCA se crea el usuario en Firebase.
         const respuesta = await fetch('http://localhost:3000/api/registrar-fundacion', {
             method: 'POST',
-            body: formData // Fetch detecta automáticamente el FormData para enviar archivos binarios
+            body: formData 
         });
 
         const resultado = await respuesta.json();
 
-        if (resultado.exito) {
-            alert(resultado.mensaje);
-            sessionStorage.clear(); // Limpiamos la memoria temporal
-            window.location.href = "home.html";
-        } else {
-            // Si el servidor de MySQL falla, borramos el usuario creado en Firebase para evitar cuentas huérfanas
-            if (userFirebase) await userFirebase.delete();
-            alert("Error al guardar en la base de datos: " + resultado.mensaje);
+        if (!resultado.exito) {
+            alert("No se pudo registrar en la base de datos: " + resultado.mensaje);
+            return; // Cortamos el flujo, Firebase sigue limpio sin cuentas huérfanas
         }
+
+        // PASO 2: Como MySQL respondió con éxito, recién ahora creamos la cuenta en Firebase Auth
+        await auth.createUserWithEmailAndPassword(correo, password);
+
+        alert(resultado.mensaje);
+        sessionStorage.clear(); // Limpiamos la memoria temporal
+        window.location.href = "home.html";
+
     } catch (error) {
-        console.error("Error durante el registro final:", error);
-        // Si ocurre un error de red o de Firebase, limpiamos la cuenta huérfana si llegó a crearse
-        if (userFirebase) {
-            try { await userFirebase.delete(); } catch(e) {}
-        }
-        alert("No se pudo completar el registro: " + error.message);
+        console.error("Error crítico durante el registro final:", error);
+        alert("Ocurrió un error inesperado al procesar el registro: " + error.message);
     }
 }
     </script>
