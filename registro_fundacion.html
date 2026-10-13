@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro Legal de Fundación - ARCA</title>
+    <link rel="stylesheet" href="style_home.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="dark-mode.css">
+    
+    <!-- Script inicial para evitar parpadeo de modo oscuro -->
+    <script>
+    if (localStorage.getItem("modo_oscuro") === "true") {
+        document.body.classList.add("dark-mode");
+    }
+    </script>
+
+    <style>
+        /* Ajuste para centrar el formulario de registro sin barra lateral */
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding-bottom: 50px;
+        }
+
+        .registro-container {
+            max-width: 900px;
+            width: 90%;
+            background-color: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            border-radius: 32px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(229, 115, 115, 0.12);
+            margin: 100px auto 30px auto; /* Margen superior para despegarlo del top-nav simple */
+            box-sizing: border-box;
+        }
+
+        body.dark-mode .registro-container {
+            background-color: rgba(59, 40, 30, 0.9) !important;
+            border-color: #4f392d !important;
+            color: #f4ebd0 !important;
+        }
+
+        .seccion-form-titulo {
+            background-color: #ffd6d8c5;
+            padding: 8px 22px;
+            border-radius: 20px;
+            font-size: 1.3rem;
+            color: #333;
+            font-weight: 500;
+            display: inline-block;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+        }
+
+        body.dark-mode .seccion-form-titulo {
+            background-color: #4f392d !important;
+            color: #f4ebd0 !important;
+        }
+
+        .grid-campos {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .campo-full {
+            grid-column: span 2;
+        }
+
+        .input-label-arca {
+            display: block;
+            font-size: 1rem;
+            color: #555;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        body.dark-mode .input-label-arca {
+            color: #f4ebd0 !important;
+        }
+
+        .input-registro-arca {
+            width: 100%;
+            background-color: rgba(234, 243, 218, 0.68);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(190, 198, 165, 0.6);
+            border-radius: 15px;
+            padding: 12px 16px;
+            font-family: 'Itim', sans-serif;
+            font-size: 1rem;
+            color: #4a5a1c;
+            outline: none;
+            box-sizing: border-box;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.03);
+            transition: all 0.2s ease;
+        }
+
+        body.dark-mode .input-registro-arca {
+            background-color: #2b1d16 !important;
+            color: #f4ebd0 !important;
+            border-color: #4f392d !important;
+        }
+
+        .input-registro-arca:focus {
+            border-color: #e57373;
+            background-color: rgba(234, 243, 218, 0.9);
+            box-shadow: 0 0 8px rgba(229, 115, 115, 0.25);
+        }
+
+        textarea.input-registro-arca {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn-enviar-fundacion {
+            background-color: #fbc2c4;
+            color: #222;
+            border: none;
+            padding: 14px 40px;
+            font-family: 'Itim', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s ease, background-color 0.2s ease;
+            display: block;
+            margin: 30px auto 0 auto;
+        }
+
+        body.dark-mode .btn-enviar-fundacion {
+            background-color: #e76f51 !important;
+            color: white !important;
+        }
+
+        .btn-enviar-fundacion:hover {
+            transform: scale(1.04);
+            background-color: #f9a3a6;
+        }
+
+        @media (max-width: 768px) {
+            .grid-campos {
+                grid-template-columns: 1fr;
+            }
+            .campo-full {
+                grid-column: span 1;
+            }
+            .registro-container {
+                padding: 20px;
+                margin-top: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top-Nav minimalista exclusiva para salir del registro -->
+    <nav class="top-nav" style="justify-content: space-between; padding: 0 30px;">
+        <div class="top-left">
+            <div class="mini-logo-circle">
+                <img src="logo.png" alt="Logo">
+            </div>
+            <span class="page-title">ARCA - Registro de Refugios</span>
+        </div>
+        <div class="top-right">
+            <a href="home.html" style="color: #4a3e3d; font-size: 1rem; text-decoration: none; font-weight: 600;">
+                <i class="fa-solid fa-arrow-left"></i> Cancelar y volver
+            </a>
+        </div>
+    </nav>
+
+    <!-- Contenedor Principal del Formulario -->
+    <main class="registro-container">
+        <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="font-size: 2.3rem; color: #e57373; margin-bottom: 8px;">Puntualiza tu Fundación</h1>
+            <p style="color: #666; font-size: 1.05rem;">Ingresa tu información legal y de contacto para que el equipo de ARCA verifique tus credenciales.</p>
+        </div>
+
+        <form id="form-registro-fundacion">
+            <!-- PASO 1: INFORMACIÓN LEGAL Y CONTACTO -->
+            <div class="seccion-form-titulo"><i class="fa-solid fa-file-shield"></i> Paso 1: Información Legal y Contacto</div>
+            
+            <div class="grid-campos">
+                <div>
+                    <label class="input-label-arca">Nombre Legal de la Fundación</label>
+                    <input type="text" id="nombre-legal" class="input-registro-arca" placeholder="Ej. Fundación Huellitas de Amor" required>
+                </div>
+                <div>
+                    <label class="input-label-arca">Nombre Comercial</label>
+                    <input type="text" id="nombre-comercial" class="input-registro-arca" placeholder="Ej. Refugio Huellitas">
+                </div>
+
+                <div>
+                    <label class="input-label-arca">NIT / RUT</label>
+                    <input type="number" id="nit-rut" class="input-registro-arca" placeholder="Ej. 900123456" required>
+                </div>
+                <div>
+                    <label class="input-label-arca">ID Representante Legal (Cédula)</label>
+                    <input type="number" id="id-representante" class="input-registro-arca" placeholder="Ej. 10203040" required>
+                </div>
+
+                <div>
+                    <label class="input-label-arca">Correo Electrónico Oficial</label>
+                    <input type="email" id="correo-fundacion" class="input-registro-arca" placeholder="contacto@refugio.com" required>
+                </div>
+                <div>
+                    <label class="input-label-arca">Teléfono de la Fundación</label>
+                    <input type="text" id="telefono-fundacion" class="input-registro-arca" placeholder="Ej. 3001234567" required>
+                </div>
+
+                <div>
+                    <label class="input-label-arca">País</label>
+                    <input type="text" id="pais" class="input-registro-arca" value="Colombia" required>
+                </div>
+                <div>
+                    <label class="input-label-arca">Ciudad</label>
+                    <input type="text" id="ciudad" class="input-registro-arca" value="Medellín" required>
+                </div>
+
+                <div class="campo-full">
+                    <label class="input-label-arca">Dirección Física del Refugio</label>
+                    <input type="text" id="direccion" class="input-registro-arca" placeholder="Ej. Calle 45 # 78-12, Belén" required>
+                </div>
+                
+                <div class="campo-full">
+                    <label class="input-label-arca">Página Web o Red Social Principal</label>
+                    <input type="url" id="pagina-web" class="input-registro-arca" placeholder="https://instagram.com/tu_refugio">
+                </div>
+            </div>
+
+            <!-- PASO 2: PERFIL PÚBLICO Y ENFOQUE -->
+            <div class="seccion-form-titulo" style="margin-top: 15px;"><i class="fa-solid fa-paw"></i> Paso 2: Perfil Público y Enfoque del Refugio</div>
+
+            <div class="grid-campos">
+                <div class="campo-full">
+                    <label class="input-label-arca">Misión de la Fundación</label>
+                    <textarea id="descripcion-mision" class="input-registro-arca" placeholder="¿Cuál es el propósito principal de su labor de rescate?"></textarea>
+                </div>
+
+                <div class="campo-full">
+                    <label class="input-label-arca">Visión de la Fundación</label>
+                    <textarea id="descripcion-vision" class="input-registro-arca" placeholder="¿Cómo proyectan el futuro de su refugio?"></textarea>
+                </div>
+
+                <div class="campo-full">
+                    <label class="input-label-arca">Programas o Proyectos Actuales</label>
+                    <textarea id="programas-proyectos" class="input-registro-arca" placeholder="Ej. Jornadas de esterilización masiva, brigadas médicas, adopciones responsables..."></textarea>
+                </div>
+
+                <div>
+                    <label class="input-label-arca">URL de Logo / Foto de Perfil (PFP)</label>
+                    <input type="text" id="pfp-fundacion" class="input-registro-arca" placeholder="Enlace de imagen de logo">
+                </div>
+                <div>
+                    <label class="input-label-arca">URL de Foto de Portada</label>
+                    <input type="text" id="foto-portada" class="input-registro-arca" placeholder="Enlace de imagen de portada">
+                </div>
+            </div>
+
+            <button type="submit" class="btn-enviar-fundacion">Finalizar Registro y Solicitar Verificación</button>
+        </form>
+    </main>
+
+    <!-- Script para precargar el correo y manejar el envío -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const emailParam = params.get('email');
+            if (emailParam) {
+                const inputCorreo = document.getElementById('correo-fundacion');
+                if (inputCorreo) {
+                    inputCorreo.value = emailParam;
+                }
+            }
+        });
+
+        document.getElementById('form-registro-fundacion').addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert("¡Formulario completado! Aquí conectarás tu petición para guardar la fundación en la base de datos con estado 'pendiente'.");
+            window.location.href = "home.html";
+        });
+    </script>
+</body>
+</html>

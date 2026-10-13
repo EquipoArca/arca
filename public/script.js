@@ -63,7 +63,22 @@ auth.onAuthStateChanged(async (user) => {
             }
             const data = await response.json();
             const nombreFinal = data.nombre_usuario || (user.displayName || user.email.split('@')[0]);
+            // --- NUEVO: GUARDAR ROL Y ESTADO DE APROBACIÓN ---
+            const tipoUsuario = data.tipo_usuario || 'usuario';
+            const estadoAprobacion = data.estado_aprobacion || 'aprobado';
 
+            localStorage.setItem('tipo_usuario', tipoUsuario);
+            localStorage.setItem('estado_aprobacion', estadoAprobacion);
+            // Si es una fundación pero su estado sigue pendiente, la bloqueamos temporalmente
+            if (tipoUsuario === 'fundacion' && estadoAprobacion === 'pendiente') {
+                alert("¡Tu fundación está en proceso de revisión legal por el equipo de ARCA! Te notificaremos cuando sea aprobada.");
+                auth.signOut().then(() => {
+                    localStorage.clear();
+                    window.location.href = "home.html";
+                });
+                return;
+            }
+            // ------------------------------------------------
             if (nombrePerfilElem) nombrePerfilElem.textContent = `@${nombreFinal}`;
             if (userDisplayName) userDisplayName.textContent = nombreFinal;
             if (dropdownName) dropdownName.textContent = nombreFinal;
@@ -209,10 +224,19 @@ async function ejecutarLoginEmail() {
         const metodos = await auth.fetchSignInMethodsForEmail(email);
         if (metodos.length > 0) {
             mostrarPasoContrasena(email);
-        } else {
+            } else {
+            const esFlujoFundacion = localStorage.getItem('flujo_fundacion') === 'true';
+            
+            if (esFlujoFundacion) {
+                // Limpiamos la marca y los mandamos al registro legal de fundaciones con el correo de la mano
+                localStorage.removeItem('flujo_fundacion');
+                alert("Esta fundación no tiene una cuenta creada. Te redirigiremos a su registro legal.");
+                window.location.href = `registro_fundacion.html?email=${encodeURIComponent(email)}`;
+            } else {
             alert("Este correo no tiene una cuenta creada. Te redirigiremos para registrarte.");
             window.location.href = `registro.html?email=${encodeURIComponent(email)}`;
         }
+    }
     } catch (error) {
         // Si hay error de red o de conexión en Firebase -> Muestra TU modal
         if (!navigator.onLine || error.code === 'auth/network-request-failed') {
@@ -315,6 +339,7 @@ function volverAlPaso2() {
     const p3 = document.getElementById("paso3");
     if (p3) p3.style.display = "none";
     if (p2) p2.style.display = "block";
+    localStorage.removeItem('flujo_fundacion');
 }
 
 function abrirBloqueo() {
@@ -339,6 +364,7 @@ function volverAlPaso1() {
     const p2 = document.getElementById("paso2");
     if (p2) p2.style.display = "none";
     if (p1) p1.style.display = "block";
+    localStorage.removeItem('flujo_fundacion');
 }
 
 function mostrarSeccion(seccion) {
@@ -1022,3 +1048,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 600);
     }
 });
+//fundaciones//
+function prepararModoFundacion() {
+    // Marcamos que el flujo actual es para fundación
+    localStorage.setItem('flujo_fundacion', 'true');
+    
+    // Ocultamos el paso 2 y mostramos el paso 3 (el formulario de correo)
+    const p2 = document.getElementById("paso2");
+    const p3 = document.getElementById("paso3");
+    if (p2) p2.style.display = "none";
+    if (p3) p3.style.display = "block";
+}
