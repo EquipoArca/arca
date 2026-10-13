@@ -577,7 +577,7 @@
           <div class="detalle-barra-inferior">
               <div class="detalle-info-autor">
                   Publicado por: 
-                  <a href="perfil_usuario.html" id="link-autor" title="Ver perfil del autor">
+                  <a href="javascript:void(0)" id="link-autor" title="Ver perfil del autor">
                       <span id="nombre-autor-texto">@usuario</span>
                       <span class="badge-ver-perfil"><i class="fa-solid fa-user-check"></i> Ver perfil</span>
                   </a>
@@ -630,10 +630,10 @@
           if (btnVolver) {
               if (origen === 'guardados') {
                   btnVolver.innerHTML = `<i class="fa-solid fa-arrow-left"></i> Volver a guardados`;
-                  btnVolver.href = 'guardados_usuario.html'; // Cambia por el nombre real de tu archivo de guardados
+                  btnVolver.href = 'guardados_usuario.html';
               } else if (origen === 'mis-reportes') {
                   btnVolver.innerHTML = `<i class="fa-solid fa-arrow-left"></i> Volver a mis reportes`;
-                  btnVolver.href = 'mis_reportes.html'; // Cambia si usas otro nombre
+                  btnVolver.href = 'mis_reportes.html';
               } else {
                   btnVolver.innerHTML = `<i class="fa-solid fa-arrow-left"></i> Volver a novedades`;
                   btnVolver.href = 'novedades.html';
@@ -726,14 +726,12 @@
               
               const publicaciones = await respuesta.json();
               
-              // Buscamos el reporte evaluando todas las combinaciones posibles de ID para reportes
               const reporte = publicaciones.find(r => 
                   Number(r.id_reporte) === Number(reporteId) || 
                   Number(r.id_publicacion) === Number(reporteId) || 
                   Number(r.id_origen) === Number(reporteId)
               );
 
-              // Respaldo directo por si viene de un fetch individual de reporte
               let datosReporteFinal = reporte;
               if (!datosReporteFinal) {
                   try {
@@ -750,7 +748,6 @@
                   throw new Error("Reporte no encontrado.");
               }
               
-              // Usamos 'datosReporteFinal' para pintar la interfaz...
               const reporteData = datosReporteFinal;
 
               document.getElementById('lbl-fecha').textContent = `Publicado el ${reporteData.Fecha_reporte ? reporteData.Fecha_reporte.split('T')[0] : ''}`;
@@ -761,15 +758,7 @@
                   document.getElementById('img-reporte').src = reporteData.img_reporte;
               }
 
-              document.getElementById('lbl-fecha').textContent = `Publicado el ${reporte.Fecha_reporte ? reporte.Fecha_reporte.split('T')[0] : ''}`;
-              document.getElementById('lbl-tipo-reporte').textContent = reporte.nombre_tipo_reporte || 'Reporte General';
-              document.getElementById('lbl-descripcion').textContent = reporte.Descripcion || 'Sin descripción proporcionada.';
-              
-              if (reporte.img_reporte) {
-                  document.getElementById('img-reporte').src = reporte.img_reporte;
-              }
-
-              let textoUbicacionOriginal = reporte.Ubicacion || reporte.ubicacion || 'Ubicación no especificada';
+              let textoUbicacionOriginal = reporteData.Ubicacion || reporteData.ubicacion || 'Ubicación no especificada';
               let textoUbicacionLimpia = textoUbicacionOriginal.replace('Ubicación GPS:', '').trim();
               let textoUbicacionFinal = textoUbicacionOriginal;
 
@@ -780,20 +769,20 @@
 
                   if (!isNaN(latPosible) && !isNaN(lonPosible)) {
                       textoUbicacionFinal = await obtenerNombreUbicacion(latPosible, lonPosible);
-                      reporte.latitud = latPosible;
-                      reporte.longitud = lonPosible;
+                      reporteData.latitud = latPosible;
+                      reporteData.longitud = lonPosible;
                   }
               }
 
               let htmlUbicacion = `<span>${textoUbicacionFinal}</span>`;
-              if (reporte.latitud && reporte.longitud) {
-                  htmlUbicacion += `<br><a href="mapa.html?lat=${reporte.latitud}&lng=${reporte.longitud}" class="btn-ver-mapa-chiquito"><i class="fa-solid fa-map-location-dot"></i> Ver en el mapa</a>`;
+              if (reporteData.latitud && reporteData.longitud) {
+                  htmlUbicacion += `<br><a href="mapa.html?lat=${reporteData.latitud}&lng=${reporteData.longitud}" class="btn-ver-mapa-chiquito"><i class="fa-solid fa-map-location-dot"></i> Ver en el mapa</a>`;
               }
               document.getElementById('lbl-ubicacion').innerHTML = htmlUbicacion;
 
               let contactoHTML = "";
-              const tel = reporte.telefono_contacto ? reporte.telefono_contacto.trim() : "";
-              const correo = reporte.correo_contacto ? reporte.correo_contacto.trim() : "";
+              const tel = reporteData.telefono_contacto ? reporteData.telefono_contacto.trim() : "";
+              const correo = reporteData.correo_contacto ? reporteData.correo_contacto.trim() : "";
 
               const urlGmail = correo ? `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(correo)}&su=${encodeURIComponent("Sobre tu reporte en ARCA")}&body=${encodeURIComponent("Hola, vi tu publicación en ARCA y me interesa ayudar con el caso...")}` : "";
               const urlWhatsapp = tel ? `https://wa.me/${tel.replace(/\D/g,'')}` : "";
@@ -844,15 +833,21 @@
               }
               document.getElementById('lbl-contacto').innerHTML = contactoHTML;
 
-              const nombreUsuario = reporte.nombre_usuario || 'usuario';
+              // --- CONFIGURACIÓN DINÁMICA DEL AUTOR Y SU PERFIL PÚBLICO ---
+              const nombreUsuario = reporteData.nombre_usuario || 'usuario';
               document.getElementById('nombre-autor-texto').textContent = `@${nombreUsuario}`;
+              
+              const linkAutor = document.getElementById('link-autor');
+              if (linkAutor) {
+                  linkAutor.href = `perfil_publico.html?user=${encodeURIComponent(nombreUsuario)}`;
+              }
 
               const usuarioLogueadoId = localStorage.getItem('id_usuarios') || 1; 
               const contenedorBoton = document.getElementById('contenedor-boton-accion');
 
-              if (Number(reporte.id_usuarios) === Number(usuarioLogueadoId)) {
+              if (Number(reporteData.id_usuarios) === Number(usuarioLogueadoId)) {
                   contenedorBoton.innerHTML = `
-                      <a href="editar_reporte.html?id=${reporte.id_reporte}" class="detalle-btn-accion detalle-btn-editar">
+                      <a href="editar_reporte.html?id=${reporteData.id_reporte || reporteId}" class="detalle-btn-accion detalle-btn-editar">
                           <i class="fa-solid fa-pen-to-square"></i> Editar reporte
                       </a>
                   `;
