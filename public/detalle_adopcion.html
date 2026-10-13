@@ -567,7 +567,7 @@
           <div class="detalle-barra-inferior">
               <div class="detalle-info-autor">
                   Publicado por: 
-                  <a href="perfil_usuario.html" id="link-autor" title="Ver perfil del autor">
+                  <a href="javascript:void(0)" id="link-autor" title="Ver perfil del autor">
                       <span id="nombre-autor-texto">@usuario</span>
                       <span class="badge-ver-perfil"><i class="fa-solid fa-user-check"></i> Ver perfil</span>
                   </a>
@@ -658,7 +658,7 @@
           cerrarModalArca();
       });
 
-    async function cargarDetalleAdopcion() {
+      async function cargarDetalleAdopcion() {
           const params = new URLSearchParams(window.location.search);
           const adopcionId = params.get('id');
 
@@ -700,6 +700,7 @@
                   textoEspecieRaza = razaTexto;
               }
               document.getElementById('lbl-info-extra').textContent = `Especie / Raza: ${textoEspecieRaza}`;
+              
               // Descripción
               document.getElementById('lbl-descripcion').textContent = adopcion.descripcion_animal || adopcion.Descripcion || 'Sin descripción proporcionada.';
 
@@ -764,16 +765,20 @@
               }
               document.getElementById('lbl-contacto').innerHTML = contactoHTML;
 
-              // Autor
+              // --- CONFIGURACIÓN DINÁMICA DEL AUTOR Y SU PERFIL PÚBLICO ---
               const nombreUsuario = adopcion.nombre_usuario || 'usuario';
               document.getElementById('nombre-autor-texto').textContent = `@${nombreUsuario}`;
+              
+              const linkAutor = document.getElementById('link-autor');
+              if (linkAutor) {
+                  linkAutor.href = `perfil_publico.html?user=${encodeURIComponent(nombreUsuario)}`;
+              }
 
               // --- BOTÓN DE GUARDADO / QUITAR GUARDADO INTERACTIVO ---
               const correoLogueado = localStorage.getItem('correo_usuario');
               const contenedorAccion = document.getElementById('contenedor-boton-accion');
 
               if (correoLogueado) {
-                  // Buscamos el ID general de la publicación correspondiente a esta adopción
                   const resPubs = await fetch('/api/publicaciones-globales');
                   const publicaciones = await resPubs.json();
                   const pubEncontrada = publicaciones.find(p => p.tipo_publicacion === 'adopcion' && Number(p.id_origen) === Number(adopcionId));
@@ -781,7 +786,6 @@
                   if (pubEncontrada) {
                       const idPublicacionGlobal = pubEncontrada.id_publicacion;
                       
-                      // Verificamos si ya está guardada
                       const resGuards = await fetch(`/api/guardados/ids/${encodeURIComponent(correoLogueado)}`);
                       const idsGuardados = await resGuards.json();
                       const estaGuardada = idsGuardados.includes(idPublicacionGlobal);
@@ -793,7 +797,6 @@
                               </button>
                           `;
                           
-                          // Al hacer clic, pregunta si desea quitarla de guardados
                           document.getElementById('btn-accion-guardado').addEventListener('click', async () => {
                               if (confirm("¿Deseas quitar esta publicación de tus guardados?")) {
                                   const quitRes = await fetch('/api/quitar-guardado', {
