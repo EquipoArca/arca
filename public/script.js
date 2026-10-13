@@ -850,7 +850,7 @@ function verDetallesAdopcion(idAdopcion) {
     window.location.href = `detalles_adopcion.html?id=${idAdopcion}`;
 }
 // ==========================================
-// 7. BUSCADOR UNIVERSAL INTELIGENTE (ESTILO CONFIGURACIÓN DE TELÉFONO)
+// 7. BUSCADOR UNIVERSAL INTELIGENTE (AJUSTES + PERFIL + PUBLICACIONES)
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
     const inputBusqueda = document.querySelector('.search-bar input');
@@ -866,14 +866,27 @@ document.addEventListener('DOMContentLoaded', () => {
         contenedorBarra.appendChild(menuFlotante);
     }
 
-    // Opciones del sistema estáticas (Ajustes, Secciones, Guardados) estilo sistema de teléfono
-    const paginasSistema = [
-        { titulo: "Ajustes y Preferencias", subtitulo: "Idioma y notificaciones", icono: "fa-gear", clase: "ajustes", url: "configuracion.html", categoria: "Ajustes del Sistema" },
-        { titulo: "Publicaciones Guardadas", subtitulo: "Tus elementos guardados", icono: "fa-bookmark", clase: "guardados", url: "guardados_usuario.html", categoria: "Accesos Rápidos" },
-        { titulo: "Perfil de Usuario", subtitulo: "Tu cuenta y datos personales", icono: "fa-circle-user", clase: "seccion", url: "perfil_usuario.html", categoria: "Accesos Rápidos" },
-        { titulo: "Mapa de Refugios y Casos", subtitulo: "Explora la ubicación en el mapa", icono: "fa-location-dot", clase: "seccion", url: "mapa.html", categoria: "Accesos Rápidos" },
-        { titulo: "Poner en Adopción", subtitulo: "Publicar una mascota", icono: "fa-paw", clase: "adopcion", url: "formulario_adopcion.html", categoria: "Acciones" },
-        { titulo: "Reportar Emergencia", subtitulo: "Crear un nuevo reporte", icono: "fa-triangle-exclamation", clase: "adopcion", url: "formularior.html", categoria: "Acciones" }
+    // DICCIONARIO INTELIGENTE DEL SISTEMA (Perfil, Ajustes, Preferencias, Soporte, etc.)
+    const indicesSistema = [
+        // --- SECCIÓN DE PERFIL ---
+        { titulo: "Cambiar nombre de usuario", subtitulo: "Perfil > Ajustes de cuenta", icono: "fa-user-pen", clase: "seccion", url: "perfil_usuario.html", palabras: ["nombre", "usuario", "cambiar nombre", "perfil"] },
+        { titulo: "Editar correo electrónico", subtitulo: "Perfil > Seguridad", icono: "fa-envelope", clase: "seccion", url: "perfil_usuario.html", palabras: ["correo", "email", "electronico", "editar correo"] },
+        { titulo: "Cambiar número de celular", subtitulo: "Perfil > Contacto", icono: "fa-phone", clase: "seccion", url: "perfil_usuario.html", palabras: ["celular", "telefono", "numero", "contacto"] },
+        { titulo: "Perfil de adoptante", subtitulo: "Perfil > Solicitudes", icono: "fa-paw", clase: "adopcion", url: "perfil_usuario.html", palabras: ["adoptante", "perfil adoptante"] },
+        { titulo: "Mis publicaciones", subtitulo: "Perfil > Mis reportes y adopciones", icono: "fa-bookmark", clase: "guardados", url: "perfil_usuario.html", palabras: ["mis publicaciones", "mis reportes", "publicaciones"] },
+
+        // --- SECCIÓN DE CONFIGURACIÓN Y AJUSTES ---
+        { titulo: "Modo oscuro (Apariencia)", subtitulo: "Configuración > Preferencias", icono: "fa-moon", clase: "ajustes", url: "configuracion.html", palabras: ["apariencia", "oscuro", "modo oscuro", "tema", "preferencias"] },
+        { titulo: "Notificaciones en el navegador", subtitulo: "Configuración > Preferencias", icono: "fa-bell", clase: "ajustes", url: "configuracion.html", palabras: ["notificaciones", "alertas", "navegador"] },
+        { titulo: "Idioma de la aplicación", subtitulo: "Configuración > Preferencias", icono: "fa-language", clase: "ajustes", url: "configuracion.html", palabras: ["idioma", "español", "english", "lenguaje"] },
+        { titulo: "Usuarios bloqueados", subtitulo: "Configuración > Permisos y Cuenta", icono: "fa-user-slash", clase: "ajustes", url: "configuracion.html", palabras: ["bloqueados", "bloquear", "usuarios bloqueados", "privacidad"] },
+        { titulo: "Permisos de ubicación", subtitulo: "Configuración > Permisos", icono: "fa-location-dot", clase: "ajustes", url: "configuracion.html", palabras: ["ubicacion", "gps", "permisos", "mapa"] },
+        { titulo: "Eliminar cuenta", subtitulo: "Configuración > Cuenta (Zona de peligro)", icono: "fa-triangle-exclamation", clase: "adopcion", url: "configuracion.html", palabras: ["eliminar cuenta", "borrar cuenta", "cuenta"] },
+        { titulo: "Ayuda y soporte técnico", subtitulo: "Configuración > Soporte", icono: "fa-headset", clase: "seccion", url: "configuracion.html", palabras: ["soporte", "ayuda", "contacto", "tecnico", "ayuda y soporte"] },
+
+        // --- ACCESOS RÁPIDOS GENERALES ---
+        { titulo: "Mapa General", subtitulo: "Ver refugios y reportes cercanos", icono: "fa-map", clase: "seccion", url: "mapa.html", palabras: ["mapa", "refugios", "cerca"] },
+        { titulo: "Publicaciones Guardadas", subtitulo: "Tus elementos guardados", icono: "fa-bookmark", clase: "guardados", url: "guardados_usuario.html", palabras: ["guardados", "favoritos", "guardado"] }
     ];
 
     let cachePublicaciones = [];
@@ -896,12 +909,15 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // 1. Filtrar páginas y ajustes del sistema
-        const matchSistema = paginasSistema.filter(p => 
-            p.titulo.toLowerCase().includes(texto) || p.subtitulo.toLowerCase().includes(texto)
-        );
+        // 1. Filtrar en el diccionario inteligente de ajustes/perfil usando palabras clave
+        const matchSistema = indicesSistema.filter(item => {
+            const coincideTitulo = item.titulo.toLowerCase().includes(texto);
+            const coincideSub = item.subtitulo.toLowerCase().includes(texto);
+            const coincideKeywords = item.palabras.some(palabra => palabra.includes(texto));
+            return coincideTitulo || coincideSub || coincideKeywords;
+        });
 
-        // 2. Filtrar publicaciones de la base de datos (mascotas, reportes, ubicaciones)
+        // 2. Filtrar en las publicaciones de la comunidad (mascotas, reportes, usuarios)
         const matchPublicaciones = cachePublicaciones.filter(pub => {
             const usuario = (pub.nombre_usuario || '').toLowerCase();
             const desc = (pub.Descripcion || pub.descripcion_animal || '').toLowerCase();
@@ -919,9 +935,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (matchSistema.length > 0 || matchPublicaciones.length > 0) {
             let htmlHTML = '';
 
-            // Renderizar Ajustes / Secciones del sistema
+            // Renderizar resultados del sistema (Ajustes, Perfil, Opciones)
             if (matchSistema.length > 0) {
-                htmlHTML += `<div class="categoria-busqueda-header">Ajustes y Secciones</div>`;
+                htmlHTML += `<div class="categoria-busqueda-header">Ajustes y Opciones del Sistema</div>`;
                 matchSistema.forEach(sys => {
                     htmlHTML += `
                         <a href="${sys.url}" class="item-resultado-busqueda">
@@ -937,9 +953,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
 
-            // Renderizar Publicaciones Encontradas
+            // Renderizar publicaciones de la comunidad encontradas
             if (matchPublicaciones.length > 0) {
-                htmlHTML += `<div class="categoria-busqueda-header">Publicaciones y Comunidad</div>`;
+                htmlHTML += `<div class="categoria-busqueda-header">Comunidad y Publicaciones</div>`;
                 matchPublicaciones.slice(0, 5).forEach(item => {
                     const esAdopcion = item.tipo_publicacion === 'adopcion';
                     const titulo = item.nombre_animal || item.nombre_tipo_reporte || (esAdopcion ? 'Mascota en adopción' : 'Reporte general');
