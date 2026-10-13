@@ -233,7 +233,7 @@ async function ejecutarLoginEmail() {
                 // los mandamos a tu página de registro normal o de contraseña/OTP 
                 // pasando una bandera de que es fundación para que al terminar caiga en el Paso 1.
                 alert("Esta fundación no tiene una cuenta. Primero crearemos tus credenciales de acceso.");
-                window.location.href = `registro.html?email=${encodeURIComponent(email)}&tipo=fundacion`;
+                window.location.href = `registro_fundacion.html?email=${encodeURIComponent(email)}&tipo=fundacion`;
             } else {
                 alert("Este correo no tiene una cuenta creada. Te redirigiremos para registrarte.");
                 window.location.href = `registro.html?email=${encodeURIComponent(email)}`;
