@@ -866,23 +866,23 @@ document.addEventListener('DOMContentLoaded', () => {
         contenedorBarra.appendChild(menuFlotante);
     }
 
-    // DICCIONARIO INTELIGENTE DEL SISTEMA (Perfil, Ajustes, Preferencias, Soporte, etc.)
+    // DICCIONARIO INTELIGENTE DEL SISTEMA (Perfil, Ajustes, Preferencias, Soporte, etc.) con sus hashes de destino
     const indicesSistema = [
         // --- SECCIÓN DE PERFIL ---
-        { titulo: "Cambiar nombre de usuario", subtitulo: "Perfil > Ajustes de cuenta", icono: "fa-user-pen", clase: "seccion", url: "perfil_usuario.html", palabras: ["nombre", "usuario", "cambiar nombre", "perfil"] },
-        { titulo: "Editar correo electrónico", subtitulo: "Perfil > Seguridad", icono: "fa-envelope", clase: "seccion", url: "perfil_usuario.html", palabras: ["correo", "email", "electronico", "editar correo"] },
-        { titulo: "Cambiar número de celular", subtitulo: "Perfil > Contacto", icono: "fa-phone", clase: "seccion", url: "perfil_usuario.html", palabras: ["celular", "telefono", "numero", "contacto"] },
-        { titulo: "Perfil de adoptante", subtitulo: "Perfil > Solicitudes", icono: "fa-paw", clase: "adopcion", url: "perfil_usuario.html", palabras: ["adoptante", "perfil adoptante"] },
-        { titulo: "Mis publicaciones", subtitulo: "Perfil > Mis reportes y adopciones", icono: "fa-bookmark", clase: "guardados", url: "perfil_usuario.html", palabras: ["mis publicaciones", "mis reportes", "publicaciones"] },
+        { titulo: "Cambiar nombre de usuario", subtitulo: "Perfil > Ajustes de cuenta", icono: "fa-user-pen", clase: "seccion", url: "perfil_usuario.html#nombre-usuario", palabras: ["nombre", "usuario", "cambiar nombre", "perfil"] },
+        { titulo: "Editar correo electrónico", subtitulo: "Perfil > Seguridad", icono: "fa-envelope", clase: "seccion", url: "perfil_usuario.html#correo", palabras: ["correo", "email", "electronico", "editar correo"] },
+        { titulo: "Cambiar número de celular", subtitulo: "Perfil > Contacto", icono: "fa-phone", clase: "seccion", url: "perfil_usuario.html#celular", palabras: ["celular", "telefono", "numero", "contacto"] },
+        { titulo: "Perfil de adoptante", subtitulo: "Perfil > Solicitudes", icono: "fa-paw", clase: "adopcion", url: "perfil_usuario.html#adoptante", palabras: ["adoptante", "perfil adoptante"] },
+        { titulo: "Mis publicaciones", subtitulo: "Perfil > Mis reportes y adopciones", icono: "fa-bookmark", clase: "guardados", url: "perfil_usuario.html#publicaciones", palabras: ["mis publicaciones", "mis reportes", "publicaciones"] },
 
         // --- SECCIÓN DE CONFIGURACIÓN Y AJUSTES ---
-        { titulo: "Modo oscuro (Apariencia)", subtitulo: "Configuración > Preferencias", icono: "fa-moon", clase: "ajustes", url: "configuracion.html", palabras: ["apariencia", "oscuro", "modo oscuro", "tema", "preferencias"] },
-        { titulo: "Notificaciones en el navegador", subtitulo: "Configuración > Preferencias", icono: "fa-bell", clase: "ajustes", url: "configuracion.html", palabras: ["notificaciones", "alertas", "navegador"] },
-        { titulo: "Idioma de la aplicación", subtitulo: "Configuración > Preferencias", icono: "fa-language", clase: "ajustes", url: "configuracion.html", palabras: ["idioma", "español", "english", "lenguaje"] },
-        { titulo: "Usuarios bloqueados", subtitulo: "Configuración > Permisos y Cuenta", icono: "fa-user-slash", clase: "ajustes", url: "configuracion.html", palabras: ["bloqueados", "bloquear", "usuarios bloqueados", "privacidad"] },
-        { titulo: "Permisos de ubicación", subtitulo: "Configuración > Permisos", icono: "fa-location-dot", clase: "ajustes", url: "configuracion.html", palabras: ["ubicacion", "gps", "permisos", "mapa"] },
-        { titulo: "Eliminar cuenta", subtitulo: "Configuración > Cuenta (Zona de peligro)", icono: "fa-triangle-exclamation", clase: "adopcion", url: "configuracion.html", palabras: ["eliminar cuenta", "borrar cuenta", "cuenta"] },
-        { titulo: "Ayuda y soporte técnico", subtitulo: "Configuración > Soporte", icono: "fa-headset", clase: "seccion", url: "configuracion.html", palabras: ["soporte", "ayuda", "contacto", "tecnico", "ayuda y soporte"] },
+        { titulo: "Modo oscuro (Apariencia)", subtitulo: "Configuración > Preferencias", icono: "fa-moon", clase: "ajustes", url: "configuracion.html#modo-oscuro", palabras: ["apariencia", "oscuro", "modo oscuro", "tema", "preferencias"] },
+        { titulo: "Notificaciones en el navegador", subtitulo: "Configuración > Preferencias", icono: "fa-bell", clase: "ajustes", url: "configuracion.html#notificaciones", palabras: ["notificaciones", "alertas", "navegador"] },
+        { titulo: "Idioma de la aplicación", subtitulo: "Configuración > Preferencias", icono: "fa-language", clase: "ajustes", url: "configuracion.html#idioma", palabras: ["idioma", "español", "english", "lenguaje"] },
+        { titulo: "Usuarios bloqueados", subtitulo: "Configuración > Permisos y Cuenta", icono: "fa-user-slash", clase: "ajustes", url: "configuracion.html#bloqueados", palabras: ["bloqueados", "bloquear", "usuarios bloqueados", "privacidad"] },
+        { titulo: "Permisos de ubicación", subtitulo: "Configuración > Permisos", icono: "fa-location-dot", clase: "ajustes", url: "configuracion.html#ubicacion", palabras: ["ubicacion", "gps", "permisos", "mapa"] },
+        { titulo: "Eliminar cuenta", subtitulo: "Configuración > Cuenta (Zona de peligro)", icono: "fa-triangle-exclamation", clase: "adopcion", url: "configuracion.html#eliminar", palabras: ["eliminar cuenta", "borrar cuenta", "cuenta"] },
+        { titulo: "Ayuda y soporte técnico", subtitulo: "Configuración > Soporte", icono: "fa-headset", clase: "seccion", url: "configuracion.html#soporte", palabras: ["soporte", "ayuda", "contacto", "tecnico", "ayuda y soporte"] },
 
         // --- ACCESOS RÁPIDOS GENERALES ---
         { titulo: "Mapa General", subtitulo: "Ver refugios y reportes cercanos", icono: "fa-map", clase: "seccion", url: "mapa.html", palabras: ["mapa", "refugios", "cerca"] },
@@ -953,13 +953,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
 
-            // Renderizar publicaciones de la comunidad encontradas
+            // Renderizar publicaciones de la comunidad encontradas (con soporte de hash para resaltarlas)
             if (matchPublicaciones.length > 0) {
                 htmlHTML += `<div class="categoria-busqueda-header">Comunidad y Publicaciones</div>`;
                 matchPublicaciones.slice(0, 5).forEach(item => {
                     const esAdopcion = item.tipo_publicacion === 'adopcion';
                     const titulo = item.nombre_animal || item.nombre_tipo_reporte || (esAdopcion ? 'Mascota en adopción' : 'Reporte general');
-                    const enlace = esAdopcion ? `detalle_adopcion.html?id=${item.id_origen}` : `detalle_reporte.html?id=${item.id_origen || item.id_publicacion}`;
+                    const idUnico = item.id_origen || item.id_publicacion;
+                    const enlace = esAdopcion ? `adopciones.html#pub-${idUnico}` : `novedades.html#pub-${idUnico}`;
                     const icono = esAdopcion ? 'fa-paw' : 'fa-triangle-exclamation';
 
                     htmlHTML += `
@@ -994,4 +995,30 @@ document.addEventListener('DOMContentLoaded', () => {
             menuFlotante.style.display = 'none';
         }
     });
+});
+
+// ==========================================
+// 8. DETECTOR UNIVERSAL DE HASH PARA SCROLL Y EFECTO PARPADEANTE
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+    if (window.location.hash) {
+        const selectorHash = window.location.hash;
+        
+        setTimeout(() => {
+            const elementoDestino = document.querySelector(selectorHash) || document.getElementById(selectorHash.substring(1));
+            
+            if (elementoDestino) {
+                // Desplazamiento suave hacia la opción exacta
+                elementoDestino.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+                // Aplicar la clase mágica del parpadeo
+                elementoDestino.classList.add('elemento-resaltado-magico');
+                
+                // Remover el efecto de parpadeo a los 4 segundos
+                setTimeout(() => {
+                    elementoDestino.classList.remove('elemento-resaltado-magico');
+                }, 4000);
+            }
+        }, 600);
+    }
 });
