@@ -849,3 +849,102 @@ function verDetallesAdopcion(idAdopcion) {
     // Redirige a tu vista/archivo de detalles pasando el ID correspondiente
     window.location.href = `detalles_adopcion.html?id=${idAdopcion}`;
 }
+// ==========================================
+// 7. BUSCADOR GLOBAL INTELIGENTE EN TIEMPO REAL
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+    const inputBusqueda = document.querySelector('.search-bar input');
+    const contenedorBarra = document.querySelector('.search-bar');
+
+    if (!inputBusqueda || !contenedorBarra) return;
+
+    // Crear el contenedor flotante de resultados dinámicamente
+    let menuFlotante = document.getElementById('desplegable-busqueda-arca');
+    if (!menuFlotante) {
+        menuFlotante = document.createElement('div');
+        menuFlotante.id = 'desplegable-busqueda-arca';
+        menuFlotante.className = 'resultados-busqueda-flotante';
+        contenedorBarra.appendChild(menuFlotante);
+    }
+
+    let cachePublicaciones = [];
+
+    inputBusqueda.addEventListener('input', async (e) => {
+        const texto = e.target.value.trim().toLowerCase();
+
+        if (texto.length < 2) {
+            menuFlotante.style.display = 'none';
+            return;
+        }
+
+        // Si aún no tenemos los datos cargados, los pedimos al servidor
+        if (cachePublicaciones.length === 0) {
+            try {
+                const res = await fetch('/api/publicaciones-globales');
+                if (res.ok) {
+                    cachePublicaciones = await res.json();
+                }
+            } catch (err) {
+                console.error("Error al cargar datos para la búsqueda:", err);
+            }
+        }
+
+        // Filtramos las publicaciones según lo que escriba la usuaria (nombre, ubicación, descripción, autor o tipo)
+        const coincidencias = cachePublicaciones.filter(pub => {
+            const usuario = (pub.nombre_usuario || '').toLowerCase();
+            const desc = (pub.Descripcion || pub.descripcion_animal || '').toLowerCase();
+            const ubicacion = (pub.Ubicacion || pub.ubicacion || '').toLowerCase();
+            const tipo = (pub.nombre_tipo_reporte || pub.tipo_publicacion || '').toLowerCase();
+            const nombreMascota = (pub.nombre_animal || '').toLowerCase();
+
+            return usuario.includes(texto) || 
+                   desc.includes(texto) || 
+                   ubicacion.includes(texto) || 
+                   tipo.includes(texto) || 
+                   nombreMascota.includes(texto);
+        });
+
+        if (coincidencias.length > 0) {
+            let htmlResultados = '';
+
+            // Mostramos hasta un máximo de 6 resultados para que no sea muy largo
+            coincidencias.slice(0, 6).forEach(item => {
+                const esAdopcion = item.tipo_publicacion === 'adopcion';
+                const titulo = item.nombre_animal || item.nombre_tipo_reporte || (esAdopcion ? 'Mascota en adopción' : 'Reporte general');
+                
+                // Redirige correctamente dependiendo si es adopción o reporte
+                const enlace = esAdopcion ? `detalle_adopcion.html?id=${item.id_origen}` : `detalle_reporte.html?id=${item.id_origen || item.id_publicacion}`;
+                const icono = esAdopcion ? 'fa-paw' : 'fa-triangle-exclamation';
+
+                htmlResultados += `
+                    <a href="${enlace}" class="item-resultado-busqueda">
+                        <div class="icono-resultado">
+                            <i class="fa-solid ${icono}"></i>
+                        </div>
+                        <div class="info-resultado">
+                            <span class="titulo-resultado">${titulo}</span>
+                            <span class="subtitulo-resultado">@${item.nombre_usuario || 'usuario'} • ${item.Ubicacion || 'Medellín'}</span>
+                        </div>
+                    </a>
+                `;
+            });
+
+            menuFlotante.innerHTML = htmlResultados;
+            menuFlotante.style.display = 'block';
+        } else {
+            menuFlotante.innerHTML = `
+                <div style="padding: 15px; text-align: center; color: #777; font-size: 13.5px;">
+                    No se encontraron resultados para "${texto}"
+                </div>
+            `;
+            menuFlotante.style.display = 'block';
+        }
+    });
+
+    // Ocultar el menú flotante si hacen clic fuera de la barra de búsqueda
+    document.addEventListener('click', (e) => {
+        if (!contenedorBarra.contains(e.target)) {
+            menuFlotante.style.display = 'none';
+        }
+    });
+});
