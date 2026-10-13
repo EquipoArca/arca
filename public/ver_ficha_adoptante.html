@@ -157,7 +157,7 @@
                         <span id="mini-menu-username">Usuario</span>
                     </div>
                     <hr class="mini-menu-divider">
-                    <a href="javascript:void(0)" onclick="mostrarSeccion('configuracion')" class="mini-menu-item btn-ajustes">
+                    <a href="configuracion.html" class="mini-menu-item btn-ajustes">
                         <i class="fa-solid fa-gear"></i>
                         <span>Ajustes</span>
                     </a>
@@ -202,7 +202,7 @@
           <div class="seccion-ficha-bloque">
               <div class="titulo-subseccion">Información General</div>
               <div class="grid-datos-ficha">
-                  <div class="dato-item"><strong>Edad / Fecha Nacimiento:</strong> <span id="f-edad">--</span></div>
+                  <div class="dato-item"><strong>Fecha de Nacimiento:</strong> <span id="f-edad">--</span></div>
                   <div class="dato-item"><strong>Teléfono de Contacto:</strong> <span id="f-tel">--</span></div>
                   <div class="dato-item"><strong>Correo Electrónico:</strong> <span id="f-correo">--</span></div>
                   <div class="dato-item"><strong>Ocupación:</strong> <span id="f-ocupacion">--</span></div>
@@ -225,9 +225,9 @@
               <div class="titulo-subseccion">Responsabilidad y Logística</div>
               <div class="grid-datos-ficha">
                   <div class="dato-item"><strong>Otras Mascotas en Casa:</strong> <span id="f-otras-mascotas">--</span></div>
-                  <div class="dato-item"><strong>Presupuesto Mensual Asegurado:</strong> <span id="f-presupuesto">--</span></div>
-                  <div class="dato-item"><strong>Tiempo que Estaría Solo al Día:</strong> <span id="f-tiempo-solo">--</span></div>
-                  <div class="dato-item"><strong>Cuidador Responsable:</strong> <span id="f-cuidador">--</span></div>
+                  <div class="dato-item"><strong>Presupuesto Mensual:</strong> <span id="f-presupuesto">--</span></div>
+                  <div class="dato-item"><strong>Horas Solo al Día:</strong> <span id="f-tiempo-solo">--</span></div>
+                  <div class="dato-item"><strong>Cuidador en Ausencia:</strong> <span id="f-cuidador">--</span></div>
               </div>
           </div>
 
@@ -298,24 +298,37 @@
               const f = data.ficha;
 
               // Rellenar Cabecera
-              document.getElementById('lbl-nombre-usuario').textContent = u.nombre_usuario;
+              document.getElementById('lbl-nombre-usuario').textContent = f.nombre_completo || u.nombre_usuario;
+              if (f.ubicacion) {
+                  document.getElementById('lbl-ubicacion').innerHTML = `<i class="fa-solid fa-location-dot"></i> ${f.ubicacion}`;
+              }
 
-              // Rellenar Datos
-              document.getElementById('f-edad').textContent = f.fecha_nacimiento || f.edad || 'No especificada';
-              document.getElementById('f-tel').textContent = u.Telefono_usuario || f.telefono || 'No registrado';
-              document.getElementById('f-correo').textContent = u.correo_usuario || 'No registrado';
+              // 1. Información General
+              document.getElementById('f-edad').textContent = f.fecha_nacimiento ? f.fecha_nacimiento.split('T')[0] : 'No especificada';
+              document.getElementById('f-tel').textContent = f.telefono || u.Telefono_usuario || 'No registrado';
+              document.getElementById('f-correo').textContent = f.correo || u.correo_usuario || 'No registrado';
               document.getElementById('f-ocupacion').textContent = f.ocupacion || 'No especificada';
 
-              document.getElementById('f-vivienda').textContent = f.tipo_vivienda || 'Propia';
-              document.getElementById('f-permiten').textContent = f.permiten_mascotas || 'Sí';
-              document.getElementById('f-convivientes').textContent = f.convivientes || 'Vive solo';
-              document.getElementById('f-ninos').textContent = f.hay_ninos || 'No';
+              // 2. Condiciones del Hogar
+              let tipoViviendaTexto = 'Casa / Apartamento';
+              if (f.id_tipo_vivienda === 5) tipoViviendaTexto = 'Casa';
+              else if (f.id_tipo_vivienda === 6) tipoViviendaTexto = 'Apartamento';
+              else if (f.id_tipo_vivienda === 7) tipoViviendaTexto = 'Finca / Casa Campestre';
+              
+              const tenencia = f.vivienda_propia === 1 ? 'Propia' : (f.vivienda_arrendada === 1 ? 'Arrendada' : '');
+              document.getElementById('f-vivienda').textContent = `${tipoViviendaTexto} (${tenencia})`;
+              
+              document.getElementById('f-permiten').textContent = f.mascotas_permitidas === 1 ? 'Sí' : 'No';
+              document.getElementById('f-convivientes').textContent = f.con_quien_vives || 'No especificado';
+              document.getElementById('f-ninos').textContent = f.hay_niños_en_casa === 1 ? 'Sí' : 'No';
 
-              document.getElementById('f-otras-mascotas').textContent = f.otras_mascotas || 'No';
-              document.getElementById('f-presupuesto').textContent = f.presupuesto ? `$${f.presupuesto}` : 'Asegurado';
-              document.getElementById('f-tiempo-solo').textContent = f.tiempo_solo || 'Poco tiempo';
-              document.getElementById('f-cuidador').textContent = f.cuidador_responsable || 'El adoptante';
+              // 3. Responsabilidad y Logística (Mapeado exacto con tu BD)
+              document.getElementById('f-otras-mascotas').textContent = f.tiene_otras_mascotas === 1 ? 'Sí' : 'No';
+              document.getElementById('f-presupuesto').textContent = f.prosupuesto_mensual ? `${f.prosupuesto_mensual}` : 'No definido';
+              document.getElementById('f-tiempo-solo').textContent = f.horas_ausente !== null && f.horas_ausente !== undefined ? `${f.horas_ausente} horas al día` : 'No especificado';
+              document.getElementById('f-cuidador').textContent = f.cuidador || 'No especificado';
 
+              // 4. Motivación
               document.getElementById('f-motivacion').textContent = `"${f.motivacion || 'Deseo brindarle un hogar amoroso a una mascota.'}"`;
 
           } catch (e) {
