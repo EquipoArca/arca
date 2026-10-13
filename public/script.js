@@ -850,7 +850,7 @@ function verDetallesAdopcion(idAdopcion) {
     window.location.href = `detalles_adopcion.html?id=${idAdopcion}`;
 }
 // ==========================================
-// 7. BUSCADOR GLOBAL INTELIGENTE EN TIEMPO REAL
+// 7. BUSCADOR UNIVERSAL INTELIGENTE (ESTILO CONFIGURACIÓN DE TELÉFONO)
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
     const inputBusqueda = document.querySelector('.search-bar input');
@@ -858,7 +858,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!inputBusqueda || !contenedorBarra) return;
 
-    // Crear el contenedor flotante de resultados dinámicamente
     let menuFlotante = document.getElementById('desplegable-busqueda-arca');
     if (!menuFlotante) {
         menuFlotante = document.createElement('div');
@@ -866,6 +865,16 @@ document.addEventListener('DOMContentLoaded', () => {
         menuFlotante.className = 'resultados-busqueda-flotante';
         contenedorBarra.appendChild(menuFlotante);
     }
+
+    // Opciones del sistema estáticas (Ajustes, Secciones, Guardados) estilo sistema de teléfono
+    const paginasSistema = [
+        { titulo: "Ajustes y Preferencias", subtitulo: "Idioma y notificaciones", icono: "fa-gear", clase: "ajustes", url: "configuracion.html", categoria: "Ajustes del Sistema" },
+        { titulo: "Publicaciones Guardadas", subtitulo: "Tus elementos guardados", icono: "fa-bookmark", clase: "guardados", url: "guardados_usuario.html", categoria: "Accesos Rápidos" },
+        { titulo: "Perfil de Usuario", subtitulo: "Tu cuenta y datos personales", icono: "fa-circle-user", clase: "seccion", url: "perfil_usuario.html", categoria: "Accesos Rápidos" },
+        { titulo: "Mapa de Refugios y Casos", subtitulo: "Explora la ubicación en el mapa", icono: "fa-location-dot", clase: "seccion", url: "mapa.html", categoria: "Accesos Rápidos" },
+        { titulo: "Poner en Adopción", subtitulo: "Publicar una mascota", icono: "fa-paw", clase: "adopcion", url: "formulario_adopcion.html", categoria: "Acciones" },
+        { titulo: "Reportar Emergencia", subtitulo: "Crear un nuevo reporte", icono: "fa-triangle-exclamation", clase: "adopcion", url: "formularior.html", categoria: "Acciones" }
+    ];
 
     let cachePublicaciones = [];
 
@@ -877,20 +886,23 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Si aún no tenemos los datos cargados, los pedimos al servidor
+        // Cargar publicaciones del servidor si está vacío
         if (cachePublicaciones.length === 0) {
             try {
                 const res = await fetch('/api/publicaciones-globales');
-                if (res.ok) {
-                    cachePublicaciones = await res.json();
-                }
+                if (res.ok) cachePublicaciones = await res.json();
             } catch (err) {
-                console.error("Error al cargar datos para la búsqueda:", err);
+                console.error("Error al cargar datos globales:", err);
             }
         }
 
-        // Filtramos las publicaciones según lo que escriba la usuaria (nombre, ubicación, descripción, autor o tipo)
-        const coincidencias = cachePublicaciones.filter(pub => {
+        // 1. Filtrar páginas y ajustes del sistema
+        const matchSistema = paginasSistema.filter(p => 
+            p.titulo.toLowerCase().includes(texto) || p.subtitulo.toLowerCase().includes(texto)
+        );
+
+        // 2. Filtrar publicaciones de la base de datos (mascotas, reportes, ubicaciones)
+        const matchPublicaciones = cachePublicaciones.filter(pub => {
             const usuario = (pub.nombre_usuario || '').toLowerCase();
             const desc = (pub.Descripcion || pub.descripcion_animal || '').toLowerCase();
             const ubicacion = (pub.Ubicacion || pub.ubicacion || '').toLowerCase();
@@ -904,44 +916,63 @@ document.addEventListener('DOMContentLoaded', () => {
                    nombreMascota.includes(texto);
         });
 
-        if (coincidencias.length > 0) {
-            let htmlResultados = '';
+        if (matchSistema.length > 0 || matchPublicaciones.length > 0) {
+            let htmlHTML = '';
 
-            // Mostramos hasta un máximo de 6 resultados para que no sea muy largo
-            coincidencias.slice(0, 6).forEach(item => {
-                const esAdopcion = item.tipo_publicacion === 'adopcion';
-                const titulo = item.nombre_animal || item.nombre_tipo_reporte || (esAdopcion ? 'Mascota en adopción' : 'Reporte general');
-                
-                // Redirige correctamente dependiendo si es adopción o reporte
-                const enlace = esAdopcion ? `detalle_adopcion.html?id=${item.id_origen}` : `detalle_reporte.html?id=${item.id_origen || item.id_publicacion}`;
-                const icono = esAdopcion ? 'fa-paw' : 'fa-triangle-exclamation';
+            // Renderizar Ajustes / Secciones del sistema
+            if (matchSistema.length > 0) {
+                htmlHTML += `<div class="categoria-busqueda-header">Ajustes y Secciones</div>`;
+                matchSistema.forEach(sys => {
+                    htmlHTML += `
+                        <a href="${sys.url}" class="item-resultado-busqueda">
+                            <div class="icono-resultado ${sys.clase}">
+                                <i class="fa-solid ${sys.icono}"></i>
+                            </div>
+                            <div class="info-resultado">
+                                <span class="titulo-resultado">${sys.titulo}</span>
+                                <span class="subtitulo-resultado">${sys.subtitulo}</span>
+                            </div>
+                        </a>
+                    `;
+                });
+            }
 
-                htmlResultados += `
-                    <a href="${enlace}" class="item-resultado-busqueda">
-                        <div class="icono-resultado">
-                            <i class="fa-solid ${icono}"></i>
-                        </div>
-                        <div class="info-resultado">
-                            <span class="titulo-resultado">${titulo}</span>
-                            <span class="subtitulo-resultado">@${item.nombre_usuario || 'usuario'} • ${item.Ubicacion || 'Medellín'}</span>
-                        </div>
-                    </a>
-                `;
-            });
+            // Renderizar Publicaciones Encontradas
+            if (matchPublicaciones.length > 0) {
+                htmlHTML += `<div class="categoria-busqueda-header">Publicaciones y Comunidad</div>`;
+                matchPublicaciones.slice(0, 5).forEach(item => {
+                    const esAdopcion = item.tipo_publicacion === 'adopcion';
+                    const titulo = item.nombre_animal || item.nombre_tipo_reporte || (esAdopcion ? 'Mascota en adopción' : 'Reporte general');
+                    const enlace = esAdopcion ? `detalle_adopcion.html?id=${item.id_origen}` : `detalle_reporte.html?id=${item.id_origen || item.id_publicacion}`;
+                    const icono = esAdopcion ? 'fa-paw' : 'fa-triangle-exclamation';
 
-            menuFlotante.innerHTML = htmlResultados;
+                    htmlHTML += `
+                        <a href="${enlace}" class="item-resultado-busqueda">
+                            <div class="icono-resultado adopcion">
+                                <i class="fa-solid ${icono}"></i>
+                            </div>
+                            <div class="info-resultado">
+                                <span class="titulo-resultado">${titulo}</span>
+                                <span class="subtitulo-resultado">@${item.nombre_usuario || 'usuario'} • ${item.Ubicacion || 'Medellín'}</span>
+                            </div>
+                        </a>
+                    `;
+                });
+            }
+
+            menuFlotante.innerHTML = htmlHTML;
             menuFlotante.style.display = 'block';
         } else {
             menuFlotante.innerHTML = `
-                <div style="padding: 15px; text-align: center; color: #777; font-size: 13.5px;">
-                    No se encontraron resultados para "${texto}"
+                <div style="padding: 18px; text-align: center; color: #777; font-size: 13.5px;">
+                    No se encontró nada para "${texto}" 🔍
                 </div>
             `;
             menuFlotante.style.display = 'block';
         }
     });
 
-    // Ocultar el menú flotante si hacen clic fuera de la barra de búsqueda
+    // Ocultar si hacen clic fuera
     document.addEventListener('click', (e) => {
         if (!contenedorBarra.contains(e.target)) {
             menuFlotante.style.display = 'none';

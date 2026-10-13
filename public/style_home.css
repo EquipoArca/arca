@@ -1608,9 +1608,9 @@ input:checked + .slider:before {
 .d-none {
   display: none !important;
 }
-/* --- ESTILOS DEL MENÚ DESPLEGABLE DE BÚSQUEDA FLOTANTE --- */
+/* --- ESTILOS DEL BUSCADOR UNIVERSAL ESTILO TELÉFONO --- */
 .search-bar {
-    position: relative; /* Clave para posicionar el menú desplegable justo abajo */
+    position: relative;
 }
 
 .resultados-busqueda-flotante {
@@ -1618,23 +1618,41 @@ input:checked + .slider:before {
     top: calc(100% + 10px);
     left: 0;
     width: 100%;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-radius: 22px;
     border: 2px solid #f9d5d3;
-    box-shadow: 0 10px 30px rgba(220, 150, 140, 0.2);
-    max-height: 380px;
+    box-shadow: 0 12px 35px rgba(220, 150, 140, 0.22);
+    max-height: 420px;
     overflow-y: auto;
     z-index: 2000;
-    display: none; /* Se oculta por defecto y aparece con JS */
-    padding: 10px 0;
+    display: none;
+    padding: 12px 0;
     font-family: 'Itim', sans-serif;
     box-sizing: border-box;
 }
 
+.categoria-busqueda-header {
+    font-size: 11px;
+    font-weight: bold;
+    color: #d9534f;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 8px 20px 4px 20px;
+    background: rgba(253, 232, 229, 0.4);
+    border-top: 1px solid #fce4e4;
+    border-bottom: 1px solid #fce4e4;
+    margin-top: 6px;
+}
+
+.categoria-busqueda-header:first-child {
+    margin-top: 0;
+    border-top: none;
+}
+
 .item-resultado-busqueda {
-    padding: 10px 18px;
+    padding: 9px 20px;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -1649,17 +1667,23 @@ input:checked + .slider:before {
 }
 
 .icono-resultado {
-    width: 36px;
-    height: 36px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
     background: #ffe5dd;
     color: #e06d53;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 15px;
+    font-size: 14px;
     flex-shrink: 0;
 }
+
+/* Colores personalizados según el tipo de elemento estilo teléfono */
+.icono-resultado.ajustes { background: #ebf5d7; color: #5a7a2e; }
+.icono-resultado.guardados { background: #fdf0d5; color: #b8860b; }
+.icono-resultado.seccion { background: #e3f2fd; color: #1e88e5; }
+.icono-resultado.adopcion { background: #fbc2c4; color: #c93b38; }
 
 .info-resultado {
     display: flex;
@@ -1668,7 +1692,7 @@ input:checked + .slider:before {
 }
 
 .titulo-resultado {
-    font-size: 14.5px;
+    font-size: 14px;
     font-weight: bold;
     white-space: nowrap;
     overflow: hidden;
@@ -1676,6 +1700,6 @@ input:checked + .slider:before {
 }
 
 .subtitulo-resultado {
-    font-size: 12.5px;
+    font-size: 12px;
     color: #777;
 }
