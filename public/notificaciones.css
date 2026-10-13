@@ -1085,3 +1085,50 @@ margin-bottom: -15px; /* Recorta la distancia inferior de la escena */}
 }
 .destello.d1 { top: 12px; left: 45px; animation: brillar 2s ease-in-out infinite; }
 .destello.d2 { bottom: 20px; right: 50px; animation: brillar 2s ease-in-out infinite 1s; }
+
+
+/* ☀️ Movimiento suave del sol */
+@keyframes pulsoSol {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-7px) rotate(2deg);
+  }
+}
+
+/* ☁️ Movimiento de la nube izquierda */
+@keyframes flotarNubeIzq {
+  0%, 100% {
+    transform: translate(0, 0);
+  }
+
+  50% {
+    transform: translate(8px, -5px);
+  }
+}
+
+/* ☁️ Movimiento de la nube derecha */
+@keyframes flotarNubeDer {
+  0%, 100% {
+    transform: translate(0, 0);
+  }
+
+  50% {
+    transform: translate(-8px, -5px);
+  }
+}
+
+/* ✨ Destellos que brillan suavemente */
+@keyframes brillar {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
