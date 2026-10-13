@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro Fundación - Paso 2 - ARCA</title>
+    <link rel="stylesheet" href="style_home.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="dark-mode.css">
+    <script>
+    if (localStorage.getItem("modo_oscuro") === "true") {
+        document.body.classList.add("dark-mode");
+    }
+    </script>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 40px;
+        }
+
+        .header-registro {
+            width: 100%;
+            height: 60px;
+            background-color: #ffd6d8c5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .badge-arca-logo {
+            width: 45px;
+            height: 45px;
+            background-color: #e57373;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+        }
+
+        .badge-arca-logo img { width: 80%; }
+
+        .titulo-header { font-size: 2.2rem; font-weight: 500; color: #333; }
+
+        .contenedor-form-paso2 {
+            width: 94%;
+            max-width: 1200px;
+            background-color: rgba(255, 240, 243, 0.75);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            border-radius: 25px;
+            padding: 30px 40px;
+            margin-top: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+        }
+
+        .capsula-categoria-larga {
+            background-color: #fcae9e;
+            color: #2b2b2b;
+            font-size: 1.4rem;
+            font-weight: 500;
+            padding: 6px 25px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .grid-dos-columnas {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .sub-capsula {
+            background-color: #fcae9e;
+            color: #2b2b2b;
+            font-size: 1.1rem;
+            padding: 4px 18px;
+            border-radius: 15px;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+
+        .input-paso2 {
+            width: 100%;
+            height: 38px;
+            background-color: #ffffff;
+            border: 1px solid #e2c0c0;
+            border-radius: 12px;
+            padding: 0 12px;
+            font-family: 'Itim', sans-serif;
+            font-size: 0.95rem;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        textarea.input-paso2 {
+            height: 90px;
+            padding: 10px;
+            resize: none;
+        }
+
+        .zona-subida-foto {
+            width: 100%;
+            height: 110px;
+            background-color: #fce4e4;
+            border: 2px dashed #e2a0a0;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .checkbox-enfoque {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            font-size: 1.05rem;
+        }
+
+        .btn-finalizar-paso2 {
+            background-color: #fbc2c4;
+            color: #2b2b2b;
+            border: none;
+            padding: 14px 50px;
+            font-family: 'Itim', sans-serif;
+            font-size: 1.6rem;
+            border-radius: 30px;
+            cursor: pointer;
+            display: block;
+            margin: 30px 0 0 auto;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: transform 0.2s ease;
+        }
+
+        .btn-finalizar-paso2:hover {
+            transform: scale(1.03);
+            background-color: #f9a3a6;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header-registro">
+        <div class="badge-arca-logo"><img src="logo.png" alt="ARCA"></div>
+        <span class="titulo-header">Registro</span>
+    </header>
+
+    <main class="contenedor-form-paso2">
+        <div class="capsula-categoria-larga">Información pública (lo que verán los usuarios)</div>
+
+        <form id="form-paso2">
+            <div class="grid-dos-columnas">
+                
+                <!-- COLUMNA IZQUIERDA -->
+                <div>
+                    <div style="display: flex; gap: 20px; margin-bottom: 15px;">
+                        <div style="flex: 1;">
+                            <div class="sub-capsula">Portada</div>
+                            <img src="logo.png" style="width: 100%; height: 110px; object-fit: cover; border-radius: 15px; border: 1px solid #ddd;">
+                        </div>
+                        <div style="flex: 1;">
+                            <div class="sub-capsula">Foto oficial</div>
+                            <div class="zona-subida-foto" onclick="document.getElementById('input-foto-oficial').click()">
+                                <i class="fa-solid fa-image-user" style="font-size: 1.8rem; color: #888;"></i>
+                                <span style="font-size: 0.85rem; color: #777;">O arrastra una imagen aquí</span>
+                                <button type="button" style="margin-top: 5px; border-radius: 10px; border: none; padding: 3px 10px; font-size: 0.8rem;">Sube un archivo</button>
+                                <input type="file" id="input-foto-oficial" accept="image/*" style="display:none;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 12px;">
+                        <div class="sub-capsula">Nombre de la fundación</div>
+                        <input type="text" id="nombre-publico-fundacion" class="input-paso2" placeholder="Huellitas de amor">
+                    </div>
+
+                    <div style="margin-bottom: 12px;">
+                        <div class="sub-capsula">Descripción general (misión)</div>
+                        <textarea id="mision-publica" class="input-paso2" placeholder="Rescatar, proteger y brindar una segunda oportunidad..."></textarea>
+                    </div>
+
+                    <div style="margin-bottom: 12px;">
+                        <div class="sub-capsula">Descripción general (visión)</div>
+                        <textarea id="vision-publica" class="input-paso2"></textarea>
+                    </div>
+
+                    <div>
+                        <div class="sub-capsula">Enfoque principal</div>
+                        <div class="checkbox-enfoque"><input type="checkbox" id="ef1"> Rescate adopción</div>
+                        <div class="checkbox-enfoque"><input type="checkbox" id="ef2"> Esterilización y control poblacional</div>
+                        <div class="checkbox-enfoque"><input type="checkbox" id="ef3"> Rehabilitación de animales maltratados</div>
+                        <div class="checkbox-enfoque"><input type="checkbox" id="ef4"> Otro: <input type="text" class="input-paso2" style="height: 28px; width: 200px;"></div>
+                    </div>
+                </div>
+
+                <!-- COLUMNA DERECHA -->
+                <div>
+                    <div style="margin-bottom: 15px;">
+                        <div class="sub-capsula">Programas/ Proyectos actuales</div>
+                        <textarea id="programas-publicos" class="input-paso2" style="height: 100px;" placeholder="Proyecto actual dentro del programa: 'Alimento para Todos'"></textarea>
+                    </div>
+
+                    <div>
+                        <div class="sub-capsula">Enlaces a redes sociales oficiales</div>
+                        <div style="margin-top: 5px;">
+                            <p style="font-size: 0.9rem; color: #444;"><i class="fa-solid fa-envelope"></i> fundacion_huellitas_de_amor@gmail.com</p>
+                            <p style="font-size: 0.9rem; color: #444;"><i class="fa-brands fa-facebook"></i> Fundación Huellitas de Amor_Oficial</p>
+                            <p style="font-size: 0.9rem; color: #444;"><i class="fa-brands fa-tiktok"></i> Fundacion_Huellitas_De_Amor_Oficial</p>
+                            <p style="font-size: 0.9rem; color: #444;"><i class="fa-brands fa-instagram"></i> Fundacion Huellitas de Amor_Oficial</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <button type="button" class="btn-finalizar-paso2" onclick="finalizarRegistroCompleto()">Finalizar Registro</button>
+        </form>
+    </main>
+
+    <script>
+        function finalizarRegistroCompleto() {
+            alert("¡Registro enviado con éxito! Tu solicitud quedó en estado 'pendiente' para revisión del equipo ARCA.");
+            sessionStorage.clear();
+            window.location.href = "home.html";
+        }
+    </script>
+</body>
+</html>
