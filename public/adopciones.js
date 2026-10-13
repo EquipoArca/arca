@@ -24,7 +24,7 @@ async function alHacerClicVerAnimales() {
     }
 
     try {
-        const respuesta = await fetch(`/api/verificar-adoptante?correo=${encodeURIComponent(user.email)}`, {
+        const respuesta = await fetch(`/api/verificar-adoptante/correo=${encodeURIComponent(user.email)}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
