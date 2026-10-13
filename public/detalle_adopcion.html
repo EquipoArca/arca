@@ -774,7 +774,7 @@
                   linkAutor.href = `perfil_publico.html?user=${encodeURIComponent(nombreUsuario)}`;
               }
 
-              // --- BOTÓN DE GUARDADO / QUITAR GUARDADO INTERACTIVO ---
+             // --- BOTÓN DE GUARDADO / QUITAR GUARDADO INTELIGENTE ---
               const correoLogueado = localStorage.getItem('correo_usuario');
               const contenedorAccion = document.getElementById('contenedor-boton-accion');
 
@@ -792,7 +792,7 @@
 
                       if (estaGuardada) {
                           contenedorAccion.innerHTML = `
-                              <button class="detalle-btn-accion" id="btn-accion-guardado" style="background: #ffe5dd; color: #d9534f;">
+                              <button class="detalle-btn-accion" id="btn-accion-guardado" style="background: #ffe5dd; color: #d9534f; border-color: #f4c2c4;">
                                   <i class="fa-solid fa-bookmark"></i> Publicación guardada
                               </button>
                           `;
