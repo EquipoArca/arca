@@ -1386,9 +1386,9 @@ app.get('/api/perfil-publico/:parametro', (req, res) => {
 
     console.log("🔍 Buscando perfil público para el parámetro:", parametro);
 
-    // Consulta flexible usando LIKE y comodines para evitar problemas de espacios o mayúsculas
+    // Seleccionamos únicamente las columnas que sabemos que existen en la tabla usuarios
     const sql = `
-        SELECT u.id_usuarios, u.nombre_usuario, u.foto_perfil, u.correo_usuario, u.Telefono_usuario, u.Ubicacion
+        SELECT u.id_usuarios, u.nombre_usuario, u.foto_perfil, u.correo_usuario, u.Telefono_usuario
         FROM usuarios u
         WHERE u.nombre_usuario LIKE ? 
            OR u.correo_usuario LIKE ?
