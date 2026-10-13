@@ -1,0 +1,313 @@
+/* --- Estilos Específicos para la Pantalla de Donación --- */
+
+/* Margen superior e izquierdo para evitar que la navbar fija y la sidebar tapen el contenido */
+.main-content {
+    margin-top: 100;
+    margin-left: 60px;
+    padding: 30px 30px 60px 30px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    flex-grow: 1;
+    min-height: calc(100vh - 60px);
+   
+}
+
+.donation-main-container {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    padding-bottom: 40px; /* Asegura espacio suficiente al final para ver el botón completamente */
+     overflow-y: auto;
+}
+
+.donation-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 30px;
+    align-items: start;
+}
+
+.donation-column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.section-pill-title {
+    background-color: #ffd6d8c5;
+    padding: 8px 25px;
+    border-radius: 20px;
+    font-size: 1.5rem;
+    color: #000;
+    font-weight: 500;
+    display: inline-block;
+    align-self: flex-start;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    font-family: 'Itim', sans-serif;
+}
+
+.donation-options-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.donation-option-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+}
+
+.donation-option-row input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+}
+
+.donation-custom-checkbox {
+    width: 24px;
+    height: 24px;
+    border: 2px solid #444;
+    border-radius: 6px;
+    background-color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04);
+}
+
+.donation-custom-checkbox::after {
+    content: '✓';
+    display: none;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 1;
+}
+
+.donation-option-row input[type="checkbox"]:checked + .donation-custom-checkbox {
+    background-color: #e57373;
+    border-color: #e57373;
+}
+
+.donation-option-row input[type="checkbox"]:checked + .donation-custom-checkbox::after {
+    display: block;
+}
+
+.donation-input-pill {
+    background-color: rgba(234, 243, 218, 0.68);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(190, 198, 165, 0.6);
+    border-radius: 20px;
+    padding: 10px 20px;
+    font-size: 1.1rem;
+    color: #4a5a1c;
+    font-family: 'Itim', sans-serif;
+    width: 100%;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.03), 0 4px 10px rgba(0, 0, 0, 0.03);
+}
+
+.donation-textarea {
+    width: 100%;
+    height: 140px;
+    background-color: rgba(234, 243, 218, 0.68);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(190, 198, 165, 0.6);
+    border-radius: 20px;
+    padding: 15px;
+    font-family: 'Itim', sans-serif;
+    font-size: 1.1rem;
+    color: #4a5a1c;
+    outline: none;
+    resize: none;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.03), 0 4px 10px rgba(0, 0, 0, 0.03);
+}
+
+.donation-label-text {
+    font-family: 'Itim', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #222;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.donation-plain-text {
+    font-family: 'Itim', sans-serif;
+    font-size: 1.15rem;
+    color: #333;
+}
+
+.foundation-sub-options {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.btn-select-map {
+    background-color: #fbc2c4;
+    color: #333;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 20px;
+    font-family: 'Itim', sans-serif;
+    font-size: 0.95rem;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease;
+}
+
+.btn-select-map:hover {
+    transform: scale(1.03);
+}
+
+.or-separator {
+    font-family: 'Itim', sans-serif;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #444;
+}
+
+.donation-contact-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.donation-contact-wrapper i {
+    position: absolute;
+    left: 18px;
+    color: #8fa882;
+    font-size: 1.2rem;
+    pointer-events: none;
+}
+
+.donation-contact-wrapper input {
+    width: 100%;
+    padding: 12px 18px 12px 48px;
+    background-color: rgba(234, 243, 218, 0.68);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(190, 198, 165, 0.6);
+    border-radius: 20px;
+    font-family: 'Itim', sans-serif;
+    font-size: 1.1rem;
+    color: #4a5a1c;
+    outline: none;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.03), 0 4px 10px rgba(0, 0, 0, 0.03);
+}
+
+.btn-submit-donation {
+    background-color: #e9e1c2;
+    color: #4a5a1c;
+    border: 1px solid #d1cdbd;
+    padding: 16px 36px;
+    font-family: 'Itim', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 600;
+    border-radius: 25px;
+    cursor: pointer;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s ease, background-color 0.2s ease;
+    align-self: flex-end;
+    margin-top: 15px;
+    margin-bottom: 20px; /* Margen de seguridad para que siempre sea visible */
+}
+
+.btn-submit-donation:hover {
+    transform: scale(1.03);
+    background-color: #dfe7cc;
+}
+
+/* Adaptación responsiva */
+@media (max-width: 768px) {
+    .main-content {
+        margin-left: 0;
+        padding: 20px 15px 40px 15px;
+    }
+    .donation-grid {
+        grid-template-columns: 1fr;
+    }
+    .btn-submit-donation {
+        width: 100%;
+        align-self: center;
+    }
+}
+/* --- Overlay / Superposición de Confirmación --- */
+.donation-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.donation-modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.donation-modal-card {
+    background-color: #ffffff;
+    padding: 40px 30px;
+    border-radius: 40px;
+    max-width: 520px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    cursor: pointer; /* Para indicar que se puede cerrar al hacer clic */
+    transform: scale(0.9);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.donation-modal-overlay.active .donation-modal-card {
+    transform: scale(1);
+}
+
+.donation-modal-message {
+    font-family: 'Itim', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: #000000;
+    line-height: 1.3;
+}
+
+.donation-modal-check {
+    width: 65px;
+    height: 65px;
+    color: #8cc63f; /* Verde característico del check */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.donation-modal-check i {
+    font-size: 4rem;
+}

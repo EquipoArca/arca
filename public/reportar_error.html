@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportar un error técnico - ARCA</title>
+    <link rel="stylesheet" href="style_home.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="dark-mode.css">
+    <script>
+    if (localStorage.getItem("modo_oscuro") === "true") {
+        document.body.classList.add("dark-mode");
+    }
+    </script>
+    <style>
+        body {
+            padding-top: 70px;
+            font-family: 'Itim', cursive, sans-serif;
+            margin: 0;
+            background-color: #fdf6f6;
+        }
+
+        .top-nav {
+            position: fixed !important;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 999 !important;
+            background-color: #ffd6d8 !important;
+        }
+
+        /* 1. Franja Superior del Título */
+        .banner-titulo-superior {
+            width: 100%;
+            background-color: #e5e5e5;
+            border-bottom: 1.5px solid #000;
+            border-top: 1.5px solid #000;
+            padding: 8px 0;
+            text-align: center;
+            box-sizing: border-box;
+            position: relative;
+            z-index: 10;
+        }
+
+        .banner-titulo-superior h1 {
+            font-family: 'Itim', cursive, sans-serif;
+            font-size: 2.1rem;
+            font-weight: 500;
+            color: #000;
+            margin: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        main.main-content {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 2. Contenedor del Formulario */
+        .form-error-container {
+            width: 100%;
+            max-width: 1100px;
+            margin: 15px auto 0 auto;
+            padding: 0 40px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .columnas-grid {
+            display: grid;
+            grid-template-columns: 1fr 0.8fr 1.2fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .columna-box {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .columna-box h2 {
+            font-size: 1.3rem;
+            color: #000;
+            margin: 0 0 5px 0;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        /* Columna 1: Textarea */
+        .textarea-que-ocurrio {
+            width: 100%;
+            height: 130px;
+            background-color: #ffffff;
+            border: 1px solid #ccc;
+            border-radius: 12px;
+            padding: 12px;
+            font-family: 'Itim', cursive, sans-serif;
+            font-size: 1rem;
+            resize: none;
+            box-sizing: border-box;
+            outline: none;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        /* Columna 2: Checkboxes */
+        .opciones-donde {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding-left: 20px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            color: #000;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #f39295;
+            border: 1.5px solid #000;
+            border-radius: 3px;
+        }
+
+        /* Columna 3: Capturas y Datos */
+        .columna-capturas {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .upload-area {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .upload-icon-circle {
+            width: 60px;
+            height: 60px;
+            background-color: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            color: #b0b0b0;
+        }
+
+        .upload-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .btn-subir-archivo {
+            background-color: #ffffff;
+            border: 1px solid #ccc;
+            border-radius: 15px;
+            padding: 4px 14px;
+            font-family: 'Itim', cursive, sans-serif;
+            font-size: 0.85rem;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-subir-archivo:hover {
+            background-color: #f5f5f5;
+        }
+
+        .drag-text {
+            font-size: 0.78rem;
+            color: #333;
+            font-weight: 600;
+        }
+
+        /* Campos de Usuario */
+        .user-fields {
+            width: 100%;
+            max-width: 280px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 2px;
+        }
+
+        .input-group-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .input-group-row i {
+            font-size: 1.2rem;
+            color: #000;
+            width: 20px;
+            text-align: center;
+        }
+
+        .input-group-row input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid #777;
+            font-family: 'Itim', cursive, sans-serif;
+            font-size: 0.9rem;
+            padding: 2px 5px;
+            outline: none;
+        }
+
+        .info-nota {
+            font-size: 0.72rem;
+            color: #555;
+            text-align: center;
+            line-height: 1.2;
+            max-width: 280px;
+            margin: 2px 0;
+        }
+
+        /* Botón Enviar */
+        .btn-enviar-error {
+            margin-top: 5px;
+            background-color: #e5dfc5;
+            border: 1px solid #b8b298;
+            padding: 6px 32px;
+            border-radius: 20px;
+            font-family: 'Itim', cursive, sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+
+        .btn-enviar-error:hover {
+            transform: scale(1.03);
+            background-color: #dad4b9;
+        }
+
+        /* Contenedor y Botón Volver (Asegura posición sobre el fondo de animales y separación del footer) */
+        .volver-container {
+            width: 100%;
+            display: flex;
+            justify-content: flex-start;
+            margin-top: 15px;
+            margin-bottom: 110px; /* Margen para asegurar que no toque la barra fija */
+        }
+
+        .btn-volver-atras {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 2.5rem;
+            color: #000;
+            transition: transform 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-volver-atras:hover {
+            transform: scale(1.15);
+        }
+
+        /* Barra de contacto fija inferior */
+        .footer-contacto-bar {
+            position: fixed;
+            bottom: 0;
+            left: 60px;
+            right: 0;
+            background-color: #ffd6d8e6;
+            backdrop-filter: blur(8px);
+            border-top: 1px solid rgba(0,0,0,0.1);
+            padding: 10px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 800;
+            font-family: 'Itim', cursive, sans-serif;
+        }
+
+        .contacto-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-size: 1rem;
+            color: #000;
+        }
+
+        .contacto-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: #000;
+            font-weight: 600;
+        }
+
+        .contacto-item i {
+            font-size: 1.1rem;
+        }
+
+        .contacto-redes {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .titulo-contactanos {
+            font-weight: 700;
+            font-size: 1rem;
+            letter-spacing: 1px;
+            color: #000;
+            text-transform: uppercase;
+        }
+
+        .redes-iconos {
+            display: flex;
+            gap: 10px;
+        }
+
+        .redes-iconos a {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: transform 0.2s ease;
+        }
+
+        .redes-iconos a:hover {
+            transform: scale(1.15);
+        }
+
+        .bg-tiktok { background-color: #000000; }
+        .bg-facebook { background-color: #1877f2; }
+        .bg-x { background-color: #000000; }
+        .bg-instagram { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
+
+        .btn-sobre-nosotros {
+            background-color: #fbc2c4;
+            color: #000;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-family: 'Itim', cursive, sans-serif;
+            font-size: 1rem;
+            text-decoration: none;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+
+        .btn-sobre-nosotros:hover {
+            transform: scale(1.05);
+            background-color: #f9a3a6;
+        }
+
+        @media (max-width: 850px) {
+            .columnas-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            .banner-titulo-superior h1 {
+                font-size: 1.6rem;
+            }
+            .footer-contacto-bar {
+                left: 0;
+                flex-direction: column;
+                gap: 12px;
+                padding: 12px;
+                position: relative;
+            }
+            .volver-container {
+                margin-bottom: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+  <!-- Barra de Navegación Superior Fija -->
+  <nav class="top-nav">
+    <div class="top-left">
+        <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu"></i>
+        
+        <div class="mini-logo-circle">
+            <img src="logo.png" alt="Logo">
+        </div>
+        <span class="page-title" id="titulo-pagina">Ayuda y soporte técnico</span>
+    </div>
+
+    <div class="search-bar">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="input-busqueda-nav" name="busqueda" placeholder="Busca algo" aria-label="Buscar en la aplicación">
+        <i class="fa-solid fa-microphone"></i>
+    </div>
+
+    <div class="top-right">
+        <div class="user-header-info">
+
+            <div class="user-profile-menu" id="user-profile-menu">
+                <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
+                    <img src="logo.png" id="user-avatar-img" alt="Perfil">
+                </div>
+
+                <div class="mini-menu-card" id="mini-menu-card">
+                    <div class="mini-menu-header">
+                        <span id="mini-menu-username">Usuario</span>
+                    </div>
+                    
+                    <hr class="mini-menu-divider">
+                    
+                    <a href="javascript:void(0)" onclick="mostrarSeccion('configuracion')" class="mini-menu-item btn-ajustes">
+                        <i class="fa-solid fa-gear"></i>
+                        <span>Ajustes</span>
+                    </a>
+                    
+                    <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Cerrar sesión</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="notif-circle">
+                <a href="notificaciones.html" aria-label="Notificaciones"><i class="fa-solid fa-bell"></i></a>
+            </div>
+
+        </div>
+    </div>
+  </nav>
+
+    <!-- Barra Lateral (Sidebar) -->
+    <aside class="sidebar" id="sidebar">
+        <div class="side-icons">
+            <a href="home.html" class="menu-fila">
+                <i class="fa-solid fa-house"></i>
+                <span class="menu-text">Inicio</span>
+            </a>
+            <a href="perfil_usuario.html" class="menu-fila">
+                <i class="fa-solid fa-circle-user"></i>
+                <span class="menu-text">Perfil</span>
+            </a>
+            <a href="guardados_usuario.html" class="menu-fila">
+                <i class="fa-solid fa-bookmark"></i>
+                <span class="menu-text">Guardado</span>
+            </a>
+            <a href="mapa.html" class="menu-fila">
+                <i class="fa-solid fa-location-dot"></i>
+                <span class="menu-text">Mapa</span>
+            </a>
+            <a href="configuracion.html" class="menu-fila">
+                <i class="fa-solid fa-gear"></i>
+                <span class="menu-text">Ajustes</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Franja Superior con el Título -->
+    <div class="banner-titulo-superior">
+        <h1>Reportar un error técnico <i class="fa-solid fa-wrench"></i></h1>
+    </div>
+
+    <!-- Contenido Principal -->
+    <main class="main-content">
+        <form class="form-error-container" id="form-reportar-error" onsubmit="event.preventDefault();">
+            
+            <div class="columnas-grid">
+                
+                <!-- Columna 1: ¿Qué ocurrió? -->
+                <div class="columna-box">
+                    <h2>¿Qué ocurrió?</h2>
+                    <textarea class="textarea-que-ocurrio" placeholder=""></textarea>
+                </div>
+
+                <!-- Columna 2: ¿Dónde ocurrió? -->
+                <div class="columna-box">
+                    <h2>¿Dónde ocurrió?</h2>
+                    <div class="opciones-donde">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="lugar_error" value="reportes">
+                            <span>Reportes</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="lugar_error" value="donaciones">
+                            <span>Donaciones</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="lugar_error" value="perfil">
+                            <span>Perfil</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="lugar_error" value="otro">
+                            <span>Otro</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Columna 3: ¿Tienes capturas del error? -->
+                <div class="columna-box columna-capturas">
+                    <h2>¿Tienes capturas del error?</h2>
+                    
+                    <div class="upload-area">
+                        <div class="upload-icon-circle">
+                            <i class="fa-regular fa-image"></i>
+                        </div>
+                        <div class="upload-controls">
+                            <button type="button" class="btn-subir-archivo" onclick="document.getElementById('file-input').click()">Sube un archivo</button>
+                            <input type="file" id="file-input" style="display: none;" accept="image/*">
+                            <span class="drag-text">O arrastra una imagen aquí</span>
+                        </div>
+                    </div>
+
+                    <div class="user-fields">
+                        <div class="input-group-row">
+                            <i class="fa-regular fa-user"></i>
+                            <span>NOMBRE:</span>
+                            <input type="text" name="nombre_usuario">
+                        </div>
+                        <div class="input-group-row">
+                            <i class="fa-regular fa-envelope"></i>
+                            <span>CORREO:</span>
+                            <input type="email" name="correo_usuario">
+                        </div>
+                    </div>
+
+                    <p class="info-nota">
+                        Usaremos esta información para ponernos en contacto contigo en cuanto al error
+                    </p>
+
+                    <button type="submit" class="btn-enviar-error">ENVIAR</button>
+                </div>
+
+            </div>
+
+            <!-- Botón Volver perfectamente ubicado en la zona rosada claro -->
+            <div class="volver-container">
+                <a href="ayuda_soporte.html" class="btn-volver-atras" title="Volver">
+                    <i class="fa-regular fa-circle-left"></i>
+                </a>
+            </div>
+
+        </form>
+    </main>
+
+    <!-- Barra Inferior de Contacto -->
+    <footer class="footer-contacto-bar">
+        <div class="contacto-info">
+            <a href="mailto:equipoarca0@gmail.com" class="contacto-item">
+                <i class="fa-regular fa-envelope"></i>
+                <span>equipoarca0@gmail.com</span>
+            </a>
+            <a href="tel:5780318" class="contacto-item">
+                <i class="fa-solid fa-phone"></i>
+                <span>578-0318</span>
+            </a>
+        </div>
+
+        <div class="contacto-redes">
+            <span class="titulo-contactanos">CONTÁCTANOS:</span>
+            <div class="redes-iconos">
+                <a href="#" class="bg-tiktok" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+                <a href="#" class="bg-facebook" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+                <a href="#" class="bg-x" aria-label="X"><i class="fa-brands fa-x-twitter"></i></a>
+                <a href="#" class="bg-instagram" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+            </div>
+        </div>
+
+        <a href="sobre_nosotros.html" class="btn-sobre-nosotros">Sobre nosotros</a>
+    </footer>
+
+    <!-- Firebase v8 Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+
+    <script src="script.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btnToggleMenu = document.getElementById('btn-toggle-menu');
+            const sidebar = document.getElementById('sidebar');
+
+            if (btnToggleMenu && sidebar) {
+                btnToggleMenu.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    sidebar.classList.toggle('sidebar-abierta');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

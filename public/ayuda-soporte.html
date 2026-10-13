@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ayuda y soporte técnico - ARCA</title>
+    <link rel="stylesheet" href="style_home.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="dark-mode.css">
+    <script>
+    if (localStorage.getItem("modo_oscuro") === "true") {
+        document.body.classList.add("dark-mode");
+    }
+    </script>
+    <style>
+        /* Estilos específicos para la pantalla de Ayuda y Soporte */
+        .soporte-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 650px;
+            margin: 20px auto 100px auto;
+            gap: 25px;
+        }
+
+        .btn-soporte-capsula {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 20px;
+            width: 100%;
+            background-color: #ffd6d8c5;
+            padding: 18px 30px;
+            border-radius: 40px;
+            text-decoration: none;
+            color: #000;
+            font-size: 2.2rem;
+            font-family: 'Itim', cursive, sans-serif;
+            font-weight: 500;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+
+        .btn-soporte-capsula:hover {
+            transform: translateY(-3px);
+            background-color: #fcaea2d8;
+        }
+
+        .btn-soporte-capsula i {
+            font-size: 2.2rem;
+            color: #000;
+        }
+
+        /* Barra de contacto fija e inferior */
+        .footer-contacto-bar {
+            position: fixed;
+            bottom: 0;
+            left: 60px;
+            right: 0;
+            background-color: #ffd6d8e6;
+            backdrop-filter: blur(8px);
+            border-top: 1px solid rgba(0,0,0,0.1);
+            padding: 12px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 800;
+            font-family: 'Itim', cursive, sans-serif;
+        }
+
+        .contacto-info {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            font-size: 1.1rem;
+            color: #000;
+        }
+
+        .contacto-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: #000;
+            font-weight: 600;
+        }
+
+        .contacto-item i {
+            font-size: 1.2rem;
+        }
+
+        .contacto-redes {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .titulo-contactanos {
+            font-weight: 700;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+            color: #000;
+            text-transform: uppercase;
+        }
+
+        .redes-iconos {
+            display: flex;
+            gap: 12px;
+        }
+
+        .redes-iconos a {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: transform 0.2s ease;
+        }
+
+        .redes-iconos a:hover {
+            transform: scale(1.15);
+        }
+
+        .bg-tiktok { background-color: #000000; }
+        .bg-facebook { background-color: #1877f2; }
+        .bg-x { background-color: #000000; }
+        .bg-instagram { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
+
+        .btn-sobre-nosotros {
+            background-color: #fbc2c4;
+            color: #000;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-family: 'Itim', cursive, sans-serif;
+            font-size: 1.1rem;
+            text-decoration: none;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+
+        .btn-sobre-nosotros:hover {
+            transform: scale(1.05);
+            background-color: #f9a3a6;
+        }
+
+        @media (max-width: 768px) {
+            .footer-contacto-bar {
+                left: 0;
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px;
+                position: relative;
+            }
+            .btn-soporte-capsula {
+                font-size: 1.5rem;
+                padding: 14px 20px;
+            }
+            .btn-soporte-capsula i {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+  <!-- Barra de Navegación Superior -->
+  <nav class="top-nav">
+    <div class="top-left">
+        <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu"></i>
+        
+        <div class="mini-logo-circle">
+            <img src="logo.png" alt="Logo">
+        </div>
+        <span class="page-title" id="titulo-pagina">Ayuda y soporte técnico</span>
+    </div>
+
+    <div class="search-bar">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="input-busqueda-nav" name="busqueda" placeholder="Busca algo" aria-label="Buscar en la aplicación">
+        <i class="fa-solid fa-microphone"></i>
+    </div>
+
+    <div class="top-right">
+        <div class="user-header-info">
+
+            <!-- 1. PERFIL Y MINI MENÚ -->
+            <div class="user-profile-menu" id="user-profile-menu">
+                <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
+                    <img src="logo.png" id="user-avatar-img" alt="Perfil">
+                </div>
+
+                <div class="mini-menu-card" id="mini-menu-card">
+                    <div class="mini-menu-header">
+                        <span id="mini-menu-username">Usuario</span>
+                    </div>
+                    
+                    <hr class="mini-menu-divider">
+                    
+                    <a href="javascript:void(0)" onclick="mostrarSeccion('configuracion')" class="mini-menu-item btn-ajustes">
+                        <i class="fa-solid fa-gear"></i>
+                        <span>Ajustes</span>
+                    </a>
+                    
+                    <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Cerrar sesión</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 2. CAMPANA DE NOTIFICACIONES -->
+            <div class="notif-circle">
+                <a href="notificaciones.html" aria-label="Notificaciones"><i class="fa-solid fa-bell"></i></a>
+            </div>
+
+        </div>
+    </div>
+  </nav>
+
+    <!-- Barra Lateral (Sidebar) -->
+    <aside class="sidebar" id="sidebar">
+        <div class="side-icons">
+            <a href="home.html" class="menu-fila">
+                <i class="fa-solid fa-house"></i>
+                <span class="menu-text">Inicio</span>
+            </a>
+            <a href="perfil_usuario.html" class="menu-fila">
+                <i class="fa-solid fa-circle-user"></i>
+                <span class="menu-text">Perfil</span>
+            </a>
+            <a href="guardados_usuario.html" class="menu-fila">
+                <i class="fa-solid fa-bookmark"></i>
+                <span class="menu-text">Guardado</span>
+            </a>
+            <a href="mapa.html" class="menu-fila">
+                <i class="fa-solid fa-location-dot"></i>
+                <span class="menu-text">Mapa</span>
+            </a>
+            <a href="configuracion.html" class="menu-fila">
+                <i class="fa-solid fa-gear"></i>
+                <span class="menu-text">Ajustes</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Contenido Principal -->
+    <main class="main-content">
+        <div class="soporte-container">
+            <a href="preguntas_frecuentes.html" class="btn-soporte-capsula">
+                <i class="fa-regular fa-circle-question"></i>
+                <span>Preguntas Frecuentes</span>
+            </a>
+
+            <a href="guia_arca.html" class="btn-soporte-capsula">
+                <i class="fa-solid fa-book-open"></i>
+                <span>Guía rápida de Arca</span>
+            </a>
+
+            <a href="formularior.html" class="btn-soporte-capsula">
+                <i class="fa-regular fa-circle-xmark"></i>
+                <span>Reportar un error</span>
+            </a>
+        </div>
+    </main>
+
+    <!-- Barra Inferior de Contacto -->
+    <footer class="footer-contacto-bar">
+        <div class="contacto-info">
+            <a href="mailto:equipoarca0@gmail.com" class="contacto-item">
+                <i class="fa-regular fa-envelope"></i>
+                <span>equipoarca0@gmail.com</span>
+            </a>
+            <a href="tel:5780318" class="contacto-item">
+                <i class="fa-solid fa-phone"></i>
+                <span>578-0318</span>
+            </a>
+        </div>
+
+        <div class="contacto-redes">
+            <span class="titulo-contactanos">CONTÁCTANOS:</span>
+            <div class="redes-iconos">
+                <a href="#" class="bg-tiktok" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+                <a href="#" class="bg-facebook" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+                <a href="#" class="bg-x" aria-label="X"><i class="fa-brands fa-x-twitter"></i></a>
+                <a href="#" class="bg-instagram" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+            </div>
+        </div>
+
+        <a href="sobre_nosotros.html" class="btn-sobre-nosotros">Sobre nosotros</a>
+    </footer>
+
+    <!-- Firebase v8 Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+
+    <!-- Tus scripts principales -->
+    <script src="script.js"></script>
+    
+    <!-- Script unificado para la barra lateral -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btnToggleMenu = document.getElementById('btn-toggle-menu');
+            const sidebar = document.getElementById('sidebar');
+
+            if (btnToggleMenu && sidebar) {
+                btnToggleMenu.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    sidebar.classList.toggle('sidebar-abierta');
+                });
+            }
+        });
+    </script>
+
+    <!-- Motor oculto de Google Translate -->
+    <div id="google_translate_element" style="display:none;"></div>
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({ pageLanguage: 'es', autoDisplay: false }, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+    <!-- Script para aplicar el idioma guardado al cambiar de página -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('app_selected_lang');
+            if (savedLang && savedLang !== 'es') {
+                const interval = setInterval(() => {
+                    const googleCombo = document.querySelector('.goog-te-combo');
+                    if (googleCombo) {
+                        googleCombo.value = savedLang;
+                        googleCombo.dispatchEvent(new Event('change'));
+                        clearInterval(interval);
+                    }
+                }, 200);
+            }
+        });
+    </script>
+    <style>
+        .goog-te-banner-frame { display: none !important; }
+        body { top: 0 !important; }
+        .skiptranslate { display: none !important; }
+    </style>
+</body>
+</html>
