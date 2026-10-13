@@ -374,7 +374,7 @@
 
         function volverAOpciones() {
             document.getElementById('seccion-catalogo-animales').style.display = 'none';
-            document.getElementById('pantalla-opciones-adopcion').style.display = 'block';
+            document.getElementById('pantalla-opciones-adopcion').style.display = 'flex';
         }
 
         async function cargarMascotasAdopcionOrdenadas() {
@@ -388,21 +388,35 @@
                 if (!respuesta.ok) throw new Error("Error al obtener las publicaciones");
                 
                 const publicaciones = await respuesta.json();
-                let adopciones = publicaciones.filter(pub => pub.tipo_publicacion === 'adopcion');
+
+                // Obtenemos los datos de la sesión actual para excluir publicaciones propias
+                const userActual = firebase.auth().currentUser;
+                const correoLogueado = userActual ? userActual.email : (localStorage.getItem('correo_usuario') || localStorage.getItem('correo'));
+                const nombreUsuarioLogueado = localStorage.getItem('nombre_usuario') || '';
+
+                // Filtramos adopciones OMITIENDO las publicadas por el usuario actual
+                let adopciones = publicaciones.filter(pub => {
+                    const esAdopcion = pub.tipo_publicacion === 'adopcion';
+                    
+                    const esMio = (correoLogueado && pub.correo_contacto && pub.correo_contacto.toLowerCase() === correoLogueado.toLowerCase()) ||
+                                   (nombreUsuarioLogueado && pub.nombre_usuario && pub.nombre_usuario.toLowerCase() === nombreUsuarioLogueado.toLowerCase()) ||
+                                   (userActual && pub.id_usuarios && String(pub.id_usuarios) === String(userActual.uid));
+
+                    return esAdopcion && !esMio;
+                });
 
                 // Obtenemos la ubicación que guardó el usuario en su perfil de adoptante
                 const ubicacionUsuario = (localStorage.getItem('ubicacion_adoptante') || '').toLowerCase().trim();
 
-                // ALGORITMO DE CERCANÍA POR TEXTO (Sin Leaflet ni coordenadas)
+                // ALGORITMO DE CERCANÍA POR TEXTO
                 adopciones.sort((a, b) => {
                     const ubA = (a.Ubicacion || a.ubicacion || '').toLowerCase();
                     const ubB = (b.Ubicacion || b.ubicacion || '').toLowerCase();
 
-                    // Si la ubicación de la publicación incluye la zona del usuario, gana prioridad (1 vs 0)
                     const coincideA = ubicacionUsuario && ubA.includes(ubicacionUsuario) ? 1 : 0;
                     const coincideB = ubicacionUsuario && ubB.includes(ubicacionUsuario) ? 1 : 0;
 
-                    return coincideB - coincideA; // Las más cercanas quedan arriba
+                    return coincideB - coincideA; 
                 });
 
                 if (adopciones.length > 0) {
@@ -457,7 +471,7 @@
                 } else {
                     contenedor.innerHTML = `
                         <div class="estado-vacio" style="text-align: center; padding: 40px;">
-                            <h2>¡Aún no hay publicaciones de adopción!</h2>
+                            <h2>¡No hay otras publicaciones de adopción disponibles por ahora!</h2>
                         </div>
                     `;
                 }
