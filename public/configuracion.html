@@ -82,6 +82,7 @@
             gap: 15px;
             border: 1px solid #fae1dd;
             box-sizing: border-box;
+            transition: all 0.3s ease;
         }
 
         .setting-row {
@@ -400,7 +401,7 @@
             <div class="columna-config-izq">
                 <div class="titulo-capsula">Preferencias</div>
                 
-                <div class="config-card">
+                <div class="config-card" id="notificaciones">
                     <div class="setting-row">
                         <span>Recibir notificaciones en tu navegador</span>
                         <label class="switch">
@@ -411,7 +412,7 @@
                 </div>
 
                 <!-- Tarjeta de Modo Oscuro -->
-                <div class="config-card">
+                <div class="config-card" id="modo-oscuro">
                     <div class="setting-row">
                         <span>Modo oscuro (Apariencia)</span>
                         <label class="switch">
@@ -422,7 +423,7 @@
                 </div>
 
                 <!-- Tarjeta de Selección de Idioma -->
-                <div class="config-card">
+                <div class="config-card" id="idioma">
                     <div class="setting-row">
                         <span>Idioma de la aplicación</span>
                         <select id="customLanguageSelect" style="padding: 8px 12px; border-radius: 8px; border: 1px solid var(--accent-pink, #e8a598); background-color: white; color: #5c4033; font-weight: 500; cursor: pointer; outline: none;">
@@ -467,7 +468,7 @@
             <div class="columna-config-der">
                 <div class="titulo-capsula">Permisos y Cuenta</div>
                 
-                <div class="config-card">
+                <div class="config-card" id="ubicacion">
                     <div class="setting-row">
                         <div>
                             <p style="font-weight: 600;">Permisos de ubicación</p>
@@ -478,7 +479,7 @@
                             <span class="slider"></span>
                         </label>
                     </div>
-                    <a href="javascript:void(0)" class="btn-accion-config" onclick="abrirSeccionBloqueados()">
+                    <a href="javascript:void(0)" class="btn-accion-config" id="bloqueados" onclick="abrirSeccionBloqueados()">
                         Bloqueados <i class="fa-solid fa-users-slash"></i>
                     </a>
                 </div>
@@ -487,14 +488,14 @@
                     <a href="perfil_usuario.html" class="btn-accion-config">
                         Cuenta <i class="fa-solid fa-user-gear"></i>
                     </a>
-                    <button type="button" class="btn-accion-config btn-danger-config" onclick="confirmarEliminarCuenta()">
+                    <button type="button" class="btn-accion-config btn-danger-config" id="eliminar" onclick="confirmarEliminarCuenta()">
                         Eliminar cuenta <i class="fa-solid fa-triangle-exclamation"></i>
                     </button>
                 </div>
 
                 <div class="titulo-capsula">Soporte</div>
                 
-                <div class="config-card">
+                <div class="config-card" id="soporte">
                     <a href="soporte.html" class="btn-accion-config">
                         Ayuda y soporte técnico <i class="fa-solid fa-headset"></i>
                     </a>
