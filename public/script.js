@@ -214,7 +214,6 @@ async function ejecutarLoginEmail() {
         return;
     }
 
-    // 1. Verificación previa de conexión
     if (!navigator.onLine) {
         mostrarAlertaOffline();
         return;
@@ -223,22 +222,24 @@ async function ejecutarLoginEmail() {
     try {
         const metodos = await auth.fetchSignInMethodsForEmail(email);
         if (metodos.length > 0) {
+            // Si el correo ya existe, muestra el campo de contraseña para iniciar sesión
             mostrarPasoContrasena(email);
-            } else {
+        } else {
+            // El correo NO existe. Revisamos si está activo el flujo de fundación
             const esFlujoFundacion = localStorage.getItem('flujo_fundacion') === 'true';
             
             if (esFlujoFundacion) {
-                // Limpiamos la marca y los mandamos al registro legal de fundaciones con el correo de la mano
-                localStorage.removeItem('flujo_fundacion');
-                alert("Esta fundación no tiene una cuenta creada. Te redirigiremos a su registro legal.");
-                window.location.href = `registro_fundacion.html?email=${encodeURIComponent(email)}`;
+                // AQUÍ ESTÁ EL CAMBIO: En lugar de saltar directo al formulario, 
+                // los mandamos a tu página de registro normal o de contraseña/OTP 
+                // pasando una bandera de que es fundación para que al terminar caiga en el Paso 1.
+                alert("Esta fundación no tiene una cuenta. Primero crearemos tus credenciales de acceso.");
+                window.location.href = `registro.html?email=${encodeURIComponent(email)}&tipo=fundacion`;
             } else {
-            alert("Este correo no tiene una cuenta creada. Te redirigiremos para registrarte.");
-            window.location.href = `registro.html?email=${encodeURIComponent(email)}`;
+                alert("Este correo no tiene una cuenta creada. Te redirigiremos para registrarte.");
+                window.location.href = `registro.html?email=${encodeURIComponent(email)}`;
+            }
         }
-    }
     } catch (error) {
-        // Si hay error de red o de conexión en Firebase -> Muestra TU modal
         if (!navigator.onLine || error.code === 'auth/network-request-failed') {
             mostrarAlertaOffline();
         } else if (error.code === 'auth/invalid-email') {
@@ -249,7 +250,6 @@ async function ejecutarLoginEmail() {
         }
     }
 }
-
 function iniciarSesionFinal() {
     // Verificación de red antes de intentar autenticar
     if (!navigator.onLine) {
