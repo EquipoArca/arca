@@ -849,70 +849,83 @@
                           <i class="fa-solid fa-pen-to-square"></i> Editar reporte
                       </a>
                   `;
-              } else if (correoLogueado) {
-                  let pubEncontrada = publicaciones.find(p => 
-                      (p.tipo_publicacion === 'reporte' && Number(p.id_origen) === Number(reporteId)) ||
-                      Number(p.id_publicacion) === Number(reporteId) ||
-                      Number(p.id_reporte) === Number(reporteId)
-                  );
-                  
-                  const idPublicacionGlobal = pubEncontrada ? pubEncontrada.id_publicacion : reporteId;
-
-                  const resGuards = await fetch(`/api/guardados/ids/${encodeURIComponent(correoLogueado)}`);
-                  const idsGuardados = await resGuards.json();
-                  const estaGuardada = idsGuardados.map(Number).includes(Number(idPublicacionGlobal));
-
-                  if (estaGuardada) {
-                      contenedorBoton.innerHTML = `
-                          <button class="detalle-btn-accion" id="btn-accion-guardado" style="background: #ffe5dd; color: #d9534f; border-color: #f4c2c4;">
-                              <i class="fa-solid fa-bookmark"></i> Publicación guardada
-                          </button>
-                      `;
+              } else if (!correoLogueado) {
+                  contenedorBoton.innerHTML = `
+                      <a href="login.html" class="detalle-btn-accion">
+                          <i class="fa-regular fa-bookmark"></i> Inicia sesión para guardar
+                      </a>
+                  `;
+              } else {
+                  try {
+                      let pubEncontrada = publicaciones.find(p => 
+                          (p.tipo_publicacion === 'reporte' && Number(p.id_origen) === Number(reporteId)) ||
+                          Number(p.id_publicacion) === Number(reporteId) ||
+                          Number(p.id_reporte) === Number(reporteId)
+                      );
                       
-                      document.getElementById('btn-accion-guardado').addEventListener('click', async () => {
-                          if (confirm("¿Deseas quitar esta publicación de tus guardados?")) {
-                              const quitRes = await fetch('/api/quitar-guardado', {
+                      const idPublicacionGlobal = pubEncontrada ? pubEncontrada.id_publicacion : reporteId;
+
+                      const resGuards = await fetch(`/api/guardados/ids/${encodeURIComponent(correoLogueado)}`);
+                      const idsGuardados = await resGuards.json();
+                      const estaGuardada = idsGuardados.map(Number).includes(Number(idPublicacionGlobal));
+
+                      if (estaGuardada) {
+                          contenedorBoton.innerHTML = `
+                              <button class="detalle-btn-accion" id="btn-accion-guardado" style="background: #ffe5dd; color: #d9534f; border-color: #f4c2c4;">
+                                  <i class="fa-solid fa-bookmark"></i> Publicación guardada
+                              </button>
+                          `;
+                          
+                          document.getElementById('btn-accion-guardado').addEventListener('click', async () => {
+                              if (confirm("¿Deseas quitar esta publicación de tus guardados?")) {
+                                  const quitRes = await fetch('/api/quitar-guardado', {
+                                      method: 'POST',
+                                      headers: { 'Content-Type': 'application/json' },
+                                      body: JSON.stringify({ correo: correoLogueado, id_publicacion: Number(idPublicacionGlobal) })
+                                  });
+                                  if (quitRes.ok) {
+                                      alert("Publicación eliminada de guardados.");
+                                      location.reload();
+                                  } else {
+                                      alert("Error al quitar de guardados.");
+                                  }
+                              }
+                          });
+                      } else {
+                          contenedorBoton.innerHTML = `
+                              <button class="detalle-btn-accion" id="btn-accion-guardado">
+                                  <i class="fa-regular fa-bookmark"></i> Guardar publicación
+                              </button>
+                          `;
+                          document.getElementById('btn-accion-guardado').addEventListener('click', async () => {
+                              const saveRes = await fetch('/api/guardar-publicacion', {
                                   method: 'POST',
                                   headers: { 'Content-Type': 'application/json' },
                                   body: JSON.stringify({ correo: correoLogueado, id_publicacion: Number(idPublicacionGlobal) })
                               });
-                              if (quitRes.ok) {
-                                  alert("Publicación eliminada de guardados.");
+                              if (saveRes.ok) {
+                                  alert("¡Publicación guardada con éxito!");
                                   location.reload();
                               } else {
-                                  alert("Error al quitar de guardados.");
+                                  alert("Error al guardar la publicación.");
                               }
-                          }
-                      });
-                  } else {
+                          });
+                      }
+                  } catch (e) {
+                      console.error("Error al gestionar guardados:", e);
                       contenedorBoton.innerHTML = `
-                          <button class="detalle-btn-accion" id="btn-accion-guardado">
+                          <button class="detalle-btn-accion">
                               <i class="fa-regular fa-bookmark"></i> Guardar publicación
                           </button>
                       `;
-                      document.getElementById('btn-accion-guardado').addEventListener('click', async () => {
-                          const saveRes = await fetch('/api/guardar-publicacion', {
-                              method: 'POST',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ correo: correoLogueado, id_publicacion: Number(idPublicacionGlobal) })
-                          });
-                          if (saveRes.ok) {
-                              alert("¡Publicación guardada con éxito!");
-                              location.reload();
-                          } else {
-                              alert("Error al guardar la publicación.");
-                          }
-                      });
                   }
-              } else {
-                  contenedorBoton.innerHTML = '';
               }
 
           } catch (error) {
               console.error("Error al cargar detalle:", error);
               alert("Hubo un error al cargar los detalles del reporte.");
           }
-      }
+      } // <-- ¡Esta llave faltaba para cerrar cargarDetalleReporte()!
   </script>
 </body>
 </html>

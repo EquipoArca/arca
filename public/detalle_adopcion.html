@@ -754,7 +754,13 @@
               const correoLogueado = localStorage.getItem('correo_usuario');
               const contenedorAccion = document.getElementById('contenedor-boton-accion');
 
-              if (correoLogueado) {
+              if (!correoLogueado) {
+                  contenedorAccion.innerHTML = `
+                      <a href="login.html" class="detalle-btn-accion">
+                          <i class="fa-regular fa-bookmark"></i> Inicia sesión para guardar
+                      </a>
+                  `;
+              } else {
                   try {
                       const resPubs = await fetch('/api/publicaciones-globales');
                       const publicaciones = await resPubs.json();
@@ -815,15 +821,19 @@
                       }
                   } catch (e) {
                       console.error("Error gestionando el guardado:", e);
+                      contenedorAccion.innerHTML = `
+                          <button class="detalle-btn-accion">
+                              <i class="fa-regular fa-bookmark"></i> Guardar publicación
+                          </button>
+                      `;
                   }
-              } else {
-                  contenedorAccion.innerHTML = '';
               }
+
           } catch (error) {
               console.error("Error al cargar detalle de adopción:", error);
               alert("Hubo un error al cargar los detalles de la adopción.");
           }
-      }
+      } // <-- Llave de cierre del bloque try principal y de la función cargarDetalleAdopcion()
   </script>
 </body>
 </html>
