@@ -1583,7 +1583,7 @@ app.get('/api/ficha-adoptante-publica/:username', (req, res) => {
             }
 
             // 3. Traemos la información detallada de su ficha de adoptante
-            const sqlFicha = "SELECT * FROM perfil_adoptante WHERE id_usuario = ?";
+            const sqlFicha = "SELECT * FROM perfil_adoptante WHERE id_usuarios = ?";
             db.query(sqlFicha, [usuarioTarget.id_usuarios], (errFicha, resFicha) => {
                 if (errFicha || resFicha.length === 0) {
                     return res.status(404).json({ error: "El usuario aún no ha completado su ficha de adoptante." });
