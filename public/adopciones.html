@@ -17,11 +17,11 @@
     }
     </script>
    <style>
-        /* CSS ESPACIOSO Y ESTILIZADO PARA EL CATÁLOGO DE ADOPCIÓN */
+        /* CSS PARA CATÁLOGO EN GRID HORIZONTAL DE 3 COLUMNAS */
         .seccion-catalogo-adopcion {
-            max-width: 900px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 30px 20px;
+            padding: 20px 20px;
             box-sizing: border-box;
         }
 
@@ -29,8 +29,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 25px;
-            padding: 0 10px;
+            margin-bottom: 20px;
+            padding: 0 5px;
         }
 
         .header-catalogo-adopcion h2 {
@@ -59,63 +59,78 @@
             transform: translateY(-2px);
         }
 
-        /* TARJETA AMPLIADA Y ELEGANTE */
-        .tarjeta-prototipo-estilo {
-            background: rgba(253, 232, 229, 0.85); 
-            backdrop-filter: blur(8px);
-            border-radius: 28px;
-            padding: 24px 30px;
-            margin-bottom: 25px;
-            box-shadow: 0 8px 25px rgba(220, 150, 140, 0.12);
-            border: 2px solid #f9d5d3;
+        /* REJILLA DE 3 COLUMNAS */
+        .grid-3-columnas {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+            gap: 22px;
             width: 100%;
+            align-items: stretch;
+        }
+
+        /* TARJETA COMPACTA DE CATÁLOGO */
+        .tarjeta-prototipo-estilo {
+            background: rgba(253, 232, 229, 0.9); 
+            backdrop-filter: blur(8px);
+            border-radius: 24px;
+            padding: 18px 20px;
+            box-shadow: 0 6px 20px rgba(220, 150, 140, 0.12);
+            border: 2px solid #f9d5d3;
             font-family: 'Itim', cursive, sans-serif;
             box-sizing: border-box;
-            transition: transform 0.2s ease;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
         .tarjeta-prototipo-estilo:hover {
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(220, 150, 140, 0.2);
         }
 
         .proto-card-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 12px;
         }
 
         .proto-titulo-pill {
             background: #fbc2c4;
             color: #2b2b2b;
-            padding: 8px 24px;
-            border-radius: 20px;
-            font-size: 19px;
+            padding: 5px 14px;
+            border-radius: 16px;
+            font-size: 14px;
             font-weight: bold;
-            box-shadow: 0 2px 8px rgba(230, 150, 140, 0.12);
+            box-shadow: 0 2px 6px rgba(230, 150, 130, 0.1);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 190px;
         }
 
         .proto-fecha {
-            font-size: 14.5px;
+            font-size: 13px;
             font-weight: bold;
-            color: #555;
+            color: #666;
         }
 
         .proto-card-body {
             display: flex;
-            gap: 25px;
-            align-items: center;
+            flex-direction: column;
+            gap: 12px;
+            flex-grow: 1;
         }
 
         .proto-img-wrapper {
-            width: 220px;
-            height: 160px;
-            border-radius: 22px;
+            width: 100%;
+            height: 180px;
+            border-radius: 18px;
             overflow: hidden;
             background: #fff;
-            border: 3px solid #fca38d;
-            flex-shrink: 0;
-            box-shadow: 0 4px 14px rgba(230, 150, 130, 0.15);
+            border: 2px solid #fca38d;
+            box-shadow: 0 4px 12px rgba(230, 150, 130, 0.12);
         }
 
         .proto-img-wrapper img {
@@ -125,36 +140,32 @@
         }
 
         .proto-content-right {
-            flex-grow: 1;
             display: flex;
             flex-direction: column;
+            gap: 8px;
+            flex-grow: 1;
             justify-content: space-between;
-            min-height: 160px;
-            padding: 4px 0;
         }
 
         .proto-pill-tipo {
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             color: #2b2b2b;
-            padding: 6px 18px;
-            border-radius: 16px;
-            font-size: 15px;
+            padding: 4px 14px;
+            border-radius: 14px;
+            font-size: 13.5px;
             font-weight: bold;
             border: 1px solid #f9cab5;
-            display: inline-block;
             align-self: flex-start;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
         }
 
         .proto-info-extra {
             display: flex;
             flex-direction: column;
-            gap: 6px;
-            margin-top: 8px;
+            gap: 4px;
         }
 
         .proto-autor {
-            font-size: 14.5px;
+            font-size: 13.5px;
             color: #555;
         }
 
@@ -169,12 +180,12 @@
         }
 
         .proto-ubicacion {
-            font-size: 14px;
+            font-size: 13px;
             color: #666;
             margin: 0;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
         }
 
         .proto-ubicacion i {
@@ -191,14 +202,16 @@
             background-color: #fffde8; 
             color: #2b2b2b;
             border: 1.5px solid #f0e6b8;
-            padding: 9px 26px;
-            border-radius: 18px;
+            padding: 8px 20px;
+            border-radius: 16px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 15px;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            font-size: 14px;
+            width: 100%;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
             transition: all 0.2s ease;
             font-family: 'Itim', cursive, sans-serif;
+            text-align: center;
         }
 
         .proto-btn-detalles:hover {
@@ -317,7 +330,7 @@
                 <button onclick="volverAOpciones()" class="btn-volver-opciones">← Volver a opciones</button>
             </div>
             
-            <div id="contenedor-animales-adopcion">
+            <div id="contenedor-animales-adopcion" class="grid-3-columnas">
                 <!-- Se cargan dinámicamente con JS -->
             </div>
         </section>
@@ -374,7 +387,7 @@
             const contenedor = document.getElementById('contenedor-animales-adopcion');
             if (!contenedor) return;
 
-            contenedor.innerHTML = '<p style="text-align:center;">Buscando animalitos cerca de ti...</p>';
+            contenedor.innerHTML = '<p style="text-align:center; grid-column: 1/-1;">Buscando animalitos cerca de ti...</p>';
 
             try {
                 const respuesta = await fetch('/api/publicaciones-globales');
@@ -438,7 +451,7 @@
                         
                         tarjeta.innerHTML = `
                             <div class="proto-card-top">
-                                <div class="proto-titulo-pill">Nueva publicación de adopción</div>
+                                <div class="proto-titulo-pill" title="Adopción">Nueva adopción</div>
                                 <span class="proto-fecha">${fechaFormateada}</span>
                             </div>
 
@@ -463,14 +476,14 @@
                     }
                 } else {
                     contenedor.innerHTML = `
-                        <div class="estado-vacio" style="text-align: center; padding: 40px;">
+                        <div class="estado-vacio" style="text-align: center; padding: 40px; grid-column: 1/-1;">
                             <h2>¡No hay otras publicaciones de adopción disponibles por ahora!</h2>
                         </div>
                     `;
                 }
             } catch (error) {
                 console.error("Error al cargar adopciones:", error);
-                contenedor.innerHTML = '<p style="text-align:center;">Error al cargar las mascotas.</p>';
+                contenedor.innerHTML = '<p style="text-align:center; grid-column: 1/-1;">Error al cargar las mascotas.</p>';
             }
         }
 
