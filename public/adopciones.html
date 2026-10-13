@@ -345,7 +345,7 @@
         async function mostrarCatalogoAdopciones() {
             document.getElementById('pantalla-opciones-adopcion').style.display = 'none';
             document.getElementById('seccion-catalogo-animales').style.display = 'block';
-            await cargarMascotasAdopcion();
+            await cargarMascotasAdopcionOrdenadas();
         }
 
         function volverAOpciones() {
@@ -353,18 +353,33 @@
             document.getElementById('pantalla-opciones-adopcion').style.display = 'block';
         }
 
-        async function cargarMascotasAdopcion() {
+        async function cargarMascotasAdopcionOrdenadas() {
             const contenedor = document.getElementById('contenedor-animales-adopcion');
             if (!contenedor) return;
 
-            contenedor.innerHTML = '<p style="text-align:center;">Cargando animalitos...</p>';
+            contenedor.innerHTML = '<p style="text-align:center;">Buscando animalitos cerca de ti...</p>';
 
             try {
                 const respuesta = await fetch('/api/publicaciones-globales');
                 if (!respuesta.ok) throw new Error("Error al obtener las publicaciones");
                 
                 const publicaciones = await respuesta.json();
-                const adopciones = publicaciones.filter(pub => pub.tipo_publicacion === 'adopcion');
+                let adopciones = publicaciones.filter(pub => pub.tipo_publicacion === 'adopcion');
+
+                // Obtenemos la ubicación que guardó el usuario en su perfil de adoptante
+                const ubicacionUsuario = (localStorage.getItem('ubicacion_adoptante') || '').toLowerCase().trim();
+
+                // ALGORITMO DE CERCANÍA POR TEXTO (Sin Leaflet ni coordenadas)
+                adopciones.sort((a, b) => {
+                    const ubA = (a.Ubicacion || a.ubicacion || '').toLowerCase();
+                    const ubB = (b.Ubicacion || b.ubicacion || '').toLowerCase();
+
+                    // Si la ubicación de la publicación incluye la zona del usuario, gana prioridad (1 vs 0)
+                    const coincideA = ubicacionUsuario && ubA.includes(ubicacionUsuario) ? 1 : 0;
+                    const coincideB = ubicacionUsuario && ubB.includes(ubicacionUsuario) ? 1 : 0;
+
+                    return coincideB - coincideA; // Las más cercanas quedan arriba
+                });
 
                 if (adopciones.length > 0) {
                     contenedor.innerHTML = ''; 
@@ -427,7 +442,6 @@
                 contenedor.innerHTML = '<p style="text-align:center;">Error al cargar las mascotas.</p>';
             }
         }
-
         document.addEventListener('click', (event) => {
             const botonDetalle = event.target.closest('.btn-ver-adopcion-ficha');
             if (botonDetalle) {

@@ -10,6 +10,7 @@ firebase.auth().onAuthStateChanged((user) => {
 });
 
 // Manejador para el botón "Ver animales en adopción"
+// Manejador para el botón "Ver animales en adopción"
 async function alHacerClicVerAnimales() {
     const user = usuarioActual || firebase.auth().currentUser;
 
@@ -37,10 +38,16 @@ async function alHacerClicVerAnimales() {
         const data = await respuesta.json();
 
         if (data.tienePerfil) {
-            // Caso A: Ya tiene perfil -> Abre el catálogo de animales
+            // ¡Tiene perfil! Guardamos su ubicación en localStorage (ej. "Robledo") para calcular cercanía
+            localStorage.setItem('ubicacion_adoptante', data.ubicacion || data.ciudad || '');
+            
+            // Abre el catálogo de animales y carga las mascotas ordenadas por cercanía
             mostrarSeccionAdopcion('seccion-catalogo-animales');
+            if (typeof cargarMascotasAdopcionOrdenadas === 'function') {
+                cargarMascotasAdopcionOrdenadas();
+            }
         } else {
-            // Caso B: No tiene perfil -> Muestra el modal personalizado
+            // No tiene perfil -> Muestra el modal personalizado
             abrirModalAviso();
         }
 
