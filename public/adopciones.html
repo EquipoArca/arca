@@ -16,95 +16,107 @@
         document.body.classList.add("dark-mode");
     }
     </script>
-    <style>
-        /* Estilos ajustados al prototipo del catálogo */
+   <style>
+        /* CSS MEJORADO Y ESPACIOSO PARA EL CATÁLOGO DE ADOPCIÓN */
         .seccion-catalogo-adopcion {
-            max-width: 950px;
+            max-width: 900px;
             margin: 0 auto;
-            padding: 20px 10px;
+            padding: 30px 20px;
+            box-sizing: border-box;
         }
 
         .header-catalogo-adopcion {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            padding: 0 10px;
         }
 
         .header-catalogo-adopcion h2 {
-            font-size: 24px;
+            font-size: 26px;
             color: #2b2b2b;
             margin: 0;
+            font-family: 'Itim', cursive, sans-serif;
         }
 
         .btn-volver-opciones {
-            background: #ffffff;
-            border: 1px solid #f9d5d3;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #f9cab5;
             color: #d9534f;
-            padding: 8px 18px;
-            border-radius: 18px;
+            padding: 8px 20px;
+            border-radius: 20px;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 14.5px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
             font-family: 'Itim', cursive, sans-serif;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            box-shadow: 0 4px 12px rgba(230, 150, 130, 0.1);
         }
 
         .btn-volver-opciones:hover {
             background: #ffe5dd;
+            transform: translateY(-2px);
         }
 
+        /* TARJETA AMPLIADA Y ESPACIOSA */
         .tarjeta-prototipo-estilo {
-            background: #fde8e5; 
-            border-radius: 24px;
-            padding: 24px;
+            background: rgba(253, 232, 229, 0.85); 
+            backdrop-filter: blur(8px);
+            border-radius: 28px;
+            padding: 24px 30px;
             margin-bottom: 25px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 8px 25px rgba(220, 150, 140, 0.12);
             border: 2px solid #f9d5d3;
             width: 100%;
             font-family: 'Itim', cursive, sans-serif;
             box-sizing: border-box;
+            transition: transform 0.2s ease;
+        }
+
+        .tarjeta-prototipo-estilo:hover {
+            transform: translateY(-2px);
         }
 
         .proto-card-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 18px;
+            margin-bottom: 20px;
         }
 
         .proto-titulo-pill {
             background: #fbc2c4;
             color: #2b2b2b;
-            padding: 8px 32px;
-            border-radius: 30px;
-            font-size: 22px;
+            padding: 8px 24px;
+            border-radius: 20px;
+            font-size: 19px;
             font-weight: bold;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.04);
+            box-shadow: 0 2px 8px rgba(230, 150, 140, 0.12);
         }
 
         .proto-fecha {
-            font-size: 15px;
+            font-size: 14.5px;
             font-weight: bold;
-            color: #444;
+            color: #555;
         }
 
+        /* CUERPO DE LA TARJETA EN GRID O FLEX AMPLIO */
         .proto-card-body {
             display: flex;
-            gap: 24px;
+            gap: 25px;
             align-items: center;
         }
 
         .proto-img-wrapper {
-            width: 210px;
-            height: 150px;
-            border-radius: 20px;
+            width: 220px;
+            height: 160px;
+            border-radius: 22px;
             overflow: hidden;
             background: #fff;
-            border: 2px solid #f9d5d3;
+            border: 3px solid #fca38d;
             flex-shrink: 0;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 14px rgba(230, 150, 130, 0.15);
         }
 
         .proto-img-wrapper img {
@@ -117,34 +129,38 @@
             flex-grow: 1;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            justify-content: space-between;
+            min-height: 160px;
+            padding: 4px 0;
         }
 
         .proto-pill-tipo {
-            background: #fff;
-            color: #333;
-            padding: 8px 22px;
-            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #2b2b2b;
+            padding: 6px 18px;
+            border-radius: 16px;
             font-size: 15px;
             font-weight: bold;
-            border: 1px solid #f3c1c3;
+            border: 1px solid #f9cab5;
             display: inline-block;
             align-self: flex-start;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
         }
 
         .proto-info-extra {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 6px;
+            margin-top: 8px;
         }
 
         .proto-autor {
-            font-size: 14px;
+            font-size: 14.5px;
             color: #555;
         }
 
         .proto-autor a {
-            color: #d9534f;
+            color: #e06d53;
             text-decoration: none;
             font-weight: bold;
         }
@@ -154,33 +170,41 @@
         }
 
         .proto-ubicacion {
-            font-size: 13px;
+            font-size: 14px;
             color: #666;
             margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .proto-ubicacion i {
+            color: #e06d53;
         }
 
         .proto-footer-row {
             display: flex;
             justify-content: flex-end;
-            margin-top: 5px;
+            margin-top: 10px;
         }
 
         .proto-btn-detalles {
             background-color: #fffde8; 
             color: #2b2b2b;
-            border: 1px solid #f0e6b8;
-            padding: 10px 28px;
-            border-radius: 20px;
+            border: 1.5px solid #f0e6b8;
+            padding: 9px 26px;
+            border-radius: 18px;
             cursor: pointer;
             font-weight: bold;
             font-size: 15px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-            transition: all 0.2s;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: all 0.2s ease;
             font-family: 'Itim', cursive, sans-serif;
         }
 
         .proto-btn-detalles:hover {
             background-color: #fff9c4;
+            transform: translateY(-1px);
         }
     </style>
 </head>
