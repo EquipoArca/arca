@@ -833,7 +833,7 @@
               }
               document.getElementById('lbl-contacto').innerHTML = contactoHTML;
 
-              // --- CONFIGURACIÓN DINÁMICA DEL AUTOR Y SU PERFIL PÚBLICO ---
+              // --- CONFIGURACIÓN DINÁMICA DEL AUTOR Y SEGUIMIENTO DE PERFIL ---
               const nombreUsuario = reporteData.nombre_usuario || 'usuario';
               document.getElementById('nombre-autor-texto').textContent = `@${nombreUsuario}`;
               
@@ -842,7 +842,7 @@
                   linkAutor.href = `perfil_publico.html?user=${encodeURIComponent(nombreUsuario)}`;
               }
 
-              // --- CONFIGURACIÓN INTELIGENTE DEL BOTÓN DE GUARDADO O EDICIÓN ---
+              // --- BOTÓN DE GUARDADO / QUITAR GUARDADO INTELIGENTE ---
               const correoLogueado = localStorage.getItem('correo_usuario');
               const usuarioLogueadoId = localStorage.getItem('id_usuarios') || 1; 
               const contenedorBoton = document.getElementById('contenedor-boton-accion');
@@ -854,11 +854,17 @@
                       </a>
                   `;
               } else if (correoLogueado) {
-                  const idPublicacionGlobal = reporteData.id_publicacion || reporteId;
+                  // Buscamos de manera flexible el ID real de la publicación global correspondiente al reporte
+                  const pubEncontrada = publicaciones.find(p => 
+                      (p.tipo_publicacion === 'reporte' && Number(p.id_origen) === Number(reporteId)) ||
+                      Number(p.id_publicacion) === Number(reporteId)
+                  );
                   
+                  const idPublicacionGlobal = pubEncontrada ? pubEncontrada.id_publicacion : (reporteData.id_publicacion || reporteId);
+
                   const resGuards = await fetch(`/api/guardados/ids/${encodeURIComponent(correoLogueado)}`);
                   const idsGuardados = await resGuards.json();
-                  const estaGuardada = idsGuardados.includes(Number(idPublicacionGlobal));
+                  const estaGuardada = idsGuardados.map(Number).includes(Number(idPublicacionGlobal));
 
                   if (estaGuardada) {
                       contenedorBoton.innerHTML = `
