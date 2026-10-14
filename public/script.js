@@ -1184,7 +1184,7 @@ async function verificarOtpYIrAlRegistro() {
         alert("¡Correo verificado con éxito! Ahora completemos los datos legales de tu fundación.");
         
         // Mandamos el correo en la URL hacia el Paso 1
-        window.location.href = `registro_fundacion_paso1.html?email=${encodeURIComponent(correoValidado)}`;
+        window.location.href = `registro_fundacion.html?email=${encodeURIComponent(correoValidado)}`;
     } else {
         alert("El código ingresado es incorrecto. Inténtalo de nuevo.");
     }
