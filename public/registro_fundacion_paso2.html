@@ -270,7 +270,7 @@
 
     try {
         // 1. Mandamos primero los datos y los PDFs a MySQL
-        const respuesta = await fetch('http://localhost:3000/api/registrar-fundacion', {
+        const respuesta = await fetch('/api/registrar-fundacion', {
             method: 'POST',
             body: formData 
         });
