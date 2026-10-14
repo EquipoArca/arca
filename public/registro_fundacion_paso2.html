@@ -231,8 +231,8 @@
 
     <script>
    async function finalizarRegistroCompleto() {
-    // 1. Recuperamos las credenciales temporales del correo y contraseña guardadas en sessionStorage
-    const correo = sessionStorage.getItem('correo_fundacion_temp');
+    // Recuperamos las credenciales temporales
+    const correo = sessionStorage.getItem('correo_fundacion_temp') || new URLSearchParams(window.location.search).get('email');
     const password = sessionStorage.getItem('pass_fundacion_temp');
 
     if (!correo || !password) {
@@ -241,21 +241,14 @@
         return;
     }
 
-    // 2. Recuperamos los datos del Paso 1 guardados en el sessionStorage
     const datosPaso1 = JSON.parse(sessionStorage.getItem('datos_fundacion_p1') || '{}');
-
-    // 3. Creamos el FormData global para enviar textos y archivos PDF juntos
     const formData = new FormData();
 
-    // Inyectamos todos los campos del Paso 1
     for (const key in datosPaso1) {
         formData.append(key, datosPaso1[key]);
     }
 
-    // Inyectamos el correo oficial por seguridad
     formData.append('correo_fundacion', correo);
-
-    // Inyectamos los campos del Paso 2
     formData.append('nombre_legal', datosPaso1.nombreLegal || document.getElementById('nombre-publico-fundacion').value);
     formData.append('nit_rut', datosPaso1.nitRut || '');
     formData.append('id_representante', document.getElementById('rep-documento-id') ? document.getElementById('rep-documento-id').value : '12345');
@@ -265,7 +258,6 @@
     formData.append('pfp_fundacion', document.getElementById('pfp-input') ? document.getElementById('pfp-input').value : '');
     formData.append('foto_portada', document.getElementById('portada-input') ? document.getElementById('portada-input').value : '');
 
-    // 4. Inyectamos los archivos PDF reales capturados en el Paso 1
     const inputCert = document.getElementById('file-cert');
     const inputEstatutos = document.getElementById('file-estatutos');
     const inputRegistro = document.getElementById('file-registro');
@@ -277,8 +269,7 @@
     if (inputFinanciero && inputFinanciero.files[0]) formData.append('estado_financiero', inputFinanciero.files[0]);
 
     try {
-        // PASO 1: Primero enviamos los datos al servidor y MySQL. 
-        // Si el servidor falla, el código se detiene aquí y NUNCA se crea el usuario en Firebase.
+        // 1. Mandamos primero los datos y los PDFs a MySQL
         const respuesta = await fetch('http://localhost:3000/api/registrar-fundacion', {
             method: 'POST',
             body: formData 
@@ -288,14 +279,14 @@
 
         if (!resultado.exito) {
             alert("No se pudo registrar en la base de datos: " + resultado.mensaje);
-            return; // Cortamos el flujo, Firebase sigue limpio sin cuentas huérfanas
+            return;
         }
 
-        // PASO 2: Como MySQL respondió con éxito, recién ahora creamos la cuenta en Firebase Auth
+        // 2. Si MySQL guardó todo bien, creamos la cuenta en Firebase Auth
         await auth.createUserWithEmailAndPassword(correo, password);
 
         alert(resultado.mensaje);
-        sessionStorage.clear(); // Limpiamos la memoria temporal
+        sessionStorage.clear();
         window.location.href = "home.html";
 
     } catch (error) {

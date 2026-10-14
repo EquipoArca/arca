@@ -1169,37 +1169,23 @@ document.addEventListener('input', (e) => {
         }
     }
 });
-
-// 4. Verificar OTP, crear cuenta en Firebase y saltar al Paso 1 del formulario de fundación
+// 4. Verificar OTP (SIN crear la cuenta aún en Firebase) y pasar al formulario de la fundación
 async function verificarOtpYIrAlRegistro() {
     const inputs = document.querySelectorAll('.otp-input-modal');
     let codigoIngresado = "";
     inputs.forEach(inp => codigoIngresado += inp.value);
 
     if (codigoIngresado === codigoOtpGenerado || codigoIngresado === "1234") {
-        try {
-            // Creamos la cuenta en Firebase Auth con el correo y contraseña blindados
-            await auth.createUserWithEmailAndPassword(correoValidado, passwordFundacionTemporal);
-            
-            localStorage.removeItem('flujo_fundacion');
-            alert("¡Correo verificado con éxito! Ahora completemos los datos legales de tu fundación.");
-            
-            // Redirigimos directo al Paso 1 que ya diseñamos
-            window.location.href = `registro_fundacion.html?email=${encodeURIComponent(correoValidado)}`;
-        } catch (error) {
-            alert("Error al crear credenciales en Firebase: " + error.message);
-        }
+        // ¡Clave! Guardamos temporalmente las credenciales sin tocar Firebase todavía
+        sessionStorage.setItem('correo_fundacion_temp', correoValidado);
+        sessionStorage.setItem('pass_fundacion_temp', passwordFundacionTemporal);
+        
+        localStorage.removeItem('flujo_fundacion');
+        alert("¡Correo verificado con éxito! Ahora completemos los datos legales de tu fundación.");
+        
+        // Mandamos el correo en la URL hacia el Paso 1
+        window.location.href = `registro_fundacion_paso1.html?email=${encodeURIComponent(correoValidado)}`;
     } else {
         alert("El código ingresado es incorrecto. Inténtalo de nuevo.");
     }
-}
-
-function atrasPaso3() {
-    document.getElementById("paso4").style.display = "none";
-    document.getElementById("paso3").style.display = "block";
-}
-
-function atrasPaso4() {
-    document.getElementById("paso5").style.display = "none";
-    document.getElementById("paso4").style.display = "block";
 }
