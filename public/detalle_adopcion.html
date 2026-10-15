@@ -750,27 +750,30 @@
                   linkAutor.href = `perfil_publico.html?user=${encodeURIComponent(nombreUsuario)}`;
               }
 
-              // --- VERIFICACIÓN DE AUTOR O USUARIO EXTERNO (ADOPCIÓN - CORREGIDA) ---
+              // --- VERIFICACIÓN DE AUTOR O USUARIO EXTERNO (ADOPCIÓN - UNIVERSAL) ---
               const contenedorAccion = document.getElementById('contenedor-boton-accion');
 
-              let correoLogueado = localStorage.getItem('correo_usuario') || localStorage.getItem('correo') || "";
-
               firebase.auth().onAuthStateChanged(async (user) => {
-                  if (user) {
-                      correoLogueado = user.email;
-                  }
+                  let correoLogueado = user ? user.email : (localStorage.getItem('correo_usuario') || localStorage.getItem('correo') || localStorage.getItem('usuario_correo'));
+                  const nombreUsuarioLocal = (localStorage.getItem('nombre_usuario') || "").toLowerCase().trim();
 
                   const autorEnPantalla = document.getElementById('nombre-autor-texto').textContent.replace('@', '').trim().toLowerCase();
-                  let nombreCorreoLogueado = correoLogueado ? correoLogueado.split('@')[0].toLowerCase() : "";
+                  const correoAdopcion = (adopcion.correo_usuario || "").toLowerCase().trim();
 
-                  const esDueño = (
-                      (adopcion.correo_usuario && correoLogueado && adopcion.correo_usuario.toLowerCase().trim() === correoLogueado.toLowerCase().trim()) ||
-                      (autorEnPantalla && nombreCorreoLogueado && autorEnPantalla.includes(nombreCorreoLogueado)) ||
-                      (autorEnPantalla === "dulce")
-                  );
+                  let esDueño = false;
+
+                  if (correoLogueado && correoAdopcion && correoLogueado.toLowerCase().trim() === correoAdopcion) {
+                      esDueño = true;
+                  } else if (nombreUsuarioLocal && autorEnPantalla && nombreUsuarioLocal === autorEnPantalla) {
+                      esDueño = true;
+                  } else if (user && user.displayName && user.displayName.toLowerCase().trim() === autorEnPantalla) {
+                      esDueño = true;
+                  } else if (correoLogueado && autorEnPantalla && correoLogueado.toLowerCase().includes(autorEnPantalla)) {
+                      esDueño = true;
+                  }
 
                   if (esDueño) {
-                      // SI ES TU PROPIA ADOPCIÓN: Botones de Editar (hacia formulario_adopcion.html) y Eliminar
+                      // SI ES TU PROPIA ADOPCIÓN: Botones de Editar y Eliminar
                       contenedorAccion.innerHTML = `
                           <div style="display: flex; gap: 8px;">
                               <a href="formulario_adopcion.html?editar=${adopcion.id_adopcion || adopcionId}" class="detalle-btn-accion" style="background: #fca38d; color: #fff;">
@@ -867,6 +870,7 @@
                       }
                   }
               });
+              
           } catch (error) {
               console.error("Error al cargar detalle de adopción:", error);
               alert("Hubo un error al cargar los detalles de la adopción.");
