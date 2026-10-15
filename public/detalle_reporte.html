@@ -836,38 +836,35 @@
               if (linkAutor) {
                   linkAutor.href = `perfil_publico.html?user=${encodeURIComponent(nombreUsuario)}`;
               }
-// --- VERIFICACIÓN DE AUTOR O USUARIO EXTERNO (REPORTE - CORREGIDA) ---
+// --- VERIFICACIÓN DE AUTOR O USUARIO EXTERNO (UNIVERSAL Y ROBUSTA) ---
               const contenedorBoton = document.getElementById('contenedor-boton-accion');
 
-              // Obtenemos el nombre de usuario logueado actualmente en el navegador/localStorage
-              let correoLogueado = localStorage.getItem('correo_usuario') || localStorage.getItem('correo') || "";
-              let nombreUsuarioLogueado = "";
-
-              // Intentamos obtener el nombre de usuario real desde localStorage si lo guardaste o desde el correo
-              if (correoLogueado) {
-                  // Si tu correo es dulce... extraemos el nombre base o comparamos con el autor de la pantalla
-              }
-
               firebase.auth().onAuthStateChanged(async (user) => {
-                  if (user) {
-                      correoLogueado = user.email;
+                  let correoLogueado = user ? user.email : (localStorage.getItem('correo_usuario') || localStorage.getItem('correo') || "");
+                  let usuarioLogueadoId = localStorage.getItem('id_usuarios');
+
+                  let esDueño = false;
+
+                  if (correoLogueado && reporteData.correo_usuario) {
+                      if (reporteData.correo_usuario.toLowerCase().trim() === correoLogueado.toLowerCase().trim()) {
+                          esDueño = true;
+                      }
                   }
 
-                  // Verificamos el nombre del autor que se muestra en la pantalla ("@Dulce")
-                  const autorEnPantalla = document.getElementById('nombre-autor-texto').textContent.replace('@', '').trim().toLowerCase();
-                  
-                  // Intentamos sacar el nombre del correo logueado (ej: dulcemaria... -> dulce)
-                  let nombreCorreoLogueado = correoLogueado ? correoLogueado.split('@')[0].toLowerCase() : "";
+                  if (usuarioLogueadoId && reporteData.id_usuarios) {
+                      if (Number(reporteData.id_usuarios) === Number(usuarioLogueadoId)) {
+                          esDueño = true;
+                      }
+                  }
 
-                  // Verificación flexible de si es el dueño
-                  const esDueño = (
-                      (reporteData.correo_usuario && correoLogueado && reporteData.correo_usuario.toLowerCase().trim() === correoLogueado.toLowerCase().trim()) ||
-                      (autorEnPantalla && nombreCorreoLogueado && autorEnPantalla.includes(nombreCorreoLogueado)) 
-                      
-                  );
+                  const autorEnPantalla = document.getElementById('nombre-autor-texto').textContent.replace('@', '').trim().toLowerCase();
+                  const nombreUsuarioLocal = (localStorage.getItem('nombre_usuario') || "").toLowerCase().trim();
+                  
+                  if (autorEnPantalla && nombreUsuarioLocal && autorEnPantalla === nombreUsuarioLocal) {
+                      esDueño = true;
+                  }
 
                   if (esDueño) {
-                      // SI ES TU PROPIO REPORTE: Mostramos botones de EDITAR y ELIMINAR
                       contenedorBoton.innerHTML = `
                           <div style="display: flex; gap: 8px;">
                               <a href="formularior.html?editar=${reporteData.id_reporte || reporteId}" class="detalle-btn-accion detalle-btn-editar">
@@ -897,7 +894,6 @@
                       });
 
                   } else {
-                      // SI ES OTRO USUARIO: Lógica normal de guardado
                       if (!correoLogueado) {
                           contenedorBoton.innerHTML = `
                               <a href="login.html" class="detalle-btn-accion">
