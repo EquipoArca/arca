@@ -836,7 +836,7 @@
               if (linkAutor) {
                   linkAutor.href = `perfil_publico.html?user=${encodeURIComponent(nombreUsuario)}`;
               }
-// --- VERIFICACIÓN DE AUTOR REAL CONSULTANDO SU PERFIL ---
+
               const contenedorBoton = document.getElementById('contenedor-boton-accion');
 
               firebase.auth().onAuthStateChanged(async (user) => {
