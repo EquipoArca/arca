@@ -709,23 +709,28 @@
                   });
 
                 let popupContenido = '';
-                  // Si el tipo NO es veterinaria (es decir, es reporte, adopción o caso), pintamos la tarjeta de detalle
                   if (tipo !== 'veterinaria') {
-                     const urlMapsReporte = `https://www.google.com/maps/search/?api=1&query=${item.lat},${item.lng}`;
-                     const idCaso = item.id_reporte || item.id || '';
+                      const urlMapsReporte = `https://www.google.com/maps/search/?api=1&query=${item.lat},${item.lng}`;
+                      
+                      // Identificamos el ID correcto y si es adopción o reporte
+                      const idReal = item.id_origen || item.id_publicacion || '';
+                      const esAdopcion = item.tipo_publicacion === 'adopcion';
+                      
+                      // Redirigimos al detalle correspondiente (o ajusta la página de detalle si tienes una específica para adopciones)
+                      const paginaDetalle = esAdopcion ? `detalle_adopcion.html?id=${idReal}` : `detalle_reporte.html?id=${idReal}`;
 
                       popupContenido = `
                           <div class="popup-card-arca">
                               <img src="${item.img_reporte || 'logo.png'}" alt="Foto">
-                              <b>${item.nombre_tipo_reporte || 'Reporte / Caso'}</b>
+                              <b>${item.nombre_tipo_reporte || 'Publicación'}</b>
                               <p>${item.Ubicacion && !item.Ubicacion.includes("Ubicacion GPS") ? item.Ubicacion : 'San Cristóbal, Medellín'}</p>
                               <div style="display: flex; gap: 4px; justify-content: center; margin-top: 4px;">
-                                  <a href="detalle_reporte.html?id=${idCaso}" class="btn-ver-caso" style="padding: 4px 8px; font-size: 11px;">Ver caso</a>
+                                  <a href="${paginaDetalle}" class="btn-ver-caso" style="padding: 4px 8px; font-size: 11px;">Ver caso</a>
                                   <a href="${urlMapsReporte}" target="_blank" class="btn-ver-caso" style="background: #27ae60; padding: 4px 8px; font-size: 11px;">Maps</a>
                               </div>
                           </div>
                       `;
-                  } else {
+                    } else {
                       const queryMapsVet = encodeURIComponent(`${item.direccion || item.nombre}, San Cristóbal, Medellín, Colombia`);
                       const urlMapsVet = `https://www.google.com/maps/search/?api=1&query=${item.lat},${item.lng}`;
                       popupContenido = `
@@ -895,18 +900,18 @@ async function cargarVeterinariasDeLaZona() {
                           const lat = parseFloat(matches[1]);
                           const lng = parseFloat(matches[2]);
 
-                          if (!isNaN(lat) && !isNaN(lng)) {
-                              // Aseguramos que la propiedad tipo identifique correctamente el reporte
-                              const tipoReporte = reporte.tipo || reporte.nombre_tipo_reporte || 'reporte';
-                              todosLosElementos.push({
-                                  id_reporte: reporte.id_reporte || reporte.id,
-                                  nombre_tipo_reporte: reporte.nombre_tipo_reporte || 'Reporte de animal',
-                                  tipo: tipoReporte.toLowerCase().includes('report') ? tipoReporte : 'reporte',
+                                if (!isNaN(lat) && !isNaN(lng)) {
+                                 todosLosElementos.push({
+                                  id_origen: reporte.id_origen,
+                                  id_publicacion: reporte.id_publicacion,
+                                  tipo_publicacion: reporte.tipo_publicacion,
+                                  nombre_tipo_reporte: reporte.nombre_tipo_reporte,
+                                  tipo: reporte.tipo_publicacion || 'reporte',
                                   lat: lat,
                                   lng: lng,
                                   Ubicacion: reporte.Ubicacion,
                                   img_reporte: reporte.img_reporte,
-                                  nombre: reporte.nombre_tipo_reporte || 'Reporte'
+                                  nombre: reporte.nombre_tipo_reporte
                               });
                           }
                       }
