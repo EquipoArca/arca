@@ -404,11 +404,9 @@
       });
 
     async function inicializarPerfil() {
-        // Capturamos la URL de forma segura
         const params = new URLSearchParams(window.location.search);
         usernamePerfil = params.get('user'); 
 
-        // Si no viene 'user', intentamos extraerlo manualmente de la URL por si acaso
         if (!usernamePerfil) {
             const urlParts = window.location.search.split('=');
             if (urlParts.length > 1) {
@@ -448,8 +446,29 @@
             document.getElementById('contacto-tel').innerHTML = `<i class="fa-brands fa-whatsapp" style="color: #25d366; font-size: 16px;"></i> <span>${telefonoReal}</span>`;
             document.getElementById('contacto-correo').innerHTML = `<i class="fa-solid fa-envelope" style="color: #007bff; font-size: 16px;"></i> <span>${correoReal}</span>`;
 
-            actualizarBotonSeguirUI(usuarioSeguidoActual);
-            actualizarEstadoBotonSolicitud(estadoSolicitudActual);
+            // ==========================================
+            // DETECTAR SI ES TU PROPIO PERFIL
+            // ==========================================
+            const esMiPerfil = (correoReal.toLowerCase().trim() === correoLogueado.toLowerCase().trim());
+
+            if (esMiPerfil) {
+                // Si es tu perfil, ocultamos o transformamos los botones de interacción ajena
+                const btnSeguir = document.getElementById('btn-seguir');
+                if (btnSeguir) btnSeguir.style.display = 'none'; // No te puedes seguir a ti mismo
+
+                const btnAdoptante = document.getElementById('btn-solicitud-adoptante');
+                if (btnAdoptante) {
+                    btnAdoptante.textContent = "Editar mi perfil ⚙️";
+                    btnAdoptante.style.background = "#e8a87c";
+                    btnAdoptante.onclick = () => {
+                        window.location.href = 'perfil_usuario.html';
+                    };
+                }
+            } else {
+                // Si es el perfil de otro usuario, mostramos todo normal
+                actualizarBotonSeguirUI(usuarioSeguidoActual);
+                actualizarEstadoBotonSolicitud(estadoSolicitudActual);
+            }
 
             cargarPublicacionesDeUsuario(usernamePerfil, idUsuarioPerfil);
 
@@ -457,7 +476,6 @@
             console.error("Error al cargar perfil:", error);
         }
     }
-
       function actualizarEstadoBotonSolicitud(estado) {
           const btnAdoptante = document.getElementById('btn-solicitud-adoptante');
 
