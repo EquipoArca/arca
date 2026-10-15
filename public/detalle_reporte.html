@@ -15,68 +15,66 @@
         document.body.classList.add("dark-mode");
     }
     </script>
-    <style>
-        html, body {
-            height: 100vh;
-            margin: 0;
-            font-family: 'Itim', cursive, sans-serif;
-            background-color: #fce8e6;
-        }
+        <style>
+        .html, body {
+        min-height: 100vh;
+        margin: 0;
+        font-family: 'Itim', cursive, sans-serif;
+        background-color: #fce8e6;
+    }
 
-        .main-content {
-            margin-top: 40px;
-            height: calc(100vh - 70px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 10px 20px;
-            box-sizing: border-box;
-            overflow-y: auto;
-        }
+    .main-content {
+        /* Cambiamos a padding superior en lugar de margin-top para respetar el flujo */
+        padding: 30px 20px;
+        min-height: calc(100vh - 70px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+    }
 
-        .detalle-container-principal {
-            background: rgba(255, 255, 255, 0.45);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-radius: 28px;
-            padding: 20px 30px;
-            width: 100%;
-            max-width: 1100px;
-            box-shadow: 0 12px 35px rgba(220, 150, 140, 0.12);
-            border: 2px solid rgba(255, 255, 255, 0.7);
-            box-sizing: border-box;
-        }
+    .detalle-container-principal {
+        background: rgba(255, 255, 255, 0.45);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-radius: 28px;
+        padding: 20px 30px;
+        width: 100%;
+        max-width: 1100px;
+        box-shadow: 0 12px 35px rgba(220, 150, 140, 0.12);
+        border: 2px solid rgba(255, 255, 255, 0.7);
+        box-sizing: border-box;
+    }
 
-        .detalle-header-card {
-            background: rgba(253, 203, 208, 0.65);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            padding: 10px 20px;
-            border-radius: 18px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            box-shadow: 0 4px 15px rgba(230, 160, 140, 0.08);
-        }
+    .detalle-header-card {
+        background: rgba(253, 203, 208, 0.65);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        padding: 10px 20px;
+        border-radius: 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        box-shadow: 0 4px 15px rgba(230, 160, 140, 0.08);
+    }
 
-        .detalle-header-card h1 {
-            margin: 0;
-            font-size: 22px;
-            color: #2b2b2b;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+    .detalle-header-card h1 {
+        margin: 0;
+        font-size: 22px;
+        color: #2b2b2b;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
 
-        .detalle-header-icon {
-            width: 26px;
-            height: 26px;
-            object-fit: contain;
-            border-radius: 50%;
-        }
-
+    .detalle-header-icon {
+        width: 26px;
+        height: 26px;
+        object-fit: contain;
+        border-radius: 50%;
+    }
         .header-acciones-derecha {
             display: flex;
             align-items: center;
