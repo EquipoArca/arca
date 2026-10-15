@@ -63,13 +63,13 @@ auth.onAuthStateChanged(async (user) => {
             }
             const data = await response.json();
             const nombreFinal = data.nombre_usuario || (user.displayName || user.email.split('@')[0]);
-            // --- NUEVO: GUARDAR ROL Y ESTADO DE APROBACIÓN ---
+            
             const tipoUsuario = data.tipo_usuario || 'usuario';
             const estadoAprobacion = data.estado_aprobacion || 'aprobado';
 
             localStorage.setItem('tipo_usuario', tipoUsuario);
             localStorage.setItem('estado_aprobacion', estadoAprobacion);
-            // Si es una fundación pero su estado sigue pendiente, la bloqueamos temporalmente
+            
             if (tipoUsuario === 'fundacion' && estadoAprobacion === 'pendiente') {
                 alert("¡Tu fundación está en proceso de revisión legal por el equipo de ARCA! Te notificaremos cuando sea aprobada.");
                 auth.signOut().then(() => {
@@ -78,12 +78,11 @@ auth.onAuthStateChanged(async (user) => {
                 });
                 return;
             }
-            // ------------------------------------------------
+            
             if (nombrePerfilElem) nombrePerfilElem.textContent = `@${nombreFinal}`;
             if (userDisplayName) userDisplayName.textContent = nombreFinal;
             if (dropdownName) dropdownName.textContent = nombreFinal;
 
-            // Manejo de foto de perfil o silueta por defecto
             if (data.foto_perfil && avatarImg) {
                 avatarImg.src = data.foto_perfil;
                 avatarImg.style.display = 'block';
@@ -169,7 +168,6 @@ function toggleSidebar() {
     }
 }
 
-// Cerrar el sidebar al hacer clic fuera de él
 document.addEventListener('click', function(event) {
     const sidebar = document.querySelector('.sidebar');
     const menuButton = document.querySelector('#btn-toggle-menu');
@@ -185,7 +183,6 @@ document.addEventListener('click', function(event) {
     }
 });
 
-// Control del Mini Menú Desplegable del Avatar
 function toggleMiniMenu() {
     const card = document.getElementById('mini-menu-card');
     if (card) card.classList.toggle('show');
@@ -210,7 +207,11 @@ async function ejecutarLoginEmail() {
     const email = emailInput.value.trim();
 
     if (email === "") {
-        alert("Por favor, ingresa tu correo electrónico.");
+        mostrarAlertaArca(
+            "¡Ey, corazón! ♡",
+            "Rellena el campo del correo antes de continuar."
+        );
+        emailInput.focus();
         return;
     }
 
@@ -221,38 +222,53 @@ async function ejecutarLoginEmail() {
 
     try {
         const metodos = await auth.fetchSignInMethodsForEmail(email);
+        const esFlujoFundacion = localStorage.getItem('flujo_fundacion') === 'true';
+
         if (metodos.length > 0) {
-            // Si el correo ya existe, muestra el campo de contraseña para iniciar sesión
-            mostrarPasoContrasena(email);
-        } else {
-            // El correo NO existe. Vemos si está activo el flujo de fundación
-            const esFlujoFundacion = localStorage.getItem('flujo_fundacion') === 'true';
-            
             if (esFlujoFundacion) {
-                // ¡CORRECTO! El correo no existe y es fundación: 
-                // Guardamos el correo y abrimos directo el Paso 4 en el modal para crear la contraseña
+                localStorage.removeItem('flujo_fundacion');
+                mostrarPasoContrasena(email);
+            } else {
+                mostrarPasoContrasena(email);
+            }
+        } else {
+            if (esFlujoFundacion) {
                 correoValidado = email;
                 document.getElementById("paso3").style.display = "none";
                 document.getElementById("paso4").style.display = "block";
             } else {
-                // Si es un usuario normal y no existe, lo mandamos al registro de usuarios de toda la vida
-                alert("Este correo no tiene una cuenta creada. Te redirigiremos para registrarte.");
-                window.location.href = `registro.html?email=${encodeURIComponent(email)}`;
+                mostrarAlertaArca(
+                    "¡Vamos a conocerte! ♡",
+                    "Este correo no tiene una cuenta registrada. Te llevaremos al registro para que puedas crear tu cuenta.",
+                    {
+                        tipo: "aviso",
+                        textoBoton: "Ir al registro ♡",
+                        alCerrar: () => {
+                            window.location.href = `registro.html?email=${encodeURIComponent(email)}`;
+                        }
+                    }
+                );
             }
         }
     } catch (error) {
-        if (!navigator.onLine || error.code === 'auth/network-request-failed') {
+        if (!navigator.onLine || error.code === "auth/network-request-failed") {
             mostrarAlertaOffline();
-        } else if (error.code === 'auth/invalid-email') {
-            alert("Por favor, ingresa un correo electrónico válido.");
+        } else if (error.code === "auth/invalid-email") {
+            mostrarAlertaArca(
+                "¡Revisa tu correo!",
+                "El correo no parece estar escrito correctamente. Comprueba que tenga un formato válido."
+            );
         } else {
             console.error("Error al verificar correo:", error);
-            alert("Ocurrió un error al verificar la cuenta: " + error.message);
+            mostrarAlertaArca(
+                "¡Hubo un pequeño error!",
+                "No pudimos verificar tu cuenta. Inténtalo de nuevo."
+            );
         }
     }
 }
+
 function iniciarSesionFinal() {
-    // Verificación de red antes de intentar autenticar
     if (!navigator.onLine) {
         mostrarAlertaOffline();
         return;
@@ -262,7 +278,11 @@ function iniciarSesionFinal() {
     const pass = passInput ? passInput.value.trim() : "";
 
     if (pass === "") {
-        alert("Por favor, ingresa tu contraseña.");
+        mostrarAlertaArca(
+            "¡Te falta un detallito! ♡",
+            "Escribe tu contraseña antes de continuar."
+        );
+        if (passInput) passInput.focus();
         return;
     }
 
@@ -274,7 +294,10 @@ function iniciarSesionFinal() {
             if (!navigator.onLine || error.code === 'auth/network-request-failed') {
                 mostrarAlertaOffline();
             } else if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-                alert("Contraseña incorrecta. Inténtalo de nuevo.");
+                mostrarAlertaArca(
+                    "Casi lo logramos ♡",
+                    "La contraseña no coincide. Revísala e inténtalo nuevamente."
+                );
             } else {
                 alert("Error al iniciar sesión: " + error.message);
             }
@@ -304,28 +327,6 @@ function mostrarPasoContrasena(email) {
     if (btnEntrar) {
         btnEntrar.setAttribute("onclick", "iniciarSesionFinal()");
     }
-}
-
-function iniciarSesionFinal() {
-    const passInput = document.getElementById("password-input-modal");
-    const pass = passInput ? passInput.value.trim() : "";
-
-    if (pass === "") {
-        alert("Por favor, ingresa tu contraseña.");
-        return;
-    }
-
-    auth.signInWithEmailAndPassword(correoValidado, pass)
-        .then(() => {
-            activarModoFull();
-        })
-        .catch((error) => {
-            if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-                alert("Contraseña incorrecta. Inténtalo de nuevo.");
-            } else {
-                alert("Error al iniciar sesión: " + error.message);
-            }
-        });
 }
 
 function mostrarFormularioCorreo() {
@@ -722,13 +723,13 @@ async function obtenerNombreUbicacionGlobal(textoUbicacionOriginal) {
     
     return textoUbicacionOriginal;
 }
+
 document.addEventListener("DOMContentLoaded", () => {
     if (localStorage.getItem("modo_oscuro") === "true") {
         document.body.classList.add("dark-mode");
     }
 });
 
-// Muestra el modal de alerta offline o lanza un alert si no existe en el HTML
 function mostrarAlertaOffline() {
     const overlay = document.getElementById('offline-alert-overlay');
     if (overlay) {
@@ -738,7 +739,6 @@ function mostrarAlertaOffline() {
     }
 }
 
-// Oculta el modal de alerta offline
 function ocultarAlertaOffline() {
     const overlay = document.getElementById('offline-alert-overlay');
     if (overlay) {
@@ -746,7 +746,6 @@ function ocultarAlertaOffline() {
     }
 }
 
-// Configura los eventos de los botones de cierre al cargar el DOM
 document.addEventListener('DOMContentLoaded', () => {
     const btnCerrar = document.getElementById('close-offline-alert');
     const btnX = document.getElementById('close-x-btn');
@@ -754,13 +753,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnCerrar) btnCerrar.addEventListener('click', ocultarAlertaOffline);
     if (btnX) btnX.addEventListener('click', ocultarAlertaOffline);
 
-    // Si al cargar la página el dispositivo no tiene internet, muestra la alerta
     if (!navigator.onLine) {
         mostrarAlertaOffline();
     }
 });
 
-// Escuchadores en tiempo real para cuando se desconecta o conecta internet
 window.addEventListener('offline', () => {
     mostrarAlertaOffline();
 });
@@ -769,32 +766,19 @@ window.addEventListener('online', () => {
     ocultarAlertaOffline();
 });
 
-// Ejemplo de cómo usar la validación dentro de cualquier función de tu archivo
-function miFuncion() {
-    if (!navigator.onLine) {
-        mostrarAlertaOffline();
-        return;
-    }
-
-}
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Aplicar el modo oscuro automáticamente si estaba guardado
     const modoOscuroGuardado = localStorage.getItem('darkMode') === 'true';
     if (modoOscuroGuardado && document.body) {
         document.body.classList.add('dark-mode');
     }
-
-    // 2. Prevenir errores de elementos nulos en general (opcional pero muy útil)
-    // Si tienes botones de menú o clases que a veces no están en todas las páginas, 
-    // puedes manejarlas aquí de forma segura sin que la consola explote.
 });
+
 // ==========================================
 // CARGAR Y FILTRAR ADOPCIONES EN NOVEDADES
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
     const contenedorNovedades = document.getElementById('contenedor-novedades');
     
-    // Verificamos si estamos en la página de novedades de adopciones buscando el contenedor
     if (contenedorNovedades && window.location.pathname.includes('novedades-adopciones.html')) {
         cargarAdopcionesNovedades();
     }
@@ -805,9 +789,8 @@ function cargarAdopcionesNovedades() {
         .then(res => res.json())
         .then(publicaciones => {
             const contenedor = document.getElementById('contenedor-novedades');
-            contenedor.innerHTML = ''; // Limpiamos el estado vacío de ejemplo
+            contenedor.innerHTML = ''; 
 
-            // Filtramos únicamente las publicaciones que sean de tipo 'adopcion'
             const adopciones = publicaciones.filter(pub => pub.tipo_publicacion === 'adopcion');
 
             if (adopciones.length === 0) {
@@ -833,11 +816,10 @@ function cargarAdopcionesNovedades() {
                 return;
             }
 
-            // Pintamos cada adopción encontrada
             adopciones.forEach(adopcion => {
                 let fotoSrc = 'logo.png';
                 try {
-                    const fotosArray = JSON.parse(adopcion.img_reporte); // En tu API unificada, fotos_animal se mapea aquí
+                    const fotosArray = JSON.parse(adopcion.img_reporte);
                     if (Array.isArray(fotosArray) && fotosArray.length > 0) {
                         fotoSrc = fotosArray[0];
                     }
@@ -871,13 +853,12 @@ function cargarAdopcionesNovedades() {
         .catch(err => console.error("Error al cargar las adopciones:", err));
 }
 
-// Función para abrir la sección de detalles de adopción
 function verDetallesAdopcion(idAdopcion) {
-    // Redirige a tu vista/archivo de detalles pasando el ID correspondiente
     window.location.href = `detalles_adopcion.html?id=${idAdopcion}`;
 }
+
 // ==========================================
-// 7. BUSCADOR UNIVERSAL INTELIGENTE (AJUSTES + PERFIL + PUBLICACIONES)
+// 7. BUSCADOR UNIVERSAL INTELIGENTE
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
     const inputBusqueda = document.querySelector('.search-bar input');
@@ -893,16 +874,12 @@ document.addEventListener('DOMContentLoaded', () => {
         contenedorBarra.appendChild(menuFlotante);
     }
 
-    // DICCIONARIO INTELIGENTE DEL SISTEMA (Perfil, Ajustes, Preferencias, Soporte, etc.) con sus hashes de destino
     const indicesSistema = [
-        // --- SECCIÓN DE PERFIL ---
         { titulo: "Cambiar nombre de usuario", subtitulo: "Perfil > Ajustes de cuenta", icono: "fa-user-pen", clase: "seccion", url: "perfil_usuario.html#nombre-usuario", palabras: ["nombre", "usuario", "cambiar nombre", "perfil"] },
         { titulo: "Editar correo electrónico", subtitulo: "Perfil > Seguridad", icono: "fa-envelope", clase: "seccion", url: "perfil_usuario.html#correo", palabras: ["correo", "email", "electronico", "editar correo"] },
         { titulo: "Cambiar número de celular", subtitulo: "Perfil > Contacto", icono: "fa-phone", clase: "seccion", url: "perfil_usuario.html#celular", palabras: ["celular", "telefono", "numero", "contacto"] },
         { titulo: "Perfil de adoptante", subtitulo: "Perfil > Solicitudes", icono: "fa-paw", clase: "adopcion", url: "perfil_usuario.html#adoptante", palabras: ["adoptante", "perfil adoptante"] },
         { titulo: "Mis publicaciones", subtitulo: "Perfil > Mis reportes y adopciones", icono: "fa-bookmark", clase: "guardados", url: "perfil_usuario.html#publicaciones", palabras: ["mis publicaciones", "mis reportes", "publicaciones"] },
-
-        // --- SECCIÓN DE CONFIGURACIÓN Y AJUSTES ---
         { titulo: "Modo oscuro (Apariencia)", subtitulo: "Configuración > Preferencias", icono: "fa-moon", clase: "ajustes", url: "configuracion.html#modo-oscuro", palabras: ["apariencia", "oscuro", "modo oscuro", "tema", "preferencias"] },
         { titulo: "Notificaciones en el navegador", subtitulo: "Configuración > Preferencias", icono: "fa-bell", clase: "ajustes", url: "configuracion.html#notificaciones", palabras: ["notificaciones", "alertas", "navegador"] },
         { titulo: "Idioma de la aplicación", subtitulo: "Configuración > Preferencias", icono: "fa-language", clase: "ajustes", url: "configuracion.html#idioma", palabras: ["idioma", "español", "english", "lenguaje"] },
@@ -910,8 +887,6 @@ document.addEventListener('DOMContentLoaded', () => {
         { titulo: "Permisos de ubicación", subtitulo: "Configuración > Permisos", icono: "fa-location-dot", clase: "ajustes", url: "configuracion.html#ubicacion", palabras: ["ubicacion", "gps", "permisos", "mapa"] },
         { titulo: "Eliminar cuenta", subtitulo: "Configuración > Cuenta (Zona de peligro)", icono: "fa-triangle-exclamation", clase: "adopcion", url: "configuracion.html#eliminar", palabras: ["eliminar cuenta", "borrar cuenta", "cuenta"] },
         { titulo: "Ayuda y soporte técnico", subtitulo: "Configuración > Soporte", icono: "fa-headset", clase: "seccion", url: "configuracion.html#soporte", palabras: ["soporte", "ayuda", "contacto", "tecnico", "ayuda y soporte"] },
-
-        // --- ACCESOS RÁPIDOS GENERALES ---
         { titulo: "Mapa General", subtitulo: "Ver refugios y reportes cercanos", icono: "fa-map", clase: "seccion", url: "mapa.html", palabras: ["mapa", "refugios", "cerca"] },
         { titulo: "Publicaciones Guardadas", subtitulo: "Tus elementos guardados", icono: "fa-bookmark", clase: "guardados", url: "guardados_usuario.html", palabras: ["guardados", "favoritos", "guardado"] }
     ];
@@ -926,7 +901,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Cargar publicaciones del servidor si está vacío
         if (cachePublicaciones.length === 0) {
             try {
                 const res = await fetch('/api/publicaciones-globales');
@@ -936,7 +910,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // 1. Filtrar en el diccionario inteligente de ajustes/perfil usando palabras clave
         const matchSistema = indicesSistema.filter(item => {
             const coincideTitulo = item.titulo.toLowerCase().includes(texto);
             const coincideSub = item.subtitulo.toLowerCase().includes(texto);
@@ -944,7 +917,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return coincideTitulo || coincideSub || coincideKeywords;
         });
 
-        // 2. Filtrar en las publicaciones de la comunidad (mascotas, reportes, usuarios)
         const matchPublicaciones = cachePublicaciones.filter(pub => {
             const usuario = (pub.nombre_usuario || '').toLowerCase();
             const desc = (pub.Descripcion || pub.descripcion_animal || '').toLowerCase();
@@ -962,7 +934,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (matchSistema.length > 0 || matchPublicaciones.length > 0) {
             let htmlHTML = '';
 
-            // Renderizar resultados del sistema (Ajustes, Perfil, Opciones)
             if (matchSistema.length > 0) {
                 htmlHTML += `<div class="categoria-busqueda-header">Ajustes y Opciones del Sistema</div>`;
                 matchSistema.forEach(sys => {
@@ -980,7 +951,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
 
-            // Renderizar publicaciones de la comunidad encontradas (con soporte de hash para resaltarlas)
             if (matchPublicaciones.length > 0) {
                 htmlHTML += `<div class="categoria-busqueda-header">Comunidad y Publicaciones</div>`;
                 matchPublicaciones.slice(0, 5).forEach(item => {
@@ -1016,7 +986,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Ocultar si hacen clic fuera
     document.addEventListener('click', (e) => {
         if (!contenedorBarra.contains(e.target)) {
             menuFlotante.style.display = 'none';
@@ -1025,7 +994,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================
-// 8. DETECTOR UNIVERSAL DE HASH PARA SCROLL Y EFECTO PARPADEANTE
+// 8. DETECTOR UNIVERSAL DE HASH PARA SCROLL
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
     if (window.location.hash) {
@@ -1035,13 +1004,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const elementoDestino = document.querySelector(selectorHash) || document.getElementById(selectorHash.substring(1));
             
             if (elementoDestino) {
-                // Desplazamiento suave hacia la opción exacta
                 elementoDestino.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                
-                // Aplicar la clase mágica del parpadeo
                 elementoDestino.classList.add('elemento-resaltado-magico');
                 
-                // Remover el efecto de parpadeo a los 4 segundos
                 setTimeout(() => {
                     elementoDestino.classList.remove('elemento-resaltado-magico');
                 }, 4000);
@@ -1049,61 +1014,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 600);
     }
 });
-//fundaciones//
+
+// ==========================================
+// FLUJO DE FUNDACIONES
+// ==========================================
 function prepararModoFundacion() {
-    // Marcamos que el flujo actual es para fundación
     localStorage.setItem('flujo_fundacion', 'true');
-    
-    // Ocultamos el paso 2 y mostramos el paso 3 (el formulario de correo)
     const p2 = document.getElementById("paso2");
     const p3 = document.getElementById("paso3");
     if (p2) p2.style.display = "none";
     if (p3) p3.style.display = "block";
 }
+
 let codigoOtpGenerado = "";
 let passwordFundacionTemporal = "";
 
-// 1. Modificamos la validación del correo en el Paso 3
-async function ejecutarLoginEmail() {
-    const emailInput = document.getElementById("email-input");
-    if (!emailInput) return;
-    const email = emailInput.value.trim();
-
-    if (email === "") {
-        alert("Por favor, ingresa tu correo electrónico.");
-        return;
-    }
-
-    try {
-        const metodos = await auth.fetchSignInMethodsForEmail(email);
-        const esFlujoFundacion = localStorage.getItem('flujo_fundacion') === 'true';
-
-        if (metodos.length > 0) {
-            if (esFlujoFundacion) {
-                alert("Este correo ya está registrado. Inicia sesión normalmente.");
-                localStorage.removeItem('flujo_fundacion');
-                mostrarPasoContrasena(email);
-            } else {
-                mostrarPasoContrasena(email);
-            }
-        } else {
-            if (esFlujoFundacion) {
-                // El correo NO existe y es Fundación: ¡Saltamos al Paso 4 (Crear Contraseña)!
-                correoValidado = email;
-                document.getElementById("paso3").style.display = "none";
-                document.getElementById("paso4").style.display = "block";
-            } else {
-                alert("Este correo no tiene una cuenta creada. Te redirigiremos para registrarte.");
-                window.location.href = `registro.html?email=${encodeURIComponent(email)}`;
-            }
-        }
-    } catch (error) {
-        console.error("Error al verificar correo:", error);
-        alert("Ocurrió un error al verificar la cuenta.");
-    }
-}
-
-// 2. Validación de restricciones de contraseña en tiempo real para el modal
 document.addEventListener('DOMContentLoaded', () => {
     const passModal = document.getElementById("password-fundacion-modal");
     const msgModal = document.getElementById("mensaje-estado-pass-modal");
@@ -1128,7 +1053,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// 3. Enviar código OTP mediante EmailJS desde el modal
 async function enviarCodigoOtpFundacion() {
     const passModal = document.getElementById("password-fundacion-modal");
     passwordFundacionTemporal = passModal ? passModal.value.trim() : "";
@@ -1152,14 +1076,12 @@ async function enviarCodigoOtpFundacion() {
         document.getElementById("paso5").style.display = "block";
     } catch (err) {
         console.error("Error EmailJS:", err);
-        // Respaldo visual por si el servicio de correo tarda
         alert("Código de prueba generado: " + codigoOtpGenerado);
         document.getElementById("paso4").style.display = "none";
         document.getElementById("paso5").style.display = "block";
     }
 }
 
-// Lógica para saltar entre los inputs del OTP modal
 document.addEventListener('input', (e) => {
     if (e.target.classList.contains('otp-input-modal')) {
         const inputs = Array.from(document.querySelectorAll('.otp-input-modal'));
@@ -1170,7 +1092,6 @@ document.addEventListener('input', (e) => {
     }
 });
 
-// 4. Verificar OTP, crear cuenta en Firebase y saltar al Paso 1 del formulario de fundación
 async function verificarOtpYIrAlRegistro() {
     const inputs = document.querySelectorAll('.otp-input-modal');
     let codigoIngresado = "";
@@ -1178,13 +1099,11 @@ async function verificarOtpYIrAlRegistro() {
 
     if (codigoIngresado === codigoOtpGenerado || codigoIngresado === "1234") {
         try {
-            // Creamos la cuenta en Firebase Auth con el correo y contraseña blindados
             await auth.createUserWithEmailAndPassword(correoValidado, passwordFundacionTemporal);
             
             localStorage.removeItem('flujo_fundacion');
             alert("¡Correo verificado con éxito! Ahora completemos los datos legales de tu fundación.");
             
-            // Redirigimos directo al Paso 1 que ya diseñamos
             window.location.href = `registro_fundacion.html?email=${encodeURIComponent(correoValidado)}`;
         } catch (error) {
             alert("Error al crear credenciales en Firebase: " + error.message);
@@ -1202,4 +1121,149 @@ function atrasPaso3() {
 function atrasPaso4() {
     document.getElementById("paso5").style.display = "none";
     document.getElementById("paso4").style.display = "block";
+}
+
+// ==========================================
+// ALERTA PERSONALIZADA ARCA
+// ==========================================
+function mostrarAlertaArca(titulo, mensaje, opciones = {}) {
+    const {
+        tipo = "error",
+        textoBoton = "Entendido ♡",
+        alCerrar = null
+    } = opciones;
+
+    document.getElementById("alerta-arca-personalizada")?.remove();
+
+    if (!document.getElementById("estilos-alerta-arca")) {
+        const estilos = document.createElement("style");
+        estilos.id = "estilos-alerta-arca";
+        estilos.textContent = `
+            .arca-alerta-overlay {
+                position: fixed;
+                inset: 0;
+                z-index: 999999;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 20px;
+                background: rgba(40, 25, 35, 0.38);
+                backdrop-filter: blur(5px);
+                animation: arcaAparecer .22s ease;
+            }
+
+            .arca-alerta-tarjeta {
+                width: min(100%, 360px);
+                padding: 30px 25px 25px;
+                border: 2px solid #fff;
+                border-radius: 28px;
+                background: #FFF1F2;
+                box-shadow: 0 15px 45px rgba(120, 60, 80, .20);
+                text-align: center;
+                font-family: 'Itim', sans-serif;
+                animation: arcaSaltar .28s ease;
+            }
+
+            .arca-alerta-icono {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                width: 76px;
+                height: 76px;
+                margin: 0 auto 17px;
+                border: 3px solid white;
+                border-radius: 50%;
+                background: #FAD4DE;
+                font-size: 36px;
+            }
+
+            .arca-alerta-titulo {
+                margin: 0 0 10px;
+                color: #704653;
+                font-size: 25px;
+            }
+
+            .arca-alerta-mensaje {
+                margin: 0 0 23px;
+                color: #795F68;
+                font-size: 17px;
+                line-height: 1.5;
+                overflow-wrap: anywhere;
+            }
+
+            .arca-alerta-boton {
+                width: 100%;
+                padding: 12px 18px;
+                border: 0;
+                border-radius: 18px;
+                background: #E985A0;
+                color: white;
+                font: inherit;
+                font-size: 17px;
+                cursor: pointer;
+                transition: transform .2s, background .2s;
+            }
+
+            .arca-alerta-boton:hover {
+                background: #D96F8D;
+                transform: translateY(-2px);
+            }
+
+            @keyframes arcaAparecer {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+
+            @keyframes arcaSaltar {
+                from { opacity: 0; transform: scale(.92) translateY(8px); }
+                to { opacity: 1; transform: scale(1) translateY(0); }
+            }
+        `;
+        document.head.appendChild(estilos);
+    }
+
+    const iconos = {
+        error: "♡",
+        aviso: "🌸",
+        conexion: "☁️"
+    };
+
+    const overlay = document.createElement("div");
+    overlay.id = "alerta-arca-personalizada";
+    overlay.className = "arca-alerta-overlay";
+    overlay.setAttribute("role", "alertdialog");
+    overlay.setAttribute("aria-modal", "true");
+
+    const tarjeta = document.createElement("div");
+    tarjeta.className = "arca-alerta-tarjeta";
+
+    const icono = document.createElement("div");
+    icono.className = "arca-alerta-icono";
+    icono.textContent = iconos[tipo] || "♡";
+
+    const encabezado = document.createElement("h2");
+    encabezado.className = "arca-alerta-titulo";
+    encabezado.textContent = titulo;
+
+    const texto = document.createElement("p");
+    texto.className = "arca-alerta-mensaje";
+    texto.textContent = mensaje;
+
+    const boton = document.createElement("button");
+    boton.type = "button";
+    boton.className = "arca-alerta-boton";
+    boton.textContent = textoBoton;
+
+    boton.addEventListener("click", () => {
+        overlay.remove();
+        if (typeof alCerrar === "function") {
+            alCerrar();
+        }
+    });
+
+    tarjeta.append(icono, encabezado, texto, boton);
+    overlay.appendChild(tarjeta);
+    document.body.appendChild(overlay);
+
+    boton.focus();
 }
