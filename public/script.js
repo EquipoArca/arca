@@ -202,15 +202,132 @@ document.addEventListener('click', (e) => {
 // ==========================================
 // 3. AUTENTICACIÓN Y NAVEGACIÓN
 // ==========================================
+
 let correoValidado = "";
+
+// Tarjeta reutilizable para mostrar errores e información
+function mostrarTarjetaAcceso(mensaje, opciones = {}) {
+    const {
+        titulo = "¡Hubo un pequeño error!",
+        boton = "Entendido",
+        tipo = "error",
+        alContinuar = () => {}
+    } = opciones;
+
+    document.getElementById("tarjeta-acceso-overlay")?.remove();
+
+    const overlay = document.createElement("div");
+    overlay.id = "tarjeta-acceso-overlay";
+
+    overlay.style.cssText = `
+        position: fixed;
+        inset: 0;
+        z-index: 999999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: rgba(30, 20, 25, 0.45);
+        backdrop-filter: blur(5px);
+    `;
+
+    const tarjeta = document.createElement("div");
+    tarjeta.style.cssText = `
+        width: 100%;
+        max-width: 390px;
+        padding: 30px 24px;
+        box-sizing: border-box;
+        text-align: center;
+        background: #fffaf9;
+        border: 1px solid #f3d9d8;
+        border-radius: 24px;
+        box-shadow: 0 18px 50px rgba(80, 35, 40, 0.18);
+        font-family: inherit;
+        animation: aparecerTarjetaAcceso .25s ease;
+    `;
+
+    const icono = tipo === "info" ? "ⓘ" : "⚠";
+    const colorIcono = tipo === "info" ? "#bd7b43" : "#d66b70";
+
+    tarjeta.innerHTML = `
+        <div style="
+            width: 62px;
+            height: 62px;
+            margin: 0 auto 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: ${tipo === "info" ? "#fff0df" : "#fde8e8"};
+            color: ${colorIcono};
+            font-size: 34px;
+            font-weight: 700;
+        ">${icono}</div>
+
+        <h2 style="
+            margin: 0 0 12px;
+            color: #49383b;
+            font-size: 22px;
+            font-weight: 700;
+        "></h2>
+
+        <p style="
+            margin: 0 0 24px;
+            color: #766568;
+            font-size: 15px;
+            line-height: 1.6;
+        "></p>
+
+        <button type="button" style="
+            width: 100%;
+            padding: 13px 18px;
+            border: none;
+            border-radius: 14px;
+            background: #d98288;
+            color: white;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+        "></button>
+    `;
+
+    tarjeta.querySelector("h2").textContent = titulo;
+    tarjeta.querySelector("p").textContent = mensaje;
+    tarjeta.querySelector("button").textContent = boton;
+
+    tarjeta.querySelector("button").addEventListener("click", () => {
+        overlay.remove();
+        alContinuar();
+    });
+
+    overlay.addEventListener("click", (evento) => {
+        if (evento.target === overlay) overlay.remove();
+    });
+
+    overlay.appendChild(tarjeta);
+    document.body.appendChild(overlay);
+}
+
+function mostrarErrorAcceso(mensaje) {
+    mostrarTarjetaAcceso(mensaje);
+}
 
 async function ejecutarLoginEmail() {
     const emailInput = document.getElementById("email-input");
     if (!emailInput) return;
+
     const email = emailInput.value.trim();
 
-    if (email === "") {
-        alert("Por favor, ingresa tu correo electrónico.");
+    if (!email) {
+        mostrarErrorAcceso("Por favor, ingresa tu correo electrónico.");
+        return;
+    }
+
+    // Validación básica del formato del correo
+    const formatoCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!formatoCorreo.test(email)) {
+        mostrarErrorAcceso("Por favor, ingresa un correo electrónico válido.");
         return;
     }
 
@@ -221,99 +338,70 @@ async function ejecutarLoginEmail() {
 
     try {
         const metodos = await auth.fetchSignInMethodsForEmail(email);
+        const esFlujoFundacion =
+            localStorage.getItem("flujo_fundacion") === "true";
+
         if (metodos.length > 0) {
-            // Si el correo ya existe, muestra el campo de contraseña para iniciar sesión
-            mostrarPasoContrasena(email);
-        } else {
-            // El correo NO existe. Vemos si está activo el flujo de fundación
-            const esFlujoFundacion = localStorage.getItem('flujo_fundacion') === 'true';
-            
             if (esFlujoFundacion) {
-                // ¡CORRECTO! El correo no existe y es fundación: 
-                // Guardamos el correo y abrimos directo el Paso 4 en el modal para crear la contraseña
-                correoValidado = email;
-                document.getElementById("paso3").style.display = "none";
-                document.getElementById("paso4").style.display = "block";
+                mostrarTarjetaAcceso(
+                    "Este correo ya está registrado. Inicia sesión con tu cuenta existente.",
+                    {
+                        alContinuar: () => mostrarPasoContrasena(email)
+                    }
+                );
+
+                localStorage.removeItem("flujo_fundacion");
             } else {
-                // Si es un usuario normal y no existe, lo mandamos al registro de usuarios de toda la vida
-                alert("Este correo no tiene una cuenta creada. Te redirigiremos para registrarte.");
-                window.location.href = `registro.html?email=${encodeURIComponent(email)}`;
+                mostrarPasoContrasena(email);
             }
+
+            return;
         }
+
+        // Correo nuevo durante el registro de una fundación
+        if (esFlujoFundacion) {
+            correoValidado = email;
+
+            const paso3 = document.getElementById("paso3");
+            const paso4 = document.getElementById("paso4");
+
+            if (paso3) paso3.style.display = "none";
+            if (paso4) paso4.style.display = "block";
+
+            return;
+        }
+
+        // Correo nuevo para un usuario normal: informar, no mostrar error
+        mostrarTarjetaAcceso(
+            "Este correo todavía no tiene una cuenta. Te llevaremos al formulario para que puedas registrarte.",
+            {
+                titulo: "¡Vamos a crear tu cuenta!",
+                boton: "Continuar al registro ♡",
+                tipo: "info",
+                alContinuar: () => {
+                    window.location.href =
+                        `registro.html?email=${encodeURIComponent(email)}`;
+                }
+            }
+        );
+
     } catch (error) {
-        if (!navigator.onLine || error.code === 'auth/network-request-failed') {
+        if (
+            !navigator.onLine ||
+            error.code === "auth/network-request-failed"
+        ) {
             mostrarAlertaOffline();
-        } else if (error.code === 'auth/invalid-email') {
-            alert("Por favor, ingresa un correo electrónico válido.");
+        } else if (error.code === "auth/invalid-email") {
+            mostrarErrorAcceso("Por favor, ingresa un correo electrónico válido.");
         } else {
             console.error("Error al verificar correo:", error);
-            alert("Ocurrió un error al verificar la cuenta: " + error.message);
+            mostrarErrorAcceso(
+                "No pudimos verificar tu cuenta en este momento. Inténtalo de nuevo."
+            );
         }
     }
 }
-function iniciarSesionFinal() {
-    // Verificación de red antes de intentar autenticar
-    if (!navigator.onLine) {
-        mostrarAlertaOffline();
-        return;
-    }
 
-    const passInput = document.getElementById("password-input-modal");
-    const pass = passInput ? passInput.value.trim() : "";
-
-    if (pass === "") {
-        alert("Por favor, ingresa tu contraseña.");
-        return;
-    }
-
-    auth.signInWithEmailAndPassword(correoValidado, pass)
-        .then(() => {
-            activarModoFull();
-        })
-        .catch((error) => {
-            if (!navigator.onLine || error.code === 'auth/network-request-failed') {
-                mostrarAlertaOffline();
-            } else if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-                alert("Contraseña incorrecta. Inténtalo de nuevo.");
-            } else {
-                alert("Error al iniciar sesión: " + error.message);
-            }
-        });
-}
-
-function mostrarPasoContrasena(email) {
-    correoValidado = email;
-    const emailInput = document.getElementById("email-input");
-    if (!emailInput) return;
-    
-    emailInput.style.display = "none";
-
-    let passInput = document.getElementById("password-input-modal");
-    if (!passInput) {
-        passInput = document.createElement("input");
-        passInput.type = "password";
-        passInput.id = "password-input-modal";
-        passInput.placeholder = "Ingresa tu contraseña";
-        passInput.className = emailInput.className; 
-        emailInput.parentNode.insertBefore(passInput, emailInput.nextSibling);
-    }
-    passInput.style.display = "block";
-    passInput.focus();
-
-    const btnEntrar = document.querySelector("#paso3 button") || document.querySelector("#paso3 .btn-entrar");
-    if (btnEntrar) {
-        btnEntrar.setAttribute("onclick", "iniciarSesionFinal()");
-    }
-}
-
-function iniciarSesionFinal() {
-    const passInput = document.getElementById("password-input-modal");
-    const pass = passInput ? passInput.value.trim() : "";
-
-    if (pass === "") {
-        alert("Por favor, ingresa tu contraseña.");
-        return;
-    }
 
     auth.signInWithEmailAndPassword(correoValidado, pass)
         .then(() => {
@@ -326,7 +414,7 @@ function iniciarSesionFinal() {
                 alert("Error al iniciar sesión: " + error.message);
             }
         });
-}
+
 
 function mostrarFormularioCorreo() {
     const p2 = document.getElementById("paso2");
