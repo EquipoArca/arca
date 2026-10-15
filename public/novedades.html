@@ -177,12 +177,17 @@
    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script> 
 
 <script>
-    document.addEventListener('DOMContentLoaded', async () => {
+    // Usamos el observador de Firebase para garantizar que tenemos el correo real antes de buscar
+    auth.onAuthStateChanged(async (user) => {
         const contenedor = document.getElementById('contenedor-novedades');
         if (!contenedor) return;
 
         try {
-            const respuesta = await fetch('/api/publicaciones-globales');
+            // Obtenemos el correo del usuario logueado de forma segura
+            const correoActual = (user && user.email) ? user.email : '';
+
+            // Hacemos el fetch pasando el correo para que el servidor filtre los bloqueados
+            const respuesta = await fetch(`/api/publicaciones-globales?correo=${encodeURIComponent(correoActual)}`);
             if (!respuesta.ok) throw new Error("Error al obtener las publicaciones globales");
             
             const publicaciones = await respuesta.json();
@@ -191,11 +196,9 @@
                 contenedor.innerHTML = ''; 
 
                 for (const pub of publicaciones) {
-                    // --- LÓGICA INTELIGENTE PARA EXTRAER LA IMAGEN ---
                     let imagenSrc = 'logo.png';
                     if (pub.img_reporte) {
                         try {
-                            // Intentamos parsear por si viene en formato JSON ['foto.jpg']
                             const parsed = JSON.parse(pub.img_reporte);
                             if (Array.isArray(parsed) && parsed.length > 0) {
                                 imagenSrc = parsed[0];
@@ -203,7 +206,6 @@
                                 imagenSrc = pub.img_reporte;
                             }
                         } catch (e) {
-                            // Si no es JSON, se usa el texto plano directamente
                             imagenSrc = pub.img_reporte;
                         }
                     }
@@ -267,8 +269,7 @@
             }
         }
     });
-   </script>
-   
+</script>   
 
 <style>
 .tarjeta-prototipo-estilo {

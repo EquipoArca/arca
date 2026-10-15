@@ -887,44 +887,46 @@ async function cargarVeterinariasDeLaZona() {
           inputBuscarLugar.addEventListener('keypress', (e) => {
               if (e.key === 'Enter') buscarLugarGeneral();
           });
+// En vez de ejecutar el try directo, envolvemos la carga en auth.onAuthStateChanged
+auth.onAuthStateChanged(async (user) => {
+    try {
+        const correoActual = (user && user.email) ? user.email : '';
+        const respuestaReportes = await fetch(`/api/publicaciones-globales?correo=${encodeURIComponent(correoActual)}`);
+        
+        if (respuestaReportes.ok) {
+            const reportes = await respuestaReportes.json();
+            reportes.forEach(reporte => {
+                const textoUbicacion = reporte.Ubicacion || "";
+                const matches = textoUbicacion.match(/(-?\d+\.\d+),\s*(-?\d+\.\d+)/);
 
-          try {
-              // Obtienes el correo actual de Firebase
-            const correoActual = (auth.currentUser && auth.currentUser.email) ? auth.currentUser.email : '';
-            const respuestaReportes = await fetch(`/api/publicaciones-globales?correo=${encodeURIComponent(correoActual)}`);
-              if (respuestaReportes.ok) {
-                  const reportes = await respuestaReportes.json();
-                  reportes.forEach(reporte => {
-                      const textoUbicacion = reporte.Ubicacion || "";
-                      const matches = textoUbicacion.match(/(-?\d+\.\d+),\s*(-?\d+\.\d+)/);
+                if (matches && matches.length >= 3) {
+                    const lat = parseFloat(matches[1]);
+                    const lng = parseFloat(matches[2]);
 
-                      if (matches && matches.length >= 3) {
-                          const lat = parseFloat(matches[1]);
-                          const lng = parseFloat(matches[2]);
+                    if (!isNaN(lat) && !isNaN(lng)) {
+                        todosLosElementos.push({
+                            id_origen: reporte.id_origen,
+                            id_publicacion: reporte.id_publicacion,
+                            tipo_publicacion: reporte.tipo_publicacion,
+                            nombre_tipo_reporte: reporte.nombre_tipo_reporte,
+                            tipo: reporte.tipo_publicacion || 'reporte',
+                            lat: lat,
+                            lng: lng,
+                            Ubicacion: reporte.Ubicacion,
+                            img_reporte: reporte.img_reporte,
+                            nombre: reporte.nombre_tipo_reporte
+                        });
+                    }
+                }
+            });
+        }
+    } catch (error) {
+        console.error("Error al cargar reportes del servidor:", error);
+    }
 
-                                if (!isNaN(lat) && !isNaN(lng)) {
-                                 todosLosElementos.push({
-                                  id_origen: reporte.id_origen,
-                                  id_publicacion: reporte.id_publicacion,
-                                  tipo_publicacion: reporte.tipo_publicacion,
-                                  nombre_tipo_reporte: reporte.nombre_tipo_reporte,
-                                  tipo: reporte.tipo_publicacion || 'reporte',
-                                  lat: lat,
-                                  lng: lng,
-                                  Ubicacion: reporte.Ubicacion,
-                                  img_reporte: reporte.img_reporte,
-                                  nombre: reporte.nombre_tipo_reporte
-                              });
-                          }
-                      }
-                  });
-              }
-          } catch (error) {
-              console.error("Error al cargar reportes del servidor:", error);
-          }
-
-          renderizarMarcadores('todos');
-          cargarVeterinariasDeLaZona();
+    renderizarMarcadores('todos');
+    cargarVeterinariasDeLaZona();
+ });
 
           const botonesFiltro = document.querySelectorAll('.filtro-btn');
           botonesFiltro.forEach(btn => {
