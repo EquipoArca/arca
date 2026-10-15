@@ -785,6 +785,12 @@ app.get('/api/guardar-publicacion/:correo', (req, res) => {
         INNER JOIN reportes r ON p.id_reporte = r.id_reporte
         LEFT JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
         WHERE LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(?))
+          AND r.id_usuarios NOT IN (
+              SELECT ub.id_usuario_bloqueado 
+              FROM usuarios_bloqueados ub
+              INNER JOIN usuarios u_bloq ON ub.id_usuario_bloqueador = u_bloq.id_usuarios
+              WHERE LOWER(TRIM(u_bloq.correo_usuario)) = LOWER(TRIM(?))
+          )
         
         UNION ALL
         
@@ -806,11 +812,18 @@ app.get('/api/guardar-publicacion/:correo', (req, res) => {
         INNER JOIN publicaciones_adopcion pa ON p.id_publicaciones_adopcion = pa.id_publicaciones_adopcion
         INNER JOIN animal a ON pa.id_animal = a.id_animal
         WHERE LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(?))
+          AND pa.id_usuarios NOT IN (
+              SELECT ub.id_usuario_bloqueado 
+              FROM usuarios_bloqueados ub
+              INNER JOIN usuarios u_bloq ON ub.id_usuario_bloqueador = u_bloq.id_usuarios
+              WHERE LOWER(TRIM(u_bloq.correo_usuario)) = LOWER(TRIM(?))
+          )
 
         ORDER BY id_publicacion DESC
     `;
 
-    db.query(query, [correo, correo], (err, results) => {
+    // Pasamos el correo dos veces: una para identificar al usuario de los guardados y otra para verificar sus bloqueados
+    db.query(query, [correo, correo, correo, correo], (err, results) => {
         if (err) {
             console.error("❌ ERROR AL OBTENER GUARDADOS:", err.message);
             return res.status(500).json({ error: "Error al obtener las publicaciones guardadas" });
@@ -900,13 +913,13 @@ app.delete('/api/reportes/:id', (req, res) => {
     });
 });
 // ==========================================
-// GET: Publicaciones Globales (Para detalles y feeds)
 // ==========================================
-// ==========================================
-// GET: Publicaciones Globales (Para detalles y feeds)
+// GET: Publicaciones Globales (Filtrando bloqueados automáticamente)
 // ==========================================
 app.get('/api/publicaciones-globales', (req, res) => {
-    const sql = `
+    const correoVisitante = req.query.correo;
+
+    let sql = `
         SELECT 
             p.id_publicacion,
             'reporte' AS tipo_publicacion,
@@ -919,11 +932,18 @@ app.get('/api/publicaciones-globales', (req, res) => {
             r.telefono_contacto,
             r.correo_contacto,
             NULL AS nombre_animal,
-            u.nombre_usuario AS nombre_usuario
+            u.nombre_usuario AS nombre_usuario,
+            r.id_usuarios
         FROM publicaciones p
         INNER JOIN reportes r ON p.id_reporte = r.id_reporte
         INNER JOIN usuarios u ON r.id_usuarios = u.id_usuarios
         LEFT JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
+        WHERE r.id_usuarios NOT IN (
+            SELECT ub.id_usuario_bloqueado 
+            FROM usuarios_bloqueados ub
+            INNER JOIN usuarios u_bloq ON ub.id_usuario_bloqueador = u_bloq.id_usuarios
+            WHERE LOWER(TRIM(u_bloq.correo_usuario)) = LOWER(TRIM(?))
+        )
         
         UNION ALL
         
@@ -939,16 +959,24 @@ app.get('/api/publicaciones-globales', (req, res) => {
             pa.telefono_contacto,
             pa.correo_contacto,
             a.nombre_animal,
-            u.nombre_usuario AS nombre_usuario
+            u.nombre_usuario AS nombre_usuario,
+            pa.id_usuarios
         FROM publicaciones p
         INNER JOIN publicaciones_adopcion pa ON p.id_publicaciones_adopcion = pa.id_publicaciones_adopcion
         INNER JOIN animal a ON pa.id_animal = a.id_animal
         INNER JOIN usuarios u ON pa.id_usuarios = u.id_usuarios
+        WHERE pa.id_usuarios NOT IN (
+            SELECT ub.id_usuario_bloqueado 
+            FROM usuarios_bloqueados ub
+            INNER JOIN usuarios u_bloq ON ub.id_usuario_bloqueador = u_bloq.id_usuarios
+            WHERE LOWER(TRIM(u_bloq.correo_usuario)) = LOWER(TRIM(?))
+        )
 
         ORDER BY id_publicacion DESC
     `;
 
-    db.query(sql, (err, rows) => {
+    const correoParam = correoVisitante || '';
+    db.query(sql, [correoParam, correoParam], (err, rows) => {
         if (err) {
             console.error("❌ ERROR AL OBTENER PUBLICACIONES GLOBALES:", err.message);
             return res.status(500).json({ error: 'Hubo un error al obtener las publicaciones globales', detalle: err.message });

@@ -889,7 +889,9 @@ async function cargarVeterinariasDeLaZona() {
           });
 
           try {
-              const respuestaReportes = await fetch(`/api/publicaciones-globales`);
+              // Obtienes el correo actual de Firebase
+            const correoActual = (auth.currentUser && auth.currentUser.email) ? auth.currentUser.email : '';
+            const respuestaReportes = await fetch(`/api/publicaciones-globales?correo=${encodeURIComponent(correoActual)}`);
               if (respuestaReportes.ok) {
                   const reportes = await respuestaReportes.json();
                   reportes.forEach(reporte => {

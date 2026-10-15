@@ -785,7 +785,10 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function cargarAdopcionesNovedades() {
-    fetch('http://localhost:3000/api/publicaciones-globales')
+    // Obtenemos el correo del usuario conectado actualmente con Firebase
+    const correoActual = (auth.currentUser && auth.currentUser.email) ? auth.currentUser.email : '';
+
+    fetch(`/api/publicaciones-globales?correo=${encodeURIComponent(correoActual)}`)
         .then(res => res.json())
         .then(publicaciones => {
             const contenedor = document.getElementById('contenedor-novedades');
