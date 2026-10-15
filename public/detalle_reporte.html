@@ -838,20 +838,48 @@
                   linkAutor.href = `perfil_publico.html?user=${encodeURIComponent(nombreUsuario)}`;
               }
 
-              // --- BOTÓN DE GUARDADO INTELIGENTE CON FIREBASE ---
-              const usuarioLogueadoId = localStorage.getItem('id_usuarios') || 1; 
+// --- VERIFICACIÓN DE AUTOR O USUARIO EXTERNO (REPORTE) ---
               const contenedorBoton = document.getElementById('contenedor-boton-accion');
 
-              if (Number(reporteData.id_usuarios) === Number(usuarioLogueadoId)) {
-                  contenedorBoton.innerHTML = `
-                      <a href="editar_reporte.html?id=${reporteData.id_reporte || reporteId}" class="detalle-btn-accion detalle-btn-editar">
-                          <i class="fa-solid fa-pen-to-square"></i> Editar reporte
-                      </a>
-                  `;
-              } else {
-                  firebase.auth().onAuthStateChanged(async (user) => {
-                      let correoLogueado = user ? user.email : (localStorage.getItem('correo_usuario') || localStorage.getItem('correo'));
+              firebase.auth().onAuthStateChanged(async (user) => {
+                  let correoLogueado = user ? user.email : (localStorage.getItem('correo_usuario') || localStorage.getItem('correo'));
+                  const usuarioLogueadoId = localStorage.getItem('id_usuarios');
 
+                  const esDueño = (
+                      (reporteData.correo_usuario && correoLogueado && reporteData.correo_usuario.toLowerCase().trim() === correoLogueado.toLowerCase().trim()) ||
+                      (reporteData.id_usuarios && usuarioLogueadoId && Number(reporteData.id_usuarios) === Number(usuarioLogueadoId))
+                  );
+
+                  if (esDueño) {
+                      contenedorBoton.innerHTML = `
+                          <div style="display: flex; gap: 8px;">
+                              <a href="formularior_2.html?editar=${reporteData.id_reporte || reporteId}" class="detalle-btn-accion detalle-btn-editar">
+                                  <i class="fa-solid fa-pen-to-square"></i> Editar
+                              </a>
+                              <button class="detalle-btn-accion" id="btn-eliminar-reporte" style="background: #ffe5dd; color: #d9534f; border-color: #f4c2c4;">
+                                  <i class="fa-solid fa-trash"></i> Eliminar
+                              </button>
+                          </div>
+                      `;
+
+                      document.getElementById('btn-eliminar-reporte').addEventListener('click', async () => {
+                          if (confirm("¿Estás seguro de que deseas eliminar este reporte permanentemente?")) {
+                              try {
+                                  const idAResolver = reporteData.id_reporte || reporteId;
+                                  const resDel = await fetch(`/api/reportes/${idAResolver}`, { method: 'DELETE' });
+                                  if (resDel.ok) {
+                                      alert("Reporte eliminado correctamente.");
+                                      window.location.href = 'novedades.html';
+                                  } else {
+                                      alert("No se pudo eliminar el reporte.");
+                                  }
+                              } catch (err) {
+                                  console.error("Error al eliminar:", err);
+                              }
+                          }
+                      });
+
+                  } else {
                       if (!correoLogueado) {
                           contenedorBoton.innerHTML = `
                               <a href="login.html" class="detalle-btn-accion">
@@ -869,7 +897,6 @@
                           );
                           
                           const idPublicacionGlobal = pubEncontrada ? pubEncontrada.id_publicacion : reporteId;
-
                           const resGuards = await fetch(`/api/guardados/ids/${encodeURIComponent(correoLogueado)}`);
                           const idsGuardados = await resGuards.json();
                           const estaGuardada = idsGuardados.map(Number).includes(Number(idPublicacionGlobal));
@@ -880,7 +907,6 @@
                                       <i class="fa-solid fa-bookmark"></i> Publicación guardada
                                   </button>
                               `;
-                              
                               document.getElementById('btn-accion-guardado').addEventListener('click', async () => {
                                   if (confirm("¿Deseas quitar esta publicación de tus guardados?")) {
                                       const quitRes = await fetch('/api/quitar-guardado', {
@@ -891,8 +917,6 @@
                                       if (quitRes.ok) {
                                           alert("Publicación eliminada de guardados.");
                                           location.reload();
-                                      } else {
-                                          alert("Error al quitar de guardados.");
                                       }
                                   }
                               });
@@ -911,27 +935,20 @@
                                   if (saveRes.ok) {
                                       alert("¡Publicación guardada con éxito!");
                                       location.reload();
-                                  } else {
-                                      alert("Error al guardar la publicación.");
                                   }
                               });
                           }
                       } catch (e) {
                           console.error("Error al gestionar guardados:", e);
-                          contenedorBoton.innerHTML = `
-                              <button class="detalle-btn-accion">
-                                  <i class="fa-regular fa-bookmark"></i> Guardar publicación
-                              </button>
-                          `;
                       }
-                  });
-              }
+                  }
+              });
 
-          } catch (error) {
-              console.error("Error al cargar detalle:", error);
-              alert("Hubo un error al cargar los detalles del reporte.");
-          }
-      }
+            } catch (error) {
+                console.error("Error al cargar detalle:", error);
+                alert("Hubo un error al cargar los detalles del reporte.");
+            }
+        }
   </script>
 </body>
 </html>

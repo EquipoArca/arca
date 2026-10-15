@@ -750,90 +750,116 @@
                   linkAutor.href = `perfil_publico.html?user=${encodeURIComponent(nombreUsuario)}`;
               }
 
-              // --- VERIFICACIÓN INTELIGENTE DE SESIÓN Y GUARDADO ---
+// --- VERIFICACIÓN DE AUTOR O USUARIO EXTERNO (ADOPCIÓN) ---
               const contenedorAccion = document.getElementById('contenedor-boton-accion');
 
-              // Verificamos si hay sesión en Firebase o respaldo en localStorage
               firebase.auth().onAuthStateChanged(async (user) => {
                   let correoLogueado = user ? user.email : (localStorage.getItem('correo_usuario') || localStorage.getItem('correo'));
+                  const usuarioLogueadoId = localStorage.getItem('id_usuarios');
 
-                  if (!correoLogueado) {
+                  const esDueño = (
+                      (adopcion.correo_usuario && correoLogueado && adopcion.correo_usuario.toLowerCase().trim() === correoLogueado.toLowerCase().trim()) ||
+                      (adopcion.id_usuarios && usuarioLogueadoId && Number(adopcion.id_usuarios) === Number(usuarioLogueadoId))
+                  );
+
+                  if (esDueño) {
+                      // SI ES SU PROPIA ADOPCIÓN: Botones de Editar y Eliminar
                       contenedorAccion.innerHTML = `
-                          <a href="login.html" class="detalle-btn-accion">
-                              <i class="fa-regular fa-bookmark"></i> Inicia sesión para guardar
-                          </a>
-                      `;
-                      return;
-                  }
-
-                  try {
-                      const resPubs = await fetch('/api/publicaciones-globales');
-                      const publicaciones = await resPubs.json();
-                      
-                      let pubEncontrada = publicaciones.find(p => 
-                          (p.tipo_publicacion === 'adopcion' && Number(p.id_origen) === Number(adopcionId)) ||
-                          Number(p.id_publicacion) === Number(adopcionId) ||
-                          Number(p.id_adopcion) === Number(adopcionId)
-                      );
-                      
-                      const idPublicacionGlobal = pubEncontrada ? pubEncontrada.id_publicacion : adopcionId;
-                      
-                      const resGuards = await fetch(`/api/guardados/ids/${encodeURIComponent(correoLogueado)}`);
-                      const idsGuardados = await resGuards.json();
-                      const estaGuardada = idsGuardados.map(Number).includes(Number(idPublicacionGlobal));
-
-                      if (estaGuardada) {
-                          contenedorAccion.innerHTML = `
-                              <button class="detalle-btn-accion" id="btn-accion-guardado" style="background: #ffe5dd; color: #d9534f; border-color: #f4c2c4;">
-                                  <i class="fa-solid fa-bookmark"></i> Publicación guardada
+                          <div style="display: flex; gap: 8px;">
+                              <a href="formulario_adopcion_2.html?editar=${adopcion.id_adopcion || adopcionId}" class="detalle-btn-accion detalle-btn-editar" style="background: #fca38d; color: #fff;">
+                                  <i class="fa-solid fa-pen-to-square"></i> Editar
+                              </a>
+                              <button class="detalle-btn-accion" id="btn-eliminar-adopcion" style="background: #ffe5dd; color: #d9534f; border-color: #f4c2c4;">
+                                  <i class="fa-solid fa-trash"></i> Eliminar
                               </button>
+                          </div>
+                      `;
+
+                      document.getElementById('btn-eliminar-adopcion').addEventListener('click', async () => {
+                          if (confirm("¿Estás seguro de que deseas eliminar esta publicación de adopción?")) {
+                              try {
+                                  const idAResolver = adopcion.id_adopcion || adopcionId;
+                                  const resDel = await fetch(`/api/adopciones/${idAResolver}`, { method: 'DELETE' });
+                                  if (resDel.ok) {
+                                      alert("Publicación de adopción eliminada correctamente.");
+                                      window.location.href = 'home.html';
+                                  } else {
+                                      alert("No se pudo eliminar la adopción.");
+                                  }
+                              } catch (err) {
+                                  console.error("Error al eliminar adopción:", err);
+                              }
+                          }
+                      });
+
+                  } else {
+                      // SI ES OTRO USUARIO: Lógica normal de guardado
+                      if (!correoLogueado) {
+                          contenedorAccion.innerHTML = `
+                              <a href="login.html" class="detalle-btn-accion">
+                                  <i class="fa-regular fa-bookmark"></i> Inicia sesión para guardar
+                              </a>
                           `;
+                          return;
+                      }
+
+                      try {
+                          const resPubs = await fetch('/api/publicaciones-globales');
+                          const publicaciones = await resPubs.json();
                           
-                          document.getElementById('btn-accion-guardado').addEventListener('click', async () => {
-                              if (confirm("¿Deseas quitar esta publicación de tus guardados?")) {
-                                  const quitRes = await fetch('/api/quitar-guardado', {
+                          let pubEncontrada = publicaciones.find(p => 
+                              (p.tipo_publicacion === 'adopcion' && Number(p.id_origen) === Number(adopcionId)) ||
+                              Number(p.id_publicacion) === Number(adopcionId) ||
+                              Number(p.id_adopcion) === Number(adopcionId)
+                          );
+                          
+                          const idPublicacionGlobal = pubEncontrada ? pubEncontrada.id_publicacion : adopcionId;
+                          const resGuards = await fetch(`/api/guardados/ids/${encodeURIComponent(correoLogueado)}`);
+                          const idsGuardados = await resGuards.json();
+                          const estaGuardada = idsGuardados.map(Number).includes(Number(idPublicacionGlobal));
+
+                          if (estaGuardada) {
+                              contenedorAccion.innerHTML = `
+                                  <button class="detalle-btn-accion" id="btn-accion-guardado" style="background: #ffe5dd; color: #d9534f; border-color: #f4c2c4;">
+                                      <i class="fa-solid fa-bookmark"></i> Publicación guardada
+                                  </button>
+                              `;
+                              document.getElementById('btn-accion-guardado').addEventListener('click', async () => {
+                                  if (confirm("¿Deseas quitar esta publicación de tus guardados?")) {
+                                      const quitRes = await fetch('/api/quitar-guardado', {
+                                          method: 'POST',
+                                          headers: { 'Content-Type': 'application/json' },
+                                          body: JSON.stringify({ correo: correoLogueado, id_publicacion: Number(idPublicacionGlobal) })
+                                      });
+                                      if (quitRes.ok) {
+                                          alert("Publicación eliminada de guardados.");
+                                          location.reload();
+                                      }
+                                  }
+                              });
+                          } else {
+                              contenedorAccion.innerHTML = `
+                                  <button class="detalle-btn-accion" id="btn-accion-guardado">
+                                      <i class="fa-regular fa-bookmark"></i> Guardar publicación
+                                  </button>
+                              `;
+                              document.getElementById('btn-accion-guardado').addEventListener('click', async () => {
+                                  const saveRes = await fetch('/api/guardar-publicacion', {
                                       method: 'POST',
                                       headers: { 'Content-Type': 'application/json' },
                                       body: JSON.stringify({ correo: correoLogueado, id_publicacion: Number(idPublicacionGlobal) })
                                   });
-                                  if (quitRes.ok) {
-                                      alert("Publicación eliminada de guardados.");
+                                  if (saveRes.ok) {
+                                      alert("¡Publicación guardada con éxito!");
                                       location.reload();
-                                  } else {
-                                      alert("Error al quitar de guardados.");
                                   }
-                              }
-                          });
-                      } else {
-                          contenedorAccion.innerHTML = `
-                              <button class="detalle-btn-accion" id="btn-accion-guardado">
-                                  <i class="fa-regular fa-bookmark"></i> Guardar publicación
-                              </button>
-                          `;
-                          document.getElementById('btn-accion-guardado').addEventListener('click', async () => {
-                              const saveRes = await fetch('/api/guardar-publicacion', {
-                                  method: 'POST',
-                                  headers: { 'Content-Type': 'application/json' },
-                                  body: JSON.stringify({ correo: correoLogueado, id_publicacion: Number(idPublicacionGlobal) })
                               });
-                              if (saveRes.ok) {
-                                  alert("¡Publicación guardada con éxito!");
-                                  location.reload();
-                              } else {
-                                  alert("Error al guardar la publicación.");
-                              }
-                          });
+                          }
+                      } catch (e) {
+                          console.error("Error gestionando el guardado:", e);
                       }
-                  } catch (e) {
-                      console.error("Error gestionando el guardado:", e);
-                      contenedorAccion.innerHTML = `
-                          <button class="detalle-btn-accion">
-                              <i class="fa-regular fa-bookmark"></i> Guardar publicación
-                          </button>
-                      `;
                   }
               });
-
           } catch (error) {
               console.error("Error al cargar detalle de adopción:", error);
               alert("Hubo un error al cargar los detalles de la adopción.");
