@@ -836,32 +836,32 @@
               if (linkAutor) {
                   linkAutor.href = `perfil_publico.html?user=${encodeURIComponent(nombreUsuario)}`;
               }
-// --- VERIFICACIÓN DE AUTOR O USUARIO EXTERNO (UNIVERSAL Y ROBUSTA) ---
+// --- VERIFICACIÓN DE AUTOR REAL CONSULTANDO SU PERFIL ---
               const contenedorBoton = document.getElementById('contenedor-boton-accion');
 
               firebase.auth().onAuthStateChanged(async (user) => {
                   let correoLogueado = user ? user.email : (localStorage.getItem('correo_usuario') || localStorage.getItem('correo') || "");
-                  let usuarioLogueadoId = localStorage.getItem('id_usuarios');
-
+                  
                   let esDueño = false;
 
-                  if (correoLogueado && reporteData.correo_usuario) {
-                      if (reporteData.correo_usuario.toLowerCase().trim() === correoLogueado.toLowerCase().trim()) {
-                          esDueño = true;
-                      }
-                  }
+                  if (correoLogueado) {
+                      try {
+                          // Consultamos el correo real del autor de la publicación a través de su nombre de usuario
+                          const nombreUsuarioAutor = reporteData.nombre_usuario;
+                          if (nombreUsuarioAutor) {
+                              const resPerfil = await fetch(`/api/perfil/${encodeURIComponent(nombreUsuarioAutor)}`);
+                              if (resPerfil.ok) {
+                                  const datosPerfilAutor = await resPerfil.json();
+                                  const correoRealAutor = datosPerfilAutor.correo_usuario || datosPerfilAutor.correo;
 
-                  if (usuarioLogueadoId && reporteData.id_usuarios) {
-                      if (Number(reporteData.id_usuarios) === Number(usuarioLogueadoId)) {
-                          esDueño = true;
+                                  if (correoRealAutor && correoRealAutor.toLowerCase().trim() === correoLogueado.toLowerCase().trim()) {
+                                      esDueño = true;
+                                  }
+                              }
+                          }
+                      } catch (err) {
+                          console.error("No se pudo verificar el autor:", err);
                       }
-                  }
-
-                  const autorEnPantalla = document.getElementById('nombre-autor-texto').textContent.replace('@', '').trim().toLowerCase();
-                  const nombreUsuarioLocal = (localStorage.getItem('nombre_usuario') || "").toLowerCase().trim();
-                  
-                  if (autorEnPantalla && nombreUsuarioLocal && autorEnPantalla === nombreUsuarioLocal) {
-                      esDueño = true;
                   }
 
                   if (esDueño) {
