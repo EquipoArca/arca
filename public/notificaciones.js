@@ -18,8 +18,22 @@ async function cargarNotificacionesServidor() {
     const correo = obtenerCorreoUsuarioActivo();
 
     if (!correo) {
+        // MODO INVITADO: Mostramos la misma escena kawaii con el sol y las nubes
         contenedor.innerHTML = `
-            <div class="estado-vacio" style="text-align: center; padding: 40px;">
+            <div class="estado-vacio">
+                <div class="escena-cielo-kawaii">
+                    <div class="nube-kawaii nube-izq"></div>
+                    <div class="sol-kawaii">
+                        <div class="ojo-sol izq"></div>
+                        <div class="ojo-sol der"></div>
+                        <div class="boca-sol"></div>
+                        <div class="rubor-sol izq"></div>
+                        <div class="rubor-sol der"></div>
+                    </div>
+                    <div class="nube-kawaii nube-der"></div>
+                    <span class="destello d1">✦</span>
+                    <span class="destello d2">✦</span>
+                </div>
                 <h2>¡Inicia sesión para ver tus notificaciones!</h2>
                 <p>&lt;3</p>
             </div>
@@ -33,7 +47,6 @@ async function cargarNotificacionesServidor() {
 
         const notificaciones = await respuesta.json();
         
-        // FILTRO EN CLIENTE: Evita pintar tarjetas duplicadas
         const notificacionesUnicas = [];
         const idsVistos = new Set();
 
@@ -165,3 +178,4 @@ document.addEventListener('DOMContentLoaded', () => {
         cargarNotificacionesServidor();
     }
 });
+
