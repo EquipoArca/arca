@@ -177,17 +177,13 @@
    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script> 
 
 <script>
-    // Usamos el observador de Firebase para garantizar que tenemos el correo real antes de buscar
-    auth.onAuthStateChanged(async (user) => {
+    // Función para cargar las publicaciones (recibe el correo opcionalmente)
+    async function cargarNovedades(correoUsuario = '') {
         const contenedor = document.getElementById('contenedor-novedades');
         if (!contenedor) return;
 
         try {
-            // Obtenemos el correo del usuario logueado de forma segura
-            const correoActual = (user && user.email) ? user.email : '';
-
-            // Hacemos el fetch pasando el correo para que el servidor filtre los bloqueados
-            const respuesta = await fetch(`/api/publicaciones-globales?correo=${encodeURIComponent(correoActual)}`);
+            const respuesta = await fetch(`/api/publicaciones-globales?correo=${encodeURIComponent(correoUsuario)}`);
             if (!respuesta.ok) throw new Error("Error al obtener las publicaciones globales");
             
             const publicaciones = await respuesta.json();
@@ -248,11 +244,32 @@
                     `;
                     contenedor.appendChild(tarjeta);
                 }
+            } else {
+                contenedor.innerHTML = `
+                    <div class="estado-vacio">
+                        <i class="fa-solid fa-paw icono-vacio"></i>
+                        <h2>¡Aún no hay publicaciones!</h2>
+                        <p> &lt;3 </p>
+                    </div>
+                `;
             }
         } catch (error) {
             console.error("No se pudieron cargar las novedades:", error);
         }
+    }
+
+    // Usamos el observador pero con un respaldo inmediato por si Firebase tarda un segundo
+    auth.onAuthStateChanged((user) => {
+        const correo = (user && user.email) ? user.email : '';
+        cargarNovedades(correo);
     });
+
+    // Respaldo de seguridad por si el observer tarda mucho en la primera carga
+    setTimeout(() => {
+        if (document.getElementById('contenedor-novedades').innerHTML.includes('estado-vacio') && auth.currentUser) {
+            cargarNovedades(auth.currentUser.email);
+        }
+    }, 800);
 
     document.addEventListener('click', (event) => {
         const botonDetalle = event.target.closest('.btn-accion-ir');
@@ -269,8 +286,7 @@
             }
         }
     });
-</script>   
-
+</script>
 <style>
 .tarjeta-prototipo-estilo {
     background: #fde8e5; 
