@@ -356,7 +356,7 @@
                   </div>
 
                   <button class="btn-accion-peligro" onclick="alert('Funcionalidad de denuncia enviada.')">Denunciar perfil</button>
-                  <button class="btn-accion-peligro" onclick="alert('Usuario bloqueado correctamente.')">Bloquear usuario</button>
+                  <button class="btn-accion-peligro" onclick="bloquearUsuarioActual()">Bloquear usuario</button>
               </div>
 
           </div>
@@ -619,6 +619,44 @@
               console.error("Error cargando publicaciones del usuario", e);
           }
       }
-  </script>
+    async function bloquearUsuarioActual() {
+    const correoLogueado = obtenerCorreoSesion();
+    if (!correoLogueado) {
+        alert("Debes iniciar sesión para bloquear a un usuario.");
+        window.location.href = 'login.html';
+        return;
+    }
+
+    if (!idUsuarioPerfil) {
+        alert("No se pudo identificar al usuario que deseas bloquear.");
+        return;
+    }
+
+    if (confirm("¿Estás seguro de que deseas bloquear a este usuario? Dejarás de ver sus publicaciones y contenido.")) {
+        try {
+            const respuesta = await fetch('/api/bloquear-usuario', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    correo_bloqueador: correoLogueado,
+                    id_usuario_bloqueado: idUsuarioPerfil
+                })
+            });
+
+            const resultado = await respuesta.json();
+            
+            if (respuesta.ok) {
+                alert("Usuario bloqueado correctamente.");
+                window.location.href = 'home.html'; // Redirigir al inicio después de bloquear
+            } else {
+                alert(resultado.error || "No se pudo bloquear al usuario.");
+            }
+        } catch (error) {
+            console.error("Error en la solicitud de bloqueo:", error);
+            alert("Ocurrió un error al intentar bloquear al usuario.");
+        }
+    }
+ }
+</script>
 </body>
 </html>
