@@ -1670,6 +1670,40 @@ app.post('/api/registrar-fundacion', upload.fields([
         });
     });
 }));
+// Ruta para bloquear a un usuario
+app.post('/api/bloquear-usuario', async (req, res) => {
+    const { correo_bloqueador, id_usuario_bloqueado } = req.body;
+
+    try {
+        // 1. Buscar el ID del usuario bloqueador a partir de su correo
+        const [usuarioBloqueador] = await pool.query(
+            'SELECT id_usuarios FROM usuarios WHERE correo_usuario = ?', 
+            [correo_bloqueador]
+        );
+
+        if (usuarioBloqueador.length === 0) {
+            return res.status(404).json({ error: "Usuario bloqueador no encontrado" });
+        }
+
+        const idBloqueador = usuarioBloqueador[0].id_usuarios;
+
+        // Evitar que se bloquee a sí mismo
+        if (Number(idBloqueador) === Number(id_usuario_bloqueado)) {
+            return res.status(400).json({ error: "No puedes bloquearte a ti mismo" });
+        }
+
+        // 2. Insertar el registro en la tabla de bloqueados
+        await pool.query(
+            'INSERT IGNORE INTO usuarios_bloqueados (id_usuario_bloqueador, id_usuario_bloqueado) VALUES (?, ?)',
+            [idBloqueador, id_usuario_bloqueado]
+        );
+
+        res.json({ mensaje: "Usuario bloqueado exitosamente" });
+    } catch (err) {
+        console.error("Error al bloquear usuario:", err);
+        res.status(500).json({ error: "Error en el servidor al bloquear usuario" });
+    }
+});
 
 // ==========================================
 // INICIALIZACIÓN DEL SERVIDOR (Siempre al final)
