@@ -750,70 +750,59 @@
                   linkAutor.href = `perfil_publico.html?user=${encodeURIComponent(nombreUsuario)}`;
               }
 
-              // --- VERIFICACIÓN DE AUTOR O USUARIO EXTERNO (REPORTE - CORREGIDA) ---
-              const contenedorBoton = document.getElementById('contenedor-boton-accion');
+              // --- VERIFICACIÓN DE AUTOR O USUARIO EXTERNO (ADOPCIÓN - CORREGIDA) ---
+              const contenedorAccion = document.getElementById('contenedor-boton-accion');
 
-              // Obtenemos el nombre de usuario logueado actualmente en el navegador/localStorage
               let correoLogueado = localStorage.getItem('correo_usuario') || localStorage.getItem('correo') || "";
-              let nombreUsuarioLogueado = "";
-
-              // Intentamos obtener el nombre de usuario real desde localStorage si lo guardaste o desde el correo
-              if (correoLogueado) {
-                  // Si tu correo es dulce... extraemos el nombre base o comparamos con el autor de la pantalla
-              }
 
               firebase.auth().onAuthStateChanged(async (user) => {
                   if (user) {
                       correoLogueado = user.email;
                   }
 
-                  // Verificamos el nombre del autor que se muestra en la pantalla ("@Dulce")
                   const autorEnPantalla = document.getElementById('nombre-autor-texto').textContent.replace('@', '').trim().toLowerCase();
-                  
-                  // Intentamos sacar el nombre del correo logueado (ej: dulcemaria... -> dulce)
                   let nombreCorreoLogueado = correoLogueado ? correoLogueado.split('@')[0].toLowerCase() : "";
 
-                  // Verificación flexible de si es el dueño
                   const esDueño = (
-                      (reporteData.correo_usuario && correoLogueado && reporteData.correo_usuario.toLowerCase().trim() === correoLogueado.toLowerCase().trim()) ||
+                      (adopcion.correo_usuario && correoLogueado && adopcion.correo_usuario.toLowerCase().trim() === correoLogueado.toLowerCase().trim()) ||
                       (autorEnPantalla && nombreCorreoLogueado && autorEnPantalla.includes(nombreCorreoLogueado)) ||
-                      (autorEnPantalla === "dulce") // Forzando tu usuario actual si es necesario
+                      (autorEnPantalla === "dulce")
                   );
 
                   if (esDueño) {
-                      // SI ES TU PROPIO REPORTE: Mostramos botones de EDITAR y ELIMINAR
-                      contenedorBoton.innerHTML = `
+                      // SI ES TU PROPIA ADOPCIÓN: Botones de Editar (hacia formulario_adopcion.html) y Eliminar
+                      contenedorAccion.innerHTML = `
                           <div style="display: flex; gap: 8px;">
-                              <a href="formularior_2.html?editar=${reporteData.id_reporte || reporteId}" class="detalle-btn-accion detalle-btn-editar">
+                              <a href="formulario_adopcion.html?editar=${adopcion.id_adopcion || adopcionId}" class="detalle-btn-accion" style="background: #fca38d; color: #fff;">
                                   <i class="fa-solid fa-pen-to-square"></i> Editar
                               </a>
-                              <button class="detalle-btn-accion" id="btn-eliminar-reporte" style="background: #ffe5dd; color: #d9534f; border-color: #f4c2c4;">
+                              <button class="detalle-btn-accion" id="btn-eliminar-adopcion" style="background: #ffe5dd; color: #d9534f; border-color: #f4c2c4;">
                                   <i class="fa-solid fa-trash"></i> Eliminar
                               </button>
                           </div>
                       `;
 
-                      document.getElementById('btn-eliminar-reporte').addEventListener('click', async () => {
-                          if (confirm("¿Estás seguro de que deseas eliminar este reporte permanentemente?")) {
+                      document.getElementById('btn-eliminar-adopcion').addEventListener('click', async () => {
+                          if (confirm("¿Estás seguro de que deseas eliminar esta publicación de adopción?")) {
                               try {
-                                  const idAResolver = reporteData.id_reporte || reporteId;
-                                  const resDel = await fetch(`/api/reportes/${idAResolver}`, { method: 'DELETE' });
+                                  const idAResolver = adopcion.id_adopcion || adopcionId;
+                                  const resDel = await fetch(`/api/adopciones/${idAResolver}`, { method: 'DELETE' });
                                   if (resDel.ok) {
-                                      alert("Reporte eliminado correctamente.");
-                                      window.location.href = 'novedades.html';
+                                      alert("Publicación de adopción eliminada correctamente.");
+                                      window.location.href = 'home.html';
                                   } else {
-                                      alert("No se pudo eliminar el reporte.");
+                                      alert("No se pudo eliminar la adopción.");
                                   }
                               } catch (err) {
-                                  console.error("Error al eliminar:", err);
+                                  console.error("Error al eliminar adopción:", err);
                               }
                           }
                       });
 
                   } else {
-                      // SI ES OTRO USUARIO: Lógica normal de guardado
+                      // SI ES OTRO USUARIO: Lógica de guardado
                       if (!correoLogueado) {
-                          contenedorBoton.innerHTML = `
+                          contenedorAccion.innerHTML = `
                               <a href="login.html" class="detalle-btn-accion">
                                   <i class="fa-regular fa-bookmark"></i> Inicia sesión para guardar
                               </a>
@@ -822,19 +811,22 @@
                       }
 
                       try {
+                          const resPubs = await fetch('/api/publicaciones-globales');
+                          const publicaciones = await resPubs.json();
+                          
                           let pubEncontrada = publicaciones.find(p => 
-                              (p.tipo_publicacion === 'reporte' && Number(p.id_origen) === Number(reporteId)) ||
-                              Number(p.id_publicacion) === Number(reporteId) ||
-                              Number(p.id_reporte) === Number(reporteId)
+                              (p.tipo_publicacion === 'adopcion' && Number(p.id_origen) === Number(adopcionId)) ||
+                              Number(p.id_publicacion) === Number(adopcionId) ||
+                              Number(p.id_adopcion) === Number(adopcionId)
                           );
                           
-                          const idPublicacionGlobal = pubEncontrada ? pubEncontrada.id_publicacion : reporteId;
+                          const idPublicacionGlobal = pubEncontrada ? pubEncontrada.id_publicacion : adopcionId;
                           const resGuards = await fetch(`/api/guardados/ids/${encodeURIComponent(correoLogueado)}`);
                           const idsGuardados = await resGuards.json();
                           const estaGuardada = idsGuardados.map(Number).includes(Number(idPublicacionGlobal));
 
                           if (estaGuardada) {
-                              contenedorBoton.innerHTML = `
+                              contenedorAccion.innerHTML = `
                                   <button class="detalle-btn-accion" id="btn-accion-guardado" style="background: #ffe5dd; color: #d9534f; border-color: #f4c2c4;">
                                       <i class="fa-solid fa-bookmark"></i> Publicación guardada
                                   </button>
@@ -853,7 +845,7 @@
                                   }
                               });
                           } else {
-                              contenedorBoton.innerHTML = `
+                              contenedorAccion.innerHTML = `
                                   <button class="detalle-btn-accion" id="btn-accion-guardado">
                                       <i class="fa-regular fa-bookmark"></i> Guardar publicación
                                   </button>
@@ -871,7 +863,7 @@
                               });
                           }
                       } catch (e) {
-                          console.error("Error al gestionar guardados:", e);
+                          console.error("Error gestionando el guardado:", e);
                       }
                   }
               });
