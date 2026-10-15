@@ -1132,3 +1132,22 @@ margin-bottom: -15px; /* Recorta la distancia inferior de la escena */}
     transform: scale(1.2);
   }
 }
+
+.btn-detalles {
+    background-color: #fbc2c4;
+    color: #000000;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 20px;
+    font-family: 'Itim', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 550;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.btn-detalles:hover {
+    transform: scale(1.05);
+    background-color: #f9a3a6;
+}
