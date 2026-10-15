@@ -708,17 +708,19 @@
                       permanent: true, direction: 'right', className: 'label-nombre-pin', offset: [10, -20]
                   });
 
-                  let popupContenido = '';
-                  if (item.id_reporte) {
+                let popupContenido = '';
+                  // Si el tipo NO es veterinaria (es decir, es reporte, adopción o caso), pintamos la tarjeta de detalle
+                  if (tipo !== 'veterinaria') {
                      const urlMapsReporte = `https://www.google.com/maps/search/?api=1&query=${item.lat},${item.lng}`;
+                     const idCaso = item.id_reporte || item.id || '';
 
                       popupContenido = `
                           <div class="popup-card-arca">
                               <img src="${item.img_reporte || 'logo.png'}" alt="Foto">
-                              <b>${item.nombre_tipo_reporte || 'Reporte'}</b>
+                              <b>${item.nombre_tipo_reporte || 'Reporte / Caso'}</b>
                               <p>${item.Ubicacion && !item.Ubicacion.includes("Ubicacion GPS") ? item.Ubicacion : 'San Cristóbal, Medellín'}</p>
                               <div style="display: flex; gap: 4px; justify-content: center; margin-top: 4px;">
-                                  <a href="detalle_reporte.html?id=${item.id_reporte}" class="btn-ver-caso" style="padding: 4px 8px; font-size: 11px;">Ver caso</a>
+                                  <a href="detalle_reporte.html?id=${idCaso}" class="btn-ver-caso" style="padding: 4px 8px; font-size: 11px;">Ver caso</a>
                                   <a href="${urlMapsReporte}" target="_blank" class="btn-ver-caso" style="background: #27ae60; padding: 4px 8px; font-size: 11px;">Maps</a>
                               </div>
                           </div>
