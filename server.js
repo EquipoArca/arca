@@ -437,6 +437,28 @@ app.post('/actualizar-correo-usuario', (req, res) => {
         });
     });
 });
+// DELETE: Eliminar el perfil de adoptante del usuario logueado
+app.delete('/api/eliminar-adoptante/:id_usuarios', (req, res) => {
+    const idUsuarios = req.params.id_usuarios;
+
+    if (!idUsuarios) {
+        return res.status(400).json({ error: "ID de usuario inválido." });
+    }
+
+    const query = "DELETE FROM adoptante WHERE id_usuarios = ?";
+    db.query(query, [idUsuarios], (err, result) => {
+        if (err) {
+            console.error("❌ Error al eliminar perfil de adoptante:", err.message);
+            return res.status(500).json({ error: "Error en el servidor al eliminar el perfil." });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: "No se encontró el perfil de adoptante." });
+        }
+
+        res.json({ mensaje: "¡Perfil de adoptante eliminado con éxito!" });
+    });
+});
 // ==========================================
 // REPORTES Y ESTADÍSTICAS
 // ==========================================

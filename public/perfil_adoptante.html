@@ -159,6 +159,7 @@
         <!-- Botones de control si la ficha SÍ existe -->
         <div class="acciones-perfil" id="acciones-perfil" style="display: none;">
             <button onclick="irAEditar()" class="btn-editar"><i class="fa-solid fa-pen-to-square"></i> Editar Perfil</button>
+            <button onclick="eliminarPerfilAdoptante()" class="btn-eliminar" style="background-color: #ff5252; color: white; padding: 10px 20px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer;"><i class="fa-solid fa-trash"></i> Eliminar Perfil</button>
             <button onclick="window.location.href='perfil_usuario.html'" class="btn-volver"><i class="fa-solid fa-arrow-left"></i> Volver</button>
         </div>
 
@@ -173,91 +174,97 @@
 
     <!-- Script de lógica de la vista corregido y robusto -->
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            firebase.auth().onAuthStateChanged(async (user) => {
-                if (!user) {
-                    alert("Debes iniciar sesión.");
-                    window.location.href = "adopciones.html";
-                    return;
-                }
+    let idUsuarioActual = null; // Variable global para almacenar el ID del usuario
 
-                try {
-                    // 1. Obtenemos el id_usuarios interno mediante el correo con rutas relativas limpias
-                    const resUser = await fetch(`/api/obtener-usuario?correo=${encodeURIComponent(user.email)}`);
-                    if (!resUser.ok) throw new Error("No se pudo obtener el usuario.");
-                    const datosUser = await resUser.json();
-                    console.log("Datos del usuario recibidos:", datosUser);
-                    console.log("ID detectado (id_usuarios):", datosUser.id_usuarios);
+    document.addEventListener('DOMContentLoaded', () => {
+        firebase.auth().onAuthStateChanged(async (user) => {
+            if (!user) {
+                alert("Debes iniciar sesión.");
+                window.location.href = "adopciones.html";
+                return;
+            }
 
-                    // 2. Consultamos la ficha de adoptante usando el id exacto limpio
-                    const resFicha = await fetch(`/api/obtener-ficha-adoptante/${datosUser.id_usuarios}`);
-                    
-                    if (resFicha.ok) {
-                        const ficha = await resFicha.json();
+            try {
+                // 1. Obtenemos el id_usuarios interno mediante el correo
+                const resUser = await fetch(`/api/obtener-usuario?correo=${encodeURIComponent(user.email)}`);
+                if (!resUser.ok) throw new Error("No se pudo obtener el usuario.");
+                const datosUser = await resUser.json();
+                
+                idUsuarioActual = datosUser.id_usuarios; // Guardamos el ID aquí
 
-                        // Rellenamos asegurando compatibilidad con variantes de nombres de columnas
-                        document.getElementById('ficha-nombre').textContent = ficha.nombre_completo || 'Sin nombre';
-                        document.getElementById('ficha-ubicacion').textContent = ficha.Ubicacion || ficha.ubicacion || 'No especificada';
-                        document.getElementById('ficha-nacimiento').textContent = ficha.fecha_nacimiento ? ficha.fecha_nacimiento.split('T')[0] : '';
-                        document.getElementById('ficha-telefono').textContent = ficha.telefono || ficha.Telefono || '';
-                        document.getElementById('ficha-correo').textContent = ficha.correo || ficha.Correo || '';
-                        document.getElementById('ficha-ocupacion').textContent = ficha.ocupacion || ficha.Ocupacion || '';
+                // 2. Consultamos la ficha de adoptante usando el id exacto
+                const resFicha = await fetch(`/api/obtener-ficha-adoptante/${idUsuarioActual}`);
+                
+                if (resFicha.ok) {
+                    const ficha = await resFicha.json();
 
-                        document.getElementById('ficha-vivienda').textContent = ficha.tipo_vivienda_nombre || 'No especificado';
-                        document.getElementById('ficha-tenencia').textContent = ficha.vivienda_propia === 1 ? 'Propia' : (ficha.vivienda_arrendada === 1 ? 'Arrendada' : 'Familiar');
-                        document.getElementById('ficha-permitidas').textContent = ficha.mascotas_permitidas === 1 ? 'Sí' : 'No';
-                        document.getElementById('ficha-convivientes').textContent = ficha.con_quien_vives || 'Nadie especificado';
-                        document.getElementById('ficha-ninos').textContent = ficha.hay_niños_en_casa === 1 ? 'Sí' : 'No';
+                    // Rellenamos los campos de la ficha...
+                    document.getElementById('ficha-nombre').textContent = ficha.nombre_completo || 'Sin nombre';
+                    document.getElementById('ficha-ubicacion').textContent = ficha.Ubicacion || ficha.ubicacion || 'No especificada';
+                    document.getElementById('ficha-nacimiento').textContent = ficha.fecha_nacimiento ? ficha.fecha_nacimiento.split('T')[0] : '';
+                    document.getElementById('ficha-telefono').textContent = ficha.telefono || ficha.Telefono || '';
+                    document.getElementById('ficha-correo').textContent = ficha.correo || ficha.Correo || '';
+                    document.getElementById('ficha-ocupacion').textContent = ficha.ocupacion || ficha.Ocupacion || '';
 
-                        document.getElementById('ficha-otras-mascotas').textContent = ficha.tiene_otras_mascotas === 1 ? 'Sí' : 'No';
-                        document.getElementById('ficha-presupuesto').textContent = `$${ficha.prosupuesto_mensual || ficha.presupuesto_mensual || 0}`;
-                        document.getElementById('ficha-horas').textContent = ficha.horas_ausente || 0;
-                        document.getElementById('ficha-cuidador').textContent = ficha.cuidador || 'No especificado';
-                        document.getElementById('ficha-motivacion').textContent = ficha.motivacion || 'Sin motivación descrita.';
+                    document.getElementById('ficha-vivienda').textContent = ficha.tipo_vivienda_nombre || 'No especificado';
+                    document.getElementById('ficha-tenencia').textContent = ficha.vivienda_propia === 1 ? 'Propia' : (ficha.vivienda_arrendada === 1 ? 'Arrendada' : 'Familiar');
+                    document.getElementById('ficha-permitidas').textContent = ficha.mascotas_permitidas === 1 ? 'Sí' : 'No';
+                    document.getElementById('ficha-convivientes').textContent = ficha.con_quien_vives || 'Nadie especificado';
+                    document.getElementById('ficha-ninos').textContent = ficha.hay_niños_en_casa === 1 ? 'Sí' : 'No';
 
-                        // Mostramos la tarjeta y los botones de acción
-                        document.getElementById('contenedor-ficha').style.display = 'block';
-                        document.getElementById('acciones-perfil').style.display = 'flex';
-                        document.getElementById('sin-perfil').style.display = 'none';
-                    } else {
-                        // Si no tiene perfil, mostramos el aviso para crearlo
-                        document.getElementById('contenedor-ficha').style.display = 'none';
-                        document.getElementById('acciones-perfil').style.display = 'none';
-                        document.getElementById('sin-perfil').style.display = 'block';
-                    }
+                    document.getElementById('ficha-otras-mascotas').textContent = ficha.tiene_otras_mascotas === 1 ? 'Sí' : 'No';
+                    document.getElementById('ficha-presupuesto').textContent = `$${ficha.prosupuesto_mensual || ficha.presupuesto_mensual || 0}`;
+                    document.getElementById('ficha-horas').textContent = ficha.horas_ausente || 0;
+                    document.getElementById('ficha-cuidador').textContent = ficha.cuidador || 'No especificado';
+                    document.getElementById('ficha-motivacion').textContent = ficha.motivacion || 'Sin motivación descrita.';
 
-                } catch (error) {
-                    console.error("Error al cargar la ficha:", error);
+                    // Mostramos la tarjeta y los botones de acción
+                    document.getElementById('contenedor-ficha').style.display = 'block';
+                    document.getElementById('acciones-perfil').style.display = 'flex';
+                    document.getElementById('sin-perfil').style.display = 'none';
+                } else {
                     document.getElementById('contenedor-ficha').style.display = 'none';
+                    document.getElementById('acciones-perfil').style.display = 'none';
                     document.getElementById('sin-perfil').style.display = 'block';
                 }
-            });
-        });
 
-        function irAEditar() {
-            // Te lleva directo al formulario para actualizar con modo edición
-            window.location.href = "formulario_adoptante.html?modo=editar";
-        }
-        
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const btnToggleMenu = document.getElementById('btn-toggle-menu');
-            const sidebar = document.getElementById('sidebar');
-
-            if (btnToggleMenu && sidebar) {
-                btnToggleMenu.addEventListener('click', (e) => {
-                    e.stopPropagation(); // Evita conflictos con clics globales
-                    sidebar.classList.toggle('sidebar-abierta');
-                });
+            } catch (error) {
+                console.error("Error al cargar la ficha:", error);
+                document.getElementById('contenedor-ficha').style.display = 'none';
+                document.getElementById('sin-perfil').style.display = 'block';
             }
         });
-    </script>
-    <!-- Motor oculto de Google Translate -->
-<div id="google_translate_element" style="display:none;"></div>
-<script type="text/javascript">
-    function googleTranslateElementInit() {
-        new google.translate.TranslateElement({ pageLanguage: 'es', autoDisplay: false }, 'google_translate_element');
+    });
+
+    function irAEditar() {
+        window.location.href = "formulario_adoptante.html?modo=editar";
+    }
+
+    async function eliminarPerfilAdoptante() {
+        if (!idUsuarioActual) {
+            alert("No se pudo identificar el usuario.");
+            return;
+        }
+
+        const confirmar = confirm("¿Estás seguro de que deseas eliminar tu perfil de adoptante? Esta acción no se puede deshacer.");
+        if (!confirmar) return;
+
+        try {
+            const response = await fetch(`/api/eliminar-adoptante/${idUsuarioActual}`, {
+                method: 'DELETE'
+            });
+
+            const resultado = await response.json();
+            if (response.ok) {
+                alert(resultado.mensaje || "Perfil eliminado correctamente.");
+                window.location.reload(); // Recarga la página para mostrar el estado de "sin perfil"
+            } else {
+                alert("Error: " + (resultado.error || "No se pudo eliminar el perfil."));
+            }
+        } catch (error) {
+            console.error("Error de red al eliminar:", error);
+            alert("Hubo un error al conectar con el servidor.");
+        }
     }
 </script>
 <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
