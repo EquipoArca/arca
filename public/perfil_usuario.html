@@ -307,7 +307,7 @@
         });
 
         // ==========================================
-        // LÓGICA DE SEGUIDORES / SEGUIDOS ESTILO TIKTOK
+        // LÓGICA ROBUSTA DE SEGUIDORES / SEGUIDOS
         // ==========================================
         window.abrirModalLista = function(tipo) {
             const modal = document.getElementById('modal-lista-social');
@@ -330,14 +330,30 @@
             }
         };
 
+        async function obtenerCorreoActivo() {
+            let user = firebase.auth().currentUser;
+            if (user && user.email) return user.email;
+
+            // Método de respaldo si Firebase tarda en devolver el usuario actual
+            await new Promise(resolve => {
+                const unsubscribe = firebase.auth().onAuthStateChanged(u => {
+                    unsubscribe();
+                    resolve(u);
+                });
+            });
+
+            user = firebase.auth().currentUser;
+            return user ? user.email : null;
+        }
+
         async function cargarContadoresYSocial() {
-            const user = firebase.auth().currentUser;
-            if (!user || !user.email) return;
+            const correo = await obtenerCorreoActivo();
+            if (!correo) return;
 
             try {
                 const [resSeguidos, resSeguidores] = await Promise.all([
-                    fetch(`/api/mis-seguidos/${encodeURIComponent(user.email)}`),
-                    fetch(`/api/mis-seguidores/${encodeURIComponent(user.email)}`)
+                    fetch(`/api/mis-seguidos/${encodeURIComponent(correo)}`),
+                    fetch(`/api/mis-seguidores/${encodeURIComponent(correo)}`)
                 ]);
 
                 const listaSeguidos = await resSeguidos.json();
@@ -357,13 +373,13 @@
             const contenedor = document.getElementById('lista-social-container');
             contenedor.innerHTML = '<p style="text-align: center; color: #666; font-style: italic;">Cargando...</p>';
 
-            const user = firebase.auth().currentUser;
-            if (!user || !user.email) {
+            const correo = await obtenerCorreoActivo();
+            if (!correo) {
                 contenedor.innerHTML = '<p style="text-align: center; color: #d9534f;">Por favor inicia sesión.</p>';
                 return;
             }
 
-            const endpoint = tipo === 'seguidos' ? `/api/mis-seguidos/${encodeURIComponent(user.email)}` : `/api/mis-seguidores/${encodeURIComponent(user.email)}`;
+            const endpoint = tipo === 'seguidos' ? `/api/mis-seguidos/${encodeURIComponent(correo)}` : `/api/mis-seguidores/${encodeURIComponent(correo)}`;
 
             try {
                 const res = await fetch(endpoint);
@@ -415,7 +431,7 @@
             }
         };
 
-        // Sincronizar con el estado de autenticación de Firebase
+        // Escuchar cambios de estado y disparar la carga inicial
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 cargarContadoresYSocial();
