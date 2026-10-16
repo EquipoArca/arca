@@ -197,7 +197,65 @@ app.get('/api/obtener-usuario', (req, res) => {
         res.json(results[0]);
     });
 });
+// GET: Obtener la lista de seguidores del usuario logueado
+app.get('/api/mis-seguidores/:correo', (req, res) => {
+    const correoUsuario = req.params.correo;
 
+    const sql = `
+        SELECT u.id_usuarios, u.nombre_usuario, u.foto_perfil, s.id_seguidor
+        FROM seguidores s
+        JOIN usuarios u ON s.id_usuario_seguidor = u.id_usuarios
+        JOIN usuarios u_seguido ON s.id_usuario_seguido = u_seguido.id_usuarios
+        WHERE LOWER(TRIM(u_seguido.correo_usuario)) = LOWER(TRIM(?))
+    `;
+
+    db.query(sql, [correoUsuario], (err, results) => {
+        if (err) {
+            console.error("❌ Error al obtener seguidores:", err.message);
+            return res.status(500).json({ error: "Error en el servidor al obtener seguidores" });
+        }
+        res.json(results);
+    });
+});
+
+// DELETE: Eliminar (remover) a un seguidor
+app.delete('/api/remover-seguidor/:id_seguidor', (req, res) => {
+    const idSeguidor = req.params.id_seguidor;
+
+    const sql = "DELETE FROM seguidores WHERE id_seguidor = ?";
+    db.query(sql, [idSeguidor], (err, result) => {
+        if (err) {
+            console.error("❌ Error al remover seguidor:", err.message);
+            return res.status(500).json({ error: "Error al eliminar el seguidor de la base de datos" });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: "No se encontró el registro del seguidor" });
+        }
+
+        res.json({ mensaje: "Seguidor eliminado con éxito" });
+    });
+});
+// GET: Obtener la lista de usuarios a los que sigue el usuario logueado
+app.get('/api/mis-seguidos/:correo', (req, res) => {
+    const correoUsuario = req.params.correo;
+
+    const sql = `
+        SELECT u.id_usuarios, u.nombre_usuario, u.foto_perfil, s.id_seguidor
+        FROM seguidores s
+        JOIN usuarios u ON s.id_usuario_seguido = u.id_usuarios
+        JOIN usuarios u_seguidor ON s.id_usuario_seguidor = u_seguidor.id_usuarios
+        WHERE LOWER(TRIM(u_seguidor.correo_usuario)) = LOWER(TRIM(?))
+    `;
+
+    db.query(sql, [correoUsuario], (err, results) => {
+        if (err) {
+            console.error("❌ Error al obtener seguidos:", err.message);
+            return res.status(500).json({ error: "Error en el servidor al obtener seguidos" });
+        }
+        res.json(results);
+    });
+});
 app.get('/api/datos-usuario-registro', (req, res) => {
     let { correo } = req.query;
 
