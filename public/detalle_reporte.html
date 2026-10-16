@@ -836,73 +836,73 @@
               if (linkAutor) {
                   linkAutor.href = `perfil_publico.html?user=${encodeURIComponent(nombreUsuario)}`;
               }
-                // --- VERIFICACIÓN DE AUTOR O USUARIO EXTERNO (FIREBASE + LOCALSTORAGE) ---
-                const contenedorBoton = document.getElementById('contenedor-boton-accion');
+// --- VERIFICACIÓN DE AUTOR ROBUSTA POR ID Y CORREO ---
+                const contenedorBoton = document.getElementById('contenedor-novedades') || document.getElementById('contenedor-boton-accion');
 
                 firebase.auth().onAuthStateChanged(async (user) => {
-                    // 1. Obtener correo logueado desde Firebase Auth o localStorage
-                    const correoLogueado = user ? user.email : (localStorage.getItem('correo_usuario') || localStorage.getItem('correo') || localStorage.getItem('usuario_correo'));
-                    const nombreUsuarioLocal = (localStorage.getItem('nombre_usuario') || "").toLowerCase().trim();
-
-                    // 2. Obtener el autor de la publicación según la pantalla y el reporte
-                    const autorEnPantalla = document.getElementById('nombre-autor-texto').textContent.replace('@', '').trim().toLowerCase();
-                    const correoReporte = (reporteData.correo_usuario || "").toLowerCase().trim();
-
-                    // 3. Determinar si el usuario actual es el dueño
-                    let esDueño = false;
-
-                    if (correoLogueado && correoReporte && correoLogueado.toLowerCase().trim() === correoReporte) {
-                        esDueño = true;
-                    } else if (nombreUsuarioLocal && autorEnPantalla && nombreUsuarioLocal === autorEnPantalla) {
-                        esDueño = true;
-                    } else if (user && user.displayName && user.displayName.toLowerCase().trim() === autorEnPantalla) {
-                        esDueño = true;
-                    } else if (correoLogueado && autorEnPantalla && correoLogueado.toLowerCase().includes(autorEnPantalla)) {
-                        esDueño = true;
+                    const correoLogueado = user ? user.email : (localStorage.getItem('correo_usuario') || localStorage.getItem('correo'));
+                    
+                    if (!correoLogueado) {
+                        contenedorBoton.innerHTML = `
+                            <a href="login.html" class="detalle-btn-accion">
+                                <i class="fa-regular fa-bookmark"></i> Inicia sesión para guardar
+                            </a>
+                        `;
+                        return;
                     }
 
-                    if (esDueño) {
-                        // SI ES EL DUEÑO: Botones Editar y Eliminar
-                        contenedorBoton.innerHTML = `
-                            <div style="display: flex; gap: 8px;">
-                                <a href="formularior.html?editar=${reporteData.id_reporte || reporteId}" class="detalle-btn-accion detalle-btn-editar">
-                                    <i class="fa-solid fa-pen-to-square"></i> Editar
-                                </a>
-                                <button class="detalle-btn-accion" id="btn-eliminar-reporte" style="background: #ffe5dd; color: #d9534f; border-color: #f4c2c4;">
-                                    <i class="fa-solid fa-trash"></i> Eliminar
-                                </button>
-                            </div>
-                        `;
+                    try {
+                        // 1. Consultamos el ID del usuario logueado actualmente en la base de datos
+                        const resUser = await fetch(`/api/obtener-usuario?correo=${encodeURIComponent(correoLogueado)}`);
+                        if (!resUser.ok) throw new Error("No se pudo obtener el usuario actual");
+                        const datosUsuarioLogueado = await resUser.json();
+                        const idUsuarioLogueado = Number(datosUsuarioLogueado.id_usuarios);
 
-                        document.getElementById('btn-eliminar-reporte').addEventListener('click', async () => {
-                            if (confirm("¿Estás seguro de que deseas eliminar este reporte permanentemente?")) {
-                                try {
-                                    const idAResolver = reporteData.id_reporte || reporteId;
-                                    const resDel = await fetch(`/api/reportes/${idAResolver}`, { method: 'DELETE' });
-                                    if (resDel.ok) {
-                                        alert("Reporte eliminado correctamente.");
-                                        window.location.href = 'novedades.html';
-                                    } else {
-                                        alert("No se pudo eliminar el reporte.");
-                                    }
-                                } catch (err) {
-                                    console.error("Error al eliminar:", err);
-                                }
+                        // 2. Obtenemos el ID del creador del reporte (viene en reporteData.id_usuarios)
+                        const idCreadorReporte = Number(reporteData.id_usuarios);
+
+                        // Comparamos directamente por ID de base de datos (¡Infalible!)
+                        let esDueño = (idUsuarioLogueado && idCreadorReporte && idUsuarioLogueado === idCreadorReporte);
+
+                        // Respaldo por si el reporte no traía el id_usuarios pero sí el correo
+                        if (!esDueño && reporteData.correo_usuario && correoLogueado) {
+                            if (reporteData.correo_usuario.toLowerCase().trim() === correoLogueado.toLowerCase().trim()) {
+                                esDueño = true;
                             }
-                        });
-
-                    } else {
-                        // SI NO ES EL DUEÑO: Lógica de guardado normal
-                        if (!correoLogueado) {
-                            contenedorBoton.innerHTML = `
-                                <a href="login.html" class="detalle-btn-accion">
-                                    <i class="fa-regular fa-bookmark"></i> Inicia sesión para guardar
-                                </a>
-                            `;
-                            return;
                         }
 
-                        try {
+                        if (esDueño) {
+                            // SI ES EL DUEÑO: Botones Editar y Eliminar
+                            contenedorBoton.innerHTML = `
+                                <div style="display: flex; gap: 8px;">
+                                    <a href="formularior.html?editar=${reporteData.id_reporte || reporteId}" class="detalle-btn-accion detalle-btn-editar">
+                                        <i class="fa-solid fa-pen-to-square"></i> Editar
+                                    </a>
+                                    <button class="detalle-btn-accion" id="btn-eliminar-reporte" style="background: #ffe5dd; color: #d9534f; border-color: #f4c2c4;">
+                                        <i class="fa-solid fa-trash"></i> Eliminar
+                                    </button>
+                                </div>
+                            `;
+
+                            document.getElementById('btn-eliminar-reporte').addEventListener('click', async () => {
+                                if (confirm("¿Estás seguro de que deseas eliminar este reporte permanentemente?")) {
+                                    try {
+                                        const idAResolver = reporteData.id_reporte || reporteId;
+                                        const resDel = await fetch(`/api/reportes/${idAResolver}`, { method: 'DELETE' });
+                                        if (resDel.ok) {
+                                            alert("Reporte eliminado correctamente.");
+                                            window.location.href = 'novedades.html';
+                                        } else {
+                                            alert("No se pudo eliminar el reporte.");
+                                        }
+                                    } catch (err) {
+                                        console.error("Error al eliminar:", err);
+                                    }
+                                }
+                            });
+
+                        } else {
+                            // SI NO ES EL DUEÑO: Lógica de guardado normal
                             let pubEncontrada = publicaciones.find(p => 
                                 (p.tipo_publicacion === 'reporte' && Number(p.id_origen) === Number(reporteId)) ||
                                 Number(p.id_publicacion) === Number(reporteId) ||
@@ -951,11 +951,12 @@
                                     }
                                 });
                             }
-                        } catch (e) {
-                            console.error("Error al gestionar guardados:", e);
                         }
+                    } catch (e) {
+                        console.error("Error al gestionar la validación del propietario:", e);
                     }
                 });
+
             } catch (error) {
                 console.error("Error al cargar detalle:", error);
                 alert("Hubo un error al cargar los detalles del reporte.");
