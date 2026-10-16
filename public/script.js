@@ -776,77 +776,59 @@ document.addEventListener('DOMContentLoaded', () => {
 // ==========================================
 // CARGAR Y FILTRAR ADOPCIONES EN NOVEDADES
 // ==========================================
+// ==========================================
+// CARGAR Y FILTRAR ADOPCIONES EN NOVEDADES
+// ==========================================
 document.addEventListener('DOMContentLoaded', () => {
     const contenedorNovedades = document.getElementById('contenedor-novedades');
     
     if (contenedorNovedades && window.location.pathname.includes('novedades-adopciones.html')) {
-        cargarAdopcionesNovedades();
+        // En lugar de llamar a la función directo, esperamos a que Firebase responda sobre el estado real de la sesión
+        auth.onAuthStateChanged((user) => {
+            cargarAdopcionesNovedades(user);
+        });
     }
 });
 
-function cargarAdopcionesNovedades() {
+function cargarAdopcionesNovedades(user) {
     const contenedor = document.getElementById('contenedor-novedades');
     if (!contenedor) return;
 
-    // Obtenemos el correo del usuario conectado actualmente con Firebase
-    const correoActual = (auth.currentUser && auth.currentUser.email) ? auth.currentUser.email : '';
-
-    // Si NO ha iniciado sesión, mostramos directamente el estado vacío con el botón para abrir el login
-    if (!correoActual) {
+    // 1. SI ES INVITADO (!user): Bloqueo total.
+    // No hace fetch de publicaciones para que un invitado NO pueda ver ni inspeccionar ninguna novedad.
+    if (!user) {
         contenedor.innerHTML = `
-            <div class="estado-vacio">
-                <div class="escena-cielo-kawaii">
-                    <div class="nube-kawaii nube-izq"></div>
-                    <div class="sol-kawaii">
-                        <div class="ojo-sol izq"></div>
-                        <div class="ojo-sol der"></div>
-                        <div class="boca-sol"></div>
-                        <div class="rubor-sol izq"></div>
-                        <div class="rubor-sol der"></div>
-                    </div>
-                    <div class="nube-kawaii nube-der"></div>
-                    <span class="destello d1">✦</span>
-                    <span class="destello d2">✦</span>
-                </div>
-                <h2>¡Aún no hay publicaciones de adopción!</h2>
-                <p>&lt;3</p>
-                <button class="btn-detalles" onclick="abrirBloqueo()" style="margin-top: 15px; padding: 10px 20px; border-radius: 14px; border: none; background: #e985a0; color: white; font-weight: bold; cursor: pointer; font-family: 'Itim';">Ver detalles</button>
+            <div class="estado-vacio" style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; min-height: 380px; text-align: center; gap: 8px;">
+                <div style="font-size: 50px; line-height: 1; margin-bottom: 4px;">🐾</div>
+                <h2 style="font-family: 'Itim', sans-serif; font-size: 26px; color: #2b2b2b; margin: 0; font-weight: bold;">¡Aún no hay publicaciones!</h2>
+                <p style="font-family: 'Itim', sans-serif; font-size: 16px; color: #555; margin: 0;">&lt;3</p>
+                <button class="btn-detalles" onclick="abrirBloqueo()" style="margin-top: 14px; padding: 10px 24px; border-radius: 20px; border: none; background: #fbc2c4; color: #2b2b2b; font-weight: bold; cursor: pointer; font-family: 'Itim', sans-serif; font-size: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">Ver detalles</button>
             </div>
         `;
         return;
     }
 
-    // Si SÍ hay sesión activa, procedemos a hacer el fetch con normalidad
-    fetch(`/api/publicaciones-globales?correo=${encodeURIComponent(correoActual)}`)
+    // 2. SI SÍ TIENE SESIÓN INICIADA: Hacemos la petición al backend para cargar las tarjetas
+    fetch(`/api/publicaciones-globales?correo=${encodeURIComponent(user.email)}`)
         .then(res => res.json())
         .then(publicaciones => {
             contenedor.innerHTML = ''; 
 
             const adopciones = publicaciones.filter(pub => pub.tipo_publicacion === 'adopcion');
 
+            // Si el usuario registrado de verdad no tiene publicaciones en la BD
             if (adopciones.length === 0) {
                 contenedor.innerHTML = `
-                    <div class="estado-vacio">
-                        <div class="escena-cielo-kawaii">
-                            <div class="nube-kawaii nube-izq"></div>
-                            <div class="sol-kawaii">
-                                <div class="ojo-sol izq"></div>
-                                <div class="ojo-sol der"></div>
-                                <div class="boca-sol"></div>
-                                <div class="rubor-sol izq"></div>
-                                <div class="rubor-sol der"></div>
-                            </div>
-                            <div class="nube-kawaii nube-der"></div>
-                            <span class="destello d1">✦</span>
-                            <span class="destello d2">✦</span>
-                        </div>
-                        <h2>¡Aún no hay publicaciones de adopción!</h2>
-                        <p>&lt;3</p>
+                    <div class="estado-vacio" style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; min-height: 380px; text-align: center; gap: 8px;">
+                        <div style="font-size: 50px; line-height: 1; margin-bottom: 4px;">🐾</div>
+                        <h2 style="font-family: 'Itim', sans-serif; font-size: 26px; color: #2b2b2b; margin: 0; font-weight: bold;">¡Aún no hay publicaciones!</h2>
+                        <p style="font-family: 'Itim', sans-serif; font-size: 16px; color: #555; margin: 0;">&lt;3</p>
                     </div>
                 `;
                 return;
             }
 
+            // Renderizar publicaciones cuando hay sesión activa
             adopciones.forEach(adopcion => {
                 let fotoSrc = 'logo.png';
                 try {
