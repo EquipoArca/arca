@@ -174,7 +174,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-     <script src="script.js"></script>
+    <script src="script.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -190,8 +190,16 @@
         });
     </script> 
 
-    <!-- Script para renderizar las adopciones con el diseño prototipo bonito -->
+    <!-- Script optimizado para renderizar las adopciones sin inestabilidad de sesión -->
     <script>
+    function obtenerCorreoSesion() {
+        const authUser = firebase.auth().currentUser;
+        if (authUser && authUser.email) return authUser.email;
+        return localStorage.getItem('correo_usuario') || 
+               localStorage.getItem('usuario_correo') || 
+               localStorage.getItem('user_email') || '';
+    }
+
     async function cargarAdopcionesNovedades(correoUsuario = '') {
         const contenedor = document.getElementById('contenedor-novedades');
         if (!contenedor) return;
@@ -235,18 +243,19 @@
 
                         <div class="proto-card-body">
                             <div class="proto-img-wrapper">
-                                <img src="${imagenSrc}" alt="Adopción" style="width:100%; height:100%; object-fit:cover;">
+                                <img src="${imagenSrc}" alt="Adopción">
                             </div>
 
                             <div class="proto-content-right">
                                 <div class="proto-pill-tipo">${pub.nombre_tipo_reporte || 'Adopción'}</div>
                                 <div class="proto-info-extra">
-                                    <span class="proto-autor">Publicado por:<a href="perfil_publico.html?user=${pub.nombre_usuario}">@${pub.nombre_usuario || 'Usuario'}</a></span>
+                                    <span class="proto-autor">Publicado por: <a href="perfil_publico.html?user=${pub.nombre_usuario}">@${pub.nombre_usuario || 'Usuario'}</a></span>
                                     <p class="proto-ubicacion"><i class="fa-solid fa-location-dot"></i> ${ubicacionBonita}</p>
                                 </div>
-                                <div class="proto-footer-row">
-                                    <button class="proto-btn-detalles btn-ver-adopcion-ficha" data-id="${pub.id_origen}">Ver detalles</button>
-                                </div>
+                            </div>
+
+                            <div class="proto-footer-row">
+                                <button class="proto-btn-detalles btn-ver-adopcion-ficha" data-id="${pub.id_origen}">Ver detalles</button>
                             </div>
                         </div>
                     `;
@@ -266,18 +275,15 @@
         }
     }
 
-    // Sincronización con Firebase para capturar el correo y filtrar bloqueados al instante
+    // CARGA INMEDIATA: Usa localStorage al instante sin esperar el retraso de Firebase
+    const correoInicial = obtenerCorreoSesion();
+    cargarAdopcionesNovedades(correoInicial);
+
+    // Sincronización secundaria por si Firebase valida la sesión después
     firebase.auth().onAuthStateChanged((user) => {
-        const correo = (user && user.email) ? user.email : '';
+        const correo = (user && user.email) ? user.email : obtenerCorreoSesion();
         cargarAdopcionesNovedades(correo);
     });
-
-    // Respaldo de seguridad por si Firebase tarda un pelín en cargar en la primera visita
-    setTimeout(() => {
-        if (document.getElementById('contenedor-novedades').innerHTML.includes('Buscando publicaciones...') && auth.currentUser) {
-            cargarAdopcionesNovedades(auth.currentUser.email);
-        }
-    }, 800);
 
     document.addEventListener('click', (event) => {
         const botonDetalle = event.target.closest('.btn-ver-adopcion-ficha');
@@ -291,18 +297,24 @@
     </script>
 
     <style>
-        /* Mismos estilos que novedades-reportes para mantener la estética uniforme */
+        /* Contenedor principal de feed en forma de lista vertical amplia */
+        .feed-novedades {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            width: 100%;
+            max-width: 950px;
+            margin: 0 auto;
+            box-sizing: border-box;
+        }
+
         .tarjeta-prototipo-estilo {
             background: #fde8e5; 
             border-radius: 24px;
             padding: 24px;
-            margin-bottom: 25px;
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
             border: 2px solid #f9d5d3;
             width: 100%;
-            max-width: 950px;
-            margin-left: auto;
-            margin-right: auto;
             font-family: 'Itim', cursive, sans-serif;
             box-sizing: border-box;
         }
@@ -330,15 +342,18 @@
             color: #444;
         }
 
+        /* Diseño horizontal amplio idéntico a la segunda imagen de referencia */
         .proto-card-body {
             display: flex;
-            gap: 24px;
             align-items: center;
+            gap: 24px;
+            position: relative;
+            width: 100%;
         }
 
         .proto-img-wrapper {
-            width: 210px;
-            height: 150px;
+            width: 160px;
+            height: 130px;
             border-radius: 20px;
             overflow: hidden;
             background: #fff;
@@ -357,15 +372,15 @@
             flex-grow: 1;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
         }
 
         .proto-pill-tipo {
             background: #fff;
             color: #333;
-            padding: 8px 22px;
+            padding: 6px 20px;
             border-radius: 20px;
-            font-size: 15px;
+            font-size: 14.5px;
             font-weight: bold;
             border: 1px solid #f3c1c3;
             display: inline-block;
@@ -400,9 +415,8 @@
         }
 
         .proto-footer-row {
-            display: flex;
-            justify-content: flex-end;
-            margin-top: 5px;
+            flex-shrink: 0;
+            margin-left: auto;
         }
 
         .proto-btn-detalles {
@@ -423,7 +437,6 @@
             background-color: #fff9c4;
         }
     </style>
-
 
     <!-- Motor de Google Translate -->
     <div id="google_translate_element" style="display:none;"></div>
