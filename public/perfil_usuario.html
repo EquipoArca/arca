@@ -115,10 +115,11 @@
                 </div>
                 <h2 id="mostrar-nombre-usuario">@cargando...</h2>
                 
+                <!-- ESTADÍSTICAS ESTILO TIKTOK -->
                 <div id="stats-seguidores-container" style="display: flex; gap: 15px; font-size: 14.5px; color: #555; margin-top: 5px; justify-content: center;">
-                    <span onclick="event.stopPropagation(); abrirModalLista('seguidos');" style="cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'"><strong id="num-seguidos" style="color: #2b2b2b;">0</strong> Seguidos</span>
+                    <span id="btn-abrir-seguidos" style="cursor: pointer; transition: opacity 0.2s;"><strong id="num-seguidos" style="color: #2b2b2b;">0</strong> Seguidos</span>
                     <span style="color: #ccc;">|</span>
-                    <span onclick="event.stopPropagation(); abrirModalLista('seguidores');" style="cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'"><strong id="num-seguidores" style="color: #2b2b2b;">0</strong> Seguidores</span>
+                    <span id="btn-abrir-seguidores" style="cursor: pointer; transition: opacity 0.2s;"><strong id="num-seguidores" style="color: #2b2b2b;">0</strong> Seguidores</span>
                 </div>
             </div>
 
@@ -266,7 +267,6 @@
             emailjs.init("AVpXUrYdpwa9oh438");
         })();
     </script>
-    
     <script>
     const btnToggleMenu = document.getElementById('btn-toggle-menu');
     const sidebar = document.getElementById('sidebar');
@@ -306,10 +306,9 @@
     });
 
     // ==========================================
-    // LÓGICA ULTRA-BLINDADA DE SEGUIDORES / SEGUIDOS
+    // LÓGICA DE SEGUIDORES / SEGUIDOS (ADSETP)
     // ==========================================
     
-    // Función global garantizada para abrir el modal de inmediato
     window.abrirModalLista = async function(tipo) {
         const modal = document.getElementById('modal-lista-social');
         const titulo = document.getElementById('modal-social-titulo');
@@ -331,37 +330,6 @@
             window.cerrarModalSocial();
         }
     };
-
-    // Obtener el correo del usuario activo por múltiples vías seguras
-    async function obtenerCorreoSeguro() {
-        // 1. Intentar desde Firebase Auth actual
-        let user = firebase.auth().currentUser;
-        if (user && user.email) return user.email;
-
-        // 2. Intentar esperando a que Firebase cargue
-        await new Promise(resolve => {
-            const unsubscribe = firebase.auth().onAuthStateChanged(u => {
-                unsubscribe();
-                resolve(u);
-            });
-            setTimeout(resolve, 1500); // Timeout de seguridad por si tarda
-        });
-
-        user = firebase.auth().currentUser;
-        if (user && user.email) return user.email;
-
-        // 3. Respaldo extremo: extraer del texto del nombre de usuario o localStorage si existe
-        const nombreElemento = document.getElementById('mostrar-nombre-usuario');
-        if (nombreElemento && nombreElemento.textContent.startsWith('@')) {
-            const usernameLimpio = nombreElemento.textContent.replace('@', '').trim();
-            try {
-                const res = await fetch(`/api/obtener-usuario?correo=${usernameLimpio}`);
-                // Si falla por nombre, intentamos mapear
-            } catch(e) {}
-        }
-
-        return null;
-    }
 
     async function cargarContadoresYSocial() {
         const user = firebase.auth().currentUser;
@@ -448,7 +416,27 @@
         }
     };
 
-    // Inicialización automática al detectar sesión en Firebase
+    // Vinculación por addEventListener para evitar interferencias de perfil.js
+    document.addEventListener("DOMContentLoaded", () => {
+        const btnSeguidos = document.getElementById('btn-abrir-seguidos');
+        const btnSeguidores = document.getElementById('btn-abrir-seguidores');
+
+        if (btnSeguidos) {
+            btnSeguidos.addEventListener('click', (e) => {
+                e.stopPropagation();
+                abrirModalLista('seguidos');
+            });
+        }
+
+        if (btnSeguidores) {
+            btnSeguidores.addEventListener('click', (e) => {
+                e.stopPropagation();
+                abrirModalLista('seguidores');
+            });
+        }
+    });
+
+    // Sincronización con Firebase
     firebase.auth().onAuthStateChanged((user) => {
         if (user) {
             cargarContadoresYSocial();
