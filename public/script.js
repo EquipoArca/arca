@@ -785,21 +785,46 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function cargarAdopcionesNovedades() {
+    const contenedor = document.getElementById('contenedor-novedades');
+    if (!contenedor) return;
+
     // Obtenemos el correo del usuario conectado actualmente con Firebase
     const correoActual = (auth.currentUser && auth.currentUser.email) ? auth.currentUser.email : '';
 
+    // Si NO ha iniciado sesión, mostramos directamente el estado vacío con el botón para abrir el login
+    if (!correoActual) {
+        contenedor.innerHTML = `
+            <div class="estado-vacio">
+                <div class="escena-cielo-kawaii">
+                    <div class="nube-kawaii nube-izq"></div>
+                    <div class="sol-kawaii">
+                        <div class="ojo-sol izq"></div>
+                        <div class="ojo-sol der"></div>
+                        <div class="boca-sol"></div>
+                        <div class="rubor-sol izq"></div>
+                        <div class="rubor-sol der"></div>
+                    </div>
+                    <div class="nube-kawaii nube-der"></div>
+                    <span class="destello d1">✦</span>
+                    <span class="destello d2">✦</span>
+                </div>
+                <h2>¡Aún no hay publicaciones de adopción!</h2>
+                <p>&lt;3</p>
+                <button class="btn-detalles" onclick="abrirBloqueo()" style="margin-top: 15px; padding: 10px 20px; border-radius: 14px; border: none; background: #e985a0; color: white; font-weight: bold; cursor: pointer; font-family: 'Itim';">Ver detalles</button>
+            </div>
+        `;
+        return;
+    }
+
+    // Si SÍ hay sesión activa, procedemos a hacer el fetch con normalidad
     fetch(`/api/publicaciones-globales?correo=${encodeURIComponent(correoActual)}`)
         .then(res => res.json())
         .then(publicaciones => {
-            const contenedor = document.getElementById('contenedor-novedades');
             contenedor.innerHTML = ''; 
 
             const adopciones = publicaciones.filter(pub => pub.tipo_publicacion === 'adopcion');
 
             if (adopciones.length === 0) {
-                // Verificamos si el usuario no ha iniciado sesión para mostrar el botón de detalles que abre el bloqueo
-                const esInvitado = !correoActual;
-                
                 contenedor.innerHTML = `
                     <div class="estado-vacio">
                         <div class="escena-cielo-kawaii">
@@ -817,7 +842,6 @@ function cargarAdopcionesNovedades() {
                         </div>
                         <h2>¡Aún no hay publicaciones de adopción!</h2>
                         <p>&lt;3</p>
-                        ${esInvitado ? `<button class="btn-detalles" onclick="abrirBloqueo()" style="margin-top: 15px; padding: 10px 20px; border-radius: 14px; border: none; background: #e985a0; color: white; font-weight: bold; cursor: pointer; font-family: 'Itim';">Ver detalles</button>` : ''}
                     </div>
                 `;
                 return;
