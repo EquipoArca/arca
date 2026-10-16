@@ -939,9 +939,13 @@ app.get('/api/publicaciones-globales', (req, res) => {
         INNER JOIN usuarios u ON r.id_usuarios = u.id_usuarios
         LEFT JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
         WHERE r.id_usuarios NOT IN (
-            SELECT ub.id_usuario_bloqueado 
-            FROM usuarios_bloqueados ub
+            -- Excluir si tú bloqueaste al autor O si el autor te bloqueó a ti
+            SELECT ub.id_usuario_bloqueado FROM usuarios_bloqueados ub
             INNER JOIN usuarios u_bloq ON ub.id_usuario_bloqueador = u_bloq.id_usuarios
+            WHERE LOWER(TRIM(u_bloq.correo_usuario)) = LOWER(TRIM(?))
+            UNION
+            SELECT ub.id_usuario_bloqueador FROM usuarios_bloqueados ub
+            INNER JOIN usuarios u_bloq ON ub.id_usuario_bloqueado = u_bloq.id_usuarios
             WHERE LOWER(TRIM(u_bloq.correo_usuario)) = LOWER(TRIM(?))
         )
         
@@ -966,9 +970,12 @@ app.get('/api/publicaciones-globales', (req, res) => {
         INNER JOIN animal a ON pa.id_animal = a.id_animal
         INNER JOIN usuarios u ON pa.id_usuarios = u.id_usuarios
         WHERE pa.id_usuarios NOT IN (
-            SELECT ub.id_usuario_bloqueado 
-            FROM usuarios_bloqueados ub
+            SELECT ub.id_usuario_bloqueado FROM usuarios_bloqueados ub
             INNER JOIN usuarios u_bloq ON ub.id_usuario_bloqueador = u_bloq.id_usuarios
+            WHERE LOWER(TRIM(u_bloq.correo_usuario)) = LOWER(TRIM(?))
+            UNION
+            SELECT ub.id_usuario_bloqueador FROM usuarios_bloqueados ub
+            INNER JOIN usuarios u_bloq ON ub.id_usuario_bloqueado = u_bloq.id_usuarios
             WHERE LOWER(TRIM(u_bloq.correo_usuario)) = LOWER(TRIM(?))
         )
 
@@ -976,7 +983,8 @@ app.get('/api/publicaciones-globales', (req, res) => {
     `;
 
     const correoParam = correoVisitante || '';
-    db.query(sql, [correoParam, correoParam], (err, rows) => {
+    // Pasamos el correo 4 veces para cubrir las subconsultas de exclusión mutua
+    db.query(sql, [correoParam, correoParam, correoParam, correoParam], (err, rows) => {
         if (err) {
             console.error("❌ ERROR AL OBTENER PUBLICACIONES GLOBALES:", err.message);
             return res.status(500).json({ error: 'Hubo un error al obtener las publicaciones globales', detalle: err.message });
@@ -1413,9 +1421,6 @@ app.get('/api/perfil-publico/:parametro', (req, res) => {
     const parametro = decodeURIComponent(req.params.parametro).trim();
     const correoVisitante = req.query.correo_visitante; 
 
-    console.log("🔍 Buscando perfil público para el parámetro:", parametro);
-
-    // Seleccionamos únicamente las columnas que sabemos que existen en la tabla usuarios
     const sql = `
         SELECT u.id_usuarios, u.nombre_usuario, u.foto_perfil, u.correo_usuario, u.Telefono_usuario
         FROM usuarios u
@@ -1424,40 +1429,47 @@ app.get('/api/perfil-publico/:parametro', (req, res) => {
     `;
 
     db.query(sql, [`%${parametro}%`, `%${parametro}%`], (err, results) => {
-        if (err) {
-            console.error("❌ Error en la base de datos:", err);
-            return res.status(500).json({ error: "Error en el servidor" });
-        }
-
-        if (results.length === 0) {
-            console.log("⚠️ Usuario no encontrado en la BD para:", parametro);
+        if (err || results.length === 0) {
             return res.status(404).json({ error: "Usuario no encontrado" });
         }
 
         const usuario = results[0];
-        console.log("✅ Usuario encontrado:", usuario.nombre_usuario);
 
         if (!correoVisitante) {
             return res.json({ ...usuario, siguiendo: false, estado_solicitud: 'ninguna' });
         }
 
-        const sqlVerificaciones = `
-            SELECT 
-                (SELECT COUNT(*) FROM seguidores WHERE id_usuario_seguidor = (SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))) AND id_usuario_seguido = ?) AS siguiendo,
-                (SELECT estado FROM solicitudes_adoptante WHERE id_solicitante = (SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))) AND id_propietario = ?) AS estado_solicitud
+        // Verificamos si hay bloqueo en cualquiera de las dos direcciones
+        const sqlBloqueo = `
+            SELECT COUNT(*) AS bloqueado FROM usuarios_bloqueados ub
+            JOIN usuarios u1 ON ub.id_usuario_bloqueador = u1.id_usuarios
+            JOIN usuarios u2 ON ub.id_usuario_bloqueado = u2.id_usuarios
+            WHERE (LOWER(TRIM(u1.correo_usuario)) = LOWER(TRIM(?)) AND u2.id_usuarios = ?)
+               OR (LOWER(TRIM(u2.correo_usuario)) = LOWER(TRIM(?)) AND u1.id_usuarios = ?)
         `;
 
-        db.query(sqlVerificaciones, [correoVisitante, usuario.id_usuarios, correoVisitante, usuario.id_usuarios], (errVerif, resVerif) => {
-            const estadoFinal = (resVerif && resVerif.length > 0 && resVerif[0].estado_solicitud) ? resVerif[0].estado_solicitud : 'ninguna';
-            res.json({
-                ...usuario,
-                siguiendo: resVerif && resVerif.length > 0 && resVerif[0].siguiendo > 0,
-                estado_solicitud: estadoFinal
+        db.query(sqlBloqueo, [correoVisitante, usuario.id_usuarios, correoVisitante, usuario.id_usuarios], (errB, resB) => {
+            if (resB && resB[0].bloqueado > 0) {
+                return res.status(404).json({ error: "Perfil no disponible" });
+            }
+
+            const sqlVerificaciones = `
+                SELECT 
+                    (SELECT COUNT(*) FROM seguidores WHERE id_usuario_seguidor = (SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))) AND id_usuario_seguido = ?) AS siguiendo,
+                    (SELECT estado FROM solicitudes_adoptante WHERE id_solicitante = (SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))) AND id_propietario = ?) AS estado_solicitud
+            `;
+
+            db.query(sqlVerificaciones, [correoVisitante, usuario.id_usuarios, correoVisitante, usuario.id_usuarios], (errVerif, resVerif) => {
+                const estadoFinal = (resVerif && resVerif.length > 0 && resVerif[0].estado_solicitud) ? resVerif[0].estado_solicitud : 'ninguna';
+                res.json({
+                    ...usuario,
+                    siguiendo: resVerif && resVerif.length > 0 && resVerif[0].siguiendo > 0,
+                    estado_solicitud: estadoFinal
+                });
             });
         });
     });
 });
-
 // POST: Seguir / Dejar de seguir usuario
 app.post('/api/alternar-seguimiento', (req, res) => {
     const { correo_seguidor, id_seguido } = req.body;

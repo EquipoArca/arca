@@ -424,7 +424,20 @@
 
         try {
             const res = await fetch(`/api/perfil-publico/${encodeURIComponent(usernamePerfil)}?correo_visitante=${encodeURIComponent(correoLogueado)}`);
-            if (!res.ok) throw new Error("Usuario no encontrado");
+            if (!res.ok) {
+                // Si hay bloqueo o no existe, mostramos el mensaje de perfil no disponible
+                document.querySelector('.main-content').innerHTML = `
+                    <div style="text-align: center; padding: 60px 20px; font-family: 'Itim', cursive;">
+                        <i class="fa-solid fa-user-slash" style="font-size: 55px; color: #d9534f; margin-bottom: 15px;"></i>
+                        <h2 style="color: #2b2b2b; font-size: 24px;">¡Perfil no encontrado!</h2>
+                        <p style="color: #666; font-size: 15px; margin-bottom: 20px;">Esta cuenta no está disponible o no se puede acceder a ella.</p>
+                        <a href="home.html" style="background: #fca38d; color: #fff; padding: 10px 22px; border-radius: 16px; text-decoration: none; font-weight: bold;">
+                            Volver al inicio
+                        </a>
+                    </div>
+                `;
+                return;
+            }
 
             const datos = await res.json();
             idUsuarioPerfil = datos.id_usuarios;
