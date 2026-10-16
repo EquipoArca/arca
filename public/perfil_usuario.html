@@ -115,11 +115,10 @@
                 </div>
                 <h2 id="mostrar-nombre-usuario">@cargando...</h2>
                 
-                <!-- ESTADÍSTICAS ESTILO TIKTOK -->
-                <div id="stats-seguidores-container" style="display: flex; gap: 15px; font-size: 14.5px; color: #555; margin-top: 5px; justify-content: center; cursor: pointer;">
-                    <span onclick="abrirModalLista('seguidos')" style="transition: opacity 0.2s;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'"><strong id="num-seguidos" style="color: #2b2b2b;">0</strong> Seguidos</span>
+                <div id="stats-seguidores-container" style="display: flex; gap: 15px; font-size: 14.5px; color: #555; margin-top: 5px; justify-content: center;">
+                    <span onclick="event.stopPropagation(); abrirModalLista('seguidos');" style="cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'"><strong id="num-seguidos" style="color: #2b2b2b;">0</strong> Seguidos</span>
                     <span style="color: #ccc;">|</span>
-                    <span onclick="abrirModalLista('seguidores')" style="transition: opacity 0.2s;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'"><strong id="num-seguidores" style="color: #2b2b2b;">0</strong> Seguidores</span>
+                    <span onclick="event.stopPropagation(); abrirModalLista('seguidores');" style="cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'"><strong id="num-seguidores" style="color: #2b2b2b;">0</strong> Seguidores</span>
                 </div>
             </div>
 

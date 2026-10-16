@@ -390,3 +390,12 @@
 .mensaje-validacion.esperando {
     color: #888888; /* Gris informativo */
 }
+#stats-seguidores-container {
+    position: relative;
+    z-index: 10;
+    pointer-events: auto !important;
+}
+#stats-seguidores-container span {
+    cursor: pointer;
+    pointer-events: auto !important;
+}
