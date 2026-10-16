@@ -259,18 +259,11 @@
         }
     }
 
-    // Usamos el observador pero con un respaldo inmediato por si Firebase tarda un segundo
+    // Único disparador: El observador de Firebase gestiona la carga de forma limpia al saber el estado de autenticación
     firebase.auth().onAuthStateChanged((user) => {
         const correo = (user && user.email) ? user.email : '';
         cargarNovedades(correo);
     });
-
-    // Respaldo de seguridad por si el observer tarda mucho en la primera carga
-    setTimeout(() => {
-        if (document.getElementById('contenedor-novedades').innerHTML.includes('estado-vacio') && auth.currentUser) {
-            cargarNovedades(auth.currentUser.email);
-        }
-    }, 800);
 
     document.addEventListener('click', (event) => {
         const botonDetalle = event.target.closest('.btn-accion-ir');
