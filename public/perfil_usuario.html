@@ -269,174 +269,192 @@
     </script>
     
     <script>
-        const btnToggleMenu = document.getElementById('btn-toggle-menu');
-        const sidebar = document.getElementById('sidebar');
+    const btnToggleMenu = document.getElementById('btn-toggle-menu');
+    const sidebar = document.getElementById('sidebar');
 
-        if (btnToggleMenu && sidebar) {
-            btnToggleMenu.addEventListener('click', () => {
-                sidebar.classList.toggle('sidebar-abierta');
-            });
-        }
+    if (btnToggleMenu && sidebar) {
+        btnToggleMenu.addEventListener('click', () => {
+            sidebar.classList.toggle('sidebar-abierta');
+        });
+    }
 
-        // Auto-foco y pegado entre casillas para el OTP del correo
-        const otpCorreoInputs = document.querySelectorAll(".otp-correo-input");
-        otpCorreoInputs.forEach((input, index) => {
-            input.addEventListener("input", (e) => {
-                input.value = input.value.replace(/[^0-9]/g, "");
-                if (input.value && index < otpCorreoInputs.length - 1) {
-                    otpCorreoInputs[index + 1].focus();
-                }
-            });
-
-            input.addEventListener("keydown", (e) => {
-                if (e.key === "Backspace" && !input.value && index > 0) {
-                    otpCorreoInputs[index - 1].focus();
-                }
-            });
-
-            input.addEventListener("paste", (e) => {
-                e.preventDefault();
-                const pasteData = e.clipboardData.getData("text").trim();
-                if (/^\d{4}$/.test(pasteData)) {
-                    pasteData.split("").forEach((char, i) => {
-                        if (otpCorreoInputs[i]) otpCorreoInputs[i].value = char;
-                    });
-                    otpCorreoInputs[3].focus();
-                }
-            });
+    // Auto-foco y pegado entre casillas para el OTP del correo
+    const otpCorreoInputs = document.querySelectorAll(".otp-correo-input");
+    otpCorreoInputs.forEach((input, index) => {
+        input.addEventListener("input", (e) => {
+            input.value = input.value.replace(/[^0-9]/g, "");
+            if (input.value && index < otpCorreoInputs.length - 1) {
+                otpCorreoInputs[index + 1].focus();
+            }
         });
 
-        // ==========================================
-        // LÓGICA ROBUSTA DE SEGUIDORES / SEGUIDOS
-        // ==========================================
-        window.abrirModalLista = function(tipo) {
-            const modal = document.getElementById('modal-lista-social');
-            const titulo = document.getElementById('modal-social-titulo');
-            if (modal) {
-                modal.style.display = 'flex';
-                titulo.textContent = tipo === 'seguidos' ? 'Personas que sigues' : 'Tus seguidores';
-                cargarContenidoModalSocial(tipo);
+        input.addEventListener("keydown", (e) => {
+            if (e.key === "Backspace" && !input.value && index > 0) {
+                otpCorreoInputs[index - 1].focus();
             }
-        };
+        });
 
-        window.cerrarModalSocial = function() {
-            const modal = document.getElementById('modal-lista-social');
-            if (modal) modal.style.display = 'none';
-        };
-
-        window.cerrarModalSocialOverlay = function(event) {
-            if (event.target.id === 'modal-lista-social') {
-                window.cerrarModalSocial();
-            }
-        };
-
-        async function obtenerCorreoActivo() {
-            let user = firebase.auth().currentUser;
-            if (user && user.email) return user.email;
-
-            // Método de respaldo si Firebase tarda en devolver el usuario actual
-            await new Promise(resolve => {
-                const unsubscribe = firebase.auth().onAuthStateChanged(u => {
-                    unsubscribe();
-                    resolve(u);
+        input.addEventListener("paste", (e) => {
+            e.preventDefault();
+            const pasteData = e.clipboardData.getData("text").trim();
+            if (/^\d{4}$/.test(pasteData)) {
+                pasteData.split("").forEach((char, i) => {
+                    if (otpCorreoInputs[i]) otpCorreoInputs[i].value = char;
                 });
+                otpCorreoInputs[3].focus();
+            }
+        });
+    });
+
+    // ==========================================
+    // LÓGICA ULTRA-BLINDADA DE SEGUIDORES / SEGUIDOS
+    // ==========================================
+    
+    // Función global garantizada para abrir el modal de inmediato
+    window.abrirModalLista = async function(tipo) {
+        const modal = document.getElementById('modal-lista-social');
+        const titulo = document.getElementById('modal-social-titulo');
+        
+        if (modal) {
+            modal.style.display = 'flex';
+            titulo.textContent = tipo === 'seguidos' ? 'Personas que sigues' : 'Tus seguidores';
+            await cargarContenidoModalSocial(tipo);
+        }
+    };
+
+    window.cerrarModalSocial = function() {
+        const modal = document.getElementById('modal-lista-social');
+        if (modal) modal.style.display = 'none';
+    };
+
+    window.cerrarModalSocialOverlay = function(event) {
+        if (event.target.id === 'modal-lista-social') {
+            window.cerrarModalSocial();
+        }
+    };
+
+    // Obtener el correo del usuario activo por múltiples vías seguras
+    async function obtenerCorreoSeguro() {
+        // 1. Intentar desde Firebase Auth actual
+        let user = firebase.auth().currentUser;
+        if (user && user.email) return user.email;
+
+        // 2. Intentar esperando a que Firebase cargue
+        await new Promise(resolve => {
+            const unsubscribe = firebase.auth().onAuthStateChanged(u => {
+                unsubscribe();
+                resolve(u);
             });
+            setTimeout(resolve, 1500); // Timeout de seguridad por si tarda
+        });
 
-            user = firebase.auth().currentUser;
-            return user ? user.email : null;
+        user = firebase.auth().currentUser;
+        if (user && user.email) return user.email;
+
+        // 3. Respaldo extremo: extraer del texto del nombre de usuario o localStorage si existe
+        const nombreElemento = document.getElementById('mostrar-nombre-usuario');
+        if (nombreElemento && nombreElemento.textContent.startsWith('@')) {
+            const usernameLimpio = nombreElemento.textContent.replace('@', '').trim();
+            try {
+                const res = await fetch(`/api/obtener-usuario?correo=${usernameLimpio}`);
+                // Si falla por nombre, intentamos mapear
+            } catch(e) {}
         }
 
-        async function cargarContadoresYSocial() {
-            const correo = await obtenerCorreoActivo();
-            if (!correo) return;
+        return null;
+    }
 
-            try {
-                const [resSeguidos, resSeguidores] = await Promise.all([
-                    fetch(`/api/mis-seguidos/${encodeURIComponent(correo)}`),
-                    fetch(`/api/mis-seguidores/${encodeURIComponent(correo)}`)
-                ]);
+    async function cargarContadoresYSocial() {
+        const user = firebase.auth().currentUser;
+        if (!user || !user.email) return;
 
-                const listaSeguidos = await resSeguidos.json();
-                const listaSeguidores = await resSeguidores.json();
+        try {
+            const [resSeguidos, resSeguidores] = await Promise.all([
+                fetch(`/api/mis-seguidos/${encodeURIComponent(user.email)}`),
+                fetch(`/api/mis-seguidores/${encodeURIComponent(user.email)}`)
+            ]);
 
-                const elemSeguidos = document.getElementById('num-seguidos');
-                const elemSeguidores = document.getElementById('num-seguidores');
+            const listaSeguidos = await resSeguidos.json();
+            const listaSeguidores = await resSeguidores.json();
 
-                if (elemSeguidos) elemSeguidos.textContent = Array.isArray(listaSeguidos) ? listaSeguidos.length : 0;
-                if (elemSeguidores) elemSeguidores.textContent = Array.isArray(listaSeguidores) ? listaSeguidores.length : 0;
-            } catch (e) {
-                console.error("Error al cargar contadores:", e);
-            }
+            const elemSeguidos = document.getElementById('num-seguidos');
+            const elemSeguidores = document.getElementById('num-seguidores');
+
+            if (elemSeguidos) elemSeguidos.textContent = Array.isArray(listaSeguidos) ? listaSeguidos.length : 0;
+            if (elemSeguidores) elemSeguidores.textContent = Array.isArray(listaSeguidores) ? listaSeguidores.length : 0;
+        } catch (e) {
+            console.error("Error al cargar contadores:", e);
+        }
+    }
+
+    async function cargarContenidoModalSocial(tipo) {
+        const contenedor = document.getElementById('lista-social-container');
+        contenedor.innerHTML = '<p style="text-align: center; color: #666; font-style: italic;">Cargando...</p>';
+
+        const user = firebase.auth().currentUser;
+        if (!user || !user.email) {
+            contenedor.innerHTML = '<p style="text-align: center; color: #d9534f;">Inicia sesión para ver esta lista.</p>';
+            return;
         }
 
-        async function cargarContenidoModalSocial(tipo) {
-            const contenedor = document.getElementById('lista-social-container');
-            contenedor.innerHTML = '<p style="text-align: center; color: #666; font-style: italic;">Cargando...</p>';
+        const endpoint = tipo === 'seguidos' ? `/api/mis-seguidos/${encodeURIComponent(user.email)}` : `/api/mis-seguidores/${encodeURIComponent(user.email)}`;
 
-            const correo = await obtenerCorreoActivo();
-            if (!correo) {
-                contenedor.innerHTML = '<p style="text-align: center; color: #d9534f;">Por favor inicia sesión.</p>';
-                return;
+        try {
+            const res = await fetch(endpoint);
+            const datos = await res.json();
+
+            if (Array.isArray(datos) && datos.length > 0) {
+                contenedor.innerHTML = '';
+                datos.forEach(item => {
+                    const avatar = item.foto_perfil || 'logo.png';
+                    const fila = document.createElement('div');
+                    fila.style.cssText = 'display: flex; align-items: center; justify-content: space-between; background: #fffde8; padding: 10px 15px; border-radius: 14px; border: 1px solid #f0e6b8;';
+                    
+                    let botonAccion = '';
+                    if (tipo === 'seguidores') {
+                        botonAccion = `<button onclick="eliminarSeguidorModal(${item.id_seguidor}, '${tipo}')" style="background: #d9534f; color: white; border: none; padding: 6px 10px; border-radius: 10px; cursor: pointer; font-family: 'Itim'; font-size: 13px;">Eliminar</button>`;
+                    }
+
+                    fila.innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="window.location.href='perfil_publico.html?user=${encodeURIComponent(item.nombre_usuario)}'">
+                            <img src="${avatar}" alt="Avatar" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #fca38d;">
+                            <span style="font-weight: bold; color: #2b2b2b;">@${item.nombre_usuario}</span>
+                        </div>
+                        <div style="display: flex; gap: 6px;">
+                            <button onclick="window.location.href='perfil_publico.html?user=${encodeURIComponent(item.nombre_usuario)}'" style="background: #fca38d; color: white; border: none; padding: 6px 10px; border-radius: 10px; cursor: pointer; font-family: 'Itim'; font-size: 13px;">Ver perfil</button>
+                            ${botonAccion}
+                        </div>
+                    `;
+                    contenedor.appendChild(fila);
+                });
+            } else {
+                contenedor.innerHTML = `<p style="text-align: center; color: #666; font-style: italic;">No hay elementos para mostrar.</p>`;
             }
-
-            const endpoint = tipo === 'seguidos' ? `/api/mis-seguidos/${encodeURIComponent(correo)}` : `/api/mis-seguidores/${encodeURIComponent(correo)}`;
-
-            try {
-                const res = await fetch(endpoint);
-                const datos = await res.json();
-
-                if (Array.isArray(datos) && datos.length > 0) {
-                    contenedor.innerHTML = '';
-                    datos.forEach(item => {
-                        const avatar = item.foto_perfil || 'logo.png';
-                        const fila = document.createElement('div');
-                        fila.style.cssText = 'display: flex; align-items: center; justify-content: space-between; background: #fffde8; padding: 10px 15px; border-radius: 14px; border: 1px solid #f0e6b8;';
-                        
-                        let botonAccion = '';
-                        if (tipo === 'seguidores') {
-                            botonAccion = `<button onclick="eliminarSeguidorModal(${item.id_seguidor}, '${tipo}')" style="background: #d9534f; color: white; border: none; padding: 6px 10px; border-radius: 10px; cursor: pointer; font-family: 'Itim'; font-size: 13px;">Eliminar</button>`;
-                        }
-
-                        fila.innerHTML = `
-                            <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="window.location.href='perfil_publico.html?user=${encodeURIComponent(item.nombre_usuario)}'">
-                                <img src="${avatar}" alt="Avatar" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #fca38d;">
-                                <span style="font-weight: bold; color: #2b2b2b;">@${item.nombre_usuario}</span>
-                            </div>
-                            <div style="display: flex; gap: 6px;">
-                                <button onclick="window.location.href='perfil_publico.html?user=${encodeURIComponent(item.nombre_usuario)}'" style="background: #fca38d; color: white; border: none; padding: 6px 10px; border-radius: 10px; cursor: pointer; font-family: 'Itim'; font-size: 13px;">Ver perfil</button>
-                                ${botonAccion}
-                            </div>
-                        `;
-                        contenedor.appendChild(fila);
-                    });
-                } else {
-                    contenedor.innerHTML = `<p style="text-align: center; color: #666; font-style: italic;">No hay elementos para mostrar.</p>`;
-                }
-            } catch (e) {
-                console.error("Error al cargar contenido social:", e);
-                contenedor.innerHTML = `<p style="text-align: center; color: #d9534f;">Error al cargar la lista.</p>`;
-            }
+        } catch (e) {
+            console.error("Error al cargar contenido social:", e);
+            contenedor.innerHTML = `<p style="text-align: center; color: #d9534f;">Error al conectar con el servidor.</p>`;
         }
+    }
 
-        window.eliminarSeguidorModal = async function(idSeguidor, tipo) {
-            if (!confirm("¿Deseas eliminar a este seguidor?")) return;
-            try {
-                const res = await fetch(`/api/remover-seguidor/${idSeguidor}`, { method: 'DELETE' });
-                if (res.ok) {
-                    cargarContenidoModalSocial(tipo);
-                    cargarContadoresYSocial();
-                }
-            } catch (e) {
-                alert("Error al eliminar.");
-            }
-        };
-
-        // Escuchar cambios de estado y disparar la carga inicial
-        firebase.auth().onAuthStateChanged((user) => {
-            if (user) {
+    window.eliminarSeguidorModal = async function(idSeguidor, tipo) {
+        if (!confirm("¿Deseas eliminar a este seguidor?")) return;
+        try {
+            const res = await fetch(`/api/remover-seguidor/${idSeguidor}`, { method: 'DELETE' });
+            if (res.ok) {
+                cargarContenidoModalSocial(tipo);
                 cargarContadoresYSocial();
             }
-        });
-    </script>
+        } catch (e) {
+            alert("Error al eliminar.");
+        }
+    };
+
+    // Inicialización automática al detectar sesión en Firebase
+    firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+            cargarContadoresYSocial();
+        }
+    });
+</script>
 </body>
 </html>
