@@ -797,6 +797,9 @@ function cargarAdopcionesNovedades() {
             const adopciones = publicaciones.filter(pub => pub.tipo_publicacion === 'adopcion');
 
             if (adopciones.length === 0) {
+                // Verificamos si el usuario no ha iniciado sesión para mostrar el botón de detalles que abre el bloqueo
+                const esInvitado = !correoActual;
+                
                 contenedor.innerHTML = `
                     <div class="estado-vacio">
                         <div class="escena-cielo-kawaii">
@@ -814,6 +817,7 @@ function cargarAdopcionesNovedades() {
                         </div>
                         <h2>¡Aún no hay publicaciones de adopción!</h2>
                         <p>&lt;3</p>
+                        ${esInvitado ? `<button class="btn-detalles" onclick="abrirBloqueo()" style="margin-top: 15px; padding: 10px 20px; border-radius: 14px; border: none; background: #e985a0; color: white; font-weight: bold; cursor: pointer; font-family: 'Itim';">Ver detalles</button>` : ''}
                     </div>
                 `;
                 return;
