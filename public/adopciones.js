@@ -24,7 +24,8 @@ async function alHacerClicVerAnimales() {
     }
 
     try {
-        const respuesta = await fetch(`/api/verificar-adoptante/correo=${encodeURIComponent(user.email)}`, {
+        // Corregido: Usando query params (?correo=...) para que coincida con server.js
+        const respuesta = await fetch(`/api/verificar-adoptante?correo=${encodeURIComponent(user.email)}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -38,7 +39,7 @@ async function alHacerClicVerAnimales() {
         const data = await respuesta.json();
 
         if (data.tienePerfil) {
-            // ¡Tiene perfil! Guardamos su ubicación en localStorage (ej. "Robledo") para calcular cercanía
+            // ¡Tiene perfil! Guardamos su ubicación en localStorage para calcular cercanía
             localStorage.setItem('ubicacion_adoptante', data.ubicacion || data.ciudad || '');
             
             // Abre el catálogo de animales y carga las mascotas ordenadas por cercanía
