@@ -1,4 +1,3 @@
-
 const convertirFotoPerfilBase64 = (archivo) => {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -653,4 +652,85 @@ try {
             btnVerificarCorreo.textContent = "Verificar y cambiar correo";
         }
     };
+}
+
+// ==========================================
+// RENDERIZAR NOTIFICACIONES CON TARJETAS
+// ==========================================
+function renderizarNotificaciones(lista) {
+    const contenedor = obtenerContenedor();
+    if (!contenedor) return;
+    
+    contenedor.innerHTML = '';
+
+    if (!lista || lista.length === 0) {
+        contenedor.innerHTML = `
+            <div class="estado-vacio">
+                <div class="escena-cielo-kawaii">
+                    <div class="nube-kawaii nube-izq"></div>
+                    <div class="sol-kawaii">
+                        <div class="ojo-sol izq"></div>
+                        <div class="ojo-sol der"></div>
+                        <div class="boca-sol"></div>
+                        <div class="rubor-sol izq"></div>
+                        <div class="rubor-sol der"></div>
+                    </div>
+                    <div class="nube-kawaii nube-der"></div>
+                    <span class="destello d1">✦</span>
+                    <span class="destello d2">✦</span>
+                </div>
+                <h2>¡Aún no hay notificaciones!</h2>
+                <p>&lt;3</p>
+            </div>
+        `;
+        return;
+    }
+
+    lista.forEach(notif => {
+        const tarjeta = document.createElement('article');
+        tarjeta.classList.add('tarjeta-notificacion');
+        tarjeta.style.background = 'rgba(255, 255, 255, 0.7)';
+        tarjeta.style.borderRadius = '20px';
+        tarjeta.style.padding = '18px 24px';
+        tarjeta.style.marginBottom = '15px';
+        tarjeta.style.border = '2px solid #f9d5d3';
+        tarjeta.style.display = 'flex';
+        tarjeta.style.justifyContent = 'space-between';
+        tarjeta.style.alignItems = 'center';
+
+        const fechaStr = notif.fecha_notificacion ? notif.fecha_notificacion.split('T')[0] : 'Reciente';
+        
+        const autorNombre = notif.origen_nombre 
+            ? `<a href="perfil_publico.html?user=${encodeURIComponent(notif.origen_nombre)}" style="color: #e06d53; font-weight: bold; text-decoration: none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">@${notif.origen_nombre}</a>` 
+            : 'Sistema ARCA';
+
+        let htmlAccion = '';
+        if (notif.tipo === 'solicitud_adoptante' && notif.estado_solicitud === 'pendiente') {
+            htmlAccion = `
+                <div style="display: flex; gap: 8px; margin-top: 8px;">
+                    <button onclick="responderSolicitud(${notif.id_solicitud}, 'aceptar')" style="background: #25d366; color: white; border: none; padding: 6px 14px; border-radius: 12px; cursor: pointer; font-weight: bold; font-family: 'Itim';">Aceptar</button>
+                    <button onclick="responderSolicitud(${notif.id_solicitud}, 'rechazar')" style="background: #d9534f; color: white; border: none; padding: 6px 14px; border-radius: 12px; cursor: pointer; font-weight: bold; font-family: 'Itim';">Rechazar</button>
+                </div>
+            `;
+        } else if (notif.tipo === 'solicitud_adoptante' && notif.estado_solicitud === 'aceptada') {
+            htmlAccion = `<span style="color: #25d366; font-weight: bold; font-size: 13.5px;"> Solicitud aceptada ✓</span>`;
+        } else {
+            htmlAccion = `<button onclick="window.location.href='perfil_publico.html?user=${notif.origen_nombre}'" style="background: #fffde8; border: 1px solid #f0e6b8; padding: 6px 14px; border-radius: 12px; cursor: pointer; font-weight: bold; font-family: 'Itim'; margin-top: 6px;">Ver perfil</button>`;
+        }
+
+        tarjeta.innerHTML = `
+            <div class="info-notif-izq" style="display: flex; flex-direction: column; gap: 4px;">
+                <div style="font-weight: bold; font-size: 16px; color: #2b2b2b;">
+                    ${autorNombre} ${notif.mensaje}
+                </div>
+                <span style="font-size: 12px; color: #777;">${fechaStr}</span>
+                <div>${htmlAccion}</div>
+            </div>
+            <button onclick="eliminarNotificacionBd(${notif.id_notificacion})" title="Borrar notificación" style="background: none; border: none; color: #d9534f; cursor: pointer; font-size: 18px;">
+                <i class="fa-solid fa-trash-can"></i>
+            </button>
+        `;
+
+        contenedor.appendChild(tarjeta);
+    });
 }
