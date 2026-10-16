@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Novedades - ARCA</title>
+    <title>Reportes - Novedades - ARCA</title>
     <link rel="stylesheet" href="novedades-reportes-style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -104,7 +104,7 @@
       <aside class="panel-filtros">
           <div class="titulo-filtro">Filtros</div>
           <a href="novedades.html" class="btn-filtro" style="text-decoration: none;">Todo</a>
-          <a href="novedades-reportes.html" class="btn-filtro" style="text-decoration: none;">Reportes</a>
+          <a href="novedades-reportes.html" class="btn-filtro active" style="text-decoration: none;">Reportes</a>
           <a href="novedades-adopciones.html" class="btn-filtro" style="text-decoration: none;">Adopciones</a>
           <a href="novedades-eventos.html" class="btn-filtro" style="text-decoration: none;">Eventos</a>
       </aside>
@@ -112,17 +112,8 @@
       <section class="feed-novedades" id="contenedor-novedades">
           <article class="tarjeta-reporte">
               <div class="header-tarjeta-reporte">
-                  <div class="badge-titulo-reporte">No hay ningún reporte nuevo</div>
+                  <div class="badge-titulo-reporte">Cargando reportes...</div>
                   <span class="fecha-reporte">--/--/----</span>
-              </div>
-              <div class="contenido-reporte">
-                  <div class="contenedor-foto-reporte foto-vacia">
-                      <i class="fa-solid fa-paw icono-huella"></i>
-                  </div>
-                  <div class="info-reporte">
-                      <div class="etiqueta-estado">. . .</div>
-                      <button class="btn-detalles" onclick="abrirBloqueo()">Ver detalles</button>
-                  </div>
               </div>
           </article>
       </section>
@@ -171,6 +162,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="script.js"></script>
 
   <script>
       // Control del Sidebar
@@ -187,14 +179,14 @@
       });
   </script>   
 
-  <!-- Script optimizado para cargar y filtrar exclusivamente los reportes -->
+  <!-- Script optimizado para cargar y filtrar exclusivamente los reportes con soporte de bloqueados y Firebase -->
   <script>
-      document.addEventListener('DOMContentLoaded', async () => {
+      async function cargarReportesNovedades(correoUsuario = '') {
           const contenedor = document.getElementById('contenedor-novedades');
           if (!contenedor) return;
 
           try {
-              const respuesta = await fetch('/api/publicaciones-globales');
+              const respuesta = await fetch(`/api/publicaciones-globales?correo=${encodeURIComponent(correoUsuario)}`);
               if (!respuesta.ok) throw new Error("Error al obtener las publicaciones globales");
               
               const publicaciones = await respuesta.json();
@@ -203,12 +195,24 @@
               const reportes = publicaciones.filter(pub => pub.tipo_publicacion === 'reporte');
 
               if (reportes.length > 0) {
-                  contenedor.innerHTML = ''; // Limpia el mensaje por defecto
+                  contenedor.innerHTML = ''; 
 
                   for (const pub of reportes) {
-                      const imagenSrc = pub.img_reporte ? pub.img_reporte : 'logo.png';
+                      let imagenSrc = 'logo.png';
+                      if (pub.img_reporte) {
+                          try {
+                              const parsed = JSON.parse(pub.img_reporte);
+                              if (Array.isArray(parsed) && parsed.length > 0) {
+                                  imagenSrc = parsed[0];
+                              } else {
+                                  imagenSrc = pub.img_reporte;
+                              }
+                          } catch (e) {
+                              imagenSrc = pub.img_reporte;
+                          }
+                      }
+
                       const fechaFormateada = pub.Fecha_reporte ? pub.Fecha_reporte.split('T')[0] : '';
-                      
                       let textoUbicacionBruta = pub.Ubicacion || pub.ubicacion || '';
                       let ubicacionBonita = await obtenerNombreUbicacionGlobal(textoUbicacionBruta);
 
@@ -225,13 +229,13 @@
 
                           <div class="proto-card-body">
                               <div class="proto-img-wrapper">
-                                  <img src="${imagenSrc}" alt="Reporte">
+                                  <img src="${imagenSrc}" alt="Reporte" style="width:100%; height:100%; object-fit:cover;">
                               </div>
 
                               <div class="proto-content-right">
                                   <div class="proto-pill-tipo">${pub.nombre_tipo_reporte || 'Animal en situación de calle'}</div>
                                   <div class="proto-info-extra">
-                                      <span class="proto-autor">Publicado por: <a href="perfil_usuario.html">@${pub.nombre_usuario || 'Usuario'}</a></span>
+                                      <span class="proto-autor">Publicado por: <a href="perfil_publico.html?user=${pub.nombre_usuario}">@${pub.nombre_usuario || 'Usuario'}</a></span>
                                       <p class="proto-ubicacion"><i class="fa-solid fa-location-dot"></i> ${ubicacionBonita}</p>
                                   </div>
                                   <div class="proto-footer-row">
@@ -244,7 +248,8 @@
                   }
               } else {
                   contenedor.innerHTML = `
-                      <div class="estado-vacio" style="text-align: center; padding: 40px;">
+                      <div class="estado-vacio" style="text-align: center; padding: 40px; font-family: 'Itim', cursive;">
+                          <i class="fa-solid fa-paw icono-huella" style="font-size: 40px; color: #e06d53; margin-bottom: 10px;"></i>
                           <h2>¡Aún no hay reportes!</h2>
                           <p>&lt;3</p>
                       </div>
@@ -253,7 +258,20 @@
           } catch (error) {
               console.error("No se pudieron cargar los reportes:", error);
           }
+      }
+
+      // Sincronización con Firebase para capturar el correo y filtrar bloqueados al instante
+      firebase.auth().onAuthStateChanged((user) => {
+          const correo = (user && user.email) ? user.email : '';
+          cargarReportesNovedades(correo);
       });
+
+      // Respaldo por si Firebase tarda un pelín en la primera visita
+      setTimeout(() => {
+          if (document.getElementById('contenedor-novedades').innerHTML.includes('Cargando reportes...') && auth.currentUser) {
+              cargarReportesNovedades(auth.currentUser.email);
+          }
+      }, 800);
   </script>
 
   <style>
@@ -389,7 +407,6 @@
       }
   </style>
 
-  <script src="script.js"></script>
 
   <!-- Motor oculto de Google Translate -->
   <div id="google_translate_element" style="display:none;"></div>
