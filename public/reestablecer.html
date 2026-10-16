@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restablecer Contraseña - ARCA</title>
+    <link rel="stylesheet" href="style_home.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="dark-mode.css">
+    <script>
+    if (localStorage.getItem("modo_oscuro") === "true") {
+        document.body.classList.add("dark-mode");
+    }
+    </script>
+    <style>
+        html, body {
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Itim', cursive, sans-serif;
+            background-color: #fce8e6;
+        }
+
+        .card-reestablecer {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            padding: 35px;
+            border-radius: 28px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 12px 35px rgba(220, 150, 140, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .card-reestablecer h2 {
+            color: #2b2b2b;
+            margin-bottom: 10px;
+        }
+
+        .card-reestablecer p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+
+        .input-arca-reest {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 14px;
+            border: 1px solid #f9cab5;
+            background: #fff;
+            font-family: 'Itim', cursive, sans-serif;
+            font-size: 15px;
+            box-sizing: border-box;
+            outline: none;
+            margin-bottom: 8px;
+        }
+
+        .mensaje-validacion {
+            font-size: 13px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .mensaje-validacion.error {
+            color: #d9534f;
+        }
+
+        .mensaje-validacion.exito {
+            color: #25d366;
+        }
+
+        .btn-enviar-reest {
+            background: #fca38d;
+            color: #fff;
+            border: none;
+            padding: 12px;
+            border-radius: 16px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            font-family: 'Itim', cursive, sans-serif;
+            box-shadow: 0 4px 12px rgba(252, 163, 141, 0.4);
+            transition: background 0.2s;
+        }
+
+        .btn-enviar-reest:hover {
+            background: #e88f78;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card-reestablecer">
+        <h2>Nueva Contraseña</h2>
+        <p>Ingresa tu nueva contraseña cumpliendo con los requisitos de seguridad.</p>
+        
+        <div style="text-align: left; position: relative;">
+            <input type="password" id="nuevaPassword" placeholder="Nueva contraseña" class="input-arca-reest">
+        </div>
+        <div id="mensaje-estado-pass" class="mensaje-validacion"></div>
+
+        <button id="btnGuardarPassword" class="btn-enviar-reest">Actualizar contraseña</button>
+    </div>
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script>
+        // Configuración de Firebase (asegúrate de que coincida con la tuya)
+        const firebaseConfig = {
+          apiKey: "AIzaSyC-KetEpCzTu7AHp6OV7kcaM6rwxdbwaxs",
+          authDomain: "arca-90c0f.firebaseapp.com",
+          projectId: "arca-90c0f",
+          storageBucket: "arca-90c0f.firebasestorage.app",
+          messagingSenderId: "208516820997",
+          appId: "1:208516820997:web:b610694c5ee7c8b8adac6c",
+          measurementId: "G-22M1GJC6PZ"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const urlParams = new URLSearchParams(window.location.search);
+        const oobCode = urlParams.get('oobCode');
+        const mode = urlParams.get('mode');
+
+    // Si por alguna razón Firebase abre su interfaz genérica, puedes forzar la verificación aquí:
+        if (mode === 'resetPassword' && oobCode) {
+            // El código ya está listo para ser usado por el botón de actualizar
+        }
+
+        // Misma expresión regular que usas en el registro: Mínimo 8 caracteres, 1 mayúscula y 1 número
+        const regExPassword = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+        const inputNuevaPass = document.getElementById('nuevaPassword');
+        const mensajeEstadoPass = document.getElementById('mensaje-estado-pass');
+        const btnGuardarPassword = document.getElementById('btnGuardarPassword');
+
+        let esPasswordValida = false;
+
+        // Validación en tiempo real
+        inputNuevaPass.addEventListener('input', (e) => {
+            const passVal = e.target.value;
+
+            if (passVal.length === 0) {
+                mensajeEstadoPass.textContent = "";
+                esPasswordValida = false;
+                return;
+            }
+
+            if (!regExPassword.test(passVal)) {
+                mensajeEstadoPass.textContent = "Debe tener al menos 8 caracteres, una mayúscula y un número.";
+                mensajeEstadoPass.className = "mensaje-validacion error";
+                esPasswordValida = false;
+            } else {
+                mensajeEstadoPass.textContent = "¡Contraseña segura!";
+                mensajeEstadoPass.className = "mensaje-validacion exito";
+                esPasswordValida = true;
+            }
+        });
+
+        // Guardar la nueva contraseña con Firebase
+        btnGuardarPassword.addEventListener('click', async () => {
+            if (!esPasswordValida) {
+                mensajeEstadoPass.textContent = "La contraseña no cumple con los requisitos de seguridad.";
+                mensajeEstadoPass.className = "mensaje-validacion error";
+                inputNuevaPass.focus();
+                return;
+            }
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const oobCode = urlParams.get('oobCode');
+
+            if (!oobCode) {
+                alert("Enlace inválido o expirado.");
+                return;
+            }
+
+            const nuevaPasswordTexto = inputNuevaPass.value.trim();
+
+            try {
+                await firebase.auth().confirmPasswordReset(oobCode, nuevaPasswordTexto);
+                alert("¡Contraseña actualizada con éxito! Ya puedes iniciar sesión.");
+                window.location.href = "home.html"; // O tu página de login
+            } catch (error) {
+                console.error("Error:", error);
+                alert("No se pudo actualizar la contraseña. El enlace pudo haber expirado.");
+            }
+        });
+    </script>
+</body>
+</html>
