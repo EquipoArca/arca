@@ -24,7 +24,6 @@
     }
 
     .main-content {
-        /* Cambiamos a padding superior en lugar de margin-top para respetar el flujo */
         padding: 30px 20px;
         min-height: calc(100vh - 70px);
         display: flex;
@@ -750,70 +749,73 @@
                   linkAutor.href = `perfil_publico.html?user=${encodeURIComponent(nombreUsuario)}`;
               }
 
-              // --- VERIFICACIÓN DE AUTOR O USUARIO EXTERNO (ADOPCIÓN - UNIVERSAL) ---
+              // --- VERIFICACIÓN DE AUTOR ROBUSTA POR ID Y CORREO (ADOPCIÓN) ---
               const contenedorAccion = document.getElementById('contenedor-boton-accion');
 
               firebase.auth().onAuthStateChanged(async (user) => {
-                  let correoLogueado = user ? user.email : (localStorage.getItem('correo_usuario') || localStorage.getItem('correo') || localStorage.getItem('usuario_correo'));
-                  const nombreUsuarioLocal = (localStorage.getItem('nombre_usuario') || "").toLowerCase().trim();
-
-                  const autorEnPantalla = document.getElementById('nombre-autor-texto').textContent.replace('@', '').trim().toLowerCase();
-                  const correoAdopcion = (adopcion.correo_usuario || "").toLowerCase().trim();
-
-                  let esDueño = false;
-
-                  if (correoLogueado && correoAdopcion && correoLogueado.toLowerCase().trim() === correoAdopcion) {
-                      esDueño = true;
-                  } else if (nombreUsuarioLocal && autorEnPantalla && nombreUsuarioLocal === autorEnPantalla) {
-                      esDueño = true;
-                  } else if (user && user.displayName && user.displayName.toLowerCase().trim() === autorEnPantalla) {
-                      esDueño = true;
-                  } else if (correoLogueado && autorEnPantalla && correoLogueado.toLowerCase().includes(autorEnPantalla)) {
-                      esDueño = true;
+                  const correoLogueado = user ? user.email : (localStorage.getItem('correo_usuario') || localStorage.getItem('correo'));
+                  
+                  if (!correoLogueado) {
+                      contenedorAccion.innerHTML = `
+                          <a href="login.html" class="detalle-btn-accion">
+                              <i class="fa-regular fa-bookmark"></i> Inicia sesión para guardar
+                          </a>
+                      `;
+                      return;
                   }
 
-                  if (esDueño) {
-                      // SI ES TU PROPIA ADOPCIÓN: Botones de Editar y Eliminar
-                      contenedorAccion.innerHTML = `
-                          <div style="display: flex; gap: 8px;">
-                              <a href="formulario_adopcion.html?editar=${adopcion.id_adopcion || adopcionId}" class="detalle-btn-accion" style="background: #fca38d; color: #fff;">
-                                  <i class="fa-solid fa-pen-to-square"></i> Editar
-                              </a>
-                              <button class="detalle-btn-accion" id="btn-eliminar-adopcion" style="background: #ffe5dd; color: #d9534f; border-color: #f4c2c4;">
-                                  <i class="fa-solid fa-trash"></i> Eliminar
-                              </button>
-                          </div>
-                      `;
+                  try {
+                      // 1. Consultamos el ID del usuario logueado en la base de datos
+                      const resUser = await fetch(`/api/obtener-usuario?correo=${encodeURIComponent(correoLogueado)}`);
+                      if (!resUser.ok) throw new Error("No se pudo obtener el usuario actual");
+                      const datosUsuarioLogueado = await resUser.json();
+                      const idUsuarioLogueado = Number(datosUsuarioLogueado.id_usuarios);
 
-                      document.getElementById('btn-eliminar-adopcion').addEventListener('click', async () => {
-                          if (confirm("¿Estás seguro de que deseas eliminar esta publicación de adopción?")) {
-                              try {
-                                  const idAResolver = adopcion.id_adopcion || adopcionId;
-                                  const resDel = await fetch(`/api/adopciones/${idAResolver}`, { method: 'DELETE' });
-                                  if (resDel.ok) {
-                                      alert("Publicación de adopción eliminada correctamente.");
-                                      window.location.href = 'home.html';
-                                  } else {
-                                      alert("No se pudo eliminar la adopción.");
-                                  }
-                              } catch (err) {
-                                  console.error("Error al eliminar adopción:", err);
-                              }
+                      // 2. Obtenemos el ID del creador de la adopción
+                      const idCreadorAdopcion = Number(adopcion.id_usuarios);
+
+                      // Comparamos directamente por ID de base de datos
+                      let esDueño = (idUsuarioLogueado && idCreadorAdopcion && idUsuarioLogueado === idCreadorAdopcion);
+
+                      // Respaldo por si el registro no traía el id_usuarios pero sí el correo
+                      if (!esDueño && adopcion.correo_usuario && correoLogueado) {
+                          if (adopcion.correo_usuario.toLowerCase().trim() === correoLogueado.toLowerCase().trim()) {
+                              esDueño = true;
                           }
-                      });
-
-                  } else {
-                      // SI ES OTRO USUARIO: Lógica de guardado
-                      if (!correoLogueado) {
-                          contenedorAccion.innerHTML = `
-                              <a href="login.html" class="detalle-btn-accion">
-                                  <i class="fa-regular fa-bookmark"></i> Inicia sesión para guardar
-                              </a>
-                          `;
-                          return;
                       }
 
-                      try {
+                      if (esDueño) {
+                          // SI ES EL DUEÑO: Botones Editar y Eliminar
+                          contenedorAccion.innerHTML = `
+                              <div style="display: flex; gap: 8px;">
+                                  <a href="formulario_adopcion.html?editar=${adopcion.id_adopcion || adopcionId}" class="detalle-btn-accion" style="background: #fca38d; color: #fff;">
+                                      <i class="fa-solid fa-pen-to-square"></i> Editar
+                                  </a>
+                                  <button class="detalle-btn-accion" id="btn-eliminar-adopcion" style="background: #ffe5dd; color: #d9534f; border-color: #f4c2c4;">
+                                      <i class="fa-solid fa-trash"></i> Eliminar
+                                  </button>
+                              </div>
+                          `;
+
+                          document.getElementById('btn-eliminar-adopcion').addEventListener('click', async () => {
+                              if (confirm("¿Estás seguro de que deseas eliminar esta publicación de adopción?")) {
+                                  try {
+                                      const idAResolver = adopcion.id_adopcion || adopcionId;
+                                      const resDel = await fetch(`/api/adopciones/${idAResolver}`, { method: 'DELETE' });
+                                      if (resDel.ok) {
+                                          alert("Publicación de adopción eliminada correctamente.");
+                                          window.location.href = 'home.html';
+                                      } else {
+                                          alert("No se pudo eliminar la adopción.");
+                                      }
+                                  } catch (err) {
+                                      console.error("Error al eliminar adopción:", err);
+                                  }
+                              }
+                          });
+
+                      } else {
+                          // SI NO ES EL DUEÑO: Lógica de guardado normal
                           const resPubs = await fetch('/api/publicaciones-globales');
                           const publicaciones = await resPubs.json();
                           
@@ -865,9 +867,9 @@
                                   }
                               });
                           }
-                      } catch (e) {
-                          console.error("Error gestionando el guardado:", e);
                       }
+                  } catch (e) {
+                      console.error("Error al validar el propietario de la adopción:", e);
                   }
               });
               
