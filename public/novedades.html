@@ -259,7 +259,7 @@
     }
 
     // Usamos el observador pero con un respaldo inmediato por si Firebase tarda un segundo
-    auth.onAuthStateChanged((user) => {
+    firebase.auth().onAuthStateChanged((user) => {
         const correo = (user && user.email) ? user.email : '';
         cargarNovedades(correo);
     });
