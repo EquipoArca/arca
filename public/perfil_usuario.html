@@ -14,9 +14,9 @@
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             if (localStorage.getItem("modo_oscuro") === "true") {
-        document.body.classList.add("dark-mode");}
-     });
-    
+                document.body.classList.add("dark-mode");
+            }
+        });
     </script>
 </head>
 <body>
@@ -114,6 +114,8 @@
                     </button>
                 </div>
                 <h2 id="mostrar-nombre-usuario">@cargando...</h2>
+                
+                <!-- ESTADÍSTICAS ESTILO TIKTOK -->
                 <div id="stats-seguidores-container" style="display: flex; gap: 15px; font-size: 14.5px; color: #555; margin-top: 5px; justify-content: center; cursor: pointer;">
                     <span onclick="abrirModalLista('seguidos')" style="transition: opacity 0.2s;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'"><strong id="num-seguidos" style="color: #2b2b2b;">0</strong> Seguidos</span>
                     <span style="color: #ccc;">|</span>
@@ -237,21 +239,34 @@
             </div>
         </div>
     </div>
-<!-- SDK de Firebase -->
+
+    <!-- MODAL DINÁMICO DE SEGUIDORES / SEGUIDOS -->
+    <div id="modal-lista-social" class="modal-foto-overlay" onclick="cerrarModalSocialOverlay(event)" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1000; align-items: center; justify-content: center;">
+        <div class="modal-foto-contenido modal-nombre-box" style="background: #fff; padding: 25px; border-radius: 20px; width: 90%; max-width: 450px; max-height: 80vh; overflow-y: auto; position: relative; font-family: 'Itim', cursive;">
+            <button type="button" class="btn-cerrar-modal" onclick="cerrarModalSocial()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 22px; cursor: pointer;">&times;</button>
+            <h3 id="modal-social-titulo" style="margin-top: 0; color: #2b2b2b; text-align: center; border-bottom: 2px solid #fde8e5; padding-bottom: 10px;">Lista</h3>
+            
+            <div id="lista-social-container" style="display: flex; flex-direction: column; gap: 12px; margin-top: 15px;">
+                <p style="text-align: center; color: #666; font-style: italic;">Cargando...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SDK de Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
     <script src="script.js"></script>
     <script src="perfil.js"></script>
-    <!-- 1. Cargas el SDK Global de EmailJS antes de tu script -->
+    
+    <!-- SDK Global de EmailJS -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script type="text/javascript">
         (function(){
             emailjs.init("AVpXUrYdpwa9oh438");
         })();
     </script>
-
     
     <script>
         const btnToggleMenu = document.getElementById('btn-toggle-menu');
@@ -288,124 +303,124 @@
                     });
                     otpCorreoInputs[3].focus();
                 }
-                
             });
         });
-        </script>
-        <!-- MODAL DINÁMICO DE SEGUIDORES / SEGUIDOS -->
-<div id="modal-lista-social" class="modal-foto-overlay" onclick="cerrarModalSocialOverlay(event)" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1000; align-items: center; justify-content: center;">
-    <div class="modal-foto-contenido modal-nombre-box" style="background: #fff; padding: 25px; border-radius: 20px; width: 90%; max-width: 450px; max-height: 80vh; overflow-y: auto; position: relative; font-family: 'Itim', cursive;">
-        <button type="button" class="btn-cerrar-modal" onclick="cerrarModalSocial()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 22px; cursor: pointer;">&times;</button>
-        <h3 id="modal-social-titulo" style="margin-top: 0; color: #2b2b2b; text-align: center; border-bottom: 2px solid #fde8e5; padding-bottom: 10px;">Lista</h3>
-        
-        <div id="lista-social-container" style="display: flex; flex-direction: column; gap: 12px; margin-top: 15px;">
-            <p style="text-align: center; color: #666; font-style: italic;">Cargando...</p>
-        </div>
-    </div>
-</div>
 
-<script>
-    async function cargarContadoresYSocial() {
-        const user = firebase.auth().currentUser;
-        if (!user || !user.email) return;
-
-        try {
-            const [resSeguidos, resSeguidores] = await Promise.all([
-                fetch(`/api/mis-seguidos/${encodeURIComponent(user.email)}`),
-                fetch(`/api/mis-seguidores/${encodeURIComponent(user.email)}`)
-            ]);
-
-            const listaSeguidos = await resSeguidos.json();
-            const listaSeguidores = await resSeguidores.json();
-
-            document.getElementById('num-seguidos').textContent = Array.isArray(listaSeguidos) ? listaSeguidos.length : 0;
-            document.getElementById('num-seguidores').textContent = Array.isArray(listaSeguidores) ? listaSeguidores.length : 0;
-        } catch (e) {
-            console.error("Error al cargar contadores:", e);
-        }
-    }
-
-    function abrirModalLista(tipo) {
-        const modal = document.getElementById('modal-lista-social');
-        const titulo = document.getElementById('modal-social-titulo');
-        if (modal) {
-            modal.style.display = 'flex';
-            titulo.textContent = tipo === 'seguidos' ? 'Personas que sigues' : 'Tus seguidores';
-            cargarContenidoModalSocial(tipo);
-        }
-    }
-
-    function cerrarModalSocial() {
-        const modal = document.getElementById('modal-lista-social');
-        if (modal) modal.style.display = 'none';
-    }
-
-    function cerrarModalSocialOverlay(event) {
-        if (event.target.id === 'modal-lista-social') cerrarModalSocial();
-    }
-
-    async function cargarContenidoModalSocial(tipo) {
-        const contenedor = document.getElementById('lista-social-container');
-        contenedor.innerHTML = '<p style="text-align: center; color: #666; font-style: italic;">Cargando...</p>';
-
-        const user = firebase.auth().currentUser;
-        if (!user) return;
-
-        const endpoint = tipo === 'seguidos' ? `/api/mis-seguidos/${encodeURIComponent(user.email)}` : `/api/mis-seguidores/${encodeURIComponent(user.email)}`;
-
-        try {
-            const res = await fetch(endpoint);
-            const datos = await res.json();
-
-            if (datos.length > 0) {
-                contenedor.innerHTML = '';
-                datos.forEach(item => {
-                    const avatar = item.foto_perfil || 'logo.png';
-                    const fila = document.createElement('div');
-                    fila.style.cssText = 'display: flex; align-items: center; justify-content: space-between; background: #fffde8; padding: 10px 15px; border-radius: 14px; border: 1px solid #f0e6b8;';
-                    
-                    let botonAccion = '';
-                    if (tipo === 'seguidores') {
-                        botonAccion = `<button onclick="eliminarSeguidorModal(${item.id_seguidor}, '${tipo}')" style="background: #d9534f; color: white; border: none; padding: 6px 10px; border-radius: 10px; cursor: pointer; font-family: 'Itim'; font-size: 13px;">Eliminar</button>`;
-                    }
-
-                    fila.innerHTML = `
-                        <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="window.location.href='perfil_publico.html?user=${encodeURIComponent(item.nombre_usuario)}'">
-                            <img src="${avatar}" alt="Avatar" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #fca38d;">
-                            <span style="font-weight: bold; color: #2b2b2b;">@${item.nombre_usuario}</span>
-                        </div>
-                        <div style="display: flex; gap: 6px;">
-                            <button onclick="window.location.href='perfil_publico.html?user=${encodeURIComponent(item.nombre_usuario)}'" style="background: #fca38d; color: white; border: none; padding: 6px 10px; border-radius: 10px; cursor: pointer; font-family: 'Itim'; font-size: 13px;">Ver perfil</button>
-                            ${botonAccion}
-                        </div>
-                    `;
-                    contenedor.appendChild(fila);
-                });
-            } else {
-                contenedor.innerHTML = `<p style="text-align: center; color: #666; font-style: italic;">No hay elementos para mostrar.</p>`;
-            }
-        } catch (e) {
-            contenedor.innerHTML = `<p style="text-align: center; color: #d9534f;">Error al cargar la lista.</p>`;
-        }
-    }
-
-    async function eliminarSeguidorModal(idSeguidor, tipo) {
-        if (!confirm("¿Deseas eliminar a este seguidor?")) return;
-        try {
-            const res = await fetch(`/api/remover-seguidor/${idSeguidor}`, { method: 'DELETE' });
-            if (res.ok) {
+        // ==========================================
+        // LÓGICA DE SEGUIDORES / SEGUIDOS ESTILO TIKTOK
+        // ==========================================
+        window.abrirModalLista = function(tipo) {
+            const modal = document.getElementById('modal-lista-social');
+            const titulo = document.getElementById('modal-social-titulo');
+            if (modal) {
+                modal.style.display = 'flex';
+                titulo.textContent = tipo === 'seguidos' ? 'Personas que sigues' : 'Tus seguidores';
                 cargarContenidoModalSocial(tipo);
+            }
+        };
+
+        window.cerrarModalSocial = function() {
+            const modal = document.getElementById('modal-lista-social');
+            if (modal) modal.style.display = 'none';
+        };
+
+        window.cerrarModalSocialOverlay = function(event) {
+            if (event.target.id === 'modal-lista-social') {
+                window.cerrarModalSocial();
+            }
+        };
+
+        async function cargarContadoresYSocial() {
+            const user = firebase.auth().currentUser;
+            if (!user || !user.email) return;
+
+            try {
+                const [resSeguidos, resSeguidores] = await Promise.all([
+                    fetch(`/api/mis-seguidos/${encodeURIComponent(user.email)}`),
+                    fetch(`/api/mis-seguidores/${encodeURIComponent(user.email)}`)
+                ]);
+
+                const listaSeguidos = await resSeguidos.json();
+                const listaSeguidores = await resSeguidores.json();
+
+                const elemSeguidos = document.getElementById('num-seguidos');
+                const elemSeguidores = document.getElementById('num-seguidores');
+
+                if (elemSeguidos) elemSeguidos.textContent = Array.isArray(listaSeguidos) ? listaSeguidos.length : 0;
+                if (elemSeguidores) elemSeguidores.textContent = Array.isArray(listaSeguidores) ? listaSeguidores.length : 0;
+            } catch (e) {
+                console.error("Error al cargar contadores:", e);
+            }
+        }
+
+        async function cargarContenidoModalSocial(tipo) {
+            const contenedor = document.getElementById('lista-social-container');
+            contenedor.innerHTML = '<p style="text-align: center; color: #666; font-style: italic;">Cargando...</p>';
+
+            const user = firebase.auth().currentUser;
+            if (!user || !user.email) {
+                contenedor.innerHTML = '<p style="text-align: center; color: #d9534f;">Por favor inicia sesión.</p>';
+                return;
+            }
+
+            const endpoint = tipo === 'seguidos' ? `/api/mis-seguidos/${encodeURIComponent(user.email)}` : `/api/mis-seguidores/${encodeURIComponent(user.email)}`;
+
+            try {
+                const res = await fetch(endpoint);
+                const datos = await res.json();
+
+                if (Array.isArray(datos) && datos.length > 0) {
+                    contenedor.innerHTML = '';
+                    datos.forEach(item => {
+                        const avatar = item.foto_perfil || 'logo.png';
+                        const fila = document.createElement('div');
+                        fila.style.cssText = 'display: flex; align-items: center; justify-content: space-between; background: #fffde8; padding: 10px 15px; border-radius: 14px; border: 1px solid #f0e6b8;';
+                        
+                        let botonAccion = '';
+                        if (tipo === 'seguidores') {
+                            botonAccion = `<button onclick="eliminarSeguidorModal(${item.id_seguidor}, '${tipo}')" style="background: #d9534f; color: white; border: none; padding: 6px 10px; border-radius: 10px; cursor: pointer; font-family: 'Itim'; font-size: 13px;">Eliminar</button>`;
+                        }
+
+                        fila.innerHTML = `
+                            <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="window.location.href='perfil_publico.html?user=${encodeURIComponent(item.nombre_usuario)}'">
+                                <img src="${avatar}" alt="Avatar" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #fca38d;">
+                                <span style="font-weight: bold; color: #2b2b2b;">@${item.nombre_usuario}</span>
+                            </div>
+                            <div style="display: flex; gap: 6px;">
+                                <button onclick="window.location.href='perfil_publico.html?user=${encodeURIComponent(item.nombre_usuario)}'" style="background: #fca38d; color: white; border: none; padding: 6px 10px; border-radius: 10px; cursor: pointer; font-family: 'Itim'; font-size: 13px;">Ver perfil</button>
+                                ${botonAccion}
+                            </div>
+                        `;
+                        contenedor.appendChild(fila);
+                    });
+                } else {
+                    contenedor.innerHTML = `<p style="text-align: center; color: #666; font-style: italic;">No hay elementos para mostrar.</p>`;
+                }
+            } catch (e) {
+                console.error("Error al cargar contenido social:", e);
+                contenedor.innerHTML = `<p style="text-align: center; color: #d9534f;">Error al cargar la lista.</p>`;
+            }
+        }
+
+        window.eliminarSeguidorModal = async function(idSeguidor, tipo) {
+            if (!confirm("¿Deseas eliminar a este seguidor?")) return;
+            try {
+                const res = await fetch(`/api/remover-seguidor/${idSeguidor}`, { method: 'DELETE' });
+                if (res.ok) {
+                    cargarContenidoModalSocial(tipo);
+                    cargarContadoresYSocial();
+                }
+            } catch (e) {
+                alert("Error al eliminar.");
+            }
+        };
+
+        // Sincronizar con el estado de autenticación de Firebase
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
                 cargarContadoresYSocial();
             }
-        } catch (e) {
-            alert("Error al eliminar.");
-        }
-    }
-
-    // Cargar contadores automáticamente cuando Firebase detecte la sesión
-    firebase.auth().onAuthStateChanged((user) => {
-        if (user) cargarContadoresYSocial();
-    });
-</script>
+        });
+    </script>
 </body>
 </html>
