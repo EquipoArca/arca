@@ -115,11 +115,12 @@
                 </div>
                 <h2 id="mostrar-nombre-usuario">@cargando...</h2>
                
-            <div id="stats-seguidores-container" style="display: flex; gap: 15px; font-size: 14.5px; color: #555; margin-top: 5px; justify-content: center;">
-                <span onclick="abrirModalListaSocial('seguidos')" style="cursor: pointer; transition: opacity 0.2s;"><strong id="num-seguidos" style="color: #2b2b2b;">0</strong> Seguidos</span>
-                <span style="color: #ccc;">|</span>
-                <span onclick="abrirModalListaSocial('seguidores')" style="cursor: pointer; transition: opacity 0.2s;"><strong id="num-seguidores" style="color: #2b2b2b;">0</strong> Seguidores</span>
-            </div>
+                <!-- ESTADÍSTICAS ESTILO TIKTOK -->
+                <div id="stats-seguidores-container" style="display: flex; gap: 15px; font-size: 14.5px; color: #555; margin-top: 5px; justify-content: center;">
+                    <span onclick="abrirModalListaSocialDirecto('seguidos')" style="cursor: pointer; transition: opacity 0.2s;"><strong id="num-seguidos" style="color: #2b2b2b;">0</strong> Seguidos</span>
+                    <span style="color: #ccc;">|</span>
+                    <span onclick="abrirModalListaSocialDirecto('seguidores')" style="cursor: pointer; transition: opacity 0.2s;"><strong id="num-seguidores" style="color: #2b2b2b;">0</strong> Seguidores</span>
+                </div>
             </div>
 
             <div class="perfil-grid-opciones">
@@ -251,7 +252,7 @@
         </div>
     </div>
 
-    <!-- SDK de Firebase -->
+<!-- SDK de Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
@@ -266,18 +267,28 @@
     </script>
 
     <!-- SCRIPTS DE LA APP -->
-    <script src="script.js"></script>
+    <script src="script_4.js"></script>
     <script src="perfil.js"></script>
 
-    <!-- SCRIPT INDEPENDIENTE Y BLINDADO PARA LOS MODALES SOCIALES -->
+    <!-- SCRIPT BLINDADO DE CONTADORES Y MODAL SOCIAL -->
     <script>
-        window.abrirModalListaSocial = async function(tipo) {
+        window.abrirModalListaSocialDirecto = async function(tipo) {
             const modal = document.getElementById('modal-lista-social');
             const titulo = document.getElementById('modal-social-titulo');
+            
             if (modal) {
+                // Forzar despliegue y visibilidad total
                 modal.style.display = 'flex';
-                titulo.textContent = tipo === 'seguidos' ? 'Personas que sigues' : 'Tus seguidores';
-                await cargarContenidoSocialDirecto(tipo);
+                modal.style.opacity = '1';
+                modal.style.zIndex = '999999';
+                
+                if (titulo) {
+                    titulo.textContent = tipo === 'seguidos' ? 'Personas que sigues' : 'Tus seguidores';
+                }
+                
+                await cargarContenidoSocialModal(tipo);
+            } else {
+                console.error("No se encontró el elemento #modal-lista-social en el DOM.");
             }
         };
 
@@ -292,7 +303,7 @@
             }
         };
 
-        async function cargarContadoresDirectos() {
+        async function cargarContadoresPerfil() {
             const user = firebase.auth().currentUser;
             if (!user || !user.email) return;
 
@@ -315,8 +326,10 @@
             }
         }
 
-        async function cargarContenidoSocialDirecto(tipo) {
+        async function cargarContenidoSocialModal(tipo) {
             const contenedor = document.getElementById('lista-social-container');
+            if (!contenedor) return;
+            
             contenedor.innerHTML = '<p style="text-align: center; color: #666; font-style: italic;">Cargando...</p>';
 
             const user = firebase.auth().currentUser;
@@ -340,7 +353,7 @@
                         
                         let botonAccion = '';
                         if (tipo === 'seguidores') {
-                            botonAccion = `<button onclick="eliminarSeguidorDirecto(${item.id_seguidor}, '${tipo}')" style="background: #d9534f; color: white; border: none; padding: 6px 10px; border-radius: 10px; cursor: pointer; font-family: 'Itim'; font-size: 13px;">Eliminar</button>`;
+                            botonAccion = `<button onclick="eliminarSeguidorModalItem(${item.id_seguidor}, '${tipo}')" style="background: #d9534f; color: white; border: none; padding: 6px 10px; border-radius: 10px; cursor: pointer; font-family: 'Itim'; font-size: 13px;">Eliminar</button>`;
                         }
 
                         fila.innerHTML = `
@@ -359,50 +372,28 @@
                     contenedor.innerHTML = `<p style="text-align: center; color: #666; font-style: italic;">No hay elementos para mostrar.</p>`;
                 }
             } catch (e) {
-                console.error("Error al cargar contenido:", e);
+                console.error("Error al cargar contenido social:", e);
                 contenedor.innerHTML = `<p style="text-align: center; color: #d9534f;">Error al conectar con el servidor.</p>`;
             }
         }
 
-        window.eliminarSeguidorDirecto = async function(idSeguidor, tipo) {
+        window.eliminarSeguidorModalItem = async function(idSeguidor, tipo) {
             if (!confirm("¿Deseas eliminar a este seguidor?")) return;
             try {
                 const res = await fetch(`/api/remover-seguidor/${idSeguidor}`, { method: 'DELETE' });
                 if (res.ok) {
-                    cargarContenidoSocialDirecto(tipo);
-                    cargarContadoresDirectos();
+                    cargarContenidoSocialModal(tipo);
+                    cargarContadoresPerfil();
                 }
             } catch (e) {
                 alert("Error al eliminar.");
             }
         };
 
-        // Vinculación directa por ID al cargar el DOM con prioridad absoluta
-        document.addEventListener("DOMContentLoaded", () => {
-            const btnSeguidos = document.getElementById('btn-abrir-seguidos');
-            const btnSeguidores = document.getElementById('btn-abrir-seguidores');
-
-            if (btnSeguidos) {
-                btnSeguidos.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    window.abrirModalListaSocial('seguidos');
-                });
-            }
-
-            if (btnSeguidores) {
-                btnSeguidores.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    window.abrirModalListaSocial('seguidores');
-                });
-            }
-        });
-
-        // Firebase Auth listener
+        // Sincronización automática con Firebase Auth
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
-                cargarContadoresDirectos();
+                cargarContadoresPerfil();
             }
         });
     </script>
