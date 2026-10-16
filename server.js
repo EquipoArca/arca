@@ -1750,6 +1750,54 @@ app.post('/api/bloquear-usuario', (req, res) => {
         }
     );
 });
+// GET: Obtener la lista de usuarios bloqueados por el usuario logueado
+app.get('/api/usuarios-bloqueados/:correo', (req, res) => {
+    const correoBloqueador = req.params.correo;
+
+    const sql = `
+        SELECT u.id_usuarios, u.nombre_usuario, u.foto_perfil, u.correo_usuario
+        FROM usuarios_bloqueados ub
+        JOIN usuarios u ON ub.id_usuario_bloqueado = u.id_usuarios
+        JOIN usuarios u_bloq ON ub.id_usuario_bloqueador = u_bloq.id_usuarios
+        WHERE LOWER(TRIM(u_bloq.correo_usuario)) = LOWER(TRIM(?))
+    `;
+
+    db.query(sql, [correoBloqueador], (err, results) => {
+        if (err) {
+            console.error("❌ Error al obtener usuarios bloqueados:", err.message);
+            return res.status(500).json({ error: "Error en el servidor al obtener bloqueados" });
+        }
+        res.json(results);
+    });
+});
+
+// POST: Desbloquear a un usuario
+app.post('/api/desbloquear-usuario', (req, res) => {
+    const { correo_bloqueador, id_usuario_bloqueado } = req.body;
+
+    if (!correo_bloqueador || !id_usuario_bloqueado) {
+        return res.status(400).json({ error: "Faltan datos requeridos para desbloquear." });
+    }
+
+    const sqlBusqueda = 'SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))';
+    db.query(sqlBusqueda, [correo_bloqueador], (err, usuario) => {
+        if (err || usuario.length === 0) {
+            return res.status(404).json({ error: "Usuario bloqueador no encontrado" });
+        }
+
+        const idBloqueador = usuario[0].id_usuarios;
+
+        const sqlDelete = 'DELETE FROM usuarios_bloqueados WHERE id_usuario_bloqueador = ? AND id_usuario_bloqueado = ?';
+        db.query(sqlDelete, [idBloqueador, id_usuario_bloqueado], (errDel, result) => {
+            if (errDel) {
+                console.error("❌ Error al desbloquear usuario:", errDel.message);
+                return res.status(500).json({ error: "Error en el servidor al desbloquear" });
+            }
+
+            res.json({ mensaje: "Usuario desbloqueado exitosamente" });
+        });
+    });
+});
 
 // ==========================================
 // INICIALIZACIÓN DEL SERVIDOR (Siempre al final)

@@ -727,8 +727,117 @@
             };
         }
 
-        function abrirSeccionBloqueados() {
-            mostrarModalInformativo("Usuarios Bloqueados", "No tienes ningún usuario bloqueado en este momento.");
+        async function abrirSeccionBloqueados() {
+            const correoLogueado = obtenerCorreoSesionConfig();
+            if (!correoLogueado) {
+                mostrarModalInformativo("Sesión requerida", "Debes iniciar sesión para ver tus usuarios bloqueados.");
+                return;
+            }
+
+            // Crear el contenedor de la modal de bloqueados
+            const overlay = document.createElement("div");
+            overlay.className = "arca-modal-overlay";
+            overlay.id = "modal-bloqueados-overlay";
+            
+            overlay.innerHTML = `
+                <div class="arca-modal-card" style="max-width: 480px; width: 95%;">
+                    <div class="arca-modal-icon" style="background-color: #fce8e6; color: #d9534f;">
+                        <i class="fa-solid fa-users-slash"></i>
+                    </div>
+                    <h3 style="margin: 0; color: #2b2b2b;">Usuarios Bloqueados</h3>
+                    <p class="arca-modal-text" style="font-size: 13.5px; color: #666; margin-bottom: 5px;">
+                        Aquí puedes ver las cuentas que has bloqueado. Al desbloquear a alguien, podrán volver a interactuar y ver sus contenidos mutuamente.
+                    </p>
+                    
+                    <div id="lista-bloqueados-container" style="width: 100%; max-height: 260px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin: 10px 0; padding-right: 5px;">
+                        <p style="text-align: center; color: #888; font-style: italic; padding: 20px;">Cargando lista...</p>
+                    </div>
+
+                    <div class="arca-modal-buttons">
+                        <button class="arca-btn-modal arca-btn-primary" style="width: 100%;" onclick="document.getElementById('modal-bloqueados-overlay').remove()">Cerrar</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+
+            // Cargar los usuarios bloqueados desde el servidor
+            try {
+                const res = await fetch(`/api/usuarios-bloqueados/${encodeURIComponent(correoLogueado)}`);
+                const bloqueados = await res.json();
+                const contenedorLista = document.getElementById('lista-bloqueados-container');
+
+                if (bloqueados.length > 0) {
+                    contenedorLista.innerHTML = '';
+                    bloqueados.forEach(user => {
+                        const avatar = user.foto_perfil || 'logo.png';
+                        const fila = document.createElement('div');
+                        fila.style.cssText = "display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.7); padding: 8px 12px; border-radius: 14px; border: 1px solid #f9cab5;";
+                        
+                        fila.innerHTML = `
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <img src="${avatar}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #fca38d;" alt="Avatar">
+                                <span style="font-weight: bold; font-size: 14px; color: #2b2b2b;">@${user.nombre_usuario}</span>
+                            </div>
+                            <button onclick="desbloquearUsuarioModal(${user.id_usuarios}, this)" style="background: #fff; border: 1px solid #d9534f; color: #d9534f; padding: 6px 14px; border-radius: 12px; font-weight: bold; cursor: pointer; font-family: 'Itim', cursive; transition: all 0.2s;">
+                                Desbloquear
+                            </button>
+                        `;
+                        contenedorLista.appendChild(fila);
+                    });
+                } else {
+                    contenedorLista.innerHTML = `<p style="text-align: center; color: #888; font-style: italic; padding: 20px;">No tienes ningún usuario bloqueado.</p>`;
+                }
+            } catch (e) {
+                console.error("Error al obtener bloqueados:", e);
+                document.getElementById('lista-bloqueados-container').innerHTML = `<p style="text-align: center; color: #d9534f;">Error al cargar la lista.</p>`;
+            }
+        }
+
+        // Función auxiliar para desbloquear desde la modal
+        async function desbloquearUsuarioModal(idUsuarioBloqueado, btnElement) {
+            const correoLogueado = obtenerCorreoSesionConfig();
+            if (!correoLogueado) return;
+
+            if (confirm("¿Estás seguro de que deseas desbloquear a este usuario?")) {
+                try {
+                    const res = await fetch('/api/desbloquear-usuario', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            correo_bloqueador: correoLogueado,
+                            id_usuario_bloqueado: idUsuarioBloqueado
+                        })
+                    });
+                    const data = await res.json();
+
+                    if (res.ok) {
+                        mostrarToast("Usuario desbloqueado con éxito", "success");
+                        // Remover la fila visualmente de la lista modal
+                        btnElement.closest('div[style*="display: flex"]').remove();
+                        
+                        // Si ya no quedan elementos, mostrar texto vacío
+                        const contenedorLista = document.getElementById('lista-bloqueados-container');
+                        if (contenedorLista && contenedorLista.children.length === 0) {
+                            contenedorLista.innerHTML = `<p style="text-align: center; color: #888; font-style: italic; padding: 20px;">No tienes ningún usuario bloqueado.</p>`;
+                        }
+                    } else {
+                        alert(data.error || "No se pudo desbloquear al usuario.");
+                    }
+                } catch (e) {
+                    console.error("Error al desbloquear:", e);
+                    alert("Ocurrió un error en la conexión.");
+                }
+            }
+        }
+
+        // Función auxiliar robusta para obtener el correo de sesión actual en configuración
+        function obtenerCorreoSesionConfig() {
+            if (typeof firebase !== 'undefined' && firebase.auth().currentUser && firebase.auth().currentUser.email) {
+                return firebase.auth().currentUser.email;
+            }
+            return localStorage.getItem('correo_usuario') || 
+                   localStorage.getItem('usuario_correo') || 
+                   localStorage.getItem('user_email') || '';
         }
 
         function mostrarToast(mensaje, tipo = "success") {
