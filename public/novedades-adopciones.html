@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Novedades - ARCA</title>
+    <title>Adopciones - Novedades - ARCA</title>
     <link rel="stylesheet" href="novedades-adopciones-style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -105,7 +105,7 @@
             <div class="titulo-filtro">Filtros</div>
             <a href="novedades.html" class="btn-filtro" style="text-decoration: none;">Todo</a>
             <a href="novedades-reportes.html" class="btn-filtro" style="text-decoration: none;">Reportes</a>
-            <a href="novedades-adopciones.html" class="btn-filtro" style="text-decoration: none;">Adopciones</a>
+            <a href="novedades-adopciones.html" class="btn-filtro active" style="text-decoration: none;">Adopciones</a>
             <a href="novedades-eventos.html" class="btn-filtro" style="text-decoration: none;">Eventos</a>
         </aside>
 
@@ -174,6 +174,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+     <script src="script.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -191,12 +192,12 @@
 
     <!-- Script para renderizar las adopciones con el diseño prototipo bonito -->
     <script>
-    document.addEventListener('DOMContentLoaded', async () => {
+    async function cargarAdopcionesNovedades(correoUsuario = '') {
         const contenedor = document.getElementById('contenedor-novedades');
         if (!contenedor) return;
 
         try {
-            const respuesta = await fetch('/api/publicaciones-globales');
+            const respuesta = await fetch(`/api/publicaciones-globales?correo=${encodeURIComponent(correoUsuario)}`);
             if (!respuesta.ok) throw new Error("Error al obtener las publicaciones");
             
             const publicaciones = await respuesta.json();
@@ -240,7 +241,7 @@
                             <div class="proto-content-right">
                                 <div class="proto-pill-tipo">${pub.nombre_tipo_reporte || 'Adopción'}</div>
                                 <div class="proto-info-extra">
-                                    <span class="proto-autor">Publicado por:<a href="perfil_publico.html?user=${pub.nombre_usuario}">@${pub.nombre_usuario}</a></span>
+                                    <span class="proto-autor">Publicado por:<a href="perfil_publico.html?user=${pub.nombre_usuario}">@${pub.nombre_usuario || 'Usuario'}</a></span>
                                     <p class="proto-ubicacion"><i class="fa-solid fa-location-dot"></i> ${ubicacionBonita}</p>
                                 </div>
                                 <div class="proto-footer-row">
@@ -253,7 +254,8 @@
                 }
             } else {
                 contenedor.innerHTML = `
-                    <div class="estado-vacio" style="text-align: center; padding: 40px;">
+                    <div class="estado-vacio" style="text-align: center; padding: 40px; font-family: 'Itim', cursive;">
+                        <i class="fa-solid fa-paw" style="font-size: 40px; color: #ff758c; margin-bottom: 10px;"></i>
                         <h2>¡Aún no hay publicaciones de adopción!</h2>
                         <p>&lt;3</p>
                     </div>
@@ -262,7 +264,20 @@
         } catch (error) {
             console.error("Error al cargar adopciones:", error);
         }
+    }
+
+    // Sincronización con Firebase para capturar el correo y filtrar bloqueados al instante
+    firebase.auth().onAuthStateChanged((user) => {
+        const correo = (user && user.email) ? user.email : '';
+        cargarAdopcionesNovedades(correo);
     });
+
+    // Respaldo de seguridad por si Firebase tarda un pelín en cargar en la primera visita
+    setTimeout(() => {
+        if (document.getElementById('contenedor-novedades').innerHTML.includes('Buscando publicaciones...') && auth.currentUser) {
+            cargarAdopcionesNovedades(auth.currentUser.email);
+        }
+    }, 800);
 
     document.addEventListener('click', (event) => {
         const botonDetalle = event.target.closest('.btn-ver-adopcion-ficha');
@@ -409,7 +424,6 @@
         }
     </style>
 
-    <script src="script.js"></script>
 
     <!-- Motor de Google Translate -->
     <div id="google_translate_element" style="display:none;"></div>
