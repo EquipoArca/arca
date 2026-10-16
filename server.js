@@ -237,6 +237,7 @@ app.delete('/api/remover-seguidor/:id_seguidor', (req, res) => {
     });
 });
 // GET: Obtener la lista de usuarios a los que sigue el usuario logueado
+// GET: Obtener la lista de usuarios a los que sigue el usuario logueado
 app.get('/api/mis-seguidos/:correo', (req, res) => {
     const correoUsuario = req.params.correo;
 
