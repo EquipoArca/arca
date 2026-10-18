@@ -110,7 +110,7 @@ auth.onAuthStateChanged(async (user) => {
         if (linkConfig) linkConfig.href = "configuracion.html";
 
     } else {
-        console.log("Modo invitado activo: bloqueando carga de novedades personales o restricciones.");
+        // MODO INVITADO
         if (userDisplayName) userDisplayName.textContent = "";
         if (menuUsuario) menuUsuario.style.display = "none";
 
@@ -773,30 +773,46 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-function cargarAdopcionesNovedades() {
-    const contenedor = document.getElementById('contenedor-novedades');
-    if (!contenedor) return;
-
-    // Si es un invitado, no hacemos fetch al servidor y dejamos que el contenedor 
-    // mantenga la tarjeta vacía o estructura estática original que tienes diseñada.
-    if (!auth.currentUser || !auth.currentUser.email) {
-        return; 
+// ==========================================
+// CARGAR Y FILTRAR ADOPCIONES EN NOVEDADES
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+    const contenedorNovedades = document.getElementById('contenedor-novedades');
+    
+    if (contenedorNovedades && window.location.pathname.includes('novedades-adopciones.html')) {
+        cargarAdopcionesNovedades();
     }
+});
 
-    const correoActual = auth.currentUser.email;
-
-    fetch(`/api/publicaciones-globales?correo=${encodeURIComponent(correoActual)}`)
-        .then(res => {
-            if (!res.ok) throw new Error("Error al obtener las publicaciones");
-            return res.json();
-        })
+function cargarAdopcionesNovedades() {
+    fetch('http://localhost:3000/api/publicaciones-globales')
+        .then(res => res.json())
         .then(publicaciones => {
+            const contenedor = document.getElementById('contenedor-novedades');
             contenedor.innerHTML = ''; 
 
             const adopciones = publicaciones.filter(pub => pub.tipo_publicacion === 'adopcion');
 
             if (adopciones.length === 0) {
-                // Si está logueado pero no hay adopciones, puedes mostrar tu estado vacío o la tarjeta base
+                contenedor.innerHTML = `
+                    <div class="estado-vacio">
+                        <div class="escena-cielo-kawaii">
+                            <div class="nube-kawaii nube-izq"></div>
+                            <div class="sol-kawaii">
+                                <div class="ojo-sol izq"></div>
+                                <div class="ojo-sol der"></div>
+                                <div class="boca-sol"></div>
+                                <div class="rubor-sol izq"></div>
+                                <div class="rubor-sol der"></div>
+                            </div>
+                            <div class="nube-kawaii nube-der"></div>
+                            <span class="destello d1">✦</span>
+                            <span class="destello d2">✦</span>
+                        </div>
+                        <h2>¡Aún no hay publicaciones de adopción!</h2>
+                        <p>&lt;3</p>
+                    </div>
+                `;
                 return;
             }
 
