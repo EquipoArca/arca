@@ -773,62 +773,106 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+
 // ==========================================
 // CARGAR Y FILTRAR ADOPCIONES EN NOVEDADES
 // ==========================================
-// ==========================================
-// CARGAR Y FILTRAR ADOPCIONES EN NOVEDADES
-// ==========================================
+
 document.addEventListener('DOMContentLoaded', () => {
     const contenedorNovedades = document.getElementById('contenedor-novedades');
-    
-    if (contenedorNovedades && window.location.pathname.includes('novedades-adopciones.html')) {
-        // En lugar de llamar a la función directo, esperamos a que Firebase responda sobre el estado real de la sesión
-        auth.onAuthStateChanged((user) => {
-            cargarAdopcionesNovedades(user);
-        });
-    }
+    if (!contenedorNovedades) return;
+
+    auth.onAuthStateChanged((user) => {
+        cargarAdopcionesNovedades(user);
+    });
 });
 
 function cargarAdopcionesNovedades(user) {
     const contenedor = document.getElementById('contenedor-novedades');
     if (!contenedor) return;
 
-    // 1. SI ES INVITADO (!user): Bloqueo total.
-    // No hace fetch de publicaciones para que un invitado NO pueda ver ni inspeccionar ninguna novedad.
+    // Limpiar las publicaciones anteriores antes de comprobar la sesión.
+    contenedor.innerHTML = '';
+
+    // Si no hay sesión iniciada, no cargar publicaciones.
     if (!user) {
         contenedor.innerHTML = `
-            <div class="estado-vacio" style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; min-height: 380px; text-align: center; gap: 8px;">
-                <div style="font-size: 50px; line-height: 1; margin-bottom: 4px;">🐾</div>
-                <h2 style="font-family: 'Itim', sans-serif; font-size: 26px; color: #2b2b2b; margin: 0; font-weight: bold;">¡Aún no hay publicaciones!</h2>
-                <p style="font-family: 'Itim', sans-serif; font-size: 16px; color: #555; margin: 0;">&lt;3</p>
-                <button class="btn-detalles" onclick="abrirBloqueo()" style="margin-top: 14px; padding: 10px 24px; border-radius: 20px; border: none; background: #fbc2c4; color: #2b2b2b; font-weight: bold; cursor: pointer; font-family: 'Itim', sans-serif; font-size: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">Ver detalles</button>
+            <div class="estado-vacio"
+                 style="display:flex; flex-direction:column;
+                 align-items:center; justify-content:center;
+                 width:100%; min-height:380px; text-align:center; gap:8px;">
+
+                <div style="font-size:50px; line-height:1;">🐾</div>
+
+                <h2 style="font-family:'Itim',sans-serif;
+                            font-size:26px; color:#2b2b2b;
+                            margin:0; font-weight:bold;">
+                    Inicia sesión para ver las novedades
+                </h2>
+
+                <p style="font-family:'Itim',sans-serif;
+                          font-size:16px; color:#555; margin:0;">
+                    Ingresa a tu cuenta para explorar las publicaciones de ARCA ♡
+                </p>
+
+                <button class="btn-detalles"
+                        onclick="abrirBloqueo()"
+                        style="margin-top:14px; padding:10px 24px;
+                        border-radius:20px; border:none;
+                        background:#fbc2c4; color:#2b2b2b;
+                        font-weight:bold; cursor:pointer;
+                        font-family:'Itim',sans-serif; font-size:15px;">
+                    Iniciar sesión
+                </button>
             </div>
         `;
         return;
     }
 
-    // 2. SI SÍ TIENE SESIÓN INICIADA: Hacemos la petición al backend para cargar las tarjetas
     fetch(`/api/publicaciones-globales?correo=${encodeURIComponent(user.email)}`)
-        .then(res => res.json())
-        .then(publicaciones => {
-            contenedor.innerHTML = ''; 
+        .then(async (res) => {
+            if (!res.ok) {
+                throw new Error(`Error HTTP ${res.status}`);
+            }
+            return res.json();
+        })
+        .then((publicaciones) => {
+            if (!auth.currentUser || auth.currentUser.uid !== user.uid) {
+                contenedor.innerHTML = '';
+                return;
+            }
 
-            const adopciones = publicaciones.filter(pub => pub.tipo_publicacion === 'adopcion');
+            contenedor.innerHTML = '';
 
-            // Si el usuario registrado de verdad no tiene publicaciones en la BD
+            if (!Array.isArray(publicaciones)) {
+                throw new Error('La respuesta de publicaciones no es válida.');
+            }
+
+            const adopciones = publicaciones.filter(
+                pub => pub.tipo_publicacion === 'adopcion'
+            );
+
             if (adopciones.length === 0) {
                 contenedor.innerHTML = `
-                    <div class="estado-vacio" style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; min-height: 380px; text-align: center; gap: 8px;">
-                        <div style="font-size: 50px; line-height: 1; margin-bottom: 4px;">🐾</div>
-                        <h2 style="font-family: 'Itim', sans-serif; font-size: 26px; color: #2b2b2b; margin: 0; font-weight: bold;">¡Aún no hay publicaciones!</h2>
-                        <p style="font-family: 'Itim', sans-serif; font-size: 16px; color: #555; margin: 0;">&lt;3</p>
+                    <div class="estado-vacio"
+                         style="display:flex; flex-direction:column;
+                         align-items:center; justify-content:center;
+                         width:100%; min-height:380px; text-align:center; gap:8px;">
+                        <div style="font-size:50px; line-height:1;">🐾</div>
+                        <h2 style="font-family:'Itim',sans-serif;
+                                   font-size:26px; color:#2b2b2b;
+                                   margin:0; font-weight:bold;">
+                            ¡Aún no hay publicaciones!
+                        </h2>
+                        <p style="font-family:'Itim',sans-serif;
+                                  font-size:16px; color:#555; margin:0;">
+                            Vuelve pronto para conocer nuevas mascotas ♡
+                        </p>
                     </div>
                 `;
                 return;
             }
 
-            // Renderizar publicaciones cuando hay sesión activa
             adopciones.forEach(adopcion => {
                 let fotoSrc = 'logo.png';
                 try {
@@ -867,9 +911,8 @@ function cargarAdopcionesNovedades(user) {
 }
 
 function verDetallesAdopcion(idAdopcion) {
-    window.location.href = `detalles_adopcion.html?id=${idAdopcion}`;
+    window.location.href = `detalles_adopcion.html?id=${encodeURIComponent(idAdopcion)}`;
 }
-
 // ==========================================
 // 7. BUSCADOR UNIVERSAL INTELIGENTE
 // ==========================================
