@@ -774,12 +774,14 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-// ==========================================
-// CARGAR Y FILTRAR ADOPCIONES EN NOVEDADES
-// ==========================================
+
+ // ==========================================
+ // CARGAR Y FILTRAR ADOPCIONES EN NOVEDADES
+ // ==========================================
 
 document.addEventListener('DOMContentLoaded', () => {
     const contenedorNovedades = document.getElementById('contenedor-novedades');
+
     if (!contenedorNovedades) return;
 
     auth.onAuthStateChanged((user) => {
@@ -787,132 +789,186 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-function cargarAdopcionesNovedades(user) {
-    const contenedor = document.getElementById('contenedor-novedades');
+// Plantilla vacía reutilizable para invitados
+function mostrarPlantillaVacia(contenedor, mensaje = '¡Aún no hay publicaciones para mostrar!') {
     if (!contenedor) return;
 
-    // Limpiar las publicaciones anteriores antes de comprobar la sesión.
+    contenedor.innerHTML = `
+        <div class="estado-vacio">
+            <div class="escena-cielo-kawaii">
+                <div class="nube-kawaii nube-izq"></div>
+
+                <div class="sol-kawaii">
+                    <div class="ojo-sol izq"></div>
+                    <div class="ojo-sol der"></div>
+                    <div class="boca-sol"></div>
+                    <div class="rubor-sol izq"></div>
+                    <div class="rubor-sol der"></div>
+                </div>
+
+                <div class="nube-kawaii nube-der"></div>
+                <span class="destello d1">✦</span>
+                <span class="destello d2">✦</span>
+            </div>
+
+            <h2>${mensaje}</h2>
+            <p>&lt;3</p>
+        </div>
+    `;
+}
+
+async function cargarAdopcionesNovedades(user) {
+    const contenedor = document.getElementById('contenedor-novedades');
+
+    if (!contenedor) return;
+
+    // Limpiar primero para evitar que queden publicaciones anteriores.
     contenedor.innerHTML = '';
 
-    // Si no hay sesión iniciada, no cargar publicaciones.
+    // INVITADO: mostrar únicamente la plantilla vacía.
+    // No se consulta la API ni se descargan publicaciones.
     if (!user) {
-        contenedor.innerHTML = `
-            <div class="estado-vacio"
-                 style="display:flex; flex-direction:column;
-                 align-items:center; justify-content:center;
-                 width:100%; min-height:380px; text-align:center; gap:8px;">
-
-                <div style="font-size:50px; line-height:1;">🐾</div>
-
-                <h2 style="font-family:'Itim',sans-serif;
-                            font-size:26px; color:#2b2b2b;
-                            margin:0; font-weight:bold;">
-                    Inicia sesión para ver las novedades
-                </h2>
-
-                <p style="font-family:'Itim',sans-serif;
-                          font-size:16px; color:#555; margin:0;">
-                    Ingresa a tu cuenta para explorar las publicaciones de ARCA ♡
-                </p>
-
-                <button class="btn-detalles"
-                        onclick="abrirBloqueo()"
-                        style="margin-top:14px; padding:10px 24px;
-                        border-radius:20px; border:none;
-                        background:#fbc2c4; color:#2b2b2b;
-                        font-weight:bold; cursor:pointer;
-                        font-family:'Itim',sans-serif; font-size:15px;">
-                    Iniciar sesión
-                </button>
-            </div>
-        `;
+        mostrarPlantillaVacia(contenedor);
         return;
     }
 
-    fetch(`/api/publicaciones-globales?correo=${encodeURIComponent(user.email)}`)
-        .then(async (res) => {
-            if (!res.ok) {
-                throw new Error(`Error HTTP ${res.status}`);
-            }
-            return res.json();
-        })
-        .then((publicaciones) => {
-            if (!auth.currentUser || auth.currentUser.uid !== user.uid) {
-                contenedor.innerHTML = '';
-                return;
-            }
+    try {
+        const respuesta = await fetch(
+            `/api/publicaciones-globales?correo=${encodeURIComponent(user.email)}`
+        );
 
+        if (!respuesta.ok) {
+            throw new Error(`Error HTTP ${respuesta.status}`);
+        }
+
+        const publicaciones = await respuesta.json();
+
+        // Evitar mostrar datos si la sesión cambió durante la consulta.
+        if (!auth.currentUser || auth.currentUser.uid !== user.uid) {
             contenedor.innerHTML = '';
 
-            if (!Array.isArray(publicaciones)) {
-                throw new Error('La respuesta de publicaciones no es válida.');
+            if (!auth.currentUser) {
+                mostrarPlantillaVacia(contenedor);
             }
 
-            const adopciones = publicaciones.filter(
-                pub => pub.tipo_publicacion === 'adopcion'
+            return;
+        }
+
+        if (!Array.isArray(publicaciones)) {
+            throw new Error('La respuesta de publicaciones no es válida.');
+        }
+
+        const adopciones = publicaciones.filter(
+            publicacion => publicacion.tipo_publicacion === 'adopcion'
+        );
+
+        if (adopciones.length === 0) {
+            mostrarPlantillaVacia(
+                contenedor,
+                '¡Aún no hay publicaciones de adopción!'
             );
+            return;
+        }
 
-            if (adopciones.length === 0) {
-                contenedor.innerHTML = `
-                    <div class="estado-vacio"
-                         style="display:flex; flex-direction:column;
-                         align-items:center; justify-content:center;
-                         width:100%; min-height:380px; text-align:center; gap:8px;">
-                        <div style="font-size:50px; line-height:1;">🐾</div>
-                        <h2 style="font-family:'Itim',sans-serif;
-                                   font-size:26px; color:#2b2b2b;
-                                   margin:0; font-weight:bold;">
-                            ¡Aún no hay publicaciones!
-                        </h2>
-                        <p style="font-family:'Itim',sans-serif;
-                                  font-size:16px; color:#555; margin:0;">
-                            Vuelve pronto para conocer nuevas mascotas ♡
-                        </p>
-                    </div>
-                `;
-                return;
+        adopciones.forEach(adopcion => {
+            let fotoSrc = 'logo.png';
+
+            try {
+                const fotosArray = JSON.parse(adopcion.img_reporte);
+
+                if (Array.isArray(fotosArray) && fotosArray.length > 0) {
+                    fotoSrc = fotosArray[0];
+                }
+            } catch (error) {
+                if (adopcion.img_reporte) {
+                    fotoSrc = adopcion.img_reporte;
+                }
             }
 
-            adopciones.forEach(adopcion => {
-                let fotoSrc = 'logo.png';
-                try {
-                    const fotosArray = JSON.parse(adopcion.img_reporte);
-                    if (Array.isArray(fotosArray) && fotosArray.length > 0) {
-                        fotoSrc = fotosArray[0];
-                    }
-                } catch (e) {
-                    if (adopcion.img_reporte) fotoSrc = adopcion.img_reporte;
-                }
+            const fechaFormateada = adopcion.Fecha_reporte
+                ? new Date(adopcion.Fecha_reporte).toLocaleDateString()
+                : 'Fecha no disponible';
 
-                const fechaFormateada = new Date(adopcion.Fecha_reporte).toLocaleDateString();
+            const tarjeta = document.createElement('article');
+            tarjeta.classList.add('tarjeta-adopcion');
 
-                const tarjeta = document.createElement('article');
-                tarjeta.classList.add('tarjeta-adopcion');
-                tarjeta.innerHTML = `
-                    <div class="columna-izquierda">
-                        <div class="badge-titulo-adopcion">${adopcion.nombre_tipo_reporte || 'Adopción'}</div>
-                        <div class="contenedor-foto-adopcion">
-                            <img src="${fotoSrc}" alt="Mascota" style="width:100%; height:100%; object-fit:cover; border-radius:12px;">
-                        </div>
+            tarjeta.innerHTML = `
+                <div class="columna-izquierda">
+                    <div class="badge-titulo-adopcion">
+                        ${adopcion.nombre_tipo_reporte || 'Adopción'}
                     </div>
-                    <div class="columna-derecha-adopcion">
-                        <span class="fecha-adopcion">${fechaFormateada}</span>
-                        <div class="lista-capsulas-vacias">
-                            <div class="capsula-dato">📍 ${adopcion.Ubicacion}</div>
-                            <div class="capsula-dato">📝 ${adopcion.Descripcion ? adopcion.Descripcion.substring(0, 70) + '...' : 'Sin descripción'}</div>
-                            <button class="btn-detalles" onclick="verDetallesAdopcion('${adopcion.id_origen}')">Ver detalles</button>
-                        </div>
+
+                    <div class="contenedor-foto-adopcion">
+                        <img
+                            src="${fotoSrc}"
+                            alt="Mascota"
+                            style="width:100%; height:100%; object-fit:cover; border-radius:12px;"
+                        >
                     </div>
-                `;
-                contenedor.appendChild(tarjeta);
-            });
-        })
-        .catch(err => console.error("Error al cargar las adopciones:", err));
+                </div>
+
+                <div class="columna-derecha-adopcion">
+                    <span class="fecha-adopcion">${fechaFormateada}</span>
+
+                    <div class="lista-capsulas-vacias">
+                        <div class="capsula-dato">
+                            📍 ${adopcion.Ubicacion || 'Ubicación no especificada'}
+                        </div>
+
+                        <div class="capsula-dato">
+                            📝 ${
+                                adopcion.Descripcion
+                                    ? adopcion.Descripcion.substring(0, 70) + '...'
+                                    : 'Sin descripción'
+                            }
+                        </div>
+
+                        <button
+                            class="btn-detalles"
+                            onclick="verDetallesAdopcion('${adopcion.id_origen}')"
+                        >
+                            Ver detalles
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            contenedor.appendChild(tarjeta);
+        });
+
+    } catch (error) {
+        console.error('Error al cargar las adopciones:', error);
+
+        // Si no se pueden cargar, no dejar datos antiguos visibles.
+        contenedor.innerHTML = '';
+
+        if (!auth.currentUser) {
+            mostrarPlantillaVacia(contenedor);
+        } else {
+            mostrarPlantillaVacia(
+                contenedor,
+                'No pudimos cargar las publicaciones. Inténtalo de nuevo.'
+            );
+        }
+    }
 }
 
 function verDetallesAdopcion(idAdopcion) {
-    window.location.href = `detalles_adopcion.html?id=${encodeURIComponent(idAdopcion)}`;
+    // Evitar que un invitado abra los detalles.
+    if (!auth.currentUser) {
+        const contenedor = document.getElementById('contenedor-novedades');
+
+        if (contenedor) {
+            mostrarPlantillaVacia(contenedor);
+        }
+
+        return;
+    }
+
+    window.location.href =
+        `detalles_adopcion.html?id=${encodeURIComponent(idAdopcion)}`;
 }
+
 // ==========================================
 // 7. BUSCADOR UNIVERSAL INTELIGENTE
 // ==========================================
@@ -957,14 +1013,20 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        if (cachePublicaciones.length === 0) {
-            try {
-                const res = await fetch('/api/publicaciones-globales');
-                if (res.ok) cachePublicaciones = await res.json();
-            } catch (err) {
-                console.error("Error al cargar datos globales:", err);
-            }
+// Las publicaciones solo se consultan con una sesión iniciada.
+if (!auth.currentUser) {
+    cachePublicaciones = [];
+} else if (cachePublicaciones.length === 0) {
+    try {
+        const res = await fetch('/api/publicaciones-globales');
+
+        if (res.ok && auth.currentUser) {
+            cachePublicaciones = await res.json();
         }
+    } catch (err) {
+        console.error("Error al cargar datos globales:", err);
+    }
+}
 
         const matchSistema = indicesSistema.filter(item => {
             const coincideTitulo = item.titulo.toLowerCase().includes(texto);
@@ -973,7 +1035,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return coincideTitulo || coincideSub || coincideKeywords;
         });
 
-        const matchPublicaciones = cachePublicaciones.filter(pub => {
+        const matchPublicaciones = auth.currentUser
+    ? cachePublicaciones.filter(pub => {
             const usuario = (pub.nombre_usuario || '').toLowerCase();
             const desc = (pub.Descripcion || pub.descripcion_animal || '').toLowerCase();
             const ubicacion = (pub.Ubicacion || pub.ubicacion || '').toLowerCase();
@@ -985,7 +1048,8 @@ document.addEventListener('DOMContentLoaded', () => {
                    ubicacion.includes(texto) || 
                    tipo.includes(texto) || 
                    nombreMascota.includes(texto);
-        });
+    })
+    : [];
 
         if (matchSistema.length > 0 || matchPublicaciones.length > 0) {
             let htmlHTML = '';
