@@ -110,7 +110,7 @@ auth.onAuthStateChanged(async (user) => {
         if (linkConfig) linkConfig.href = "configuracion.html";
 
     } else {
-        // MODO INVITADO
+        console.log("Modo invitado activo: bloqueando carga de novedades personales o restricciones.");
         if (userDisplayName) userDisplayName.textContent = "";
         if (menuUsuario) menuUsuario.style.display = "none";
 
@@ -773,200 +773,72 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-
-
- // ==========================================
- // CARGAR Y FILTRAR ADOPCIONES EN NOVEDADES
- // ==========================================
-
-document.addEventListener('DOMContentLoaded', () => {
-    const contenedorNovedades = document.getElementById('contenedor-novedades');
-
-    if (!contenedorNovedades) return;
-
-    auth.onAuthStateChanged((user) => {
-        cargarAdopcionesNovedades(user);
-    });
-});
-
-// Plantilla vacía reutilizable para invitados
-function mostrarPlantillaVacia(contenedor, mensaje = '¡Aún no hay publicaciones para mostrar!') {
-    if (!contenedor) return;
-
-    contenedor.innerHTML = `
-        <div class="estado-vacio">
-            <div class="escena-cielo-kawaii">
-                <div class="nube-kawaii nube-izq"></div>
-
-                <div class="sol-kawaii">
-                    <div class="ojo-sol izq"></div>
-                    <div class="ojo-sol der"></div>
-                    <div class="boca-sol"></div>
-                    <div class="rubor-sol izq"></div>
-                    <div class="rubor-sol der"></div>
-                </div>
-
-                <div class="nube-kawaii nube-der"></div>
-                <span class="destello d1">✦</span>
-                <span class="destello d2">✦</span>
-            </div>
-
-            <h2>${mensaje}</h2>
-            <p>&lt;3</p>
-        </div>
-    `;
-}
-
-async function cargarAdopcionesNovedades(user) {
+function cargarAdopcionesNovedades() {
     const contenedor = document.getElementById('contenedor-novedades');
-
     if (!contenedor) return;
 
-    // Limpiar primero para evitar que queden publicaciones anteriores.
-    contenedor.innerHTML = '';
-
-    // INVITADO: mostrar únicamente la plantilla vacía.
-    // No se consulta la API ni se descargan publicaciones.
-    if (!user) {
-        mostrarPlantillaVacia(contenedor);
-        return;
+    // Si es un invitado, no hacemos fetch al servidor y dejamos que el contenedor 
+    // mantenga la tarjeta vacía o estructura estática original que tienes diseñada.
+    if (!auth.currentUser || !auth.currentUser.email) {
+        return; 
     }
 
-    try {
-        const respuesta = await fetch(
-            `/api/publicaciones-globales?correo=${encodeURIComponent(user.email)}`
-        );
+    const correoActual = auth.currentUser.email;
 
-        if (!respuesta.ok) {
-            throw new Error(`Error HTTP ${respuesta.status}`);
-        }
+    fetch(`/api/publicaciones-globales?correo=${encodeURIComponent(correoActual)}`)
+        .then(res => {
+            if (!res.ok) throw new Error("Error al obtener las publicaciones");
+            return res.json();
+        })
+        .then(publicaciones => {
+            contenedor.innerHTML = ''; 
 
-        const publicaciones = await respuesta.json();
+            const adopciones = publicaciones.filter(pub => pub.tipo_publicacion === 'adopcion');
 
-        // Evitar mostrar datos si la sesión cambió durante la consulta.
-        if (!auth.currentUser || auth.currentUser.uid !== user.uid) {
-            contenedor.innerHTML = '';
-
-            if (!auth.currentUser) {
-                mostrarPlantillaVacia(contenedor);
+            if (adopciones.length === 0) {
+                // Si está logueado pero no hay adopciones, puedes mostrar tu estado vacío o la tarjeta base
+                return;
             }
 
-            return;
-        }
-
-        if (!Array.isArray(publicaciones)) {
-            throw new Error('La respuesta de publicaciones no es válida.');
-        }
-
-        const adopciones = publicaciones.filter(
-            publicacion => publicacion.tipo_publicacion === 'adopcion'
-        );
-
-        if (adopciones.length === 0) {
-            mostrarPlantillaVacia(
-                contenedor,
-                '¡Aún no hay publicaciones de adopción!'
-            );
-            return;
-        }
-
-        adopciones.forEach(adopcion => {
-            let fotoSrc = 'logo.png';
-
-            try {
-                const fotosArray = JSON.parse(adopcion.img_reporte);
-
-                if (Array.isArray(fotosArray) && fotosArray.length > 0) {
-                    fotoSrc = fotosArray[0];
+            adopciones.forEach(adopcion => {
+                let fotoSrc = 'logo.png';
+                try {
+                    const fotosArray = JSON.parse(adopcion.img_reporte);
+                    if (Array.isArray(fotosArray) && fotosArray.length > 0) {
+                        fotoSrc = fotosArray[0];
+                    }
+                } catch (e) {
+                    if (adopcion.img_reporte) fotoSrc = adopcion.img_reporte;
                 }
-            } catch (error) {
-                if (adopcion.img_reporte) {
-                    fotoSrc = adopcion.img_reporte;
-                }
-            }
 
-            const fechaFormateada = adopcion.Fecha_reporte
-                ? new Date(adopcion.Fecha_reporte).toLocaleDateString()
-                : 'Fecha no disponible';
+                const fechaFormateada = new Date(adopcion.Fecha_reporte).toLocaleDateString();
 
-            const tarjeta = document.createElement('article');
-            tarjeta.classList.add('tarjeta-adopcion');
-
-            tarjeta.innerHTML = `
-                <div class="columna-izquierda">
-                    <div class="badge-titulo-adopcion">
-                        ${adopcion.nombre_tipo_reporte || 'Adopción'}
-                    </div>
-
-                    <div class="contenedor-foto-adopcion">
-                        <img
-                            src="${fotoSrc}"
-                            alt="Mascota"
-                            style="width:100%; height:100%; object-fit:cover; border-radius:12px;"
-                        >
-                    </div>
-                </div>
-
-                <div class="columna-derecha-adopcion">
-                    <span class="fecha-adopcion">${fechaFormateada}</span>
-
-                    <div class="lista-capsulas-vacias">
-                        <div class="capsula-dato">
-                            📍 ${adopcion.Ubicacion || 'Ubicación no especificada'}
+                const tarjeta = document.createElement('article');
+                tarjeta.classList.add('tarjeta-adopcion');
+                tarjeta.innerHTML = `
+                    <div class="columna-izquierda">
+                        <div class="badge-titulo-adopcion">${adopcion.nombre_tipo_reporte || 'Adopción'}</div>
+                        <div class="contenedor-foto-adopcion">
+                            <img src="${fotoSrc}" alt="Mascota" style="width:100%; height:100%; object-fit:cover; border-radius:12px;">
                         </div>
-
-                        <div class="capsula-dato">
-                            📝 ${
-                                adopcion.Descripcion
-                                    ? adopcion.Descripcion.substring(0, 70) + '...'
-                                    : 'Sin descripción'
-                            }
-                        </div>
-
-                        <button
-                            class="btn-detalles"
-                            onclick="verDetallesAdopcion('${adopcion.id_origen}')"
-                        >
-                            Ver detalles
-                        </button>
                     </div>
-                </div>
-            `;
-
-            contenedor.appendChild(tarjeta);
-        });
-
-    } catch (error) {
-        console.error('Error al cargar las adopciones:', error);
-
-        // Si no se pueden cargar, no dejar datos antiguos visibles.
-        contenedor.innerHTML = '';
-
-        if (!auth.currentUser) {
-            mostrarPlantillaVacia(contenedor);
-        } else {
-            mostrarPlantillaVacia(
-                contenedor,
-                'No pudimos cargar las publicaciones. Inténtalo de nuevo.'
-            );
-        }
-    }
+                    <div class="columna-derecha-adopcion">
+                        <span class="fecha-adopcion">${fechaFormateada}</span>
+                        <div class="lista-capsulas-vacias">
+                            <div class="capsula-dato">📍 ${adopcion.Ubicacion}</div>
+                            <div class="capsula-dato">📝 ${adopcion.Descripcion ? adopcion.Descripcion.substring(0, 70) + '...' : 'Sin descripción'}</div>
+                            <button class="btn-detalles" onclick="verDetallesAdopcion('${adopcion.id_origen}')">Ver detalles</button>
+                        </div>
+                    </div>
+                `;
+                contenedor.appendChild(tarjeta);
+            });
+        })
+        .catch(err => console.error("Error al cargar las adopciones:", err));
 }
 
 function verDetallesAdopcion(idAdopcion) {
-    // Evitar que un invitado abra los detalles.
-    if (!auth.currentUser) {
-        const contenedor = document.getElementById('contenedor-novedades');
-
-        if (contenedor) {
-            mostrarPlantillaVacia(contenedor);
-        }
-
-        return;
-    }
-
-    window.location.href =
-        `detalles_adopcion.html?id=${encodeURIComponent(idAdopcion)}`;
+    window.location.href = `detalles_adopcion.html?id=${idAdopcion}`;
 }
 
 // ==========================================
@@ -1013,20 +885,14 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-// Las publicaciones solo se consultan con una sesión iniciada.
-if (!auth.currentUser) {
-    cachePublicaciones = [];
-} else if (cachePublicaciones.length === 0) {
-    try {
-        const res = await fetch('/api/publicaciones-globales');
-
-        if (res.ok && auth.currentUser) {
-            cachePublicaciones = await res.json();
+        if (cachePublicaciones.length === 0) {
+            try {
+                const res = await fetch('/api/publicaciones-globales');
+                if (res.ok) cachePublicaciones = await res.json();
+            } catch (err) {
+                console.error("Error al cargar datos globales:", err);
+            }
         }
-    } catch (err) {
-        console.error("Error al cargar datos globales:", err);
-    }
-}
 
         const matchSistema = indicesSistema.filter(item => {
             const coincideTitulo = item.titulo.toLowerCase().includes(texto);
@@ -1035,8 +901,7 @@ if (!auth.currentUser) {
             return coincideTitulo || coincideSub || coincideKeywords;
         });
 
-        const matchPublicaciones = auth.currentUser
-    ? cachePublicaciones.filter(pub => {
+        const matchPublicaciones = cachePublicaciones.filter(pub => {
             const usuario = (pub.nombre_usuario || '').toLowerCase();
             const desc = (pub.Descripcion || pub.descripcion_animal || '').toLowerCase();
             const ubicacion = (pub.Ubicacion || pub.ubicacion || '').toLowerCase();
@@ -1048,8 +913,7 @@ if (!auth.currentUser) {
                    ubicacion.includes(texto) || 
                    tipo.includes(texto) || 
                    nombreMascota.includes(texto);
-    })
-    : [];
+        });
 
         if (matchSistema.length > 0 || matchPublicaciones.length > 0) {
             let htmlHTML = '';
