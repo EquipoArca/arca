@@ -31,9 +31,7 @@ auth.onAuthStateChanged(async (user) => {
     const linkGuardado = document.getElementById('link-guardado');
     const linkMapa = document.getElementById('link-mapa');
     const linkConfig = document.getElementById('link-config');
-
-    cargarAdopcionesNovedades(user);
-
+    
     
     // Referencias del Nav y Mini Menú
     const userDisplayName = document.getElementById('user-display-name');
@@ -777,49 +775,45 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================
-// CARGAR Y FILTRAR ADOPCIONES EN NOVEDADES
+// CONTROL DEFINITIVO DE NOVEDADES Y ADOPCIONES
 // ==========================================
-function cargarAdopcionesNovedades(user) {
-    const contenedor = document.getElementById('contenedor-novedades');
-    if (!contenedor) return;
 
-    // Limpiamos el contenedor antes de evaluar
-    contenedor.innerHTML = '';
+document.addEventListener('DOMContentLoaded', () => {
+    // Escuchamos el estado de autenticación de forma limpia
+    auth.onAuthStateChanged((user) => {
+        const contenedor = document.getElementById('contenedor-novedades');
+        if (!contenedor) return;
 
-    // Si es invitado (null), mostramos la tarjeta vacía con la patita y el botón que abre el modal
-    if (!user) {
-        contenedor.innerHTML = `
-            <div class="estado-vacio">
-                <div class="icono-estado-vacio">🐾</div>
-                <h2>¡Aún no hay publicaciones!</h2>
-                <p>&lt;3</p>
-                <button class="btn-detalles" onclick="abrirBloqueo()">Ver detalles</button>
-            </div>
-        `;
-        return;
-    }
+        if (!user) {
+            // ESTADO 1: MODO INVITADO (Sin peticiones al servidor)
+            renderizarEstadoInvitado(contenedor);
+        } else {
+            // ESTADO 2: USUARIO LOGUEADO (Carga segura)
+            renderizarContenidoUsuario(user, contenedor);
+        }
+    });
+});
 
-    // Si hay sesión activa, hacemos el fetch seguro con el correo del usuario
+function renderizarEstadoInvitado(contenedor) {
+    contenedor.innerHTML = `
+        <div class="estado-vacio">
+            <div class="icono-estado-vacio">🐾</div>
+            <h2>¡Aún no hay publicaciones!</h2>
+            <p>&lt;3</p>
+            <button class="btn-detalles" onclick="abrirBloqueo()">Ver detalles</button>
+        </div>
+    `;
+}
+
+function renderizarContenidoUsuario(user, contenedor) {
     fetch(`/api/publicaciones-globales?correo=${encodeURIComponent(user.email)}`)
-        .then(async (res) => {
-            if (!res.ok) throw new Error(`Error HTTP ${res.status}`);
-            return res.json();
-        })
-        .then((publicaciones) => {
-            if (!auth.currentUser || auth.currentUser.uid !== user.uid) {
-                contenedor.innerHTML = '';
-                return;
-            }
+        .then(res => res.json())
+        .then(publicaciones => {
+            contenedor.innerHTML = ''; 
 
-            contenedor.innerHTML = '';
+            if (!Array.isArray(publicaciones)) return;
 
-            if (!Array.isArray(publicaciones)) {
-                throw new Error('La respuesta de publicaciones no es válida.');
-            }
-
-            const adopciones = publicaciones.filter(
-                pub => pub.tipo_publicacion === 'adopcion'
-            );
+            const adopciones = publicaciones.filter(pub => pub.tipo_publicacion === 'adopcion');
 
             if (adopciones.length === 0) {
                 contenedor.innerHTML = `
@@ -866,15 +860,12 @@ function cargarAdopcionesNovedades(user) {
                 contenedor.appendChild(tarjeta);
             });
         })
-        .catch(err => console.error("Error al cargar las adopciones:", err));
+        .catch(err => console.error("Error al cargar adopciones:", err));
 }
 
-// Función para proteger los detalles en caso de que intenten entrar sin sesión
 function verDetallesAdopcion(idAdopcion) {
     if (!auth.currentUser) {
-        if (typeof abrirBloqueo === 'function') {
-            abrirBloqueo();
-        }
+        if (typeof abrirBloqueo === 'function') abrirBloqueo();
         return;
     }
     window.location.href = `detalles_adopcion.html?id=${encodeURIComponent(idAdopcion)}`;
