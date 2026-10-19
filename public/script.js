@@ -31,6 +31,8 @@ auth.onAuthStateChanged(async (user) => {
     const linkGuardado = document.getElementById('link-guardado');
     const linkMapa = document.getElementById('link-mapa');
     const linkConfig = document.getElementById('link-config');
+
+    cargarAdopcionesNovedades(user);
     
     // Referencias del Nav y Mini Menú
     const userDisplayName = document.getElementById('user-display-name');
@@ -109,6 +111,9 @@ auth.onAuthStateChanged(async (user) => {
         if (linkMapa) linkMapa.href = "mapa.html";
         if (linkConfig) linkConfig.href = "configuracion.html";
 
+        // AQUÍ AÑADES ESTA LÍNEA (Al final del if, cuando el usuario SÍ está logueado):
+        cargarAdopcionesNovedades(user);
+
     } else {
         // MODO INVITADO
         if (userDisplayName) userDisplayName.textContent = "";
@@ -120,6 +125,9 @@ auth.onAuthStateChanged(async (user) => {
         if (linkGuardado) linkGuardado.href = "home.html?seccion=guardado";
         if (linkMapa) linkMapa.href = "home.html?seccion=mapa";
         if (linkConfig) linkConfig.href = "home.html?seccion=configuracion";
+
+        //AQUÍ AÑADES ESTA OTRA LÍNEA (Al final del else, cuando es INVITADO):
+        cargarAdopcionesNovedades(null);
     }
 });
 
@@ -776,40 +784,53 @@ document.addEventListener('DOMContentLoaded', () => {
 // ==========================================
 // CARGAR Y FILTRAR ADOPCIONES EN NOVEDADES
 // ==========================================
-document.addEventListener('DOMContentLoaded', () => {
-    const contenedorNovedades = document.getElementById('contenedor-novedades');
-    
-    if (contenedorNovedades && window.location.pathname.includes('novedades-adopciones.html')) {
-        cargarAdopcionesNovedades();
+function cargarAdopcionesNovedades(user) {
+    const contenedor = document.getElementById('contenedor-novedades');
+    if (!contenedor) return;
+
+    // Limpiamos el contenedor antes de evaluar
+    contenedor.innerHTML = '';
+
+    // Si es invitado (null), mostramos la tarjeta vacía con la patita y el botón que abre el modal
+    if (!user) {
+        contenedor.innerHTML = `
+            <div class="estado-vacio">
+                <div class="icono-estado-vacio">🐾</div>
+                <h2>¡Aún no hay publicaciones!</h2>
+                <p>&lt;3</p>
+                <button class="btn-detalles" onclick="abrirBloqueo()">Ver detalles</button>
+            </div>
+        `;
+        return;
     }
-});
 
-function cargarAdopcionesNovedades() {
-    fetch('http://localhost:3000/api/publicaciones-globales')
-        .then(res => res.json())
-        .then(publicaciones => {
-            const contenedor = document.getElementById('contenedor-novedades');
-            contenedor.innerHTML = ''; 
+    // Si hay sesión activa, hacemos el fetch seguro con el correo del usuario
+    fetch(`/api/publicaciones-globales?correo=${encodeURIComponent(user.email)}`)
+        .then(async (res) => {
+            if (!res.ok) throw new Error(`Error HTTP ${res.status}`);
+            return res.json();
+        })
+        .then((publicaciones) => {
+            if (!auth.currentUser || auth.currentUser.uid !== user.uid) {
+                contenedor.innerHTML = '';
+                return;
+            }
 
-            const adopciones = publicaciones.filter(pub => pub.tipo_publicacion === 'adopcion');
+            contenedor.innerHTML = '';
+
+            if (!Array.isArray(publicaciones)) {
+                throw new Error('La respuesta de publicaciones no es válida.');
+            }
+
+            const adopciones = publicaciones.filter(
+                pub => pub.tipo_publicacion === 'adopcion'
+            );
 
             if (adopciones.length === 0) {
                 contenedor.innerHTML = `
                     <div class="estado-vacio">
-                        <div class="escena-cielo-kawaii">
-                            <div class="nube-kawaii nube-izq"></div>
-                            <div class="sol-kawaii">
-                                <div class="ojo-sol izq"></div>
-                                <div class="ojo-sol der"></div>
-                                <div class="boca-sol"></div>
-                                <div class="rubor-sol izq"></div>
-                                <div class="rubor-sol der"></div>
-                            </div>
-                            <div class="nube-kawaii nube-der"></div>
-                            <span class="destello d1">✦</span>
-                            <span class="destello d2">✦</span>
-                        </div>
-                        <h2>¡Aún no hay publicaciones de adopción!</h2>
+                        <div class="icono-estado-vacio">🐾</div>
+                        <h2>¡Aún no hay publicaciones!</h2>
                         <p>&lt;3</p>
                     </div>
                 `;
@@ -853,10 +874,16 @@ function cargarAdopcionesNovedades() {
         .catch(err => console.error("Error al cargar las adopciones:", err));
 }
 
+// Función para proteger los detalles en caso de que intenten entrar sin sesión
 function verDetallesAdopcion(idAdopcion) {
-    window.location.href = `detalles_adopcion.html?id=${idAdopcion}`;
+    if (!auth.currentUser) {
+        if (typeof abrirBloqueo === 'function') {
+            abrirBloqueo();
+        }
+        return;
+    }
+    window.location.href = `detalles_adopcion.html?id=${encodeURIComponent(idAdopcion)}`;
 }
-
 // ==========================================
 // 7. BUSCADOR UNIVERSAL INTELIGENTE
 // ==========================================
