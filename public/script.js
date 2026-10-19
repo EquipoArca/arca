@@ -33,6 +33,7 @@ auth.onAuthStateChanged(async (user) => {
     const linkConfig = document.getElementById('link-config');
 
     cargarAdopcionesNovedades(user);
+
     
     // Referencias del Nav y Mini Menú
     const userDisplayName = document.getElementById('user-display-name');
@@ -111,9 +112,6 @@ auth.onAuthStateChanged(async (user) => {
         if (linkMapa) linkMapa.href = "mapa.html";
         if (linkConfig) linkConfig.href = "configuracion.html";
 
-        // AQUÍ AÑADES ESTA LÍNEA (Al final del if, cuando el usuario SÍ está logueado):
-        cargarAdopcionesNovedades(user);
-
     } else {
         // MODO INVITADO
         if (userDisplayName) userDisplayName.textContent = "";
@@ -125,9 +123,6 @@ auth.onAuthStateChanged(async (user) => {
         if (linkGuardado) linkGuardado.href = "home.html?seccion=guardado";
         if (linkMapa) linkMapa.href = "home.html?seccion=mapa";
         if (linkConfig) linkConfig.href = "home.html?seccion=configuracion";
-
-        //AQUÍ AÑADES ESTA OTRA LÍNEA (Al final del else, cuando es INVITADO):
-        cargarAdopcionesNovedades(null);
     }
 });
 
