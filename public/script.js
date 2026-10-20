@@ -639,7 +639,7 @@ function cerrarModalRecuperar() {
     }
 }
 
- function enviarEnlaceRecuperacion() {
+function enviarEnlaceRecuperacion() {
     const emailInput = document.getElementById("email-recuperar");
     const msg = document.getElementById("mensaje-estado-recuperar");
 
@@ -655,16 +655,17 @@ function cerrarModalRecuperar() {
     msg.textContent = "Enviando correo...";
     msg.style.color = "#333";
 
-    // Definimos la URL de redirección dinámica (se adapta a localhost o a tu servidor de producción)
-    const urlRedireccion = "https://arca-backend-cgzt.onrender.com/reestablecer.html";
-
-    // Pasamos el objeto de configuración con la URL y handleCodeInApp en true
-    auth.sendPasswordResetEmail(email, {
-        url: urlRedireccion,
+    // Configuración estricta para forzar la apertura de TU página
+    const actionCodeSettings = {
+        // La URL exactísima donde está tu reestablecer.html
+        url: 'https://arca-backend-cgzt.onrender.com/reestablecer.html',
+        // Esto le dice a Firebase que NO abra su interfaz web predeterminada
         handleCodeInApp: true
-    })
+    };
+
+    auth.sendPasswordResetEmail(email, actionCodeSettings)
         .then(() => {
-            msg.textContent = "Correo enviado, revisa tu bandeja de entrada o spam.";
+            msg.textContent = "¡Correo enviado! Revisa tu bandeja de entrada o spam.";
             msg.style.color = "#4caf50";
             
             setTimeout(() => {
