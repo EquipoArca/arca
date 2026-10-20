@@ -31,6 +31,148 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+function mostrarAlertaArca(titulo, mensaje, opciones = {}) {
+    const {
+        tipo = "error",
+        textoBoton = "Entendido ♡",
+        alCerrar = null
+    } = opciones;
+
+    document.getElementById("alerta-arca-personalizada")?.remove();
+
+    if (!document.getElementById("estilos-alerta-arca")) {
+        const estilos = document.createElement("style");
+        estilos.id = "estilos-alerta-arca";
+        estilos.textContent = `
+            .arca-alerta-overlay {
+                position: fixed;
+                inset: 0;
+                z-index: 999999;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 20px;
+                background: rgba(40, 25, 35, 0.38);
+                backdrop-filter: blur(5px);
+                animation: arcaAparecer .22s ease;
+            }
+
+            .arca-alerta-tarjeta {
+                width: min(100%, 360px);
+                padding: 30px 25px 25px;
+                border: 2px solid #fff;
+                border-radius: 28px;
+                background: #FFF1F2;
+                box-shadow: 0 15px 45px rgba(120, 60, 80, .20);
+                text-align: center;
+                font-family: 'Itim', sans-serif;
+                animation: arcaSaltar .28s ease;
+            }
+
+            .arca-alerta-icono {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                width: 76px;
+                height: 76px;
+                margin: 0 auto 17px;
+                border: 3px solid white;
+                border-radius: 50%;
+                background: #FAD4DE;
+                font-size: 36px;
+            }
+
+            .arca-alerta-titulo {
+                margin: 0 0 10px;
+                color: #704653;
+                font-size: 25px;
+            }
+
+            .arca-alerta-mensaje {
+                margin: 0 0 23px;
+                color: #795F68;
+                font-size: 17px;
+                line-height: 1.5;
+                overflow-wrap: anywhere;
+            }
+
+            .arca-alerta-boton {
+                width: 100%;
+                padding: 12px 18px;
+                border: 0;
+                border-radius: 18px;
+                background: #E985A0;
+                color: white;
+                font: inherit;
+                font-size: 17px;
+                cursor: pointer;
+                transition: transform .2s, background .2s;
+            }
+
+            .arca-alerta-boton:hover {
+                background: #D96F8D;
+                transform: translateY(-2px);
+            }
+
+            @keyframes arcaAparecer {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+
+            @keyframes arcaSaltar {
+                from { opacity: 0; transform: scale(.92) translateY(8px); }
+                to { opacity: 1; transform: scale(1) translateY(0); }
+            }
+        `;
+        document.head.appendChild(estilos);
+    }
+
+    const iconos = {
+        error: "♡",
+        aviso: "🌸",
+        conexion: "☁️"
+    };
+
+    const overlay = document.createElement("div");
+    overlay.id = "alerta-arca-personalizada";
+    overlay.className = "arca-alerta-overlay";
+    overlay.setAttribute("role", "alertdialog");
+    overlay.setAttribute("aria-modal", "true");
+
+    const tarjeta = document.createElement("div");
+    tarjeta.className = "arca-alerta-tarjeta";
+
+    const icono = document.createElement("div");
+    icono.className = "arca-alerta-icono";
+    icono.textContent = iconos[tipo] || "♡";
+
+    const encabezado = document.createElement("h2");
+    encabezado.className = "arca-alerta-titulo";
+    encabezado.textContent = titulo;
+
+    const texto = document.createElement("p");
+    texto.className = "arca-alerta-mensaje";
+    texto.textContent = mensaje;
+
+    const boton = document.createElement("button");
+    boton.type = "button";
+    boton.className = "arca-alerta-boton";
+    boton.textContent = textoBoton;
+
+    boton.addEventListener("click", () => {
+        overlay.remove();
+        if (typeof alCerrar === "function") {
+            alCerrar();
+        }
+    });
+
+    tarjeta.append(icono, encabezado, texto, boton);
+    overlay.appendChild(tarjeta);
+    document.body.appendChild(overlay);
+
+    boton.focus();
+}
+
 // ==========================================
 // BANDERAS DE VALIDACIÓN Y ELEMENTOS
 // ==========================================

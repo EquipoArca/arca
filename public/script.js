@@ -775,100 +775,129 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================
-// CONTROL DEFINITIVO DE NOVEDADES Y ADOPCIONES
+// SECCIÓN DE NOVEDADES Y ADOPCIONES (REHECHA)
 // ==========================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Escuchamos el estado de autenticación de forma limpia
-    auth.onAuthStateChanged((user) => {
-        const contenedor = document.getElementById('contenedor-novedades');
-        if (!contenedor) return;
-
-        if (!user) {
-            // ESTADO 1: MODO INVITADO (Sin peticiones al servidor)
-            renderizarEstadoInvitado(contenedor);
-        } else {
-            // ESTADO 2: USUARIO LOGUEADO (Carga segura)
-            renderizarContenidoUsuario(user, contenedor);
-        }
-    });
+    const contenedorNovedades = document.getElementById('contenedor-novedades');
+    
+    // Validar si estamos en la página correcta
+    if (contenedorNovedades && window.location.pathname.includes('novedades-adopciones.html')) {
+        obtenerYRenderizarAdopciones();
+    }
 });
 
-function renderizarEstadoInvitado(contenedor) {
+async function obtenerYRenderizarAdopciones() {
+    const contenedor = document.getElementById('contenedor-novedades');
+    
+    // Estado de carga inicial con diseño consistente
     contenedor.innerHTML = `
-        <div class="estado-vacio">
-            <div class="icono-estado-vacio">🐾</div>
-            <h2>¡Aún no hay publicaciones!</h2>
-            <p>&lt;3</p>
-            <button class="btn-detalles" onclick="abrirBloqueo()">Ver detalles</button>
+        <div class="arca-estado-vacio">
+            <div class="arca-spinner">🐾</div>
+            <p>Buscando amiguitos buscando hogar...</p>
+        </div>
+    `;
+
+    try {
+        const respuesta = await fetch('http://localhost:3000/api/publicaciones-globales');
+        if (!respuesta.ok) throw new Error('Error al conectar con el servidor');
+        
+        const publicaciones = await respuesta.json();
+        
+        // Filtrar estrictamente las publicaciones de tipo adopción
+        const adopciones = publicaciones.filter(pub => pub.tipo_publicacion === 'adopcion');
+
+        contenedor.innerHTML = ''; // Limpiar contenedor
+
+        if (adopciones.length === 0) {
+            renderizarEstadoVacioAdopciones(contenedor);
+            return;
+        }
+
+        // Renderizar cada tarjeta de adopción con diseño unificado y protegido contra desconfiguraciones
+        adopciones.forEach(adopcion => {
+            const fotoSrc = extraerImagenAdopcion(adopcion.img_reporte);
+            const fechaFormateada = adopcion.Fecha_reporte 
+                ? new Date(adopcion.Fecha_reporte).toLocaleDateString() 
+                : 'Fecha reciente';
+            
+            const descripcionCorta = adopcion.Descripcion 
+                ? (adopcion.Descripcion.length > 80 ? adopcion.Descripcion.substring(0, 80) + '...' : adopcion.Descripcion)
+                : 'Sin descripción adicional.';
+
+            const tarjeta = document.createElement('article');
+            tarjeta.className = 'arca-tarjeta-adopcion';
+
+            tarjeta.innerHTML = `
+                <div class="arca-card-imagen-container">
+                    <span class="arca-badge-tipo">${adopcion.nombre_tipo_reporte || 'Adopción'}</span>
+                    <img src="${fotoSrc}" alt="Mascota en adopción" loading="lazy" onerror="this.src='logo.png'">
+                </div>
+                <div class="arca-card-contenido">
+                    <span class="arca-card-fecha">${fechaFormateada}</span>
+                    <div class="arca-card-datos">
+                        <div class="arca-dato-item">📍 <span>${adopcion.Ubicacion || 'Ubicación no especificada'}</span></div>
+                        <div class="arca-dato-item">📝 <span>${descripcionCorta}</span></div>
+                    </div>
+                    <button class="arca-btn-detalles" type="button" onclick="verDetallesAdopcion('${adopcion.id_origen || adopcion.id_publicacion}')">
+                        Ver detalles ♡
+                    </button>
+                </div>
+            `;
+
+            contenedor.appendChild(tarjeta);
+        });
+
+    } catch (error) {
+        console.error("Error crítico al cargar novedades:", error);
+        contenedor.innerHTML = `
+            <div class="arca-estado-vacio">
+                <div class="arca-icono-vacio">⚠️</div>
+                <h2>No pudimos cargar las novedades</h2>
+                <p>Verifica tu conexión e intenta recargar la página.</p>
+            </div>
+        `;
+    }
+}
+
+// Función auxiliar para extraer la imagen de forma segura
+function extraerImagenAdopcion(imgReporte) {
+    if (!imgReporte) return 'logo.png';
+    try {
+        const parsed = JSON.parse(imgReporte);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed[0];
+    } catch (e) {
+        // Si no es un JSON válido, se asume que es una ruta de texto plano
+    }
+    return imgReporte;
+}
+
+// Nuevo diseño unificado para el estado vacío (evita desconfiguraciones)
+function renderizarEstadoVacioAdopciones(contenedor) {
+    contenedor.innerHTML = `
+        <div class="arca-estado-vacio">
+            <div class="escena-cielo-kawaii">
+                <div class="nube-kawaii nube-izq"></div>
+                <div class="sol-kawaii">
+                    <div class="ojo-sol izq"></div>
+                    <div class="ojo-sol der"></div>
+                    <div class="boca-sol"></div>
+                    <div class="rubor-sol izq"></div>
+                    <div class="rubor-sol der"></div>
+                </div>
+                <div class="nube-kawaii nube-der"></div>
+                <span class="destello d1">✦</span>
+                <span class="destello d2">✦</span>
+            </div>
+            <h2>¡Aún no hay publicaciones de adopción!</h2>
+            <p>Vuelve pronto para conocer nuevas mascotas buscando un hogar. ♡</p>
         </div>
     `;
 }
 
-function renderizarContenidoUsuario(user, contenedor) {
-    fetch(`/api/publicaciones-globales?correo=${encodeURIComponent(user.email)}`)
-        .then(res => res.json())
-        .then(publicaciones => {
-            contenedor.innerHTML = ''; 
-
-            if (!Array.isArray(publicaciones)) return;
-
-            const adopciones = publicaciones.filter(pub => pub.tipo_publicacion === 'adopcion');
-
-            if (adopciones.length === 0) {
-                contenedor.innerHTML = `
-                    <div class="estado-vacio">
-                        <div class="icono-estado-vacio">🐾</div>
-                        <h2>¡Aún no hay publicaciones!</h2>
-                        <p>&lt;3</p>
-                    </div>
-                `;
-                return;
-            }
-
-            adopciones.forEach(adopcion => {
-                let fotoSrc = 'logo.png';
-                try {
-                    const fotosArray = JSON.parse(adopcion.img_reporte);
-                    if (Array.isArray(fotosArray) && fotosArray.length > 0) {
-                        fotoSrc = fotosArray[0];
-                    }
-                } catch (e) {
-                    if (adopcion.img_reporte) fotoSrc = adopcion.img_reporte;
-                }
-
-                const fechaFormateada = new Date(adopcion.Fecha_reporte).toLocaleDateString();
-
-                const tarjeta = document.createElement('article');
-                tarjeta.classList.add('tarjeta-adopcion');
-                tarjeta.innerHTML = `
-                    <div class="columna-izquierda">
-                        <div class="badge-titulo-adopcion">${adopcion.nombre_tipo_reporte || 'Adopción'}</div>
-                        <div class="contenedor-foto-adopcion">
-                            <img src="${fotoSrc}" alt="Mascota" style="width:100%; height:100%; object-fit:cover; border-radius:12px;">
-                        </div>
-                    </div>
-                    <div class="columna-derecha-adopcion">
-                        <span class="fecha-adopcion">${fechaFormateada}</span>
-                        <div class="lista-capsulas-vacias">
-                            <div class="capsula-dato">📍 ${adopcion.Ubicacion}</div>
-                            <div class="capsula-dato">📝 ${adopcion.Descripcion ? adopcion.Descripcion.substring(0, 70) + '...' : 'Sin descripción'}</div>
-                            <button class="btn-detalles" onclick="verDetallesAdopcion('${adopcion.id_origen}')">Ver detalles</button>
-                        </div>
-                    </div>
-                `;
-                contenedor.appendChild(tarjeta);
-            });
-        })
-        .catch(err => console.error("Error al cargar adopciones:", err));
-}
-
 function verDetallesAdopcion(idAdopcion) {
-    if (!auth.currentUser) {
-        if (typeof abrirBloqueo === 'function') abrirBloqueo();
-        return;
-    }
-    window.location.href = `detalles_adopcion.html?id=${encodeURIComponent(idAdopcion)}`;
+    if (!idAdopcion) return;
+    window.location.href = `detalles_adopcion.html?id=${idAdopcion}`;
 }
 // ==========================================
 // 7. BUSCADOR UNIVERSAL INTELIGENTE

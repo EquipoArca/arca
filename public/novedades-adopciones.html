@@ -191,29 +191,22 @@
     </script> 
 
     <!-- Script optimizado para renderizar las adopciones sin inestabilidad de sesión -->
-    <script>
-    function obtenerCorreoSesion() {
-        const authUser = firebase.auth().currentUser;
-        if (authUser && authUser.email) return authUser.email;
-        return localStorage.getItem('correo_usuario') || 
-               localStorage.getItem('usuario_correo') || 
-               localStorage.getItem('user_email') || '';
-    }
-
-    async function cargarAdopcionesNovedades(correoUsuario = '') {
+<script>
+    async function cargarAdopcionesNovedades() {
         const contenedor = document.getElementById('contenedor-novedades');
         if (!contenedor) return;
 
         try {
-            const respuesta = await fetch(`/api/publicaciones-globales?correo=${encodeURIComponent(correoUsuario)}`);
+            // Hacemos la petición directa sin requerir autenticación obligatoria
+            const respuesta = await fetch('/api/publicaciones-globales');
             if (!respuesta.ok) throw new Error("Error al obtener las publicaciones");
             
             const publicaciones = await respuesta.json();
             const adopciones = publicaciones.filter(pub => pub.tipo_publicacion === 'adopcion');
 
-            if (adopciones.length > 0) {
-                contenedor.innerHTML = ''; 
+            contenedor.innerHTML = ''; 
 
+            if (adopciones.length > 0) {
                 for (const pub of adopciones) {
                     let imagenSrc = 'logo.png';
                     if (pub.img_reporte) {
@@ -227,10 +220,7 @@
                     }
 
                     const fechaFormateada = pub.Fecha_reporte ? pub.Fecha_reporte.split('T')[0] : '';
-                    let ubicacionTextoBruta = pub.Ubicacion || pub.ubicacion || '';
-                    let ubicacionBonita = typeof obtenerNombreUbicacionGlobal === 'function' 
-                        ? await obtenerNombreUbicacionGlobal(ubicacionTextoBruta) 
-                        : ubicacionTextoBruta;
+                    let ubicacionTextoBruta = pub.Ubicacion || pub.ubicacion || 'Medellín';
 
                     const tarjeta = document.createElement('article');
                     tarjeta.className = 'tarjeta-prototipo-estilo';
@@ -249,40 +239,30 @@
                             <div class="proto-content-right">
                                 <div class="proto-pill-tipo">${pub.nombre_tipo_reporte || 'Adopción'}</div>
                                 <div class="proto-info-extra">
-                                    <span class="proto-autor">Publicado por: <a href="perfil_publico.html?user=${pub.nombre_usuario}">@${pub.nombre_usuario || 'Usuario'}</a></span>
-                                    <p class="proto-ubicacion"><i class="fa-solid fa-location-dot"></i> ${ubicacionBonita}</p>
+                                    <span class="proto-autor">Publicado por: <a href="#">@${pub.nombre_usuario || 'Usuario'}</a></span>
+                                    <p class="proto-ubicacion"><i class="fa-solid fa-location-dot"></i> ${ubicacionTextoBruta}</p>
                                 </div>
                             </div>
 
                             <div class="proto-footer-row">
-                                <button class="proto-btn-detalles btn-ver-adopcion-ficha" data-id="${pub.id_origen}">Ver detalles</button>
+                                <button class="proto-btn-detalles btn-ver-adopcion-ficha" data-id="${pub.id_origen || pub.id_publicacion}">Ver detalles</button>
                             </div>
                         </div>
                     `;
                     contenedor.appendChild(tarjeta);
                 }
             } else {
-                contenedor.innerHTML = `
-                    <div class="estado-vacio" style="text-align: center; padding: 40px; font-family: 'Itim', cursive;">
-                        <i class="fa-solid fa-paw" style="font-size: 40px; color: #ff758c; margin-bottom: 10px;"></i>
-                        <h2>¡Aún no hay publicaciones de adopción!</h2>
-                        <p>&lt;3</p>
-                    </div>
-                `;
+                renderizarEstadoVacioNovedades(contenedor, "¡Aún no hay publicaciones de adopción!");
             }
         } catch (error) {
             console.error("Error al cargar adopciones:", error);
+            renderizarEstadoVacioNovedades(contenedor, "No se pudieron cargar las novedades.");
         }
     }
 
-    // CARGA INMEDIATA: Usa localStorage al instante sin esperar el retraso de Firebase
-    const correoInicial = obtenerCorreoSesion();
-    cargarAdopcionesNovedades(correoInicial);
-
-    // Sincronización secundaria por si Firebase valida la sesión después
-    firebase.auth().onAuthStateChanged((user) => {
-        const correo = (user && user.email) ? user.email : obtenerCorreoSesion();
-        cargarAdopcionesNovedades(correo);
+    // Se ejecuta de forma independiente al estado de sesión de Firebase
+    document.addEventListener('DOMContentLoaded', () => {
+        cargarAdopcionesNovedades();
     });
 
     document.addEventListener('click', (event) => {
@@ -294,7 +274,17 @@
             }
         }
     });
-    </script>
+
+    function renderizarEstadoVacioNovedades(contenedor, mensaje) {
+        contenedor.innerHTML = `
+            <div class="estado-vacio" style="text-align: center; padding: 40px; font-family: 'Itim', cursive; width: 100%;">
+                <i class="fa-solid fa-paw" style="font-size: 40px; color: #ff758c; margin-bottom: 10px;"></i>
+                <h2>${mensaje}</h2>
+                <p>&lt;3</p>
+            </div>
+        `;
+    }
+</script>
 
     <style>
         /* Contenedor principal de feed en forma de lista vertical amplia */
