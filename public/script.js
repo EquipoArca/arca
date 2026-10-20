@@ -656,7 +656,7 @@ function cerrarModalRecuperar() {
     msg.style.color = "#333";
 
     // Definimos la URL de redirección dinámica (se adapta a localhost o a tu servidor de producción)
-    const urlRedireccion = window.location.origin + "/reestablecer.html";
+    const urlRedireccion = "https://arca-backend-cgzt.onrender.com/reestablecer.html";
 
     // Pasamos el objeto de configuración con la URL y handleCodeInApp en true
     auth.sendPasswordResetEmail(email, {
