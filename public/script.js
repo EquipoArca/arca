@@ -639,7 +639,7 @@ function cerrarModalRecuperar() {
     }
 }
 
-function enviarEnlaceRecuperacion() {
+ function enviarEnlaceRecuperacion() {
     const emailInput = document.getElementById("email-recuperar");
     const msg = document.getElementById("mensaje-estado-recuperar");
 
@@ -655,9 +655,16 @@ function enviarEnlaceRecuperacion() {
     msg.textContent = "Enviando correo...";
     msg.style.color = "#333";
 
-    auth.sendPasswordResetEmail(email)
+    // Definimos la URL de redirección dinámica (se adapta a localhost o a tu servidor de producción)
+    const urlRedireccion = window.location.origin + "/reestablecer.html";
+
+    // Pasamos el objeto de configuración con la URL y handleCodeInApp en true
+    auth.sendPasswordResetEmail(email, {
+        url: urlRedireccion,
+        handleCodeInApp: true
+    })
         .then(() => {
-            msg.textContent = "¡Correo enviado! Revisa tu bandeja de entrada o spam.";
+            msg.textContent = "Correo enviado, revisa tu bandeja de entrada o spam.";
             msg.style.color = "#4caf50";
             
             setTimeout(() => {
@@ -676,7 +683,6 @@ function enviarEnlaceRecuperacion() {
             msg.style.color = "#d32f2f";
         });
 }
-
 async function obtenerNombreUbicacionGlobal(textoUbicacionOriginal) {
     if (!textoUbicacionOriginal) return "Ubicación no especificada";
     
