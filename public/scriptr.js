@@ -31,6 +31,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+// ==========================================
+// ALERTA PERSONALIZADA ARCA
+// ==========================================
 function mostrarAlertaArca(titulo, mensaje, opciones = {}) {
     const {
         tipo = "error",
@@ -329,29 +332,28 @@ if (formRegistro) {
         e.preventDefault();
 
         if (!esNombreValido) {
-            mensajeEstadoReg.textContent = "Por favor elige un nombre de usuario disponible.";
-            mensajeEstadoReg.className = "mensaje-validacion error";
+            mostrarAlertaArca("¡Nombre no válido! 🌸", "Por favor elige un nombre de usuario disponible antes de continuar.", { tipo: "aviso" });
             inputNombreReg.focus();
             return;
         }
 
         if (!esEdadValida) {
-            mensajeEstadoFecha.textContent = "Debes confirmar que tienes 18 años o más para crear una cuenta.";
-            mensajeEstadoFecha.className = "mensaje-validacion error";
+            mostrarAlertaArca("¡Verificación de edad! 🌸", "Debes confirmar que tienes 18 años o más para crear una cuenta en ARCA.", { tipo: "aviso" });
             if (inputFechaNac) inputFechaNac.focus();
             return;
         }
 
         if (!esPasswordValida) {
-            mensajeEstadoPass.textContent = "La contraseña no cumple con los requisitos de seguridad.";
-            mensajeEstadoPass.className = "mensaje-validacion error";
+            mostrarAlertaArca("¡Contraseña insegura! ♡", "La contraseña no cumple con los requisitos de seguridad mínimos.", { tipo: "error" });
             inputPassReg.focus();
             return;
         }
 
         if (!emailTemporal) {
-            alert("No se detectó un correo válido. Por favor inicia desde la pantalla principal.");
-            window.location.href = "home.html";
+            mostrarAlertaArca("¡Correo no detectado! ☁️", "No se detectó un correo válido. Te llevaremos a la pantalla principal.", {
+                tipo: "conexion",
+                alCerrar: () => { window.location.href = "home.html"; }
+            });
             return;
         }
 
@@ -367,9 +369,8 @@ if (formRegistro) {
                 to_name: emailTemporal,
                 passcode: codigoGenerado
             };
-            
 
-            // 3. Enviar correo directo con EmailJS (reemplaza con tus IDs reales de EmailJS)
+            // 3. Enviar correo directo con EmailJS
             await emailjs.send('service_93j9cwn', 'template_bqczg41', templateParams);
 
             // 4. Si todo sale bien, abrir el modal de OTP
@@ -377,10 +378,11 @@ if (formRegistro) {
 
         } catch (error) {
             console.error("Error al enviar con EmailJS:", error);
-            alert("Hubo un problema al enviar el código de verificación.");
+            mostrarAlertaArca("¡Hubo un problema! ☁️", "Hubo un problema al enviar el código de verificación por correo.", { tipo: "conexion" });
         }
     });
 }
+
 // Botón para cerrar el modal
 if (btnOtpBack && modalOtp) {
     btnOtpBack.addEventListener('click', () => {
@@ -428,7 +430,7 @@ if (formOtp) {
         const codigoCompleto = Array.from(otpInputs).map(i => i.value).join("");
 
         if (codigoCompleto.length !== 4) {
-            alert("Por favor ingresa los 4 dígitos del código.");
+            mostrarAlertaArca("¡Faltan dígitos! ♡", "Por favor ingresa los 4 dígitos completos del código de verificación.", { tipo: "aviso" });
             return;
         }
 
@@ -437,7 +439,7 @@ if (formOtp) {
             const codigoGuardado = sessionStorage.getItem('otp_temporal');
 
             if (codigoCompleto !== codigoGuardado) {
-                alert("El código de verificación es incorrecto.");
+                mostrarAlertaArca("¡Código incorrecto! ♡", "El código de verificación ingresado no coincide. Inténtalo de nuevo.", { tipo: "error" });
                 return;
             }
 
@@ -462,17 +464,20 @@ if (formOtp) {
             });
 
             if (resMySQL.ok) {
-                alert("¡Cuenta verificada y creada con éxito! Bienvenido a ARCA.");
-                window.location.href = "home.html?modo=full";
+                mostrarAlertaArca("¡Bienvenida a ARCA! 🌸", "¡Cuenta verificada y creada con éxito!", {
+                    tipo: "aviso",
+                    textoBoton: "Empezar ♡",
+                    alCerrar: () => { window.location.href = "home.html?modo=full"; }
+                });
             } else {
-                alert("Error al guardar la información en la base de datos.");
+                mostrarAlertaArca("¡Error de base de datos! ☁️", "Ocurrió un error al guardar la información en la base de datos.", { tipo: "error" });
             }
-            } catch (error) {
+        } catch (error) {
             console.error("Error en la verificación/registro:", error);
             if (error.code === 'auth/email-already-in-use') {
-                alert("Este correo ya tiene una cuenta activa.");
+                mostrarAlertaArca("¡Cuenta existente! 🌸", "Este correo ya tiene una cuenta activa en ARCA.", { tipo: "aviso" });
             } else {
-                alert("Ocurrió un error al procesar el registro.");
+                mostrarAlertaArca("¡Error en el registro! ☁️", "Ocurrió un error inesperado al procesar tu registro.", { tipo: "error" });
             }
         }
     });
