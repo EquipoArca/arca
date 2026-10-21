@@ -1285,4 +1285,4 @@ function mostrarAlertaArca(titulo, mensaje, opciones = {}) {
     document.body.appendChild(overlay);
 
     boton.focus();
-}
+} 
