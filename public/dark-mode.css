@@ -1191,3 +1191,310 @@ body.dark-mode .btn-enviar-adopcion-final:hover {
     background-color: #6a4544 !important;
 }
 
+/* --- DONACIONES EN MODO OSCURO --- */
+
+body.dark-mode .main-content {
+    margin-top: 100px;
+    margin-left: 60px;
+    padding: 30px 30px 60px 30px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    flex-grow: 1;
+}
+
+body.dark-mode .donation-main-container {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    padding-bottom: 40px;
+    overflow-y: auto;
+}
+
+body.dark-mode .donation-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 30px;
+    align-items: start;
+}
+
+body.dark-mode .donation-column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Títulos con forma de píldora (Terracota cálido con brillo) */
+body.dark-mode .section-pill-title {
+    background-color: #925347;
+    padding: 8px 25px;
+    border-radius: 20px;
+    font-size: 1.5rem;
+    color: #f7e7de;
+    font-weight: 500;
+    display: inline-block;
+    align-self: flex-start;
+    box-shadow: 0 4px 15px rgba(146, 83, 71, 0.3);
+    border: none;
+    font-family: 'Itim', sans-serif;
+}
+
+body.dark-mode .donation-options-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+body.dark-mode .donation-option-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+}
+
+body.dark-mode .donation-option-row input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+}
+
+/* Checkbox personalizado estilo oscuro */
+body.dark-mode .donation-custom-checkbox {
+    width: 24px;
+    height: 24px;
+    border: 2px solid #6e5e5b;
+    border-radius: 6px;
+    background-color: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+body.dark-mode .donation-custom-checkbox::after {
+    content: '✓';
+    display: none;
+    color: #f7e7de;
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 1;
+}
+
+body.dark-mode .donation-option-row input[type="checkbox"]:checked + .donation-custom-checkbox {
+    background-color: #925347;
+    border-color: #925347;
+}
+
+body.dark-mode .donation-option-row input[type="checkbox"]:checked + .donation-custom-checkbox::after {
+    display: block;
+}
+
+/* Campos de entrada (Inputs y Textarea café oscuro) */
+body.dark-mode .donation-input-pill,
+body.dark-mode .donation-textarea,
+body.dark-mode .donation-contact-wrapper input {
+    background-color: #3b302e;
+    border: 1px solid #4a3e3b;
+    border-radius: 20px;
+    padding: 12px 20px;
+    font-size: 1.1rem;
+    color: #f7e7de;
+    font-family: 'Itim', sans-serif;
+    width: 100%;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+    outline: none;
+}
+
+body.dark-mode .donation-input-pill::placeholder,
+body.dark-mode .donation-textarea::placeholder,
+body.dark-mode .donation-contact-wrapper input::placeholder {
+    color: #9c8e8a;
+}
+
+body.dark-mode .donation-textarea {
+    height: 140px;
+    resize: none;
+    padding: 15px;
+}
+
+/* Textos de etiquetas e instrucciones */
+body.dark-mode .donation-label-text {
+    font-family: 'Itim', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #e3d2c9;
+    display: block;
+    margin-bottom: 8px;
+}
+
+body.dark-mode .donation-plain-text {
+    font-family: 'Itim', sans-serif;
+    font-size: 1.15rem;
+    color: #d1c1b8;
+}
+
+body.dark-mode .foundation-sub-options {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* Botón auxiliar (Mapas) */
+body.dark-mode .btn-select-map {
+    background-color: #80574d;
+    color: #f7e7de;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 20px;
+    font-family: 'Itim', sans-serif;
+    font-size: 0.95rem;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+body.dark-mode .btn-select-map:hover {
+    transform: scale(1.03);
+    background-color: #925347;
+}
+
+body.dark-mode .or-separator {
+    font-family: 'Itim', sans-serif;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #b5a49c;
+}
+
+/* Iconos de contacto */
+body.dark-mode .donation-contact-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+body.dark-mode .donation-contact-wrapper i {
+    position: absolute;
+    left: 18px;
+    color: #925347;
+    font-size: 1.2rem;
+    pointer-events: none;
+}
+
+body.dark-mode .donation-contact-wrapper input {
+    padding-left: 48px;
+}
+
+/* Botón principal de enviar */
+body.dark-mode .btn-submit-donation {
+    background-color: #925347;
+    color: #ffffff;
+    border: none;
+    padding: 16px 36px;
+    font-family: 'Itim', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 600;
+    border-radius: 25px;
+    cursor: pointer;
+    box-shadow: 0 6px 15px rgba(146, 83, 71, 0.3);
+    transition: transform 0.2s ease, background-color 0.2s ease;
+    align-self: flex-end;
+    margin-top: 15px;
+    margin-bottom: 20px;
+}
+
+body.dark-mode .btn-submit-donation:hover {
+    transform: scale(1.03);
+    background-color: #a45e51;
+}
+
+/* Adaptación responsiva */
+@media (max-width: 768px) {
+    body.dark-mode .main-content {
+        margin-left: 0;
+        padding: 20px 15px 40px 15px;
+    }
+    body.dark-mode .donation-grid {
+        grid-template-columns: 1fr;
+    }
+    body.dark-mode .btn-submit-donation {
+        width: 100%;
+        align-self: center;
+    }
+}
+
+/* --- Overlay / Modal de Confirmación --- */
+body.dark-mode .donation-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+body.dark-mode .donation-modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+body.dark-mode .donation-modal-card {
+    background-color: #2e2422;
+    border: 1px solid #4a3e3b;
+    padding: 40px 30px;
+    border-radius: 30px;
+    max-width: 520px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    cursor: pointer;
+    transform: scale(0.9);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+body.dark-mode .donation-modal-overlay.active .donation-modal-card {
+    transform: scale(1);
+}
+
+body.dark-mode .donation-modal-message {
+    font-family: 'Itim', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: #f7e7de;
+    line-height: 1.3;
+}
+
+body.dark-mode .donation-modal-check {
+    width: 65px;
+    height: 65px;
+    color: #925347;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+body.dark-mode .donation-modal-check i {
+    font-size: 4rem;
+}
