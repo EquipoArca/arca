@@ -7,6 +7,17 @@
     padding: 30px 20px;
 }
 
+@keyframes entradaEscalonada {
+    from { opacity: 0; transform: translateY(15px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes flotarMagico {
+    0% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-5px) rotate(1deg); }
+    100% { transform: translateY(0px) rotate(0deg); }
+}
+
 .perfil-prototipo-container {
     width: 100%;
     max-width: 900px;
@@ -15,14 +26,15 @@
     align-items: center;
     gap: 30px;
     padding: 40px 30px;
-    border-radius: 24px;
+    border-radius: 38px;
 
     /* Efecto Cristal */
     background: rgba(255, 255, 255, 0.45);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.6);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.85);
+    box-shadow: 0 16px 40px rgba(92, 64, 51, 0.08);
+    animation: entradaEscalonada 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 /* ==========================================
@@ -35,15 +47,15 @@
     gap: 12px;
 }
 
-/* Wrapper necesario para ubicar el lápiz relativo a la foto */
 .avatar-wrapper {
     position: relative;
     cursor: pointer;
     display: inline-block;
+    animation: flotarMagico 4s ease-in-out infinite;
 }
 
 .avatar-wrapper:hover .avatar-circulo {
-    transform: scale(1.04);
+    transform: scale(1.06) rotate(-2deg);
 }
 
 .avatar-circulo, 
@@ -52,20 +64,18 @@
     height: 110px;
     border-radius: 50%;
     
-    /* Fondo Rosado Pastel Cristalizado con Glow */
     background: rgba(255, 179, 165, 0.85); 
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     
-    /* Borde blanco brillante */
-    border: 3px solid rgba(255, 255, 255, 0.9);
-    box-shadow: 0 8px 20px rgba(247, 168, 168, 0.5);
+    border: 4px solid rgba(255, 255, 255, 0.95);
+    box-shadow: 0 10px 25px rgba(247, 168, 168, 0.6);
     
     display: flex;
     justify-content: center;
     align-items: center;
     overflow: hidden;
-    transition: transform 0.3s ease;
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .modal-avatar-preview {
@@ -73,7 +83,6 @@
     height: 170px;
 }
 
-/* Silueta SVG limpia y blanca */
 .icono-silueta {
     width: 65%;
     height: 65%;
@@ -81,7 +90,6 @@
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 
-/* Imagen de perfil subida por el usuario */
 .avatar-circulo img,
 .modal-avatar-preview img {
     width: 100%;
@@ -96,18 +104,19 @@
     position: absolute;
     bottom: 2px;
     right: 2px;
-    width: 34px;
-    height: 34px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.95);
-    border: 1px solid rgba(252, 213, 206, 0.8);
+    backdrop-filter: blur(6px);
+    border: 2px solid rgba(252, 213, 206, 0.9);
     color: #2b2b2b;
     display: flex;
     justify-content: center;
     align-items: center;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 6px 15px rgba(92, 64, 51, 0.15);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .btn-lapiz-editar svg {
@@ -117,16 +126,39 @@
 
 .btn-lapiz-editar:hover {
     background: #fcd5ce;
-    transform: scale(1.1);
+    transform: scale(1.15) rotate(10deg);
 }
 
+/* NOMBRE DE USUARIO PRINCIPAL */
 .perfil-header-prototipo h2 {
     font-family: 'Itim', cursive, sans-serif;
-    font-size: 2rem;
-    color: #2b2b2b;
-    margin: 0;
-    font-weight: normal;
-    text-shadow: 0 2px 4px rgba(255, 255, 255, 0.5);
+    font-size: 2.3rem;
+    font-weight: 400;
+    letter-spacing: 0.8px;
+    margin: 4px 0 0 0;
+    
+    background: linear-gradient(135deg, #442c20 0%, #704432 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    
+    border-bottom: 2px dashed rgba(232, 165, 152, 0.65);
+    padding-bottom: 4px;
+    display: inline-block;
+    filter: drop-shadow(0 2px 4px rgba(255, 255, 255, 0.8));
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.perfil-header-prototipo h2:hover {
+    transform: scale(1.03);
+    border-bottom-color: #e8a598;
+}
+
+body.dark-mode .perfil-header-prototipo h2 {
+    background: linear-gradient(135deg, #f4ebd0 0%, #e8a598 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    border-bottom-color: rgba(232, 165, 152, 0.4);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
 }
 
 /* ==========================================
@@ -138,7 +170,7 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(92, 64, 51, 0.45);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     display: none;
@@ -155,31 +187,38 @@
 }
 
 .modal-foto-contenido {
-    background: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.9);
-    border-radius: 24px;
-    padding: 30px 25px;
+    border: 2px solid rgba(255, 255, 255, 0.95);
+    border-radius: 38px;
+    padding: 35px 28px;
     width: 90%;
-    max-width: 360px;
+    max-width: 380px;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 20px;
     position: relative;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 24px 50px rgba(92, 64, 51, 0.18);
+    animation: entradaEscalonada 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 .btn-cerrar-modal {
     position: absolute;
-    top: 10px;
-    right: 16px;
+    top: 14px;
+    right: 18px;
     background: none;
     border: none;
     font-size: 1.8rem;
     color: #555;
     cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.btn-cerrar-modal:hover {
+    transform: scale(1.2);
+    color: #e57373;
 }
 
 .modal-avatar-preview {
@@ -188,7 +227,7 @@
     border-radius: 50%;
     background: rgba(255, 179, 165, 0.85);
     border: 4px solid #ffffff;
-    box-shadow: 0 8px 20px rgba(247, 168, 168, 0.4);
+    box-shadow: 0 10px 25px rgba(247, 168, 168, 0.5);
     overflow: hidden;
     display: flex;
     justify-content: center;
@@ -211,75 +250,102 @@
 .btn-opcion-modal {
     width: 100%;
     padding: 12px 18px;
-    border-radius: 20px;
+    border-radius: 9999px;
     font-family: 'Itim', cursive, sans-serif;
-    font-size: 1rem;
-    border: 1px solid rgba(255, 255, 255, 0.8);
+    font-size: 1.05rem;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    border: 2px solid rgba(255, 255, 255, 0.9);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
 }
 
 .btn-cambiar {
     background: rgba(252, 213, 206, 0.9);
-    color: #2b2b2b;
+    color: #442c20;
+    box-shadow: 0 4px 12px rgba(229, 115, 115, 0.2);
 }
 
 .btn-cambiar:hover {
     background: #fabbb0;
-    transform: translateY(-2px);
+    transform: scale(1.04) translateY(-2px);
+    box-shadow: 0 8px 20px rgba(229, 115, 115, 0.3);
 }
 
 .btn-borrar {
     background: rgba(255, 255, 255, 0.6);
     color: #d9534f;
+    border-color: rgba(217, 83, 79, 0.3);
 }
 
 .btn-borrar:hover {
-    background: rgba(255, 200, 200, 0.5);
-    transform: translateY(-2px);
+    background: rgba(255, 200, 200, 0.7);
+    transform: scale(1.04) translateY(-2px);
 }
-/* Grid de 3 Columnas para las Píldoras */
+
+/* Grid de 3 Columnas Alinear a misma altura */
 .perfil-grid-opciones {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 20px 25px;
     width: 100%;
+    align-items: stretch;
 }
 
-/* Botones Píldora Cristalizados */
+/* ==========================================
+   BOTONES PÍLDORA INTEGRADOS Y REDONDITOS
+   ========================================== */
 .btn-opcion-perfil {
-    /* Base Translúcida Tono Pastel */
-    background: rgba(252, 213, 206, 0.55);
+    background: rgba(252, 213, 206, 0.6);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    color: #2b2b2b;
-    border: 1px solid rgba(255, 255, 255, 0.7);
-    border-radius: 30px;
-    padding: 16px 20px;
+    color: #442c20;
+    border: 2px solid rgba(255, 255, 255, 0.85);
+    
+    /* REDONDEO PERFECTO HOMOGÉNEO */
+    border-radius: 9999px;
+    padding: 14px 22px;
+    
     font-family: 'Itim', cursive, sans-serif;
-    font-size: 1.05rem;
+    font-size: 1rem;
+    font-weight: 400;
+    letter-spacing: 0.4px;
+    line-height: 1.25;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.7);
+    
     text-align: center;
     text-decoration: none;
     cursor: pointer;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 6px 18px rgba(92, 64, 51, 0.05);
     display: flex;
     justify-content: center;
     align-items: center;
-    transition: all 0.3s ease;
-    min-height: 60px;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    
+    /* Tamaño unificado */
+    height: 64px;
     box-sizing: border-box;
+    position: relative;
+    overflow: hidden;
 }
 
 .btn-opcion-perfil:hover {
-    background: rgba(250, 187, 176, 0.85);
+    background: rgba(250, 187, 176, 0.9);
     border-color: rgba(255, 255, 255, 1);
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(250, 187, 176, 0.35);
+    color: #2b1a12;
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 12px 28px rgba(250, 187, 176, 0.4);
 }
 
 .btn-texto-largo {
-    font-size: 0.85rem;
+    font-size: 0.92rem;
     line-height: 1.2;
+}
+
+body.dark-mode .btn-opcion-perfil {
+    color: #f4ebd0;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 /* Responsivo para celulares */
@@ -290,47 +356,65 @@
     .perfil-grid-opciones {
         grid-template-columns: 1fr;
     }
+    .btn-opcion-perfil {
+        height: 58px;
+    }
 }
+
 /* ESTILOS MODAL CAMBIAR NOMBRE */
 .modal-nombre-box {
-    background-color: #fce8e6;
-    padding: 25px;
-    border-radius: 20px;
+    background-color: rgba(252, 232, 230, 0.95);
+    backdrop-filter: blur(14px);
+    padding: 30px;
+    border-radius: 38px;
     max-width: 400px;
     text-align: left;
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 24px 50px rgba(92, 64, 51, 0.18);
+    animation: entradaEscalonada 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 .etiqueta-rosa {
     background-color: #f7b2ad;
-    color: #000;
-    font-weight: bold;
+    color: #3b2218;
+    font-family: 'Itim', cursive, sans-serif;
+    font-weight: 400;
+    letter-spacing: 0.5px;
     padding: 8px 16px;
-    border-radius: 12px;
+    border-radius: 20px;
     display: inline-block;
     margin-bottom: 8px;
-    font-size: 14px;
+    font-size: 15px;
+    box-shadow: 0 4px 10px rgba(247, 178, 173, 0.3);
 }
 
 .nombre-actual-display {
+    font-family: 'Itim', cursive, sans-serif;
     font-size: 22px;
-    font-weight: bold;
+    font-weight: 400;
+    letter-spacing: 0.6px;
     margin-bottom: 15px;
     padding-left: 5px;
+    color: #442c20;
 }
 
 .input-contenedor-nombre {
     display: flex;
     align-items: center;
-    background: #fff;
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(6px);
+    border: 2px solid rgba(232, 165, 152, 0.6);
+    border-radius: 20px;
+    padding: 10px 16px;
     margin-bottom: 10px;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.03);
 }
 
 .prefijo-at {
-    font-weight: bold;
-    color: #555;
+    font-family: 'Itim', cursive, sans-serif;
+    font-weight: 400;
+    color: #704432;
+    font-size: 16px;
     margin-right: 4px;
 }
 
@@ -339,66 +423,83 @@
     outline: none;
     width: 100%;
     font-size: 15px;
-    font-family: inherit;
+    font-family: 'Itim', cursive, sans-serif;
+    letter-spacing: 0.4px;
+    background: transparent;
+    color: #5c4033;
 }
 
 .texto-restriccion {
-    font-size: 13px;
+    font-family: 'Itim', cursive, sans-serif;
+    font-size: 13.5px;
+    letter-spacing: 0.3px;
     color: #666;
     margin-bottom: 15px;
 }
 
 .mensaje-error {
+    font-family: 'Itim', cursive, sans-serif;
     color: #d9534f;
-    font-size: 13px;
+    font-size: 13.5px;
     margin-bottom: 10px;
-    font-weight: bold;
+    font-weight: 400;
 }
 
 .btn-confirmar-nombre {
-    background-color: #e6dfc3;
+    background-color: rgba(230, 223, 195, 0.9);
     border: none;
     padding: 12px 20px;
-    border-radius: 15px;
-    font-weight: bold;
-    font-size: 16px;
+    border-radius: 9999px;
+    font-family: 'Itim', cursive, sans-serif;
+    font-weight: 400;
+    font-size: 1.1rem;
+    letter-spacing: 0.6px;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6);
     cursor: pointer;
     width: 100%;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    transition: background 0.2s;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.06);
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    color: #5c552e;
 }
 
 .btn-confirmar-nombre:hover {
-    background-color: #dad2b1;
+    background-color: rgba(218, 210, 177, 0.95);
+    transform: scale(1.04) translateY(-2px);
+    box-shadow: 0 10px 25px rgba(200, 180, 100, 0.2);
 }
+
 .mensaje-validacion {
-    font-size: 0.85rem;
+    font-family: 'Itim', cursive, sans-serif;
+    font-size: 0.9rem;
     margin-top: 6px;
     margin-bottom: 12px;
-    font-weight: bold;
+    font-weight: 400;
     transition: color 0.3s ease;
 }
 
 .mensaje-validacion.exito {
-    color: #2e7d32; /* Verde amigable */
+    color: #2e7d32;
 }
 
 .mensaje-validacion.error {
-    color: #d32f2f; /* Rojo de advertencia */
+    color: #d32f2f;
 }
 
 .mensaje-validacion.esperando {
-    color: #888888; /* Gris informativo */
+    color: #888888;
 }
+
 #stats-seguidores-container {
     position: relative;
     z-index: 10;
     pointer-events: auto !important;
 }
+
 #stats-seguidores-container span {
     cursor: pointer;
     pointer-events: auto !important;
 }
+
 #modal-lista-social {
     display: none;
     position: fixed !important;
@@ -406,7 +507,7 @@
     left: 0 !important;
     width: 100vw !important;
     height: 100vh !important;
-    background: rgba(0, 0, 0, 0.4) !important;
+    background: rgba(92, 64, 51, 0.45) !important;
     backdrop-filter: blur(8px) !important;
     -webkit-backdrop-filter: blur(8px) !important;
     z-index: 99999 !important;
@@ -417,10 +518,13 @@
 #modal-lista-social .modal-foto-contenido {
     position: relative !important;
     margin: auto !important;
-    background: #ffffff !important;
-    border-radius: 24px !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(16px) !important;
+    border-radius: 38px !important;
     padding: 30px !important;
     width: 90% !important;
     max-width: 420px !important;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.2) !important;
+    box-shadow: 0 24px 50px rgba(92, 64, 51, 0.2) !important;
+    border: 2px solid rgba(255, 255, 255, 0.95) !important;
+    animation: entradaEscalonada 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
