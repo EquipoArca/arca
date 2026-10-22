@@ -17,44 +17,178 @@
     }
     </script>
     <style>
+        html, body {
+            font-family: 'Itim', cursive, sans-serif;
+            color: #2b1b13;
+            background-color: #fce8e6;
+            margin: 0;
+            overflow-x: hidden;
+        }
 
-        /* Estilos idénticos al modal de detalles de novedades */
+        /* ANIMACIONES Y EFECTOS ARCA */
+        @keyframes arcaEntrada {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes flotarSoft {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-5px) rotate(2deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+
+        @keyframes arcaEntradaPop {
+            0% { opacity: 0; transform: scale(0.85) translateY(24px) rotate(-1.5deg); }
+            65% { opacity: 1; transform: scale(1.03) translateY(-4px) rotate(0.5deg); }
+            100% { opacity: 1; transform: scale(1) translateY(0) rotate(0deg); }
+        }
+
+        .main-content {
+            height: calc(100vh - 70px);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 30px;
+            box-sizing: border-box;
+            animation: arcaEntrada 0.5s ease-in-out;
+            overflow-y: auto;
+        }
+
+        /* BOTONES INTERACTIVOS CON ANIMACIÓN */
+        .btn-arca-animado {
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+        }
+        .btn-arca-animado:hover {
+            transform: translateY(-2px) scale(1.03) !important;
+            box-shadow: 0 8px 18px rgba(92, 64, 51, 0.15) !important;
+        }
+        .btn-arca-animado:active {
+            transform: translateY(1px) scale(0.97) !important;
+        }
+
+        /* CONTENEDOR PRINCIPAL ESTILO TARJETA DE CRISTAL */
+        .feed-guardados {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border-radius: 38px;
+            padding: 30px;
+            box-shadow: 0 16px 40px rgba(92, 64, 51, 0.08);
+            border: 2px solid rgba(255, 255, 255, 0.95);
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+            box-sizing: border-box;
+        }
+
+        .header-guardados h2 {
+            color: #5c4033;
+            font-size: 26px;
+            font-weight: 400;
+            margin-bottom: 8px;
+        }
+
+        .subtitulo-guardados {
+            color: #775a4c;
+            font-size: 15px;
+            font-weight: 400;
+            margin-bottom: 25px;
+        }
+
+        /* ESTADO VACÍO REDISEÑADO */
+        .estado-vacio-guardados {
+            text-align: center;
+            padding: 50px 20px;
+            background: rgba(255, 248, 235, 0.6);
+            border-radius: 28px;
+            border: 2px dashed rgba(232, 168, 124, 0.6);
+        }
+
+        .ilustracion-guardados {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 18px;
+            background: rgba(250, 212, 222, 0.7);
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 20px rgba(233, 133, 160, 0.25);
+            animation: flotarSoft 3.5s ease-in-out infinite;
+        }
+
+        .estado-vacio-guardados h3 {
+            color: #5c4033;
+            font-size: 20px;
+            font-weight: 400;
+            margin-bottom: 10px;
+        }
+
+        .estado-vacio-guardados p {
+            color: #775a4c;
+            font-size: 14.5px;
+            max-width: 450px;
+            margin: 0 auto;
+            line-height: 1.5;
+            font-weight: 400;
+        }
+
+        /* MODAL DE DETALLES */
         .modal-foto-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(92, 64, 51, 0.45);
             display: none;
             align-items: center;
             justify-content: center;
             z-index: 2000;
-            backdrop-filter: blur(3px);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
+
         .modal-foto-contenido {
-            background: #fff8eb;
-            border: 2px solid #e8a87c;
-            border-radius: 30px;
-            padding: 30px;
+            background: rgba(255, 248, 235, 0.95);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 2px solid rgba(255, 255, 255, 0.95);
+            border-radius: 38px;
+            padding: 35px;
             position: relative;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            box-shadow: 0 20px 45px rgba(92, 64, 51, 0.18);
             width: 750px;
             max-width: 95%;
             max-height: 90vh;
             overflow-y: auto;
             text-align: left;
+            animation: arcaEntradaPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
+
         .btn-cerrar-modal {
             position: absolute;
-            top: 15px;
-            right: 20px;
-            background: none;
-            border: none;
-            font-size: 28px;
+            top: 18px;
+            right: 22px;
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid rgba(232, 168, 124, 0.4);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 20px;
             cursor: pointer;
-            color: #666;
-            font-family: 'Itim', cursive;
+            color: #775a4c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Itim', cursive, sans-serif;
+            transition: all 0.3s ease;
+        }
+        .btn-cerrar-modal:hover { 
+            background: #e57373; 
+            color: white; 
+            border-color: white;
+            transform: scale(1.1) rotate(90deg); 
         }
     </style>
 </head>
@@ -77,7 +211,7 @@
         <div class="top-right">
             <div class="user-header-info">
 
-            <!-- 1. PERFIL Y MINI MENÚ (Avatar con menú desplegable) -->
+            <!-- 1. PERFIL Y MINI MENÚ -->
             <div class="user-profile-menu" id="user-profile-menu">
                 <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
                     <img src="logo.png" id="user-avatar-img" alt="Perfil">
@@ -90,7 +224,7 @@
                     
                     <hr class="mini-menu-divider">
                     
-                    <a href="javascript:void(0)" onclick="mostrarSeccion('configuracion')" class="mini-menu-item btn-ajustes">
+                    <a href="configuracion.html" class="mini-menu-item btn-ajustes">
                         <i class="fa-solid fa-gear"></i>
                         <span>Ajustes</span>
                     </a>
@@ -137,37 +271,37 @@
         </div>
     </aside>
 
-   <main class="main-content">
-    <section class="feed-guardados">
-        
-        <!-- Encabezado de la tarjeta -->
-        <div class="header-guardados">
-            <h2>Tus publicaciones guardadas</h2>
-            <p class="subtitulo-guardados">Aquí encontrarás todo lo que has guardado para ver más tarde</p>
-        </div>
-
-        <!-- Contenedor dinámico (JS renderiza aquí las publicaciones o el estado vacío) -->
-        <div id="contenedorGuardados" class="zona-guardados-dinamica">
+    <main class="main-content">
+        <section class="feed-guardados">
             
-            <div class="estado-vacio-guardados">
-                <div class="ilustracion-guardados">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#e8a598" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>
-                    </svg>
-                </div>
-                <h3>¡Aún no tienes publicaciones guardadas!</h3>
-                <p>Explora las últimas novedades o el mapa y guarda las publicaciones que te interesen con el ícono de marcador.</p>
+            <!-- Encabezado de la tarjeta -->
+            <div class="header-guardados">
+                <h2>Tus publicaciones guardadas</h2>
+                <p class="subtitulo-guardados">Aquí encontrarás todo lo que has guardado para ver más tarde</p>
             </div>
 
-        </div>
+            <!-- Contenedor dinámico (JS renderiza aquí las publicaciones o el estado vacío) -->
+            <div id="contenedorGuardados" class="zona-guardados-dinamica">
+                
+                <div class="estado-vacio-guardados">
+                    <div class="ilustracion-guardados">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#d97736" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>
+                        </svg>
+                    </div>
+                    <h3>¡Aún no tienes publicaciones guardadas!</h3>
+                    <p>Explora las últimas novedades o el mapa y guarda las publicaciones que te interesen con el ícono de marcador.</p>
+                </div>
 
-    </section>
-</main>
+            </div>
 
-    <!-- MODAL DE DETALLES DEL REPORTE (Idéntico al de últimas novedades) -->
+        </section>
+    </main>
+
+    <!-- MODAL DE DETALLES DEL REPORTE -->
     <div id="modal-detalle-publicacion" class="modal-foto-overlay" onclick="cerrarModalDetalleOverlay(event)">
         <div class="modal-foto-contenido">
-            <button type="button" class="btn-cerrar-modal" onclick="cerrarModalDetalle()">&times;</button>
+            <button type="button" class="btn-cerrar-modal btn-arca-animado" onclick="cerrarModalDetalle()">&times;</button>
             
             <div id="contenido-detalle-dinamico">
                 <!-- Se inyecta dinámicamente desde script_guardados.js -->
@@ -194,35 +328,35 @@
             });
         }
     </script>
+    
     <!-- Motor oculto de Google Translate -->
-<div id="google_translate_element" style="display:none;"></div>
-<script type="text/javascript">
-    function googleTranslateElementInit() {
-        new google.translate.TranslateElement({ pageLanguage: 'es', autoDisplay: false }, 'google_translate_element');
-    }
-</script>
-<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-
-<!-- Script para aplicar el idioma guardado al cambiar de página -->
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const savedLang = localStorage.getItem('app_selected_lang');
-        if (savedLang && savedLang !== 'es') {
-            const interval = setInterval(() => {
-                const googleCombo = document.querySelector('.goog-te-combo');
-                if (googleCombo) {
-                    googleCombo.value = savedLang;
-                    googleCombo.dispatchEvent(new Event('change'));
-                    clearInterval(interval);
-                }
-            }, 200);
+    <div id="google_translate_element" style="display:none;"></div>
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({ pageLanguage: 'es', autoDisplay: false }, 'google_translate_element');
         }
-    });
-</script>
-<style>
-    .goog-te-banner-frame { display: none !important; }
-    body { top: 0 !important; }
-    .skiptranslate { display: none !important; }
-</style>
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('app_selected_lang');
+            if (savedLang && savedLang !== 'es') {
+                const interval = setInterval(() => {
+                    const googleCombo = document.querySelector('.goog-te-combo');
+                    if (googleCombo) {
+                        googleCombo.value = savedLang;
+                        googleCombo.dispatchEvent(new Event('change'));
+                        clearInterval(interval);
+                    }
+                }, 200);
+            }
+        });
+    </script>
+    <style>
+        .goog-te-banner-frame { display: none !important; }
+        body { top: 0 !important; }
+        .skiptranslate { display: none !important; }
+    </style>
 </body>
 </html>
