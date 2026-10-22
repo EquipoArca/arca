@@ -5,7 +5,7 @@ let usuarioActual = null;
 firebase.auth().onAuthStateChanged((user) => {
     usuarioActual = user;
     if (user) {
-        console.log("✅ Sesión de usuario detectada en Adopciones:", user.email);
+        console.log("Sesión de usuario detectada en Adopciones:", user.email);
     }
 });
 

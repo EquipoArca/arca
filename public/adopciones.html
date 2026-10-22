@@ -16,223 +16,6 @@
         document.body.classList.add("dark-mode");
     }
     </script>
-   <style>
-        /* FORZAR CONTENEDOR AMPLIO DESPEJADO DEL NAV */
-        .main-content.main-adopciones {
-            padding-top: 90px !important; /* Evita que el navbar superior lo tape */
-            overflow-y: auto !important;
-            height: calc(100vh - 70px) !important;
-        }
-
-        .seccion-catalogo-adopcion {
-            max-width: 1200px !important;
-            width: 95% !important;
-            margin: 0 auto !important;
-            padding: 20px 10px !important;
-            box-sizing: border-box !important;
-        }
-
-        .header-catalogo-adopcion {
-            display: flex !important;
-            justify-content: space-between !important;
-            align-items: center !important;
-            margin-bottom: 25px !important;
-            padding: 0 10px !important;
-            width: 100% !important;
-        }
-
-        .header-catalogo-adopcion h2 {
-            font-size: 26px !important;
-            color: #2b2b2b !important;
-            margin: 0 !important;
-            font-family: 'Itim', cursive, sans-serif !important;
-        }
-
-        .btn-volver-opciones {
-            background: rgba(255, 255, 255, 0.9) !important;
-            border: 2px solid #f9cab5 !important;
-            color: #d9534f !important;
-            padding: 8px 20px !important;
-            border-radius: 20px !important;
-            font-weight: bold !important;
-            font-size: 14.5px !important;
-            cursor: pointer !important;
-            transition: all 0.2s ease !important;
-            font-family: 'Itim', cursive, sans-serif !important;
-            box-shadow: 0 4px 12px rgba(230, 150, 130, 0.1) !important;
-        }
-
-        .btn-volver-opciones:hover {
-            background: #ffe5dd !important;
-            transform: translateY(-2px) !important;
-        }
-
-        /* REJILLA FORZADA A 3 COLUMNAS HORIZONTALES */
-        #contenedor-animales-adopcion.grid-3-columnas {
-            display: grid !important;
-            grid-template-columns: repeat(3, 1fr) !important; /* Exactamente 3 columnas */
-            gap: 20px !important;
-            width: 100% !important;
-            box-sizing: border-box !important;
-        }
-
-        /* En pantallas pequeñas de laptop/móvil pasa a 2 o 1 columna */
-        @media (max-width: 992px) {
-            #contenedor-animales-adopcion.grid-3-columnas {
-                grid-template-columns: repeat(2, 1fr) !important;
-            }
-        }
-        @media (max-width: 650px) {
-            #contenedor-animales-adopcion.grid-3-columnas {
-                grid-template-columns: 1fr !important;
-            }
-        }
-
-        /* TARJETA VERTICAL COMPACTA */
-        .tarjeta-prototipo-estilo {
-            background: rgba(253, 232, 229, 0.9) !important; 
-            backdrop-filter: blur(8px) !important;
-            border-radius: 24px !important;
-            padding: 16px 18px !important;
-            box-shadow: 0 6px 20px rgba(220, 150, 140, 0.12) !important;
-            border: 2px solid #f9d5d3 !important;
-            font-family: 'Itim', cursive, sans-serif !important;
-            box-sizing: border-box !important;
-            transition: transform 0.2s ease !important;
-            display: flex !important;
-            flex-direction: column !important;
-            justify-content: space-between !important;
-            width: 100% !important;
-            max-width: 100% !important;
-        }
-
-        .tarjeta-prototipo-estilo:hover {
-            transform: translateY(-3px) !important;
-        }
-
-        .proto-card-top {
-            display: flex !important;
-            justify-content: space-between !important;
-            align-items: center !important;
-            margin-bottom: 12px !important;
-        }
-
-        .proto-titulo-pill {
-            background: #fbc2c4 !important;
-            color: #2b2b2b !important;
-            padding: 5px 12px !important;
-            border-radius: 16px !important;
-            font-size: 13.5px !important;
-            font-weight: bold !important;
-            box-shadow: 0 2px 6px rgba(230, 150, 130, 0.1) !important;
-            white-space: nowrap !important;
-        }
-
-        .proto-fecha {
-            font-size: 13px !important;
-            font-weight: bold !important;
-            color: #666 !important;
-        }
-
-        .proto-card-body {
-            display: flex !important;
-            flex-direction: column !important;
-            gap: 10px !important;
-            flex-grow: 1 !important;
-        }
-
-        .proto-img-wrapper {
-            width: 100% !important;
-            height: 160px !important;
-            border-radius: 18px !important;
-            overflow: hidden !important;
-            background: #fff !important;
-            border: 2px solid #fca38d !important;
-            box-shadow: 0 4px 12px rgba(230, 150, 130, 0.12) !important;
-        }
-
-        .proto-img-wrapper img {
-            width: 100% !important;
-            height: 100% !important;
-            object-fit: cover !important;
-        }
-
-        .proto-content-right {
-            display: flex !important;
-            flex-direction: column !important;
-            gap: 8px !important;
-            flex-grow: 1 !important;
-            justify-content: space-between !important;
-        }
-
-        .proto-pill-tipo {
-            background: rgba(255, 255, 255, 0.95) !important;
-            color: #2b2b2b !important;
-            padding: 4px 12px !important;
-            border-radius: 14px !important;
-            font-size: 13px !important;
-            font-weight: bold !important;
-            border: 1px solid #f9cab5 !important;
-            align-self: flex-start !important;
-        }
-
-        .proto-info-extra {
-            display: flex !important;
-            flex-direction: column !important;
-            gap: 4px !important;
-        }
-
-        .proto-autor {
-            font-size: 13.5px !important;
-            color: #555 !important;
-        }
-
-        .proto-autor a {
-            color: #e06d53 !important;
-            text-decoration: none !important;
-            font-weight: bold !important;
-        }
-
-        .proto-ubicacion {
-            font-size: 13px !important;
-            color: #666 !important;
-            margin: 0 !important;
-            display: flex !important;
-            align-items: center !important;
-            gap: 5px !important;
-        }
-
-        .proto-ubicacion i {
-            color: #e06d53 !important;
-        }
-
-        .proto-footer-row {
-            display: flex !important;
-            justify-content: flex-end !important;
-            margin-top: 6px !important;
-        }
-
-        .proto-btn-detalles {
-            background-color: #fffde8 !important; 
-            color: #2b2b2b !important;
-            border: 1.5px solid #f0e6b8 !important;
-            padding: 8px 16px !important;
-            border-radius: 16px !important;
-            cursor: pointer !important;
-            font-weight: bold !important;
-            font-size: 14px !important;
-            width: 100% !important;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.04) !important;
-            transition: all 0.2s ease !important;
-            font-family: 'Itim', cursive, sans-serif !important;
-            text-align: center !important;
-        }
-
-        .proto-btn-detalles:hover {
-            background-color: #fff9c4 !important;
-            transform: translateY(-1px) !important;
-        }
-    </style>
 </head>
 <body>
 
@@ -328,10 +111,10 @@
 
             <div class="contenedor-botones-adopcion">
                 <!-- LLAMA A LA VERIFICACIÓN DE PERFIL ANTES DE MOSTRAR EL CATÁLOGO -->
-                <button class="btn-adopcion-opcion" onclick="alHacerClicVerAnimales()">
+                <button class="btn-adopcion-opcion btn-arca-animado" onclick="alHacerClicVerAnimales()">
                     Ver animales en adopción
                 </button>
-                <button class="btn-adopcion-opcion" onclick="alHacerClicPonerEnAdopcion()">
+                <button class="btn-adopcion-opcion btn-arca-animado" onclick="alHacerClicPonerEnAdopcion()">
                     Poner animal en adopción
                 </button>
             </div>
@@ -341,7 +124,7 @@
         <section id="seccion-catalogo-animales" class="seccion-catalogo-adopcion" style="display: none;">
             <div class="header-catalogo-adopcion">
                 <h2>Animales Cerca de Ti</h2>
-                <button onclick="volverAOpciones()" class="btn-volver-opciones">← Volver a opciones</button>
+                <button onclick="volverAOpciones()" class="btn-volver-opciones btn-arca-animado">← Volver a opciones</button>
             </div>
             
             <div id="contenedor-animales-adopcion" class="grid-3-columnas">
@@ -354,7 +137,7 @@
     <!-- MODAL DE AVISO: CREAR PERFIL DE ADOPTANTE -->
     <div id="modal-aviso-adoptante" class="modal-overlay-aviso" style="display: none;">
         <div class="modal-tarjeta-aviso">
-            <button class="btn-cerrar-modal" onclick="cerrarModalAviso()">&times;</button>
+            <button class="btn-cerrar-modal btn-arca-animado" onclick="cerrarModalAviso()">&times;</button>
             
             <div class="circulo-icono-modal">
                 <i class="fa-solid fa-paw"></i>
@@ -364,10 +147,10 @@
             <p class="texto-modal-aviso">Para ver a los animalitos y enviar tu solicitud, debes crear primero tu perfil de adoptante.</p>
 
             <div class="contenedor-botones-modal">
-                <button class="btn-modal-primario" onclick="irAFormularioAdoptante()">
+                <button class="btn-modal-primario btn-arca-animado" onclick="irAFormularioAdoptante()">
                     Crear perfil de adoptante
                 </button>
-                <button class="btn-modal-secundario" onclick="cerrarModalAviso()">
+                <button class="btn-modal-secundario btn-arca-animado" onclick="cerrarModalAviso()">
                     Cancelar
                 </button>
             </div>
@@ -401,7 +184,7 @@
             const contenedor = document.getElementById('contenedor-animales-adopcion');
             if (!contenedor) return;
 
-            contenedor.innerHTML = '<p style="text-align:center; grid-column: 1/-1;">Buscando animalitos cerca de ti...</p>';
+            contenedor.innerHTML = '<p style="text-align:center; grid-column: 1/-1; color: #775a4c;">Buscando animalitos cerca de ti...</p>';
 
             try {
                 const respuesta = await fetch('/api/publicaciones-globales');
@@ -409,12 +192,10 @@
                 
                 const publicaciones = await respuesta.json();
 
-                // Datos de sesión actual para filtrar publicaciones propias
                 const userActual = firebase.auth().currentUser;
                 const correoLogueado = userActual ? userActual.email : (localStorage.getItem('correo_usuario') || localStorage.getItem('correo'));
                 const nombreUsuarioLogueado = localStorage.getItem('nombre_usuario') || '';
 
-                // Filtramos las publicaciones excluyendo las del usuario logueado
                 let adopciones = publicaciones.filter(pub => {
                     const esAdopcion = pub.tipo_publicacion === 'adopcion';
                     
@@ -425,10 +206,8 @@
                     return esAdopcion && !esMio;
                 });
 
-                // Ubicación del perfil de adoptante guardada previa verificación
                 const ubicacionUsuario = (localStorage.getItem('ubicacion_adoptante') || '').toLowerCase().trim();
 
-                // ALGORITMO DE CERCANÍA POR TEXTO
                 adopciones.sort((a, b) => {
                     const ubA = (a.Ubicacion || a.ubicacion || '').toLowerCase();
                     const ubB = (b.Ubicacion || b.ubicacion || '').toLowerCase();
@@ -461,7 +240,7 @@
                             : ubicacionTextoBruta;
 
                         const tarjeta = document.createElement('article');
-                        tarjeta.className = 'tarjeta-prototipo-estilo';
+                        tarjeta.className = 'tarjeta-prototipo-estilo btn-arca-animado';
                         
                         tarjeta.innerHTML = `
                             <div class="proto-card-top">
@@ -481,7 +260,7 @@
                                         <p class="proto-ubicacion"><i class="fa-solid fa-location-dot"></i> ${ubicacionBonita}</p>
                                     </div>
                                     <div class="proto-footer-row">
-                                        <button class="proto-btn-detalles btn-ver-adopcion-ficha" data-id="${pub.id_origen}">Ver detalles</button>
+                                        <button class="proto-btn-detalles btn-ver-adopcion-ficha btn-arca-animado" data-id="${pub.id_origen}">Ver detalles</button>
                                     </div>
                                 </div>
                             </div>
@@ -490,14 +269,14 @@
                     }
                 } else {
                     contenedor.innerHTML = `
-                        <div class="estado-vacio" style="text-align: center; padding: 40px; grid-column: 1/-1;">
+                        <div class="estado-vacio" style="grid-column: 1/-1;">
                             <h2>¡No hay otras publicaciones de adopción disponibles por ahora!</h2>
                         </div>
                     `;
                 }
             } catch (error) {
                 console.error("Error al cargar adopciones:", error);
-                contenedor.innerHTML = '<p style="text-align:center; grid-column: 1/-1;">Error al cargar las mascotas.</p>';
+                contenedor.innerHTML = '<p style="text-align:center; grid-column: 1/-1; color: #775a4c;">Error al cargar las mascotas.</p>';
             }
         }
 

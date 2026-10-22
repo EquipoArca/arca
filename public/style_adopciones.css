@@ -3,254 +3,540 @@ body {
     margin: 0;
     padding: 0;
     overflow-y: auto;
+    font-family: 'Itim', cursive, sans-serif;
+    color: #020101;
+    background-color: #fce8e6;
 }
 
-/* RESETEO Y CONTENEDOR PRINCIPAL CON GLASSMORPHISM */
-.main-adopciones {
-    height: calc(100vh - 60px); /* Ajusta al alto visible restante para eliminar el scroll */
-    font-family: 'Itim', sans-serif;
+/* --- ANIMACIONES Y EFECTOS SUPER WOW ARCA --- */
+@keyframes arcaEntrada {
+    from { opacity: 0; transform: translateY(16px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes flotarSoft {
+    0% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-6px) rotate(2deg); }
+    100% { transform: translateY(0px) rotate(0deg); }
+}
+
+@keyframes arcaEntradaPop {
+    0% { opacity: 0; transform: scale(0.85) translateY(24px) rotate(-1.5deg); }
+    65% { opacity: 1; transform: scale(1.03) translateY(-4px) rotate(0.5deg); }
+    100% { opacity: 1; transform: scale(1) translateY(0) rotate(0deg); }
+}
+
+/* RESETEO Y CONTENEDOR PRINCIPAL AMPLIO DESPEJADO */
+.main-content.main-adopciones {
+    padding: 95px 30px 30px 30px !important;
+    overflow-y: auto !important;
+    height: calc(100vh - 70px) !important;
+    box-sizing: border-box !important;
+    animation: arcaEntrada 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
     background-image: url('fondo.png.png');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
-    background-color: #fff0f7;
+    background-color: #fce8e6;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px;
-    box-sizing: border-box;
 }
 
-/* TARJETA DE CRISTAL (GLASS CARD) */
+/* CONTENEDOR CENTRAL: GLASSMORPHISM PRONUNCIADO PERO SUAVE */
 .seccion-adopcion-opciones {
+    background: rgba(255, 255, 255, 0.68) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 2.5px solid rgba(255, 255, 255, 0.95) !important;
+    box-shadow: 0 24px 50px rgba(92, 64, 51, 0.12), inset 0 0 20px rgba(255, 255, 255, 0.6) !important;
+    border-radius: 42px !important;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     text-align: center;
     width: 100%;
-    max-width: 540px;
-    padding: 30px 25px; /* Relleno compacto para mantener tus colores sin desbordar */
+    max-width: 520px;
+    padding: 45px 35px;
     box-sizing: border-box;
-    
-    /* Efecto Cristal */
-    background: rgba(255, 255, 255, 0.45);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border: 1px solid rgba(255, 255, 255, 0.7);
-    border-radius: 30px;
-    box-shadow: 0 15px 35px rgba(229, 115, 115, 0.15), 
-                0 5px 15px rgba(0, 0, 0, 0.05);
+    animation: arcaEntradaPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* TÍTULO PRINCIPAL */
 .titulo-adopciones {
     font-family: 'Itim', cursive;
-    font-size: 3rem; /* Tamaño proporcional para evitar empujar la interfaz */
-    color: #4a3e3d;
-    margin-bottom: 15px;
+    font-size: 2.8rem;
+    color: #5c4033;
+    margin-bottom: 20px;
     margin-top: 0;
-    font-weight: normal;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    font-weight: 400;
 }
 
-/* CÍRCULO CON LOGO CRISTALIZADO */
+/* CÍRCULO CON LOGO: EFECTO MELOCOTÓN CON GLASSMORPHISM */
 .circulo-logo-adopcion {
-    width: 110px;
-    height: 110px;
-    background: linear-gradient(135deg, rgba(255, 211, 179, 0.9), rgba(241, 168, 165, 0.7));
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 2px solid rgba(255, 255, 255, 0.8);
+    width: 105px;
+    height: 105px;
+    background: linear-gradient(135deg, rgba(244, 164, 138, 0.82), rgba(235, 138, 108, 0.82));
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 3.5px solid rgba(255, 255, 255, 0.95);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 25px;
-    box-shadow: 0 10px 25px rgba(238, 155, 153, 0.4);
-    transition: transform 0.3s ease;
-}
-
-.circulo-logo-adopcion:hover {
-    transform: scale(1.05);
+    margin-bottom: 30px;
+    box-shadow: 0 14px 30px rgba(235, 138, 108, 0.4), inset 0 0 12px rgba(255, 255, 255, 0.5);
+    animation: flotarSoft 3.5s ease-in-out infinite;
 }
 
 .circulo-logo-adopcion img {
-    width: 65px;
+    width: 58px;
     height: auto;
     object-fit: contain;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    filter: drop-shadow(0 2px 4px rgba(92, 64, 51, 0.15));
 }
 
-/* CONTENEDOR Y BOTONES CON TUS ESTILOS DE CRISTAL */
+/* CONTENEDOR DE BOTONES */
 .contenedor-botones-adopcion {
     display: flex;
+    flex-direction: column;
     gap: 15px;
-    flex-wrap: wrap;
-    justify-content: center;
     width: 100%;
+    max-width: 380px;
 }
 
-.btn-adopcion-opcion {
-    background: linear-gradient(135deg, rgba(246, 192, 190, 0.85), rgba(238, 187, 186, 0.95));
-    color: #362d2c;
-    font-family: 'Itim', cursive;
+/* BOTÓN SUPERIOR: ROSA PALO CON GLASSMORPHISM PRONUNCIADO */
+.btn-adopcion-opcion:first-of-type {
+    background: rgba(242, 193, 196, 0.72) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border: 2px solid rgba(255, 255, 255, 0.95) !important;
+    color: #5c4033 !important;
+    font-family: 'Itim', cursive, sans-serif;
     font-size: 1.15rem;
     padding: 14px 24px;
-    border: 1.5px solid rgba(255, 255, 255, 0.9);
-    border-radius: 25px;
+    border-radius: 9999px !important;
     cursor: pointer;
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    box-shadow: 0 8px 20px rgba(229, 115, 115, 0.25);
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 10px 24px rgba(242, 193, 196, 0.45), inset 0 0 12px rgba(255, 255, 255, 0.6) !important;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 }
 
-.btn-adopcion-opcion:hover {
-    background: linear-gradient(135deg, #f1a8a5, #eebbba);
-    color: #1a1414;
-    transform: translateY(-3px);
-    box-shadow: 0 12px 25px rgba(229, 115, 115, 0.35);
-    border-color: #ffffff;
+.btn-adopcion-opcion:first-of-type:hover {
+    background: rgba(242, 193, 196, 0.9) !important;
+    transform: translateY(-3px) scale(1.02) !important;
+    box-shadow: 0 14px 30px rgba(242, 193, 196, 0.65), inset 0 0 16px rgba(255, 255, 255, 0.8) !important;
+    border-color: #ffffff !important;
 }
 
-.btn-adopcion-opcion:active {
-    transform: translateY(-1px);
-    box-shadow: 0 5px 12px rgba(229, 115, 115, 0.25);
+/* BOTÓN INFERIOR: VERDE OLIVA / AMARILLO SUAVE CON GLASSMORPHISM PRONUNCIADO */
+.btn-adopcion-opcion:last-of-type {
+    background: rgba(216, 212, 153, 0.72) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border: 2px solid rgba(255, 255, 255, 0.95) !important;
+    color: #5c4033 !important;
+    font-family: 'Itim', cursive, sans-serif;
+    font-size: 1.15rem;
+    padding: 14px 24px;
+    border-radius: 9999px !important;
+    cursor: pointer;
+    box-shadow: 0 10px 24px rgba(200, 195, 130, 0.4), inset 0 0 12px rgba(255, 255, 255, 0.6) !important;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 }
 
-/* OVERLAY Y TARJETA DEL MODAL DE AVISO */
+.btn-adopcion-opcion:last-of-type:hover {
+    background: rgba(216, 212, 153, 0.9) !important;
+    transform: translateY(-3px) scale(1.02) !important;
+    box-shadow: 0 14px 30px rgba(200, 195, 130, 0.6), inset 0 0 16px rgba(255, 255, 255, 0.8) !important;
+    border-color: #ffffff !important;
+}
+
+/* BOTONES CON ANIMACIÓN FLUIDA GENERALES */
+.btn-arca-animado {
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+.btn-arca-animado:hover {
+    transform: translateY(-3px) scale(1.03) !important;
+    box-shadow: 0 10px 22px rgba(92, 64, 51, 0.15) !important;
+}
+.btn-arca-animado:active {
+    transform: translateY(1px) scale(0.97) !important;
+}
+
+/* --- CATÁLOGO Y REJILLA --- */
+.seccion-catalogo-adopcion {
+    max-width: 1200px !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+    padding: 10px 0 !important;
+    box-sizing: border-box !important;
+}
+
+.header-catalogo-adopcion {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-bottom: 25px !important;
+    width: 100% !important;
+}
+
+.header-catalogo-adopcion h2 {
+    font-size: 28px !important;
+    color: #5c4033 !important;
+    margin: 0 !important;
+    font-weight: 400 !important;
+}
+
+.btn-volver-opciones {
+    background: rgba(255, 255, 255, 0.85) !important;
+    border: 2px solid rgba(232, 168, 124, 0.6) !important;
+    color: #d97736 !important;
+    padding: 8px 22px !important;
+    border-radius: 9999px !important;
+    font-weight: 400 !important;
+    font-size: 15px !important;
+    cursor: pointer !important;
+    font-family: 'Itim', cursive, sans-serif !important;
+    box-shadow: 0 4px 12px rgba(92, 64, 51, 0.08) !important;
+}
+
+.btn-volver-opciones:hover {
+    background: #faedcd !important;
+    transform: translateY(-2px) scale(1.02) !important;
+}
+
+/* REJILLA FORZADA A 3 COLUMNAS HORIZONTALES */
+#contenedor-animales-adopcion.grid-3-columnas {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 24px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+@media (max-width: 992px) {
+    #contenedor-animales-adopcion.grid-3-columnas {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+@media (max-width: 650px) {
+    #contenedor-animales-adopcion.grid-3-columnas {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* TARJETA CON TRANSPARENCIA GLASSMORPHISM */
+.tarjeta-prototipo-estilo {
+    background: rgba(255, 248, 235, 0.6) !important; 
+    backdrop-filter: blur(14px) !important;
+    -webkit-backdrop-filter: blur(14px) !important;
+    border-radius: 32px !important;
+    padding: 20px !important;
+    box-shadow: 0 12px 30px rgba(92, 64, 51, 0.08), inset 0 0 15px rgba(255, 255, 255, 0.5) !important;
+    border: 2px solid rgba(255, 255, 255, 0.9) !important;
+    font-family: 'Itim', cursive, sans-serif !important;
+    box-sizing: border-box !important;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    animation: arcaEntradaPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+.tarjeta-prototipo-estilo:hover {
+    background: rgba(255, 248, 235, 0.78) !important;
+    transform: translateY(-5px) scale(1.01) !important;
+    box-shadow: 0 18px 40px rgba(92, 64, 51, 0.14), inset 0 0 20px rgba(255, 255, 255, 0.7) !important;
+    border-color: #ffffff !important;
+}
+
+.proto-card-top {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-bottom: 12px !important;
+}
+
+.proto-titulo-pill {
+    background: rgba(250, 212, 222, 0.85) !important;
+    color: #5c4033 !important;
+    padding: 4px 12px !important;
+    border-radius: 9999px !important;
+    font-size: 13px !important;
+    font-weight: 400 !important;
+    border: 1px solid rgba(255, 255, 255, 0.9) !important;
+}
+
+.proto-fecha {
+    font-size: 13px !important;
+    color: #775a4c !important;
+}
+
+.proto-card-body {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    flex-grow: 1 !important;
+}
+
+.proto-img-wrapper {
+    width: 100% !important;
+    height: 170px !important;
+    border-radius: 24px !important;
+    overflow: hidden !important;
+    background: rgba(232, 168, 124, 0.15) !important;
+    border: 2px dashed rgba(232, 168, 124, 0.4) !important;
+}
+
+.proto-img-wrapper img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+}
+
+.proto-content-right {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    flex-grow: 1 !important;
+    justify-content: space-between !important;
+}
+
+.proto-pill-tipo {
+    background: rgba(255, 255, 255, 0.9) !important;
+    color: #5c4033 !important;
+    padding: 4px 12px !important;
+    border-radius: 9999px !important;
+    font-size: 13px !important;
+    font-weight: 400 !important;
+    border: 1px solid rgba(232, 168, 124, 0.4) !important;
+    align-self: flex-start !important;
+}
+
+.proto-info-extra {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 5px !important;
+}
+
+.proto-autor {
+    font-size: 13.5px !important;
+    color: #775a4c !important;
+}
+
+.proto-autor a {
+    color: #d97736 !important;
+    text-decoration: none !important;
+    font-weight: bold !important;
+}
+
+.proto-ubicacion {
+    font-size: 13.5px !important;
+    color: #775a4c !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+
+.proto-ubicacion i {
+    color: #e8a87c !important;
+}
+
+.proto-footer-row {
+    display: flex !important;
+    justify-content: flex-end !important;
+    margin-top: 8px !important;
+}
+
+.proto-btn-detalles {
+    background-color: #e8a87c !important; 
+    color: white !important;
+    border: 2px solid rgba(255, 255, 255, 0.9) !important;
+    padding: 9px 16px !important;
+    border-radius: 9999px !important;
+    cursor: pointer !important;
+    font-weight: 400 !important;
+    font-size: 14px !important;
+    width: 100% !important;
+    box-shadow: 0 4px 12px rgba(232, 168, 124, 0.3) !important;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    font-family: 'Itim', cursive, sans-serif !important;
+    text-align: center !important;
+}
+
+.proto-btn-detalles:hover {
+    background-color: #d97736 !important;
+    transform: translateY(-2px) scale(1.02) !important;
+}
+
+/* ESTADO VACÍO ORGÁNICO */
+.estado-vacio {
+    background: rgba(255, 248, 235, 0.65) !important;
+    backdrop-filter: blur(14px) !important;
+    border: 2px dashed rgba(232, 168, 124, 0.7) !important;
+    border-radius: 38px !important;
+    padding: 50px 30px !important;
+    text-align: center !important;
+    box-shadow: 0 16px 40px rgba(92, 64, 51, 0.08) !important;
+    animation: arcaEntradaPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+.estado-vacio h2 {
+    color: #5c4033 !important;
+    font-size: 22px !important;
+    font-weight: 400 !important;
+    margin: 0 !important;
+}
+
+/* --- OVERLAY Y TARJETA DEL MODAL DE AVISO --- */
 .modal-overlay-aviso {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.35);
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
+    background: rgba(92, 64, 51, 0.45);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 9999;
+    animation: arcaEntrada 0.25s ease;
 }
 
 .modal-tarjeta-aviso {
-    background: #e3dede;
+    background: rgba(255, 248, 235, 0.88);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+    border: 2.5px solid rgba(255, 255, 255, 0.95);
     width: 90%;
-    max-width: 350px;
-    padding: 30px 22px 25px 22px;
-    border-radius: 32px;
+    max-width: 380px;
+    padding: 35px 24px 28px 24px;
+    border-radius: 38px;
     position: relative;
     text-align: center;
     font-family: 'Itim', cursive, sans-serif;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 24px 50px rgba(92, 64, 51, 0.22), inset 0 0 18px rgba(255, 255, 255, 0.7);
     box-sizing: border-box;
-    animation: popupFade 0.25s ease-out;
-}
-
-@keyframes popupFade {
-    from { transform: scale(0.9); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
+    animation: arcaEntradaPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 /* BOTÓN DE CERRAR (X) */
 .btn-cerrar-modal {
     position: absolute;
-    top: 14px;
-    right: 18px;
-    background: transparent;
-    border: none;
-    font-size: 1.6rem;
-    color: #5d5555;
+    top: 18px;
+    right: 22px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid rgba(232, 168, 124, 0.4);
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    font-size: 20px;
     cursor: pointer;
-    line-height: 1;
-    transition: color 0.2s;
+    color: #775a4c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Itim', cursive, sans-serif;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 4px 12px rgba(92, 64, 51, 0.08);
 }
 
 .btn-cerrar-modal:hover {
-    color: #1a1414;
+    background: #e57373;
+    color: white;
+    border-color: white;
+    transform: scale(1.12) rotate(90deg);
+    box-shadow: 0 6px 16px rgba(229, 115, 115, 0.35);
 }
 
 /* CÍRCULO CON ÍCONO CENTRAL */
 .circulo-icono-modal {
-    width: 100px;
-    height: 100px;
+    width: 84px;
+    height: 84px;
     margin: 0 auto 18px auto;
-    background: linear-gradient(135deg, rgba(246, 192, 190, 0.9), rgba(238, 187, 186, 0.95));
+    background: linear-gradient(135deg, rgba(244, 164, 138, 0.82), rgba(235, 138, 108, 0.82));
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 3px solid rgba(255, 255, 255, 0.95);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 3px solid #ffffff;
-    box-shadow: 0 8px 20px rgba(229, 115, 115, 0.3);
+    box-shadow: 0 10px 25px rgba(235, 138, 108, 0.35), inset 0 0 10px rgba(255, 255, 255, 0.5);
+    animation: flotarSoft 3.5s ease-in-out infinite;
 }
 
 .circulo-icono-modal i {
-    font-size: 2.8rem;
-    color: #4a3e3d;
+    font-size: 2.4rem;
+    color: #5c4033;
 }
 
 /* TEXTOS INTERNOS */
 .titulo-modal-aviso {
-    font-size: 1.35rem;
-    color: #362d2c;
+    font-size: 1.4rem;
+    color: #5c4033;
     margin: 0 0 10px 0;
-    font-weight: normal;
+    font-weight: 400;
 }
 
 .texto-modal-aviso {
-    font-size: 0.98rem;
-    color: #5c5251;
-    margin: 0 0 22px 0;
-    line-height: 1.35;
+    font-size: 1rem;
+    color: #775a4c;
+    margin: 0 0 24px 0;
+    line-height: 1.5;
 }
 
 /* CONTENEDOR DE BOTONES */
 .contenedor-botones-modal {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
     width: 100%;
 }
 
 .btn-modal-primario {
-    background: #fcdad7;
-    color: #362d2c;
+    background: #e8a87c;
+    color: white;
     font-family: 'Itim', cursive, sans-serif;
-    font-size: 1.05rem;
+    font-size: 1.1rem;
     padding: 13px 20px;
-    border: none;
-    border-radius: 25px;
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    border-radius: 9999px;
     cursor: pointer;
-    transition: background 0.2s, transform 0.15s;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    box-shadow: 0 6px 16px rgba(232, 168, 124, 0.35);
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .btn-modal-primario:hover {
-    background: #f9c7c3;
-    transform: translateY(-1px);
+    background: #d97736;
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 10px 22px rgba(232, 168, 124, 0.45);
 }
 
 .btn-modal-secundario {
-    background: #ffffff;
-    color: #e57373;
+    background: rgba(255, 255, 255, 0.85);
+    color: #775a4c;
     font-family: 'Itim', cursive, sans-serif;
-    font-size: 1.05rem;
+    font-size: 1.1rem;
     padding: 13px 20px;
-    border: none;
-    border-radius: 25px;
+    border: 2px solid rgba(232, 168, 124, 0.4);
+    border-radius: 9999px;
     cursor: pointer;
-    transition: background 0.2s, transform 0.15s;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 12px rgba(92, 64, 51, 0.08);
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .btn-modal-secundario:hover {
-    background: #fdf5f5;
-    transform: translateY(-1px);
+    background: #faedcd;
+    color: #5c4033;
+    transform: translateY(-2px) scale(1.02);
 }
-/* FORMULARIO DE ADOPTANTE STYLES */
+
+/* --- FORMULARIO DE ADOPTANTE STYLES --- */
 .contenedor-formulario-adoptante {
     display: flex;
     justify-content: center;
@@ -262,31 +548,32 @@ body {
 }
 
 .tarjeta-formulario-glass {
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.8);
-    border-radius: 28px;
+    background: rgba(255, 248, 235, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 2px solid rgba(255, 255, 255, 0.95);
+    border-radius: 38px;
     width: 100%;
     max-width: 680px;
-    padding: 30px 25px;
-    box-shadow: 0 15px 35px rgba(229, 115, 115, 0.15);
+    padding: 35px 30px;
+    box-shadow: 0 16px 40px rgba(92, 64, 51, 0.08);
     font-family: 'Itim', cursive, sans-serif;
 }
 
 .btn-volver-top {
-    color: #4a3e3d;
+    color: #5c4033;
     text-decoration: none;
     font-size: 1rem;
     font-family: 'Itim', cursive;
-    background: rgba(255, 255, 255, 0.6);
-    padding: 6px 14px;
-    border-radius: 20px;
-    transition: background 0.2s;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 8px 18px;
+    border-radius: 9999px;
+    border: 1px solid rgba(232, 168, 124, 0.4);
+    transition: all 0.3s ease;
 }
 
 .btn-volver-top:hover {
-    background: #ffffff;
+    background: #faedcd;
 }
 
 .encabezado-form {
@@ -295,37 +582,39 @@ body {
 }
 
 .icono-encabezado {
-    font-size: 2.5rem;
-    color: #e57373;
+    font-size: 2.8rem;
+    color: #e8a87c;
     margin-bottom: 8px;
 }
 
 .encabezado-form h2 {
     margin: 0;
-    color: #362d2c;
-    font-size: 1.8rem;
+    color: #5c4033;
+    font-size: 2rem;
+    font-weight: 400;
 }
 
 .encabezado-form p {
-    color: #665b5a;
-    font-size: 0.95rem;
+    color: #775a4c;
+    font-size: 1rem;
     margin-top: 5px;
 }
 
 /* BLOQUES Y CAMPOS DEL FORMULARIO */
 .bloque-form {
-    background: rgba(255, 255, 255, 0.5);
-    border-radius: 20px;
-    padding: 20px;
+    background: rgba(255, 255, 255, 0.55);
+    border-radius: 28px;
+    padding: 22px;
     margin-bottom: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.6);
+    border: 2px solid rgba(255, 255, 255, 0.85);
 }
 
 .bloque-form h3 {
     margin-top: 0;
     margin-bottom: 15px;
-    color: #4a3e3d;
-    font-size: 1.2rem;
+    color: #5c4033;
+    font-size: 1.3rem;
+    font-weight: 400;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -350,8 +639,8 @@ body {
 }
 
 .grupo-campo label {
-    font-size: 0.95rem;
-    color: #362d2c;
+    font-size: 1rem;
+    color: #5c4033;
     margin-bottom: 6px;
 }
 
@@ -363,20 +652,20 @@ body {
 .grupo-campo textarea {
     font-family: 'Itim', cursive, sans-serif;
     font-size: 1rem;
-    padding: 10px 14px;
-    border-radius: 15px;
-    border: 1px solid #e0d0d0;
+    padding: 12px 16px;
+    border-radius: 20px;
+    border: 2px solid rgba(232, 168, 124, 0.4);
     outline: none;
-    background: #ffffff;
-    color: #362d2c;
+    background: rgba(255, 255, 255, 0.9);
+    color: #5c4033;
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .grupo-campo input:focus,
 .grupo-campo select:focus,
 .grupo-campo textarea:focus {
-    border-color: #f6c0be;
-    box-shadow: 0 0 8px rgba(246, 192, 190, 0.6);
+    border-color: #e8a87c;
+    box-shadow: 0 0 10px rgba(232, 168, 124, 0.4);
 }
 
 .opciones-inline {
@@ -389,42 +678,46 @@ body {
 .opciones-inline label {
     cursor: pointer;
     font-weight: normal;
+    color: #5c4033;
 }
 
 .btn-guardar-form {
     width: 100%;
-    background: linear-gradient(135deg, #f6c0be, #eebbba);
-    color: #362d2c;
+    background: #e8a87c;
+    color: white;
     font-family: 'Itim', cursive, sans-serif;
     font-size: 1.2rem;
     padding: 14px;
-    border: none;
-    border-radius: 25px;
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    border-radius: 9999px;
     cursor: pointer;
-    box-shadow: 0 8px 20px rgba(229, 115, 115, 0.25);
-    transition: transform 0.2s, background 0.2s;
+    box-shadow: 0 8px 20px rgba(232, 168, 124, 0.35);
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
     margin-top: 10px;
 }
 
 .btn-guardar-form:hover {
-    transform: translateY(-2px);
-    background: linear-gradient(135deg, #f1a8a5, #eebbba);
+    background: #d97736;
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 12px 28px rgba(232, 168, 124, 0.45);
 }
 
 /* ESTILOS PARA LA HOJA DE LECTURA REDACTADA (FICHA DEL ADOPTANTE) */
 .ficha-adoptante-tarjeta {
-    background: #ffffff;
-    border-radius: 24px;
-    padding: 25px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    background: rgba(255, 248, 235, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 38px;
+    padding: 30px;
+    box-shadow: 0 16px 40px rgba(92, 64, 51, 0.08);
     font-family: 'Itim', cursive, sans-serif;
     max-width: 650px;
     margin: 0 auto;
-    border: 1px solid #f0e6e6;
+    border: 2px solid rgba(255, 255, 255, 0.95);
 }
 
 .ficha-header {
-    border-bottom: 2px solid #fcdad7;
+    border-bottom: 2px solid rgba(232, 168, 124, 0.4);
     padding-bottom: 15px;
     margin-bottom: 20px;
     text-align: center;
@@ -435,20 +728,21 @@ body {
 }
 
 .ficha-seccion h4 {
-    color: #e57373;
+    color: #d97736;
     margin-bottom: 10px;
-    font-size: 1.15rem;
-    border-bottom: 1px dashed #fcdad7;
+    font-size: 1.2rem;
+    font-weight: 400;
+    border-bottom: 1px dashed rgba(232, 168, 124, 0.5);
     padding-bottom: 4px;
 }
 
 .ficha-item {
     margin-bottom: 8px;
     font-size: 1rem;
-    color: #4a3e3d;
+    color: #775a4c;
     line-height: 1.4;
 }
 
 .ficha-item strong {
-    color: #261f1e;
+    color: #5c4033;
 }
