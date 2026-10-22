@@ -30,11 +30,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const imgPreview = document.createElement('img');
             imgPreview.src = url;
-            imgPreview.style.width = '70px';
-            imgPreview.style.height = '70px';
+            imgPreview.style.width = '75px';
+            imgPreview.style.height = '75px';
             imgPreview.style.objectFit = 'cover';
-            imgPreview.style.borderRadius = '8px';
-            imgPreview.style.border = '2px solid #ccc';
+            imgPreview.style.borderRadius = '16px'; // Más orgánico
+            imgPreview.style.border = '2px solid rgba(255, 255, 255, 0.9)';
+            imgPreview.style.boxShadow = '0 4px 10px rgba(92, 64, 51, 0.1)';
 
             // Botón de eliminar (X)
             const btnEliminar = document.createElement('button');
