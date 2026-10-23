@@ -10,7 +10,6 @@
     align-items: flex-start;
     flex-grow: 1;
     min-height: calc(100vh - 60px);
-   
 }
 
 .donation-main-container {
@@ -238,6 +237,7 @@
         margin-left: 0;
         padding: 20px 15px 40px 15px;
     }
+
     .donation-grid {
         grid-template-columns: 1fr;
     }
@@ -246,6 +246,7 @@
         align-self: center;
     }
 }
+
 /* --- Overlay / Superposición de Confirmación --- */
 .donation-modal-overlay {
     position: fixed;

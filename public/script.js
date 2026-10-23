@@ -1286,3 +1286,32 @@ function atrasPaso4() {
 
         boton.focus();
     } 
+
+    // ==========================================
+// 9. CONTROLADOR DEL MODO OSCURO GLOBAL
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Aplicar el modo oscuro guardado al cargar cualquier página
+    const modoOscuroGuardado = localStorage.getItem('theme') === 'dark' || localStorage.getItem('darkMode') === 'true';
+    if (modoOscuroGuardado) {
+        document.body.classList.add('dark-mode');
+    }
+
+    // 2. Detectar automáticamente si usas un switch o botón de modo oscuro en configuración
+    const switchDarkMode = document.querySelector('#switch-dark-mode, .toggle-dark-mode, input[type="checkbox"][name="darkMode"]');
+    if (switchDarkMode) {
+        switchDarkMode.checked = modoOscuroGuardado;
+        
+        switchDarkMode.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                document.body.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark');
+                localStorage.setItem('darkMode', 'true');
+            } else {
+                document.body.classList.remove('dark-mode');
+                localStorage.setItem('theme', 'light');
+                localStorage.setItem('darkMode', 'false');
+            }
+        });
+    }
+});

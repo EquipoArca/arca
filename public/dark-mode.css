@@ -1193,32 +1193,48 @@ body.dark-mode .btn-enviar-adopcion-final:hover {
 
 
 /* ==========================================
-   MODO OSCURO - DONACIONES ARCA
+   ARCA - DONACIONES EN MODO OSCURO
    ========================================== */
+
+/* Fondo de la sección */
+body.dark-mode .donation-main-container {
+    background-color: transparent !important;
+}
 
 /* Títulos de las secciones */
 body.dark-mode .section-pill-title {
     background-color: #925347 !important;
     color: #f7e7de !important;
-    border: 1px solid #a66b60 !important;
+    box-shadow: 0 4px 15px rgba(146, 83, 71, 0.3) !important;
+    border: none !important;
 }
 
-/* Opciones de donación */
-body.dark-mode .donation-input-pill {
+/* Casillas de selección */
+body.dark-mode .donation-custom-checkbox {
+    border-color: #6e5e5b !important;
     background-color: #352b28 !important;
-    border: 1px solid #6e5149 !important;
-    color: #f4ebd0 !important;
+}
+
+/* Casillas seleccionadas */
+body.dark-mode .donation-option-row input[type="checkbox"]:checked
++ .donation-custom-checkbox {
+    background-color: #925347 !important;
+    border-color: #925347 !important;
 }
 
 /* Campos de texto y descripción */
+body.dark-mode .donation-input-pill,
 body.dark-mode .donation-textarea,
 body.dark-mode .donation-contact-wrapper input {
     background-color: #352b28 !important;
-    border: 1px solid #6e5149 !important;
+    border: 1px solid #4a3b32 !important;
     color: #f4ebd0 !important;
+    box-shadow:
+        inset 0 2px 4px rgba(0, 0, 0, 0.2),
+        0 4px 10px rgba(0, 0, 0, 0.2) !important;
 }
 
-/* Texto de los campos vacíos */
+/* Texto de ayuda dentro de los campos */
 body.dark-mode .donation-input-pill::placeholder,
 body.dark-mode .donation-textarea::placeholder,
 body.dark-mode .donation-contact-wrapper input::placeholder {
@@ -1226,57 +1242,40 @@ body.dark-mode .donation-contact-wrapper input::placeholder {
     opacity: 1;
 }
 
-/* Textos descriptivos */
+/* Textos y etiquetas */
 body.dark-mode .donation-label-text,
 body.dark-mode .donation-plain-text {
-    color: #f4ebd0 !important;
+    color: #e3d2c9 !important;
+}
+
+/* Botón para seleccionar fundación */
+body.dark-mode .btn-select-map {
+    background-color: #80574d !important;
+    color: #f7e7de !important;
 }
 
 /* Separador "o" */
 body.dark-mode .or-separator {
-    color: #d1b5a5 !important;
+    color: #b59b8e !important;
 }
 
-/* Casillas de selección */
-body.dark-mode .donation-custom-checkbox {
-    background-color: #352b28 !important;
-    border-color: #8c5d5b !important;
+/* Iconos de contacto */
+body.dark-mode .donation-contact-wrapper i {
+    color: #925347 !important;
 }
 
-body.dark-mode .donation-option-row input:checked
-+ .donation-custom-checkbox {
-    background-color: #925347 !important;
-    border-color: #925347 !important;
-}
-
-/* Botón del mapa */
-body.dark-mode .btn-select-map {
-    background-color: #80574d !important;
-    color: #fff0e8 !important;
-}
-
-/* Botón de enviar */
+/* Botón para enviar donación */
 body.dark-mode .btn-submit-donation {
     background-color: #925347 !important;
     color: #ffffff !important;
-    border-color: #a66b60 !important;
+    border: none !important;
+    box-shadow: 0 6px 15px rgba(146, 83, 71, 0.3) !important;
 }
 
-body.dark-mode .btn-submit-donation:hover {
-    background-color: #a45e51 !important;
-}
-
-/* Ventana de confirmación */
-body.dark-mode .donation-modal-overlay {
-    background-color: rgba(0, 0, 0, 0.75) !important;
-}
-
-body.dark-mode .donation-modal-card {
-    background-color: #2b2321 !important;
-    border: 1px solid #4a3b32 !important;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5) !important;
-}
-
-body.dark-mode .donation-modal-message {
-    color: #f4ebd0 !important;
-}
+/* Evitar que los campos pierdan contraste al seleccionarlos */
+body.dark-mode .donation-input-pill:focus,
+body.dark-mode .donation-textarea:focus,
+body.dark-mode .donation-contact-wrapper input:focus {
+    outline: none;
+    border-color: #925347 !important;
+}   

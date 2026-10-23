@@ -1,22 +1,45 @@
-<!DOCTYPE html>
-<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Donación - ARCA</title>
-    <!-- Vinculación de los estilos generales y el archivo específico de donación -->
+
     <link rel="stylesheet" href="style_home.css">
     <link rel="stylesheet" href="style_donacion.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="dark-mode.css">
-</head>
-<body>
-    <body class="dark-mode">
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap"
+          rel="stylesheet">
 
-    <!-- Barra Superior Reutilizada -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <link rel="stylesheet" href="dark-mode.css">
+
+    <script>
+        (function () {
+            const temaGuardado = localStorage.getItem('darkMode');
+
+            const esOscuro = temaGuardado !== null
+                ? temaGuardado === 'true'
+                : localStorage.getItem('modo_oscuro') === 'true';
+
+            document.documentElement.classList.toggle(
+                'dark-mode',
+                esOscuro
+            );
+
+            document.addEventListener('DOMContentLoaded', function () {
+                document.body.classList.toggle(
+                    'dark-mode',
+                    esOscuro
+                );
+            });
+        })();
+    </script>
+</head>
+
+<body>
+    <!-- Barra Superior -->
     <nav class="top-nav">
         <div class="top-left">
             <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu" onclick="toggleSidebar()"></i>
@@ -43,7 +66,7 @@
                             <span id="mini-menu-username">Usuario</span>
                         </div>
                         <hr class="mini-menu-divider">
-                        <a href="javascript:void(0)" onclick="mostrarSeccion('configuracion')" class="mini-menu-item btn-ajustes">
+                        <a href="home.html?seccion=configuracion" class="mini-menu-item btn-ajustes">
                             <i class="fa-solid fa-gear"></i>
                             <span>Ajustes</span>
                         </a>
@@ -60,35 +83,31 @@
         </div>
     </nav>
     
-<aside class="sidebar" id="sidebar">
-    <div class="side-icons">
-        <a href="home.html?seccion=inicio" id="link-inicio" class="menu-fila">
-            <i class="fa-solid fa-house active"></i>
-            <span class="menu-text">Inicio</span>
-        </a>
-       
-        <!-- Redirigen a home.html o llaman a tu función de bloqueo según tu lógica de invitado -->
-        <a href="home.html?seccion=perfil" id="link-perfil" class="menu-fila">
-            <i class="fa-solid fa-circle-user"></i>
-            <span class="menu-text">Perfil</span>
-        </a>
-       
-        <a href="home.html?seccion=guardado" id="link-guardado" class="menu-fila">
-            <i class="fa-solid fa-bookmark"></i>
-            <span class="menu-text">Guardado</span>
-        </a>
-       
-        <a href="home.html?seccion=mapa" id="link-mapa" class="menu-fila">
-            <i class="fa-solid fa-location-dot"></i>
-            <span class="menu-text">Mapa</span>
-        </a>
-       
-        <a href="home.html?seccion=configuracion" id="link-config" class="menu-fila">
-            <i class="fa-solid fa-gear"></i>
-            <span class="menu-text">Ajustes</span>
-        </a>
-    </div>
-</aside>
+    <!-- Barra Lateral -->
+    <aside class="sidebar" id="sidebar">
+        <div class="side-icons">
+            <a href="home.html?seccion=inicio" id="link-inicio" class="menu-fila">
+                <i class="fa-solid fa-house active"></i>
+                <span class="menu-text">Inicio</span>
+            </a>
+            <a href="home.html?seccion=perfil" id="link-perfil" class="menu-fila">
+                <i class="fa-solid fa-circle-user"></i>
+                <span class="menu-text">Perfil</span>
+            </a>
+            <a href="home.html?seccion=guardado" id="link-guardado" class="menu-fila">
+                <i class="fa-solid fa-bookmark"></i>
+                <span class="menu-text">Guardado</span>
+            </a>
+            <a href="home.html?seccion=mapa" id="link-mapa" class="menu-fila">
+                <i class="fa-solid fa-location-dot"></i>
+                <span class="menu-text">Mapa</span>
+            </a>
+            <a href="home.html?seccion=configuracion" id="link-config" class="menu-fila">
+                <i class="fa-solid fa-gear"></i>
+                <span class="menu-text">Ajustes</span>
+            </a>
+        </div>
+    </aside>
 
     <!-- Contenido Principal de Donación -->
     <main class="main-content" style="opacity: 1; visibility: visible;">
@@ -128,9 +147,7 @@
                     </div>
 
                     <div style="margin-top: 10px;">
-                        <span class="donation-label-text">
-                            Cantidad o descripción del donativo
-                        </span>
+                        <span class="donation-label-text">Cantidad o descripción del donativo</span>
                         <textarea class="donation-textarea" placeholder="Descripción..."></textarea>
                     </div>
                 </div>
@@ -184,19 +201,18 @@
         </div>
     </main>
 
+    <!-- Script Global de la Aplicación -->
+    <script src="script.js"></script>
+
     <script>
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
-            if (sidebar) {
-                sidebar.classList.toggle('sidebar-abierta');
-            }
+            if (sidebar) sidebar.classList.toggle('sidebar-abierta');
         }
 
         function toggleMiniMenu() {
             const menu = document.getElementById('mini-menu-card');
-            if (menu) {
-                menu.classList.toggle('show');
-            }
+            if (menu) menu.classList.toggle('show');
         }
     </script>
 </body>
