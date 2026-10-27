@@ -1150,7 +1150,6 @@ document.addEventListener('input', (e) => {
         }
     }
 });
-
 async function verificarOtpYIrAlRegistro() {
     const inputs = document.querySelectorAll('.otp-input-modal');
     let codigoIngresado = "";
@@ -1160,10 +1159,14 @@ async function verificarOtpYIrAlRegistro() {
         try {
             await auth.createUserWithEmailAndPassword(correoValidado, passwordFundacionTemporal);
             
+            // 👇 ¡ESTO ES LO QUE FALTA! Guarda las credenciales para el Paso 2
+            sessionStorage.setItem('pass_fundacion_temp', passwordFundacionTemporal);
+            sessionStorage.setItem('correo_fundacion_temp', correoValidado);
+            
             localStorage.removeItem('flujo_fundacion');
             alert("¡Correo verificado con éxito! Ahora completemos los datos legales de tu fundación.");
             
-            window.location.href = `registro_fundacion.html?email=${encodeURIComponent(correoValidado)}`;
+            window.location.href = `registro_fundacion_paso2_2.html?email=${encodeURIComponent(correoValidado)}`;
         } catch (error) {
             alert("Error al crear credenciales en Firebase: " + error.message);
         }
