@@ -10,7 +10,6 @@ firebase.auth().onAuthStateChanged((user) => {
 });
 
 // Manejador para el botón "Ver animales en adopción"
-// Manejador para el botón "Ver animales en adopción"
 async function alHacerClicVerAnimales() {
     const user = usuarioActual || firebase.auth().currentUser;
 
@@ -98,10 +97,17 @@ function mostrarSeccionAdopcion(idSeccion) {
 
     const seccionObjetivo = document.getElementById(idSeccion);
     if (seccionObjetivo) {
-        seccionObjetivo.style.display = 'block';
+        // CAMBIO AQUÍ: Usar 'flex' o 'block' según corresponda, 
+        // y asegurarnos de que el contenedor principal adapte su flujo.
+        seccionObjetivo.style.display = 'block'; 
+    }
+
+    // Opcional pero recomendado: Quitar el centrado forzado del main para que el catálogo respire de arriba a abajo
+    const mainContainer = document.querySelector('.main-content.main-adopciones');
+    if (mainContainer) {
+        mainContainer.style.display = 'block'; 
     }
 }
-
 function volverAOpciones() {
     const catalogoAnimales = document.getElementById('seccion-catalogo-animales');
     const pantallaOpciones = document.getElementById('pantalla-opciones-adopcion');
