@@ -1011,6 +1011,142 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+// Variable para evitar llamadas duplicadas
+let peticionNovedadesEnCurso = false;
+
+async function cargarNovedadesSeguras() {
+    const contenedor = document.getElementById('contenedor-novedades');
+    if (!contenedor || peticionNovedadesEnCurso) return;
+    
+    peticionNovedadesEnCurso = true;
+
+    // Detectar automáticamente el filtro según la URL actual de la página
+    let tipoFiltro = 'todos';
+    const path = window.location.pathname;
+    if (path.includes('reportes')) tipoFiltro = 'reporte';
+    if (path.includes('adopciones')) tipoFiltro = 'adopcion';
+
+    try {
+        const user = typeof firebase !== 'undefined' && firebase.auth().currentUser ? firebase.auth().currentUser : null;
+        const correoUsuario = (user && user.email) ? user.email : (localStorage.getItem('correo_usuario') || '');
+
+        const respuesta = await fetch(`/api/publicaciones-globales?correo=${encodeURIComponent(correoUsuario)}`);
+        if (!respuesta.ok) throw new Error("Error al obtener las publicaciones globales");
+        
+        let publicaciones = await respuesta.json();
+
+        // Aplicar el filtro correspondiente
+        if (tipoFiltro === 'reporte') {
+            publicaciones = publicaciones.filter(pub => pub.tipo_publicacion === 'reporte');
+        } else if (tipoFiltro === 'adopcion') {
+            publicaciones = publicaciones.filter(pub => pub.tipo_publicacion === 'adopcion');
+        }
+
+        contenedor.innerHTML = ''; // Limpiar estado de carga
+
+        if (publicaciones.length > 0) {
+            for (const pub of publicaciones) {
+                let imagenSrc = 'logo.png';
+                if (pub.img_reporte) {
+                    try {
+                        const parsed = JSON.parse(pub.img_reporte);
+                        if (Array.isArray(parsed) && parsed.length > 0) {
+                            imagenSrc = parsed[0];
+                        } else {
+                            imagenSrc = pub.img_reporte;
+                        }
+                    } catch (e) {
+                        imagenSrc = pub.img_reporte;
+                    }
+                }
+
+                const fechaFormateada = pub.Fecha_reporte ? pub.Fecha_reporte.split('T')[0] : '';
+                let ubicacionTextoBruta = pub.Ubicacion || pub.ubicacion || 'Medellín';
+                let ubicacionBonita = typeof obtenerNombreUbicacionGlobal === 'function' 
+                    ? await obtenerNombreUbicacionGlobal(ubicacionTextoBruta) 
+                    : ubicacionTextoBruta;
+
+                const esAdopcion = pub.tipo_publicacion === 'adopcion';
+                const tipoTitulo = esAdopcion ? 'Publicación de Adopción' : 'Nuevo Reporte';
+                const tipoSubPill = pub.nombre_tipo_reporte || (esAdopcion ? 'Adopción' : 'Animal en situación de calle');
+                const idDestino = esAdopcion ? pub.id_origen : (pub.id_origen || pub.id_reporte);
+
+                const tarjeta = document.createElement('article');
+                tarjeta.className = 'tarjeta-prototipo-estilo';
+                
+                tarjeta.innerHTML = `
+                    <div class="proto-card-top">
+                        <div class="proto-titulo-pill">${tipoTitulo}</div>
+                        <span class="proto-fecha">${fechaFormateada}</span>
+                    </div>
+
+                    <div class="proto-card-body">
+                        <div class="proto-img-wrapper">
+                            <img src="${imagenSrc}" alt="Publicación" style="width:100%; height:100%; object-fit:cover;">
+                        </div>
+
+                        <div class="proto-content-right">
+                            <div class="proto-pill-tipo">${tipoSubPill}</div>
+                            <div class="proto-info-extra">
+                                <span class="proto-autor">Publicado por: <a href="perfil_publico.html?user=${pub.nombre_usuario}">@${pub.nombre_usuario || 'Usuario'}</a></span>
+                                <p class="proto-ubicacion"><i class="fa-solid fa-location-dot"></i> ${ubicacionBonita}</p>
+                            </div>
+                            <div class="proto-footer-row">
+                                <button class="proto-btn-detalles btn-accion-ir" data-tipo="${pub.tipo_publicacion}" data-id="${idDestino}">Ver detalles</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                contenedor.appendChild(tarjeta);
+            }
+        } else {
+            contenedor.innerHTML = `
+                <div class="estado-vacio" style="text-align: center; padding: 40px; font-family: 'Itim', cursive; width: 100%;">
+                    <i class="fa-solid fa-paw icono-vacio" style="font-size: 40px; color: #ff758c; margin-bottom: 10px;"></i>
+                    <h2>¡Aún no hay publicaciones!</h2>
+                    <p>&lt;3</p>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error("Error al cargar novedades:", error);
+        contenedor.innerHTML = `
+            <div class="estado-vacio" style="text-align: center; padding: 40px; font-family: 'Itim', cursive; width: 100%;">
+                <h2>No se pudieron cargar las publicaciones.</h2>
+            </div>
+        `;
+    } finally {
+        peticionNovedadesEnCurso = false;
+    }
+}
+
+// Delegación de eventos global para los botones de "Ver detalles"
+document.addEventListener('click', (event) => {
+    const botonDetalle = event.target.closest('.btn-accion-ir, .btn-ver-adopcion-ficha');
+    if (botonDetalle) {
+        const idItem = botonDetalle.getAttribute('data-id');
+        const tipoItem = botonDetalle.getAttribute('data-tipo');
+        
+        if (idItem) {
+            if (tipoItem === 'adopcion' || window.location.pathname.includes('adopciones')) {
+                window.location.href = `detalle_adopcion.html?id=${idItem}`;
+            } else {
+                window.location.href = `detalle_reporte.html?id=${idItem}`;
+            }
+        }
+    }
+});
+
+// Inicializar la carga cuando Firebase esté listo o por respaldo
+if (typeof firebase !== 'undefined' && firebase.auth) {
+    firebase.auth().onAuthStateChanged(() => {
+        cargarNovedadesSeguras();
+    });
+} else {
+    document.addEventListener('DOMContentLoaded', () => {
+        cargarNovedadesSeguras();
+    });
+}
 
 // ==========================================
 // 8. DETECTOR UNIVERSAL DE HASH PARA SCROLL

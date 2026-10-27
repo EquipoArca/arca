@@ -176,111 +176,20 @@
    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script> 
    <script src="script.js"></script>
+   <script>
+      // Control del Sidebar
+      document.addEventListener('DOMContentLoaded', () => {
+          const btnToggleMenu = document.getElementById('btn-toggle-menu');
+          const sidebar = document.getElementById('sidebar');
 
-<script>
-    // Función para cargar las publicaciones (recibe el correo opcionalmente)
-    async function cargarNovedades(correoUsuario = '') {
-        const contenedor = document.getElementById('contenedor-novedades');
-        if (!contenedor) return;
-
-        try {
-            const respuesta = await fetch(`/api/publicaciones-globales?correo=${encodeURIComponent(correoUsuario)}`);
-            if (!respuesta.ok) throw new Error("Error al obtener las publicaciones globales");
-            
-            const publicaciones = await respuesta.json();
-
-            if (publicaciones.length > 0) {
-                contenedor.innerHTML = ''; 
-
-                for (const pub of publicaciones) {
-                    let imagenSrc = 'logo.png';
-                    if (pub.img_reporte) {
-                        try {
-                            const parsed = JSON.parse(pub.img_reporte);
-                            if (Array.isArray(parsed) && parsed.length > 0) {
-                                imagenSrc = parsed[0];
-                            } else {
-                                imagenSrc = pub.img_reporte;
-                            }
-                        } catch (e) {
-                            imagenSrc = pub.img_reporte;
-                        }
-                    }
-
-                    const fechaFormateada = pub.Fecha_reporte ? pub.Fecha_reporte.split('T')[0] : '';
-                    let ubicacionTextoBruta = pub.Ubicacion || pub.ubicacion || '';
-                    let ubicacionBonita = await obtenerNombreUbicacionGlobal(ubicacionTextoBruta);
-
-                    const tarjeta = document.createElement('article');
-                    tarjeta.className = 'tarjeta-prototipo-estilo';
-                    
-                    const esAdopcion = pub.tipo_publicacion === 'adopcion';
-                    const tipoTitulo = esAdopcion ? 'Publicación de Adopción' : 'Nuevo Reporte';
-                    const tipoSubPill = pub.nombre_tipo_reporte || (esAdopcion ? 'Adopción' : 'Animal en situación de calle');
-                    
-                    const idDestino = esAdopcion ? pub.id_origen : (pub.id_origen || pub.id_reporte);
-
-                    tarjeta.innerHTML = `
-                        <div class="proto-card-top">
-                            <div class="proto-titulo-pill">${tipoTitulo}</div>
-                            <span class="proto-fecha">${fechaFormateada}</span>
-                        </div>
-
-                        <div class="proto-card-body">
-                            <div class="proto-img-wrapper">
-                                <img src="${imagenSrc}" alt="Publicación" style="width:100%; height:100%; object-fit:cover;">
-                            </div>
-
-                            <div class="proto-content-right">
-                                <div class="proto-pill-tipo">${tipoSubPill}</div>
-                                <div class="proto-info-extra">
-                                    <span class="proto-autor">Publicado por:<a href="perfil_publico.html?user=${pub.nombre_usuario}">@${pub.nombre_usuario}</a></span>
-                                    <p class="proto-ubicacion"><i class="fa-solid fa-location-dot"></i> ${ubicacionBonita}</p>
-                                </div>
-                                <div class="proto-footer-row">
-                                    <button class="proto-btn-detalles btn-accion-ir" data-tipo="${pub.tipo_publicacion}" data-id="${idDestino}">Ver detalles</button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    contenedor.appendChild(tarjeta);
-                }
-            } else {
-                contenedor.innerHTML = `
-                    <div class="estado-vacio">
-                        <i class="fa-solid fa-paw icono-vacio"></i>
-                        <h2>¡Aún no hay publicaciones!</h2>
-                        <p> &lt;3 </p>
-                    </div>
-                `;
-            }
-        } catch (error) {
-            console.error("No se pudieron cargar las novedades:", error);
-        }
-    }
-
-    // Único disparador: El observador de Firebase gestiona la carga de forma limpia al saber el estado de autenticación
-    firebase.auth().onAuthStateChanged((user) => {
-        const correo = (user && user.email) ? user.email : '';
-        cargarNovedades(correo);
-    });
-
-    document.addEventListener('click', (event) => {
-        const botonDetalle = event.target.closest('.btn-accion-ir');
-        if (botonDetalle) {
-            const idItem = botonDetalle.getAttribute('data-id');
-            const tipoItem = botonDetalle.getAttribute('data-tipo');
-            
-            if (idItem) {
-                if (tipoItem === 'adopcion') {
-                    window.location.href = `detalle_adopcion.html?id=${idItem}`;
-                } else {
-                    window.location.href = `detalle_reporte.html?id=${idItem}`;
-                }
-            }
-        }
-    });
-</script>
+          if (btnToggleMenu && sidebar) {
+              btnToggleMenu.addEventListener('click', (e) => {
+                  e.stopPropagation();
+                  sidebar.classList.toggle('sidebar-abierta'); 
+              });
+          }
+      });
+  </script>   
 <style>
     
 .tarjeta-prototipo-estilo {
