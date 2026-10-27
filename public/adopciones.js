@@ -87,7 +87,6 @@ function irAFormularioAdoptante() {
     window.location.href = "formulario_adoptante.html";
 }
 
-// MOSTRAR Y OCULTAR VISTAS INTERNAS
 function mostrarSeccionAdopcion(idSeccion) {
     const pantallaOpciones = document.getElementById('pantalla-opciones-adopcion');
     const catalogoAnimales = document.getElementById('seccion-catalogo-animales');
@@ -97,15 +96,13 @@ function mostrarSeccionAdopcion(idSeccion) {
 
     const seccionObjetivo = document.getElementById(idSeccion);
     if (seccionObjetivo) {
-        // CAMBIO AQUÍ: Usar 'flex' o 'block' según corresponda, 
-        // y asegurarnos de que el contenedor principal adapte su flujo.
         seccionObjetivo.style.display = 'block'; 
     }
 
-    // Opcional pero recomendado: Quitar el centrado forzado del main para que el catálogo respire de arriba a abajo
+    // FORZAR AL CONTENEDOR PRINCIPAL A DEJAR DE SER FLEX
     const mainContainer = document.querySelector('.main-content.main-adopciones');
     if (mainContainer) {
-        mainContainer.style.display = 'block'; 
+        mainContainer.style.setProperty('display', 'block', 'important');
     }
 }
 function volverAOpciones() {
