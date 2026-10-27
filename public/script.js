@@ -52,7 +52,7 @@ auth.onAuthStateChanged(async (user) => {
         // Evento del botón de cerrar sesión
         if (btnCerrarSesion) {
             btnCerrarSesion.onclick = () => {
-                auth.signOut().then(() => window.location.reload());
+                auth.signOut().then(() => window.location.href = "home.html");
             };
         }
 
