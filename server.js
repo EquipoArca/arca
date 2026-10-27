@@ -1724,12 +1724,13 @@ app.get('/api/ficha-adoptante-publica/:username', (req, res) => {
 // ==========================================
 const upload = multer({ storage: multer.memoryStorage() });
 
+// --- CORRECCIÓN EN EL SERVER.JS ---
 app.post('/api/registrar-fundacion', upload.fields([
     { name: 'certificado_existencia', maxCount: 1 },
     { name: 'estatuto', maxCount: 1 },
     { name: 'registro_oficial', maxCount: 1 },
     { name: 'estado_financiero', maxCount: 1 }
-], (req, res) => {
+]), (req, res) => { // <-- ¡Aquí se cierra el paréntesis antes de la coma y la función!
     
     const files = req.files || {};
     const certBuffer = files.certificado_existencia ? files.certificado_existencia[0].buffer : null;
@@ -1790,7 +1791,7 @@ app.post('/api/registrar-fundacion', upload.fields([
             });
         });
     });
-}));
+});
 // Ruta para bloquear a un usuario
 app.post('/api/bloquear-usuario', (req, res) => {
     const { correo_bloqueador, id_usuario_bloqueado } = req.body;
