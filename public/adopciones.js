@@ -92,20 +92,25 @@ function mostrarSeccionAdopcion(idSeccion) {
     const catalogoAnimales = document.getElementById('seccion-catalogo-animales');
 
     if (pantallaOpciones) {
-        // Forzamos el ocultamiento absoluto con !important para que el CSS no la vuelva a mostrar
         pantallaOpciones.style.setProperty('display', 'none', 'important');
     }
     
     if (catalogoAnimales) {
-        catalogoAnimales.style.setProperty('display', 'block', 'important');
+        // Lo mostramos como flex para que mantenga el contenedor centrado y ordenado
+        catalogoAnimales.style.setProperty('display', 'flex', 'important');
+        catalogoAnimales.style.setProperty('flex-direction', 'column', 'important');
     }
 
     const mainContainer = document.querySelector('.main-content.main-adopciones');
     if (mainContainer) {
-        mainContainer.style.setProperty('display', 'block', 'important');
-        mainContainer.classList.remove('vista-opciones-centrada');
+        // Le devolvemos el diseño centrado que usa la vista principal para que luzca hermoso
+        mainContainer.style.setProperty('display', 'flex', 'important');
+        mainContainer.style.setProperty('align-items', 'center', 'important');
+        mainContainer.style.setProperty('justify-content', 'center', 'important');
+        mainContainer.classList.add('vista-opciones-centrada');
     }
 }
+
 function volverAOpciones() {
     const catalogoAnimales = document.getElementById('seccion-catalogo-animales');
     const pantallaOpciones = document.getElementById('pantalla-opciones-adopcion');
@@ -115,13 +120,14 @@ function volverAOpciones() {
     }
     
     if (pantallaOpciones) {
-        // Restaura el diseño centrado original de las opciones
         pantallaOpciones.style.setProperty('display', 'flex', 'important');
     }
 
     const mainContainer = document.querySelector('.main-content.main-adopciones');
     if (mainContainer) {
-        mainContainer.style.removeProperty('display');
+        mainContainer.style.setProperty('display', 'flex', 'important');
+        mainContainer.style.setProperty('align-items', 'center', 'important');
+        mainContainer.style.setProperty('justify-content', 'center', 'important');
         mainContainer.classList.add('vista-opciones-centrada');
     }
 }

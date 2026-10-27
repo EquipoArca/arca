@@ -378,3 +378,17 @@ body {
 .btn-arca-animado {
     transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 }
+#seccion-catalogo-animales {
+    background: rgba(255, 255, 255, 0.78) !important;
+    backdrop-filter: blur(22px) !important;
+    -webkit-backdrop-filter: blur(22px) !important;
+    border: 3px solid rgba(255, 255, 255, 0.95) !important;
+    box-shadow: 0 24px 50px rgba(92, 64, 51, 0.12), inset 0 0 20px rgba(255, 255, 255, 0.7) !important;
+    border-radius: 42px !important;
+    max-width: 1000px !important;
+    width: 95% !important;
+    margin: auto !important;
+    padding: 35px 30px !important;
+    box-sizing: border-box !important;
+    animation: arcaEntradaPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
