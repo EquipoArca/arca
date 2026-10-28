@@ -1166,7 +1166,7 @@ async function verificarOtpYIrAlRegistro() {
             localStorage.removeItem('flujo_fundacion');
             alert("¡Correo verificado con éxito! Ahora completemos los datos legales de tu fundación.");
             
-            window.location.href = `registro_fundacion_paso2.html?email=${encodeURIComponent(correoValidado)}`;
+            window.location.href = `registro_fundacion?email=${encodeURIComponent(correoValidado)}`;
         } catch (error) {
             alert("Error al crear credenciales en Firebase: " + error.message);
         }
