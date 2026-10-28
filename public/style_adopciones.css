@@ -588,20 +588,20 @@ body {
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    background: rgba(92, 64, 51, 0.4) !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: rgba(92, 64, 51, 0.45) !important;
     backdrop-filter: blur(10px) !important;
     -webkit-backdrop-filter: blur(10px) !important;
-    display: flex !important;
+    display: none; /* Por defecto oculto, JS lo cambia a flex */
     align-items: center !important;
     justify-content: center !important;
-    z-index: 9999 !important;
-    animation: arcaEntrada 0.3s ease-out !important;
+    z-index: 999999 !important;
+    pointer-events: auto !important;
 }
 
 .modal-tarjeta-aviso {
-    background: rgba(255, 255, 255, 0.88) !important;
+    background: rgba(255, 255, 255, 0.92) !important;
     backdrop-filter: blur(20px) !important;
     -webkit-backdrop-filter: blur(20px) !important;
     border: 3px solid rgba(255, 255, 255, 0.95) !important;
@@ -613,7 +613,16 @@ body {
     text-align: center !important;
     position: relative !important;
     box-sizing: border-box !important;
+    z-index: 1000000 !important;
+    pointer-events: auto !important;
     animation: arcaEntradaPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+.modal-tarjeta-aviso button {
+    position: relative !important;
+    z-index: 1000001 !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
 }
 
 .btn-cerrar-modal {
@@ -702,33 +711,4 @@ body {
 .btn-modal-secundario:hover {
     background: rgba(250, 212, 222, 0.5) !important;
     transform: translateY(-2px) !important;
-}
-/* --- FIX DE CLICS PARA EL MODAL DE AVISO --- */
-.modal-overlay-aviso {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    background: rgba(92, 64, 51, 0.45) !important;
-    backdrop-filter: blur(10px) !important;
-    -webkit-backdrop-filter: blur(10px) !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    z-index: 999999 !important;
-    pointer-events: auto !important;
-}
-
-.modal-tarjeta-aviso {
-    position: relative !important;
-    z-index: 1000000 !important;
-    pointer-events: auto !important;
-}
-
-.modal-tarjeta-aviso button {
-    position: relative !important;
-    z-index: 1000001 !important;
-    pointer-events: auto !important;
-    cursor: pointer !important;
 }

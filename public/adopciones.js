@@ -70,15 +70,18 @@ function alHacerClicPonerEnAdopcion() {
     // Redirige al formulario de adopción creado
     window.location.href = "formulario_adopcion.html";
 }
-// CONTROLADORES DEL MODAL Y REDIRECCIÓN
 function abrirModalAviso() {
     const modal = document.getElementById('modal-aviso-adoptante');
-    if (modal) modal.style.display = 'flex';
+    if (modal) {
+        modal.style.setProperty('display', 'flex', 'important');
+    }
 }
 
 function cerrarModalAviso() {
     const modal = document.getElementById('modal-aviso-adoptante');
-    if (modal) modal.style.display = 'none';
+    if (modal) {
+        modal.style.setProperty('display', 'none', 'important');
+    }
 }
 
 function irAFormularioAdoptante() {
