@@ -56,8 +56,10 @@ async function alHacerClicVerAnimales() {
         alert("Ocurrió un error al consultar tu perfil de adoptante. Revisa que el servidor Node.js esté corriendo.");
     }
 }
-function alHacerClicPonerEnAdopcion() {
+// Manejador para el botón "Poner animal en adopción"
+async function alHacerClicPonerEnAdopcion() {
     const user = usuarioActual || firebase.auth().currentUser;
+
     if (!user) {
         if (typeof abrirBloqueo === "function") {
             abrirBloqueo();
@@ -66,9 +68,35 @@ function alHacerClicPonerEnAdopcion() {
         }
         return;
     }
-    
-    // Redirige al formulario de adopción creado
-    window.location.href = "formulario_adopcion.html";
+
+    try {
+        // Verificamos si también tiene perfil de adoptante antes de permitir publicar
+        const respuesta = await fetch(`/api/verificar-adoptante?correo=${encodeURIComponent(user.email)}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!respuesta.ok) {
+            throw new Error(`Error HTTP: ${respuesta.status}`);
+        }
+
+        const data = await respuesta.json();
+
+        if (data.tienePerfil) {
+            // ¡Tiene perfil! Guardamos su ubicación y lo mandamos al formulario de publicación
+            localStorage.setItem('ubicacion_adoptante', data.ubicacion || data.ciudad || '');
+            window.location.href = "formulario_adopcion.html";
+        } else {
+            // No tiene perfil -> Muestra el modal de aviso para que lo cree primero
+            abrirModalAviso();
+        }
+
+    } catch (error) {
+        console.error("❌ Error al verificar adoptante:", error);
+        alert("Ocurrió un error al consultar tu perfil. Revisa que el servidor Node.js esté corriendo.");
+    }
 }
 function abrirModalAviso() {
     const modal = document.getElementById('modal-aviso-adoptante');
