@@ -1724,7 +1724,6 @@ app.get('/api/ficha-adoptante-publica/:username', (req, res) => {
 // ==========================================
 const upload = multer({ storage: multer.memoryStorage() });
 
-// --- CORRECCIÓN EN EL SERVER.JS ---
 app.post('/api/registrar-fundacion', express.json({ limit: '20mb' }), (req, res) => {
     const {
         nombre_legal, nombre_comercial, nit_rut, id_representante,
@@ -1747,6 +1746,7 @@ app.post('/api/registrar-fundacion', express.json({ limit: '20mb' }), (req, res)
     const registroBuffer = parseBase64ToBuffer(registro_oficial);
     const financieroBuffer = parseBase64ToBuffer(estado_financiero);
 
+    // 1. Guardar primero los documentos en la tabla 'documentacion'
     const queryDocumentacion = `
         INSERT INTO documentacion (certificado_existencia, estatuto, estado_financiero, registro_oficial) 
         VALUES (?, ?, ?, ?)
@@ -1754,35 +1754,80 @@ app.post('/api/registrar-fundacion', express.json({ limit: '20mb' }), (req, res)
     
     db.query(queryDocumentacion, [certBuffer, estatutoBuffer, financieroBuffer, registroBuffer], (err, resultadoDoc) => {
         if (err) {
-            console.error("Error al guardar documentación:", err);
-            return res.status(500).json({ exito: false, mensaje: "Error al guardar los documentos legales." });
+            console.error("❌ Error al guardar documentación:", err.sqlMessage || err);
+            return res.status(500).json({ exito: false, mensaje: "Error al guardar los documentos legales: " + (err.sqlMessage || err.message) });
         }
 
         const idDocumentacionGenerado = resultadoDoc.insertId;
         const fechaActual = new Date().toISOString().slice(0, 10);
 
-        const queryFundacion = `
+        // 2. Guardar o actualizar en la tabla 'usuarios' con el tipo fundación y estado pendiente
+        const queryUsuarios = `
             INSERT INTO usuarios (
-                tipo_usuario, estado_aprobacion, id_documentacion, 
-                Nombre_Legal, Nombre_Comercial, id_representante, Nit_Rut, 
-                Pais, Ciudad, Direccion, Telefono_fundacion, Correo_fundacion, 
-                Pagina_web, Fecha_registro, Descripcion_mision, Descripcion_vision, 
-                PFP_Fundacion, Foto_Portada, Programas_Proyectos_Actuales, enfoque_otro
+                tipo_usuario, 
+                estado_aprobacion, 
+                id_documentacion, 
+                Nombre_Legal, 
+                Nombre_Comercial, 
+                id_representante, 
+                Nit_Rut, 
+                Pais, 
+                Ciudad, 
+                Direccion, 
+                Telefono_fundacion, 
+                correo_usuario, 
+                Pagina_web, 
+                Fecha_registro, 
+                Descripcion_mision, 
+                Descripcion_vision, 
+                PFP_Fundacion, 
+                Foto_Portada, 
+                Programas_Proyectos_Actuales, 
+                enfoque_otro
             ) VALUES ('fundacion', 'pendiente', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE
+                tipo_usuario = 'fundacion',
+                estado_aprobacion = 'pendiente',
+                id_documentacion = VALUES(id_documentacion),
+                Nombre_Legal = VALUES(Nombre_Legal),
+                Nombre_Comercial = VALUES(Nombre_Comercial),
+                Nit_Rut = VALUES(Nit_Rut),
+                Pais = VALUES(Pais),
+                Ciudad = VALUES(Ciudad),
+                Direccion = VALUES(Direccion),
+                Telefono_fundacion = VALUES(Telefono_fundacion),
+                Pagina_web = VALUES(Pagina_web),
+                Descripcion_mision = VALUES(Descripcion_mision),
+                Descripcion_vision = VALUES(Descripcion_vision),
+                Programas_Proyectos_Actuales = VALUES(Programas_Proyectos_Actuales),
+                enfoque_otro = VALUES(enfoque_otro);
         `;
 
-        const valoresFundacion = [
+        const valoresUsuarios = [
             idDocumentacionGenerado,
-            nombre_legal, nombre_comercial, id_representante, nit_rut,
-            pais || 'Colombia', ciudad || 'Medellín', direccion, telefono_fundacion, correo_fundacion,
-            pagina_web, fechaActual, descripcion_mision, descripcion_vision,
-            pfp_fundacion, foto_portada, programas_proyectos, enfoque_otro
+            nombre_legal || '',
+            nombre_comercial || '',
+            rep_documento || null,
+            nit_rut || '',
+            pais || 'Colombia',
+            ciudad || 'Medellín',
+            direccion || '',
+            telefono_fundacion || '',
+            correo_fundacion, // Mapeado correctamente al correo del usuario
+            pagina_web || '',
+            fechaActual,
+            descripcion_mision || '',
+            descripcion_vision || '',
+            pfp_fundacion || '',
+            foto_portada || '',
+            programas_proyectos || '',
+            enfoque_otro || ''
         ];
 
-        db.query(queryFundacion, valoresFundacion, (err2) => {
+        db.query(queryUsuarios, valoresUsuarios, (err2) => {
             if (err2) {
-                console.error("Error al registrar la fundación:", err2);
-                return res.status(500).json({ exito: false, mensaje: "Error al registrar la fundación en la base de datos." });
+                console.error("❌ Error al registrar en la tabla usuarios:", err2.sqlMessage || err2);
+                return res.status(500).json({ exito: false, mensaje: "Error al registrar la fundación en usuarios: " + (err2.sqlMessage || err2.message) });
             }
 
             res.json({ 
