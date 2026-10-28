@@ -21,9 +21,7 @@ if (!firebase.apps.length) {
 }
 const auth = firebase.auth();
 
-// ==========================================
-// 1. ESCUCHADOR DE SESIÓN MAESTRO (UNIFICADO)
-// ==========================================
+
 auth.onAuthStateChanged(async (user) => {
     // Referencias del Menú Lateral
     const linkInicio = document.getElementById('link-inicio');
@@ -124,9 +122,7 @@ auth.onAuthStateChanged(async (user) => {
     }
 });
 
-// ==========================================
-// 2. FUNCIONES DE INTERFAZ Y MODOS
-// ==========================================
+
 function activarModoFull() {
     cerrarBloqueo();
 
@@ -197,9 +193,7 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// ==========================================
-// 3. AUTENTICACIÓN Y NAVEGACIÓN
-// ==========================================
+
 let correoValidado = "";
 
 async function ejecutarLoginEmail() {

@@ -392,3 +392,194 @@ body {
     box-sizing: border-box !important;
     animation: arcaEntradaPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 }
+/* --- ESTILOS PARA EL FORMULARIO DE PERFIL DE ADOPTANTE --- */
+.contenedor-formulario-adoptante {
+    max-width: 850px !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+    padding: 20px 15px 40px 15px !important;
+    box-sizing: border-box !important;
+}
+
+.tarjeta-formulario-glass {
+    background: rgba(255, 255, 255, 0.78) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 3px solid rgba(255, 255, 255, 0.95) !important;
+    box-shadow: 0 20px 45px rgba(92, 64, 51, 0.12), inset 0 0 20px rgba(255, 255, 255, 0.6) !important;
+    border-radius: 36px !important;
+    padding: 35px 30px !important;
+    box-sizing: border-box !important;
+    animation: arcaEntradaPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+.encabezado-form {
+    text-align: center !important;
+    margin-bottom: 25px !important;
+}
+
+.encabezado-form h2 {
+    font-size: 2.3rem !important;
+    color: #5c4033 !important;
+    margin: 8px 0 4px 0 !important;
+    font-weight: 400 !important;
+}
+
+.encabezado-form p {
+    color: #775a4c !important;
+    font-size: 1.05rem !important;
+    margin: 0 !important;
+}
+
+.icono-encabezado {
+    font-size: 2.5rem !important;
+    color: #d97736 !important;
+}
+
+.bloque-form {
+    background: rgba(255, 246, 235, 0.85) !important;
+    backdrop-filter: blur(14px) !important;
+    border: 2px solid rgba(255, 255, 255, 0.95) !important;
+    border-radius: 26px !important;
+    padding: 22px 24px !important;
+    margin-bottom: 20px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 15px !important;
+    box-shadow: 0 8px 24px rgba(92, 64, 51, 0.06) !important;
+}
+
+.bloque-form h3 {
+    font-size: 1.2rem !important;
+    color: #5c4033 !important;
+    margin: 0 0 5px 0 !important;
+    font-weight: 400 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.bloque-form h3 i {
+    color: #d97736 !important;
+}
+
+.grupo-campo {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+    width: 100% !important;
+}
+
+.grupo-campo label {
+    font-size: 1rem !important;
+    color: #5c4033 !important;
+    font-weight: 400 !important;
+}
+
+.grupo-campo input[type="text"],
+.grupo-campo input[type="date"],
+.grupo-campo input[type="tel"],
+.grupo-campo input[type="number"],
+.grupo-campo select,
+.grupo-campo textarea {
+    font-family: 'Itim', cursive, sans-serif !important;
+    font-size: 0.98rem !important;
+    padding: 11px 15px !important;
+    border-radius: 16px !important;
+    border: 1.8px solid rgba(232, 168, 124, 0.45) !important;
+    outline: none !important;
+    background: rgba(255, 255, 255, 0.92) !important;
+    color: #5c4033 !important;
+    box-sizing: border-box !important;
+    transition: all 0.25s ease !important;
+    width: 100% !important;
+}
+
+.grupo-campo input:focus,
+.grupo-campo select:focus,
+.grupo-campo textarea:focus {
+    border-color: #d97736 !important;
+    background: #ffffff !important;
+    box-shadow: 0 0 10px rgba(232, 168, 124, 0.35) !important;
+}
+
+.grid-2-columnas {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 16px !important;
+    width: 100% !important;
+}
+
+@media (max-width: 720px) {
+    .grid-2-columnas {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+.opciones-inline {
+    display: flex !important;
+    gap: 20px !important;
+    align-items: center !important;
+    padding: 6px 0 !important;
+}
+
+.opciones-inline label {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    cursor: pointer !important;
+    font-size: 0.98rem !important;
+    color: #5c4033 !important;
+}
+
+.opciones-inline input[type="radio"] {
+    accent-color: #d97736 !important;
+    cursor: pointer !important;
+}
+
+.btn-guardar-form {
+    width: 100% !important;
+    background: linear-gradient(135deg, #e8a87c, #d97736) !important;
+    color: white !important;
+    font-family: 'Itim', cursive, sans-serif !important;
+    font-size: 1.15rem !important;
+    padding: 14px !important;
+    border: 2px solid rgba(255, 255, 255, 0.9) !important;
+    border-radius: 9999px !important;
+    cursor: pointer !important;
+    box-shadow: 0 8px 22px rgba(232, 168, 124, 0.35) !important;
+    transition: all 0.3s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    margin-top: 10px !important;
+}
+
+.btn-guardar-form:hover {
+    background: linear-gradient(135deg, #d97736, #c26122) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 12px 26px rgba(232, 168, 124, 0.5) !important;
+}
+
+.btn-volver-top {
+    background: rgba(255, 255, 255, 0.85) !important;
+    border: 2px solid rgba(232, 168, 124, 0.6) !important;
+    color: #d97736 !important;
+    padding: 7px 18px !important;
+    border-radius: 9999px !important;
+    font-weight: 400 !important;
+    font-size: 14px !important;
+    cursor: pointer !important;
+    font-family: 'Itim', cursive, sans-serif !important;
+    box-shadow: 0 4px 12px rgba(92, 64, 51, 0.08) !important;
+    transition: all 0.3s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+
+.btn-volver-top:hover {
+    background: #faedcd !important;
+    transform: translateY(-2px) scale(1.02) !important;
+}
