@@ -230,12 +230,12 @@
     </main>
 
     <script>
-async function finalizarRegistroCompleto() {
+    async function finalizarRegistroCompleto() {
     const correo = sessionStorage.getItem('correo_fundacion_temp') || new URLSearchParams(window.location.search).get('email');
-    const password = sessionStorage.getItem('pass_fundacion_temp');
+    const password = sessionStorage.getItem('pass_fundacion_temp'); // Recuperamos la contraseña guardada temporalmente
 
     if (!correo || !password) {
-        alert("La sesión de credenciales expiró. Por favor, inicia el registro de nuevo desde el inicio.");
+        alert("La sesión de credenciales expiró. Por favor, inicia el registro de nuevo.");
         window.location.href = "home.html";
         return;
     }
@@ -258,6 +258,8 @@ async function finalizarRegistroCompleto() {
     }
 
     const payload = {
+        correo_fundacion: correo,
+        password: password, // <-- Enviamos la contraseña para que el servidor cree la cuenta al final
         nombre_legal: datosPaso1.nombreLegal || '',
         nombre_comercial: datosPaso1.nombreComercial || '',
         nit_rut: datosPaso1.nitRut || '',
@@ -266,7 +268,6 @@ async function finalizarRegistroCompleto() {
         ciudad: ciudadVal,
         direccion: datosPaso1.direccionFisica || '',
         telefono_fundacion: datosPaso1.telefonoPrincipal || '',
-        correo_fundacion: correo,
         pagina_web: datosPaso1.paginaWeb || '',
         
         rep_nombre: datosPaso1.repNombre || '',
@@ -298,14 +299,18 @@ async function finalizarRegistroCompleto() {
         const resultado = await respuesta.json();
 
         if (!resultado.exito) {
-            alert("No se pudo registrar en la base de datos: " + resultado.mensaje);
+            alert("No se pudo registrar: " + resultado.mensaje);
             return;
         }
 
-        await auth.createUserWithEmailAndPassword(correo, password);
-
         alert(resultado.mensaje);
         sessionStorage.clear();
+        
+        // Asegurar que no quede sesión iniciada a medias
+        if (typeof auth !== 'undefined') {
+            await auth.signOut();
+        }
+
         window.location.href = "home.html";
 
     } catch (error) {
