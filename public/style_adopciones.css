@@ -583,3 +583,123 @@ body {
     background: #faedcd !important;
     transform: translateY(-2px) scale(1.02) !important;
 }
+/* --- ESTILOS DEL MODAL DE AVISO (PERFIL DE ADOPCIÓN) --- */
+.modal-overlay-aviso {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: rgba(92, 64, 51, 0.4) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 9999 !important;
+    animation: arcaEntrada 0.3s ease-out !important;
+}
+
+.modal-tarjeta-aviso {
+    background: rgba(255, 255, 255, 0.88) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 3px solid rgba(255, 255, 255, 0.95) !important;
+    box-shadow: 0 24px 50px rgba(92, 64, 51, 0.2), inset 0 0 20px rgba(255, 255, 255, 0.7) !important;
+    border-radius: 36px !important;
+    padding: 35px 30px !important;
+    width: 90% !important;
+    max-width: 440px !important;
+    text-align: center !important;
+    position: relative !important;
+    box-sizing: border-box !important;
+    animation: arcaEntradaPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+.btn-cerrar-modal {
+    position: absolute !important;
+    top: 16px !important;
+    right: 20px !important;
+    background: transparent !important;
+    border: none !important;
+    font-size: 1.8rem !important;
+    color: #775a4c !important;
+    cursor: pointer !important;
+    transition: color 0.2s ease !important;
+}
+
+.btn-cerrar-modal:hover {
+    color: #d97736 !important;
+}
+
+.circulo-icono-modal {
+    width: 75px !important;
+    height: 75px !important;
+    background: linear-gradient(135deg, rgba(244, 164, 138, 0.88), rgba(235, 138, 108, 0.88)) !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 auto 18px auto !important;
+    box-shadow: 0 10px 22px rgba(235, 138, 108, 0.4) !important;
+}
+
+.circulo-icono-modal i {
+    font-size: 2rem !important;
+    color: white !important;
+}
+
+.titulo-modal-aviso {
+    font-size: 1.6rem !important;
+    color: #5c4033 !important;
+    margin: 0 0 10px 0 !important;
+    font-weight: 400 !important;
+}
+
+.texto-modal-aviso {
+    font-size: 1.02rem !important;
+    color: #775a4c !important;
+    margin: 0 0 24px 0 !important;
+    line-height: 1.4 !important;
+}
+
+.contenedor-botones-modal {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+}
+
+.btn-modal-primario {
+    background: linear-gradient(135deg, #e8a87c, #d97736) !important;
+    color: white !important;
+    font-family: 'Itim', cursive, sans-serif !important;
+    font-size: 1.1rem !important;
+    padding: 12px 20px !important;
+    border: 2px solid rgba(255, 255, 255, 0.9) !important;
+    border-radius: 9999px !important;
+    cursor: pointer !important;
+    box-shadow: 0 6px 18px rgba(232, 168, 124, 0.35) !important;
+    transition: all 0.3s ease !important;
+}
+
+.btn-modal-primario:hover {
+    background: linear-gradient(135deg, #d97736, #c26122) !important;
+    transform: translateY(-2px) !important;
+}
+
+.btn-modal-secundario {
+    background: rgba(255, 255, 255, 0.85) !important;
+    color: #775a4c !important;
+    font-family: 'Itim', cursive, sans-serif !important;
+    font-size: 1.05rem !important;
+    padding: 12px 20px !important;
+    border: 1.5px solid rgba(232, 168, 124, 0.4) !important;
+    border-radius: 9999px !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+}
+
+.btn-modal-secundario:hover {
+    background: rgba(250, 212, 222, 0.5) !important;
+    transform: translateY(-2px) !important;
+}
