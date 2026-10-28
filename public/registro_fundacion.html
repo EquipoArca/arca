@@ -323,26 +323,53 @@
         }
 
         function guardarPaso1YContinuar() {
-            // Guardamos datos temporalmente en sessionStorage para enviarlos todos juntos al final
-            const datosPaso1 = {
-                nombreLegal: document.getElementById('nombre-legal').value,
-                nombreComercial: document.getElementById('nombre-comercial').value,
-                nitRut: document.getElementById('nit-rut').value,
-                paisCiudad: document.getElementById('pais-ciudad').value,
-                direccionFisica: document.getElementById('direccion-fisica').value,
-                telefonoPrincipal: document.getElementById('telefono-principal').value,
-                correoOficial: document.getElementById('correo-oficial').value,
-                paginaWeb: document.getElementById('pagina-web').value,
-                repNombre: document.getElementById('rep-nombre').value,
-                repDocumento: document.getElementById('rep-documento').value,
-                repCargo: document.getElementById('rep-cargo').value,
-                repTelefono: document.getElementById('rep-telefono').value,
-                repCorreo: document.getElementById('rep-correo').value,
-                metodosDonacion: document.getElementById('metodos-donacion').value
+            const archivoToGenerarBase64 = (file) => {
+                return new Promise((resolve, reject) => {
+                    if (!file) return resolve(null);
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = error => reject(error);
+                    reader.readAsDataURL(file);
+                });
             };
 
-            sessionStorage.setItem('datos_fundacion_p1', JSON.stringify(datosPaso1));
-            window.location.href = "registro_fundacion_paso2.html";
+            async function procesarYContinuar() {
+                const fileCert = document.getElementById('file-cert').files[0];
+                const fileEstatutos = document.getElementById('file-estatutos').files[0];
+                const fileRegistro = document.getElementById('file-registro').files[0];
+                const fileFinanciero = document.getElementById('file-financiero').files[0];
+
+                const certBase64 = await archivoToGenerarBase64(fileCert);
+                const estatutoBase64 = await archivoToGenerarBase64(fileEstatutos);
+                const registroBase64 = await archivoToGenerarBase64(fileRegistro);
+                const financieroBase64 = await archivoToGenerarBase64(fileFinanciero);
+
+                const datosPaso1 = {
+                    nombreLegal: document.getElementById('nombre-legal').value,
+                    nombreComercial: document.getElementById('nombre-comercial').value,
+                    nitRut: document.getElementById('nit-rut').value,
+                    paisCiudad: document.getElementById('pais-ciudad').value,
+                    direccionFisica: document.getElementById('direccion-fisica').value,
+                    telefonoPrincipal: document.getElementById('telefono-principal').value,
+                    correoOficial: document.getElementById('correo-oficial').value,
+                    paginaWeb: document.getElementById('pagina-web').value,
+                    repNombre: document.getElementById('rep-nombre').value,
+                    repDocumento: document.getElementById('rep-documento').value,
+                    repCargo: document.getElementById('rep-cargo').value,
+                    repTelefono: document.getElementById('rep-telefono').value,
+                    repCorreo: document.getElementById('rep-correo').value,
+                    metodosDonacion: document.getElementById('metodos-donacion').value,
+                    certBase64,
+                    estatutoBase64,
+                    registroBase64,
+                    financieroBase64
+                };
+
+                sessionStorage.setItem('datos_fundacion_p1', JSON.stringify(datosPaso1));
+                window.location.href = "registro_fundacion_paso2.html";
+            }
+
+            procesarYContinuar();
         }
     </script>
 </body>

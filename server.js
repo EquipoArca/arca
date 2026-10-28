@@ -1725,27 +1725,28 @@ app.get('/api/ficha-adoptante-publica/:username', (req, res) => {
 const upload = multer({ storage: multer.memoryStorage() });
 
 // --- CORRECCIÓN EN EL SERVER.JS ---
-app.post('/api/registrar-fundacion', upload.fields([
-    { name: 'certificado_existencia', maxCount: 1 },
-    { name: 'estatuto', maxCount: 1 },
-    { name: 'registro_oficial', maxCount: 1 },
-    { name: 'estado_financiero', maxCount: 1 }
-]), (req, res) => { // <-- ¡Aquí se cierra el paréntesis antes de la coma y la función!
-    
-    const files = req.files || {};
-    const certBuffer = files.certificado_existencia ? files.certificado_existencia[0].buffer : null;
-    const estatutoBuffer = files.estatuto ? files.estatuto[0].buffer : null;
-    const registroBuffer = files.registro_oficial ? files.registro_oficial[0].buffer : null;
-    const financieroBuffer = files.estado_financiero ? files.estado_financiero[0].buffer : null;
-
+app.post('/api/registrar-fundacion', express.json({ limit: '20mb' }), (req, res) => {
     const {
         nombre_legal, nombre_comercial, nit_rut, id_representante,
         pais, ciudad, direccion, telefono_fundacion, correo_fundacion, pagina_web,
         rep_nombre, rep_documento, rep_cargo, rep_telefono, metodos_donacion,
-        descripcion_mision, descripcion_vision, programas_proyectos, pfp_fundacion, foto_portada, enfoque_otro
+        descripcion_mision, descripcion_vision, programas_proyectos, pfp_fundacion, foto_portada, enfoque_otro,
+        certificado_existencia, estatuto, registro_oficial, estado_financiero
     } = req.body;
 
-    // 1. Insertar primero en la tabla 'documentacion' para usar los tinyblobs
+    const parseBase64ToBuffer = (base64Str) => {
+        if (!base64Str) return null;
+        if (base64Str.includes(',')) {
+            base64Str = base64Str.split(',')[1];
+        }
+        return Buffer.from(base64Str, 'base64');
+    };
+
+    const certBuffer = parseBase64ToBuffer(certificado_existencia);
+    const estatutoBuffer = parseBase64ToBuffer(estatuto);
+    const registroBuffer = parseBase64ToBuffer(registro_oficial);
+    const financieroBuffer = parseBase64ToBuffer(estado_financiero);
+
     const queryDocumentacion = `
         INSERT INTO documentacion (certificado_existencia, estatuto, estado_financiero, registro_oficial) 
         VALUES (?, ?, ?, ?)
@@ -1760,7 +1761,6 @@ app.post('/api/registrar-fundacion', upload.fields([
         const idDocumentacionGenerado = resultadoDoc.insertId;
         const fechaActual = new Date().toISOString().slice(0, 10);
 
-        // 2. Insertar en la tabla principal de usuarios/fundaciones con estado pendiente
         const queryFundacion = `
             INSERT INTO usuarios (
                 tipo_usuario, estado_aprobacion, id_documentacion, 

@@ -230,8 +230,7 @@
     </main>
 
     <script>
-   async function finalizarRegistroCompleto() {
-    // Recuperamos las credenciales temporales
+async function finalizarRegistroCompleto() {
     const correo = sessionStorage.getItem('correo_fundacion_temp') || new URLSearchParams(window.location.search).get('email');
     const password = sessionStorage.getItem('pass_fundacion_temp');
 
@@ -242,37 +241,58 @@
     }
 
     const datosPaso1 = JSON.parse(sessionStorage.getItem('datos_fundacion_p1') || '{}');
-    const formData = new FormData();
 
-    for (const key in datosPaso1) {
-        formData.append(key, datosPaso1[key]);
+    let enfoques = [];
+    if (document.getElementById('ef1')?.checked) enfoques.push('Rescate adopción');
+    if (document.getElementById('ef2')?.checked) enfoques.push('Esterilización y control poblacional');
+    if (document.getElementById('ef3')?.checked) enfoques.push('Rehabilitación de animales maltratados');
+    const otroEnfoqueInput = document.querySelector('#ef4 input');
+    if (otroEnfoqueInput && otroEnfoqueInput.value.trim()) enfoques.push(otroEnfoqueInput.value.trim());
+
+    let paisVal = 'Colombia';
+    let ciudadVal = 'Medellín';
+    if (datosPaso1.paisCiudad && datosPaso1.paisCiudad.includes(',')) {
+        const partes = datosPaso1.paisCiudad.split(',');
+        paisVal = partes[0].trim();
+        ciudadVal = partes[1].trim();
     }
 
-    formData.append('correo_fundacion', correo);
-    formData.append('nombre_legal', datosPaso1.nombreLegal || document.getElementById('nombre-publico-fundacion').value);
-    formData.append('nit_rut', datosPaso1.nitRut || '');
-    formData.append('id_representante', document.getElementById('rep-documento-id') ? document.getElementById('rep-documento-id').value : '12345');
-    formData.append('descripcion_mision', document.getElementById('mision-publica').value);
-    formData.append('descripcion_vision', document.getElementById('vision-publica').value);
-    formData.append('programas_proyectos', document.getElementById('programas-publicos').value);
-    formData.append('pfp_fundacion', document.getElementById('pfp-input') ? document.getElementById('pfp-input').value : '');
-    formData.append('foto_portada', document.getElementById('portada-input') ? document.getElementById('portada-input').value : '');
+    const payload = {
+        nombre_legal: datosPaso1.nombreLegal || '',
+        nombre_comercial: datosPaso1.nombreComercial || '',
+        nit_rut: datosPaso1.nitRut || '',
+        id_representante: datosPaso1.repDocumento || '12345',
+        pais: paisVal,
+        ciudad: ciudadVal,
+        direccion: datosPaso1.direccionFisica || '',
+        telefono_fundacion: datosPaso1.telefonoPrincipal || '',
+        correo_fundacion: correo,
+        pagina_web: datosPaso1.paginaWeb || '',
+        
+        rep_nombre: datosPaso1.repNombre || '',
+        rep_documento: datosPaso1.repDocumento || '',
+        rep_cargo: datosPaso1.repCargo || '',
+        rep_telefono: datosPaso1.repTelefono || '',
+        metodos_donacion: datosPaso1.metodosDonacion || '',
 
-    const inputCert = document.getElementById('file-cert');
-    const inputEstatutos = document.getElementById('file-estatutos');
-    const inputRegistro = document.getElementById('file-registro');
-    const inputFinanciero = document.getElementById('file-financiero');
+        descripcion_mision: document.getElementById('mision-publica').value || '',
+        descripcion_vision: document.getElementById('vision-publica').value || '',
+        programas_proyectos: document.getElementById('programas-publicos').value || '',
+        pfp_fundacion: '',
+        foto_portada: '',
+        enfoque_otro: enfoques.join(', '),
 
-    if (inputCert && inputCert.files[0]) formData.append('certificado_existencia', inputCert.files[0]);
-    if (inputEstatutos && inputEstatutos.files[0]) formData.append('estatuto', inputEstatutos.files[0]);
-    if (inputRegistro && inputRegistro.files[0]) formData.append('registro_oficial', inputRegistro.files[0]);
-    if (inputFinanciero && inputFinanciero.files[0]) formData.append('estado_financiero', inputFinanciero.files[0]);
+        certificado_existencia: datosPaso1.certBase64 || null,
+        estatuto: datosPaso1.estatutoBase64 || null,
+        registro_oficial: datosPaso1.registroBase64 || null,
+        estado_financiero: datosPaso1.financieroBase64 || null
+    };
 
     try {
-        // 1. Mandamos primero los datos y los PDFs a MySQL
         const respuesta = await fetch('/api/registrar-fundacion', {
             method: 'POST',
-            body: formData 
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
         });
 
         const resultado = await respuesta.json();
@@ -282,7 +302,6 @@
             return;
         }
 
-        // 2. Si MySQL guardó todo bien, creamos la cuenta en Firebase Auth
         await auth.createUserWithEmailAndPassword(correo, password);
 
         alert(resultado.mensaje);
