@@ -30,15 +30,18 @@
 
        .main-content {
     min-height: calc(100vh - 70px);
-    padding-top: 200px !important;
+    padding-top: 100px !important;
     padding-bottom: 40px;
     box-sizing: border-box;
     overflow: visible !important;
+    width: calc(100% - 60px) !important;
+margin-left: 60px !important;
 }
 
         body.dark-mode {
             background-color: #2b1d16 !important;
             color: #f4ebd0 !important;
+            
         }
         
         body.dark-mode .config-card, 
@@ -390,6 +393,49 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* Corrección exclusiva para la distribución de Ajustes */
+body.dark-mode .main-content {
+    display: block !important;
+    width: calc(100% - 60px) !important;
+    max-width: none !important;
+    margin-left: 60px !important;
+    padding-top: 100px !important;
+    margin-top: 13px !important;
+    padding-bottom: 40px !important;
+    box-sizing: border-box !important;
+    transform: translateY(-40px) !important;
+}
+
+body.dark-mode .grid-configuracion {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+    align-items: start !important;
+    gap: 25px !important;
+    width: 100% !important;
+    max-width: 1200px !important;
+    margin: 0 auto !important;
+    padding: 0 20px !important;
+    box-sizing: border-box !important;
+}
+
+body.dark-mode .columna-config-izq,
+body.dark-mode .columna-config-der {
+    min-width: 0 !important;
+    width: 100% !important;
+}
+
+@media (max-width: 768px) {
+    body.dark-mode .main-content {
+        width: calc(100% - 60px) !important;
+        margin-left: 60px !important;
+    }
+
+    body.dark-mode .grid-configuracion {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+}
+
     </style>
 </head>
 <body>
