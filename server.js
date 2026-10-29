@@ -8,27 +8,28 @@ const multer = require('multer');
 const { initializeApp, cert } = require('firebase-admin/app');
 const { getAuth } = require('firebase-admin/auth');
 
-// Carga segura y limpia de credenciales de Firebase Admin (Soporta entorno local y Render)
-let serviceAccount;
-if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+// Inicialización de Firebase utilizando EXCLUSIVAMENTE las variables de entorno individuales
+let credentialCert;
+
+if (process.env.FIREBASE_PRIVATE_KEY) {
+    credentialCert = cert({
+        projectId: process.env.FIREBASE_PROJECT_ID,
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+        privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
+    });
+} else {
+    // Si estás en tu PC y quieres usar un archivo local que tengas oculto:
     try {
-        // Parseamos el JSON de la variable de entorno
-        serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-        
-        // Limpiamos los saltos de línea de la llave privada por seguridad
-        if (serviceAccount.private_key) {
-            serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
-        }
+        const serviceAccount = require('./clave-firebase.json');
+        credentialCert = cert(serviceAccount);
     } catch (e) {
-        console.error("❌ Error al procesar FIREBASE_SERVICE_ACCOUNT:", e);
+        console.error("❌ ERROR: No se encontró la configuración de Firebase ni en variables de entorno ni en archivo local.");
     }
 }
 
-// Inicialización con respaldo local si estás trabajando en tu PC
 initializeApp({
-    credential: serviceAccount ? cert(serviceAccount) : cert(require('./clave-firebase.json'))
+    credential: credentialCert
 });
-
 const app = express();
 
 app.use(express.json({ limit: '10mb' })); 
