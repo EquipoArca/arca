@@ -7,18 +7,20 @@ const path = require('path');
 const multer = require('multer');
 const { initializeApp, cert } = require('firebase-admin/app');
 const { getAuth } = require('firebase-admin/auth');
-
 // Inicialización de Firebase utilizando EXCLUSIVAMENTE las variables de entorno individuales
 let credentialCert;
 
 if (process.env.FIREBASE_PRIVATE_KEY) {
+    // Reemplazamos los "\n" literales por saltos de línea reales (\n) de forma estricta
+    let rawKey = process.env.FIREBASE_PRIVATE_KEY;
+    let formattedKey = rawKey.includes('\\n') ? rawKey.replace(/\\n/g, '\n') : rawKey;
+
     credentialCert = cert({
         projectId: process.env.FIREBASE_PROJECT_ID,
         clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
+        privateKey: formattedKey
     });
 } else {
-    // Si estás en tu PC y quieres usar un archivo local que tengas oculto:
     try {
         const serviceAccount = require('./clave-firebase.json');
         credentialCert = cert(serviceAccount);
