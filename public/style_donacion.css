@@ -1,26 +1,22 @@
-/* --- Estilos Específicos para la Pantalla de Donación --- */
-
-/* Margen superior e izquierdo para evitar que la navbar fija y la sidebar tapen el contenido */
-.main-content {
-    margin-top: 100;
-    margin-left: 60px;
-    padding: 30px 30px 60px 30px;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    flex-grow: 1;
-    min-height: calc(100vh - 60px);
+/* Permitir que la estructura crezca y use el scroll global de la ventana */
+html, body {
+    height: 100% !important;
+    overflow: auto !important;
 }
 
+.main-content {
+    height: auto !important;
+    min-height: 100vh !important;
+    overflow: visible !important;
+    display: block !important; /* Evita que se comporte como una caja rígida de altura fija */
+}
+
+/* Asegurar contenedor general de donación limpio */
 .donation-main-container {
-    display: flex;
-    flex-direction: column;
-    gap: 25px;
-    max-width: 1200px;
-    width: 100%;
-    margin: 0 auto;
-    padding-bottom: 40px; /* Asegura espacio suficiente al final para ver el botón completamente */
-     overflow-y: auto;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding-bottom: 60px !important; /* Espacio cómodo abajo para que no quede cortado */
 }
 
 .donation-grid {

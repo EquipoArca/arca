@@ -1,8 +1,3 @@
-/* ==========================================
-   MODO OSCURO GLOBAL - ARCA (VERSIÓN AJUSTADA Y SIN DESBORDES)
-   ========================================== */
-
-/* 1. Fondo general y colores base */
 body.dark-mode {
     background-color: #211918 !important;
     background-image: linear-gradient(rgba(125, 82, 80, 0.25), rgba(30, 24, 23, 0.85)), url('fondo.png.png') !important;
@@ -11,12 +6,15 @@ body.dark-mode {
     background-position: center !important;
     background-blend-mode: overlay !important;
     color: #f4ebd0 !important;
-    overflow-x: hidden !important; /* Evita desplazamiento lateral molesto */
-    overflow-y: auto !important;
-    height: 100% !important;
+    overflow-x: hidden !important;
+    
+    /* Forzamos que la página cubra al menos toda la pantalla */
+    height: auto !important;
     min-height: 100vh !important;
+    overflow-y: auto !important;
     margin: 0 !important;
 }
+
 
 /* Control estricto de posición y dimensiones del contenido principal */
 body.dark-mode .main-content {
@@ -26,9 +24,13 @@ body.dark-mode .main-content {
     max-width: 100vw !important;
     box-sizing: border-box !important;
     overflow-x: hidden !important;
+    overflow-y: visible !important;
+    height: auto !important;
+    min-height: calc(100vh - 65px) !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
+    padding-bottom: 50px !important;
 }
 
 /* 2. Barra Superior (Top Nav) */
@@ -324,7 +326,6 @@ body.dark-mode .icono-silueta-nav {
     fill: #8c5d5b !important;
 }
 
-/* 9. Configuración, Términos y Privacidad */
 body.dark-mode .brand-arca,
 body.dark-mode .main-title,
 body.dark-mode .sub-title,
@@ -1199,6 +1200,9 @@ body.dark-mode .btn-enviar-adopcion-final:hover {
 /* Fondo de la sección */
 body.dark-mode .donation-main-container {
     background-color: transparent !important;
+    overflow-y: auto !important; /* Habilita el desplazamiento vertical si el contenido es muy largo */
+    max-height: 100vh; /* Limita la altura al tamaño de la ventana */
+    padding-bottom: 50px !important; /* Da un respiro al final para que no se corten los últimos campos */
 }
 
 /* Títulos de las secciones */
