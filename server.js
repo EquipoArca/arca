@@ -5,14 +5,28 @@ const cors = require('cors');
 const nodemailer = require('nodemailer');
 const path = require('path');
 const multer = require('multer');
-
 const { initializeApp, cert } = require('firebase-admin/app');
 const { getAuth } = require('firebase-admin/auth');
 
-const serviceAccount = require('./clave-firebase.json');
+// Carga segura y limpia de credenciales de Firebase Admin (Soporta entorno local y Render)
+let serviceAccount;
+if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    try {
+        // Parseamos el JSON de la variable de entorno
+        serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+        
+        // Limpiamos los saltos de línea de la llave privada por seguridad
+        if (serviceAccount.private_key) {
+            serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+        }
+    } catch (e) {
+        console.error("❌ Error al procesar FIREBASE_SERVICE_ACCOUNT:", e);
+    }
+}
 
+// Inicialización con respaldo local si estás trabajando en tu PC
 initializeApp({
-    credential: cert(serviceAccount)
+    credential: serviceAccount ? cert(serviceAccount) : cert(require('./clave-firebase.json'))
 });
 
 const app = express();
