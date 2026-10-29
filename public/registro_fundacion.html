@@ -315,61 +315,61 @@
         </form>
     </main>
 
-    <script>
-        function actualizarNombre(input, elemId) {
+ <script>
+        // Objeto global para almacenar temporalmente los archivos PDF en memoria (sin saturar el sessionStorage)
+        window.archivosTemporalesPDF = {
+            cert: null,
+            estatuto: null,
+            registro: null,
+            financiero: null
+        };
+
+        function actualizarNombre(input, elemId, tipoPdf) {
             if (input.files.length > 0) {
-                document.getElementById(elemId).textContent = input.files[0].name;
+                const archivo = input.files[0];
+                document.getElementById(elemId).textContent = archivo.name;
+                // Guardamos el objeto File directamente en memoria
+                window.archivosTemporalesPDF[tipoPdf] = archivo;
             }
         }
 
         function guardarPaso1YContinuar() {
-            const archivoToGenerarBase64 = (file) => {
-                return new Promise((resolve, reject) => {
-                    if (!file) return resolve(null);
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result);
-                    reader.onerror = error => reject(error);
-                    reader.readAsDataURL(file);
-                });
-            };
+            const fileCert = document.getElementById('file-cert').files[0];
+            const fileEstatutos = document.getElementById('file-estatutos').files[0];
+            const fileRegistro = document.getElementById('file-registro').files[0];
+            const fileFinanciero = document.getElementById('file-financiero').files[0];
 
-            async function procesarYContinuar() {
-                const fileCert = document.getElementById('file-cert').files[0];
-                const fileEstatutos = document.getElementById('file-estatutos').files[0];
-                const fileRegistro = document.getElementById('file-registro').files[0];
-                const fileFinanciero = document.getElementById('file-financiero').files[0];
-
-                const certBase64 = await archivoToGenerarBase64(fileCert);
-                const estatutoBase64 = await archivoToGenerarBase64(fileEstatutos);
-                const registroBase64 = await archivoToGenerarBase64(fileRegistro);
-                const financieroBase64 = await archivoToGenerarBase64(fileFinanciero);
-
-                const datosPaso1 = {
-                    nombreLegal: document.getElementById('nombre-legal').value,
-                    nombreComercial: document.getElementById('nombre-comercial').value,
-                    nitRut: document.getElementById('nit-rut').value,
-                    paisCiudad: document.getElementById('pais-ciudad').value,
-                    direccionFisica: document.getElementById('direccion-fisica').value,
-                    telefonoPrincipal: document.getElementById('telefono-principal').value,
-                    correoOficial: document.getElementById('correo-oficial').value,
-                    paginaWeb: document.getElementById('pagina-web').value,
-                    repNombre: document.getElementById('rep-nombre').value,
-                    repDocumento: document.getElementById('rep-documento').value,
-                    repCargo: document.getElementById('rep-cargo').value,
-                    repTelefono: document.getElementById('rep-telefono').value,
-                    repCorreo: document.getElementById('rep-correo').value,
-                    metodosDonacion: document.getElementById('metodos-donacion').value,
-                    certBase64,
-                    estatutoBase64,
-                    registroBase64,
-                    financieroBase64
-                };
-
-                sessionStorage.setItem('datos_fundacion_p1', JSON.stringify(datosPaso1));
-                window.location.href = "registro_fundacion_paso2.html";
+            if (!fileCert || !fileEstatutos || !fileRegistro || !fileFinanciero) {
+                alert("Por favor, sube todos los documentos PDF obligatorios antes de continuar.");
+                return;
             }
 
-            procesarYContinuar();
+            // Guardamos solo los datos de texto en el sessionStorage (esto ocupa poquísimos kilobytes)
+            const datosPaso1 = {
+                nombreLegal: document.getElementById('nombre-legal').value,
+                nombreComercial: document.getElementById('nombre-comercial').value,
+                nitRut: document.getElementById('nit-rut').value,
+                paisCiudad: document.getElementById('pais-ciudad').value,
+                direccionFisica: document.getElementById('direccion-fisica').value,
+                telefonoPrincipal: document.getElementById('telefono-principal').value,
+                correoOficial: document.getElementById('correo-oficial').value,
+                paginaWeb: document.getElementById('pagina-web').value,
+                repNombre: document.getElementById('rep-nombre').value,
+                repDocumento: document.getElementById('rep-documento').value,
+                repCargo: document.getElementById('rep-cargo').value,
+                repTelefono: document.getElementById('rep-telefono').value,
+                repCorreo: document.getElementById('rep-correo').value,
+                metodosDonacion: document.getElementById('metodos-donacion').value
+            };
+
+            sessionStorage.setItem('datos_fundacion_p1', JSON.stringify(datosPaso1));
+            
+            // Guardamos temporalmente los archivos en window.name para que pasen al siguiente archivo HTML sin saturar storage
+            window.name = JSON.stringify({
+                hasFiles: true
+            });
+
+            window.location.href = "registro_fundacion_paso2.html";
         }
     </script>
 </body>
