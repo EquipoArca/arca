@@ -1,42 +1,45 @@
-require('dotenv').config(); 
-const mysql = require('mysql2'); 
-const express = require('express'); 
+
+require('dotenv').config();
+
+const mysql = require('mysql2');
+const express = require('express');
 const cors = require('cors');
 const nodemailer = require('nodemailer');
 const path = require('path');
 const multer = require('multer');
+
 const { initializeApp, cert } = require('firebase-admin/app');
 const { getAuth } = require('firebase-admin/auth');
-// Inicialización de Firebase utilizando EXCLUSIVAMENTE las variables de entorno individuales
-let credentialCert;
 
-if (process.env.FIREBASE_PRIVATE_KEY) {
-    // Reemplazamos los "\n" literales por saltos de línea reales (\n) de forma estricta
-    let rawKey = process.env.FIREBASE_PRIVATE_KEY;
-    let formattedKey = rawKey.includes('\\n') ? rawKey.replace(/\\n/g, '\n') : rawKey;
+// Inicialización de Firebase mediante variables de entorno
+const projectId = process.env.FIREBASE_PROJECT_ID;
+const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+const privateKey = process.env.FIREBASE_PRIVATE_KEY;
 
-    credentialCert = cert({
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey: formattedKey
-    });
-} else {
-    try {
-        const serviceAccount = require('./clave-firebase.json');
-        credentialCert = cert(serviceAccount);
-    } catch (e) {
-        console.error("❌ ERROR: No se encontró la configuración de Firebase ni en variables de entorno ni en archivo local.");
-    }
+if (!projectId || !clientEmail || !privateKey) {
+    throw new Error(
+        'Faltan variables de entorno de Firebase. Verifica FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL y FIREBASE_PRIVATE_KEY.'
+    );
 }
+
+const formattedKey = privateKey.replace(/\\n/g, '\n');
+
+const credentialCert = cert({
+    projectId,
+    clientEmail,
+    privateKey: formattedKey
+});
 
 initializeApp({
     credential: credentialCert
 });
+
 const app = express();
 
-app.use(express.json({ limit: '10mb' })); 
+app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(cors());
+
 
 // ==========================================
 // ARCHIVOS ESTÁTICOS (¡ESTO ES LO QUE FALTABA!)
