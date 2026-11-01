@@ -1,17 +1,23 @@
+require('dotenv').config(); 
+const mysql = require('mysql2'); 
+const express = require('express'); 
+const cors = require('cors');
+const nodemailer = require('nodemailer');
+const path = require('path');
+const multer = require('multer');
+const { initializeApp, cert } = require('firebase-admin/app');
+const { getAuth } = require('firebase-admin/auth');
 // Inicialización de Firebase utilizando EXCLUSIVAMENTE las variables de entorno individuales
 let credentialCert;
 
-const { FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY } = process.env;
-
-if (FIREBASE_PROJECT_ID && FIREBASE_CLIENT_EMAIL && FIREBASE_PRIVATE_KEY) {
+if (process.env.FIREBASE_PRIVATE_KEY) {
     // Reemplazamos los "\n" literales por saltos de línea reales (\n) de forma estricta
-    let formattedKey = FIREBASE_PRIVATE_KEY.includes('\\n') 
-        ? FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n') 
-        : FIREBASE_PRIVATE_KEY;
+    let rawKey = process.env.FIREBASE_PRIVATE_KEY;
+    let formattedKey = rawKey.includes('\\n') ? rawKey.replace(/\\n/g, '\n') : rawKey;
 
     credentialCert = cert({
-        projectId: FIREBASE_PROJECT_ID,
-        clientEmail: FIREBASE_CLIENT_EMAIL,
+        projectId: process.env.FIREBASE_PROJECT_ID,
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
         privateKey: formattedKey
     });
 } else {
