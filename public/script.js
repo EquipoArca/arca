@@ -747,16 +747,12 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function mostrarAlertaOffline() {
-    const overlay = document.getElementById('offline-alert-overlay');
-    if (overlay) {
-        overlay.classList.remove('d-none');
-    } else {
-        mostrarAlertaArca(
-            "¡No tienes conexión a internet!",
-            "Inténtalo más tarde. ♡",
-            { tipo: "error" }
-        );
-    }
+    // Usamos directamente tu tarjeta personalizada de ARCA
+    mostrarAlertaArca(
+        "¡No tienes conexión a internet!",
+        "Inténtalo más tarde. ♡",
+        { tipo: "conexion" }
+    );
 }
 
 function ocultarAlertaOffline() {
