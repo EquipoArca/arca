@@ -473,7 +473,10 @@ if (zonaArrastre && inputOculto && btnSubir) {
             if (soloImagenes.length > 0) {
                 procesarArchivosMultiples(soloImagenes);
             } else {
-                alert("Por favor, arrastra solo archivos de imagen.");
+                mostrarAlertaArca(
+                "¡Formato incorrecto! 🌸",
+            "Por favor, arrasta archivos que sean únicamente imagenes.",
+            {Tipo: "aviso"});
             }
         }
     });
