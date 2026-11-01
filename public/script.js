@@ -70,7 +70,11 @@ auth.onAuthStateChanged(async (user) => {
             localStorage.setItem('estado_aprobacion', estadoAprobacion);
             
             if (tipoUsuario === 'fundacion' && estadoAprobacion === 'pendiente') {
-                alert("¡Tu fundación está en proceso de revisión legal por el equipo de ARCA! Te notificaremos cuando sea aprobada.");
+                mostrarAlertaArca(
+    "¡Revisión legal en proceso!",
+    "¡Tu fundación está en proceso de revisión legal por el equipo de ARCA! Te notificaremos cuando sea aprobada. 🌸",
+    { tipo: "aviso" }
+);
                 auth.signOut().then(() => {
                     localStorage.clear();
                     window.location.href = "home.html";
@@ -153,7 +157,11 @@ function activarModoFull() {
     botonesDetalles.forEach((boton) => {
         boton.removeAttribute("onclick");
         boton.onclick = function() {
-            alert("Aún no se han publicado detalles para esta novedad.");
+            mostrarAlertaArca(
+                "¡Pronto habrá más Información!",
+                "Aún no se han publicado detalles para esta novedad. 🌸",
+                {tipo: "aviso"}
+            );
         };
     });
 }
@@ -256,7 +264,7 @@ async function ejecutarLoginEmail() {
         } else {
             console.error("Error al verificar correo:", error);
             mostrarAlertaArca(
-                "¡Hubo un pequeño error!",
+                "¡Hubo un pequeño error!" ,
                 "No pudimos verificar tu cuenta. Inténtalo de nuevo."
             );
         }
@@ -294,7 +302,11 @@ function iniciarSesionFinal() {
                     "La contraseña no coincide. Revísala e inténtalo nuevamente."
                 );
             } else {
-                alert("Error al iniciar sesión: " + error.message);
+                mostrarAlertaArca(
+                    "Error al iniciar sesión",
+                    "Intentalo más tarde. ♡",
+                    { tipo: "error" }
+                );
             }
         });
 }
@@ -739,7 +751,11 @@ function mostrarAlertaOffline() {
     if (overlay) {
         overlay.classList.remove('d-none');
     } else {
-        alert("¡No tienes conexión a internet! Inténtalo más tarde.");
+        mostrarAlertaArca(
+            "¡No tienes conexión a internet!",
+            "Inténtalo más tarde. ♡",
+            { tipo: "error" }
+        );
     }
 }
 
@@ -1114,7 +1130,11 @@ async function enviarCodigoOtpFundacion() {
     passwordFundacionTemporal = passModal ? passModal.value.trim() : "";
 
     if (passwordFundacionTemporal.length < 8 || !/[A-Z]/.test(passwordFundacionTemporal) || !/[0-9]/.test(passwordFundacionTemporal)) {
-        alert("Por favor, ingresa una contraseña que cumpla con todos los requisitos de seguridad.");
+        mostrarAlertaArca(
+            "Contraseña no segura",
+            "Por favor, ingresa una contraseña que cumpla con todos los requisitos de seguridad. ♡",
+            { tipo: "error" }
+        );
         return;
     }
 
@@ -1127,15 +1147,35 @@ async function enviarCodigoOtpFundacion() {
             nombre: "Fundación"
         });
 
-        alert("¡Código de verificación enviado a tu correo!");
-        document.getElementById("paso4").style.display = "none";
-        document.getElementById("paso5").style.display = "block";
-    } catch (err) {
-        console.error("Error EmailJS:", err);
-        alert("Código de prueba generado: " + codigoOtpGenerado);
-        document.getElementById("paso4").style.display = "none";
-        document.getElementById("paso5").style.display = "block";
-    }
+       // Caso 1: Cuando el correo se envía con éxito
+    mostrarAlertaArca(
+        "¡Código enviado! 🌸",
+        "¡Código de verificación enviado a tu correo!",
+        {
+            tipo: "aviso",
+            alCerrar: () => {
+                document.getElementById("paso4").style.display = "none";
+                document.getElementById("paso5").style.display = "block";
+            }
+        }
+    );
+
+} catch (err) {
+    console.error("Error EmailJS:", err);
+    
+    // Caso 2: Cuando ocurre un error y usas el código de prueba
+    mostrarAlertaArca(
+        "Código de prueba generado ♡",
+        "Código de prueba generado: " + codigoOtpGenerado,
+        {
+            tipo: "error",
+            alCerrar: () => {
+                document.getElementById("paso4").style.display = "none";
+                document.getElementById("paso5").style.display = "block";
+            }
+        }
+    );
+}
 }
 
 document.addEventListener('input', (e) => {
@@ -1161,14 +1201,26 @@ async function verificarOtpYIrAlRegistro() {
             sessionStorage.setItem('correo_fundacion_temp', correoValidado);
             
             localStorage.removeItem('flujo_fundacion');
-            alert("¡Correo verificado con éxito! Ahora completemos los datos legales de tu fundación.");
-            
+            mostrarAlertaArca(
+                "¡Correo verificado con éxito! 🌸",
+                "Ahora completemos los datos legales de tu fundación.",
+                { tipo: "aviso" }
+            );
             window.location.href = `registro_fundacion.html?email=${encodeURIComponent(correoValidado)}`;
         } catch (error) {
-            alert("Error al crear credenciales en Firebase: " + error.message);
+         mostrarAlertaArca(
+    "Error al registrar cuenta",
+    "No se pudo crear las credenciales en Firebase. ♡ " + error.message,
+    { tipo: "error" }
+);
         }
+
     } else {
-        alert("El código ingresado es incorrecto. Inténtalo de nuevo.");
+        mostrarAlertaArca(
+            "Código incorrecto",
+            "Inténtalo de nuevo. ♡",
+            { tipo: "error" }
+        );
     }
 }
 
