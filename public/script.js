@@ -1189,27 +1189,19 @@ async function verificarOtpYIrAlRegistro() {
     inputs.forEach(inp => codigoIngresado += inp.value);
 
     if (codigoIngresado === codigoOtpGenerado || codigoIngresado === "1234") {
-        try {
-            await auth.createUserWithEmailAndPassword(correoValidado, passwordFundacionTemporal);
-            
-            // 👇 ¡ESTO ES LO QUE FALTA! Guarda las credenciales para el Paso 2
-            sessionStorage.setItem('pass_fundacion_temp', passwordFundacionTemporal);
-            sessionStorage.setItem('correo_fundacion_temp', correoValidado);
-            
-            localStorage.removeItem('flujo_fundacion');
-            mostrarAlertaArca(
-                "¡Correo verificado con éxito! 🌸",
-                "Ahora completemos los datos legales de tu fundación.",
-                { tipo: "aviso" }
-            );
-            window.location.href = `registro_fundacion.html?email=${encodeURIComponent(correoValidado)}`;
-        } catch (error) {
-         mostrarAlertaArca(
-    "Error al registrar cuenta",
-    "No se pudo crear las credenciales en Firebase. ♡ " + error.message,
-    { tipo: "error" }
-);
-        }
+        // ❌ Eliminamos el auth.createUserWithEmailAndPassword de aquí para que no se cree antes de tiempo.
+        
+        // Guardamos las credenciales temporalmente en sessionStorage para usarlas al final del Paso 2
+        sessionStorage.setItem('pass_fundacion_temp', passwordFundacionTemporal);
+        sessionStorage.setItem('correo_fundacion_temp', correoValidado);
+        
+        localStorage.removeItem('flujo_fundacion');
+        mostrarAlertaArca(
+            "¡Correo verificado con éxito! 🌸",
+            "Ahora completemos los datos legales de tu fundación.",
+            { tipo: "aviso" }
+        );
+        window.location.href = `registro_fundacion.html?email=${encodeURIComponent(correoValidado)}`;
 
     } else {
         mostrarAlertaArca(
