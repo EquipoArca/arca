@@ -1802,18 +1802,20 @@ app.post('/api/registrar-fundacion', express.json({ limit: '20mb' }), async (req
             const idDocumentacionGenerado = resultadoDoc.insertId;
             const fechaActual = new Date().toISOString().slice(0, 10);
 
-            // 3. Registrar al usuario base en la tabla 'usuarios'
+// 3. Registrar al usuario base en la tabla 'usuarios' (sin Fecha_registro)
             const queryUsuarios = `
-                INSERT INTO usuarios (tipo_usuario, estado_aprobacion, correo_usuario, Fecha_registro) 
-                VALUES ('fundacion', 'pendiente', ?, ?)
+                INSERT INTO usuarios (tipo_usuario, estado_aprobacion, correo_usuario) 
+                VALUES ('fundacion', 'pendiente', ?)
             `;
 
-            db.query(queryUsuarios, [correo_fundacion, fechaActual], (err2, resultadoUsuario) => {
+            db.query(queryUsuarios, [correo_fundacion], (err2, resultadoUsuario) => {
                 if (err2) {
                     console.error("❌ Error al registrar en usuarios:", err2.sqlMessage || err2);
                     getAuth().deleteUser(firebaseUser.uid).catch(() => {});
                     return res.status(500).json({ exito: false, mensaje: "Error al registrar en usuarios: " + (err2.sqlMessage || err2.message) });
                 }
+
+                const idUsuarioGenerado = resultadoUsuario.insertId;
 
                 // 4. Registrar los datos específicos en la tabla 'fundacion' vinculando la documentación
                 const queryFundacion = `
