@@ -1520,6 +1520,7 @@ function mostrarAlertaArca(titulo, mensaje, opciones = {}) {
     boton.focus();
 }
 // Función para adaptar la interfaz del Home según el tipo de usuario (Usuario normal vs Fundación)
+// Función para adaptar la interfaz del Home según el tipo de usuario (Usuario normal vs Fundación)
 function adaptarInterfazSegunRol() {
     const tipoUsuario = localStorage.getItem('tipo_usuario') || 'usuario';
     
@@ -1528,6 +1529,9 @@ function adaptarInterfazSegunRol() {
     const logoCard1 = document.getElementById('logo-card-1');
     const cardReportar = document.getElementById('card-reportar-home');
     const linkGuardado = document.getElementById('link-guardado');
+    
+    // Seleccionamos el botón de últimas novedades
+    const botonNovedades = document.querySelector('.news-button');
 
     if (tipoUsuario === 'fundacion') {
         // 1. Título con tipografía exacta y el badge de verificación pastel
@@ -1540,7 +1544,7 @@ function adaptarInterfazSegunRol() {
             `;
         }
 
-        // 2. Tarjeta 1 -> "Reportes" con su imagen PNG oficial
+        // 2. Tarjeta 1 -> "Reportes" con su imagen PNG oficial (tamaño 200px que te gusta)
         if (tituloCard1) tituloCard1.textContent = "Reportes";
         
         if (logoCard1) {
@@ -1558,6 +1562,11 @@ function adaptarInterfazSegunRol() {
             if (iconoGuardado) iconoGuardado.className = "fa-solid fa-layer-group";
             if (textoGuardado) textoGuardado.textContent = "Publicaciones";
             linkGuardado.href = "publicaciones_fundacion.html";
+        }
+
+        // 4. Ocultar el botón de Últimas Novedades para fundaciones
+        if (botonNovedades) {
+            botonNovedades.style.display = 'none';
         }
 
     } else {
@@ -1579,8 +1588,13 @@ function adaptarInterfazSegunRol() {
             if (textoGuardado) textoGuardado.textContent = "Guardado";
             linkGuardado.href = "guardados_usuario.html";
         }
+
+        // Mostrar el botón de Últimas Novedades para usuarios normales
+        if (botonNovedades) {
+            botonNovedades.style.display = 'flex';
+        }
     }
-}       // ==========================================
+}   // ==========================================
 // 9. CONTROLADOR DEL MODO OSCURO GLOBAL
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
