@@ -1746,9 +1746,9 @@ const upload = multer({ storage: multer.memoryStorage() });
 app.post('/api/registrar-fundacion', express.json({ limit: '20mb' }), async (req, res) => {
     const {
         correo_fundacion, password,
-        nombre_legal, nombre_comercial, nit_rut, id_representante,
+        nombre_legal, nombre_comercial, nit_rut,
         pais, ciudad, direccion, telefono_fundacion, pagina_web,
-        rep_nombre, rep_documento, rep_cargo, rep_telefono, metodos_donacion,
+        rep_nombre, rep_documento, rep_cargo, rep_telefono, rep_correo, metodos_donacion,
         descripcion_mision, descripcion_vision, programas_proyectos, pfp_fundacion, foto_portada, enfoque_otro,
         certificado_existencia, estatuto, registro_oficial, estado_financiero
     } = req.body;
@@ -1792,38 +1792,34 @@ app.post('/api/registrar-fundacion', express.json({ limit: '20mb' }), async (req
             VALUES (?, ?, ?, ?)
         `;
         
-        db.query(queryDocumentacion, [certBuffer, estatutoBuffer, financieroBuffer, registroBuffer], (err, resultadoDoc) => {
-            if (err) {
-                console.error("❌ Error al guardar documentación:", err.sqlMessage || err);
+        db.query(queryDocumentacion, [certBuffer, estatutoBuffer, financieroBuffer, registroBuffer], (errDoc, resultadoDoc) => {
+            if (errDoc) {
+                console.error("❌ Error al guardar documentación:", errDoc.sqlMessage || errDoc);
                 getAuth().deleteUser(firebaseUser.uid).catch(() => {});
-                return res.status(500).json({ exito: false, mensaje: "Error al guardar los documentos legales: " + (err.sqlMessage || err.message) });
+                return res.status(500).json({ exito: false, mensaje: "Error al guardar los documentos legales: " + (errDoc.sqlMessage || errDoc.message) });
             }
 
             const idDocumentacionGenerado = resultadoDoc.insertId;
-            const fechaActual = new Date().toISOString().slice(0, 10);
 
-// 3. Registrar al usuario base en la tabla 'usuarios' incluyendo el nombre de la fundación
+            // 3. Registrar al usuario base en la tabla 'usuarios'
             const queryUsuarios = `
                 INSERT INTO usuarios (tipo_usuario, estado_aprobacion, correo_usuario, nombre_usuario) 
                 VALUES ('fundacion', 'pendiente', ?, ?)
             `;
 
-            db.query(queryUsuarios, [correo_fundacion, nombre_comercial || nombre_legal || 'Fundacion'], (err2, resultadoUsuario) => {
-                if (err2) {
-                    console.error("❌ Error al registrar en usuarios:", err2.sqlMessage || err2);
+            db.query(queryUsuarios, [correo_fundacion, nombre_comercial || nombre_legal || 'Fundacion'], (errUsr, resultadoUsuario) => {
+                if (errUsr) {
+                    console.error("❌ Error al registrar en usuarios:", errUsr.sqlMessage || errUsr);
                     getAuth().deleteUser(firebaseUser.uid).catch(() => {});
-                    return res.status(500).json({ exito: false, mensaje: "Error al registrar en usuarios: " + (err2.sqlMessage || err2.message) });
+                    return res.status(500).json({ exito: false, mensaje: "Error al registrar en usuarios: " + (errUsr.sqlMessage || errUsr.message) });
                 }
 
-                const idUsuarioGenerado = resultadoUsuario.insertId;
-
-                // 4. Registrar los datos específicos en la tabla 'fundacion' vinculando la documentación
+                // 4. Registrar los datos específicos en la tabla 'fundacion' primero para obtener su id_fundacion
                 const queryFundacion = `
                     INSERT INTO fundacion (
                         id_documentacion, 
                         Nombre_Legal, 
                         Nombre_Comercial, 
-                        id_representante, 
                         Nit_Rut, 
                         Pais, 
                         Ciudad, 
@@ -1836,14 +1832,13 @@ app.post('/api/registrar-fundacion', express.json({ limit: '20mb' }), async (req
                         Foto_Portada, 
                         Programas_Proyectos_Actuales, 
                         enfoque_otro
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 `;
 
                 const valoresFundacion = [
                     idDocumentacionGenerado,
                     nombre_legal || '',
                     nombre_comercial || '',
-                    rep_documento || null,
                     nit_rut || '',
                     pais || 'Colombia',
                     ciudad || 'Medellín',
@@ -1858,19 +1853,40 @@ app.post('/api/registrar-fundacion', express.json({ limit: '20mb' }), async (req
                     enfoque_otro || ''
                 ];
 
-                db.query(queryFundacion, valoresFundacion, (err3) => {
-                    if (err3) {
-                        console.error("❌ Error al registrar en la tabla fundacion:", err3.sqlMessage || err3);
+                db.query(queryFundacion, valoresFundacion, (errFund, resultadoFundacion) => {
+                    if (errFund) {
+                        console.error("❌ Error al registrar en la tabla fundacion:", errFund.sqlMessage || errFund);
                         getAuth().deleteUser(firebaseUser.uid).catch(() => {});
-                        return res.status(500).json({ exito: false, mensaje: "Error al registrar la fundación: " + (err3.sqlMessage || err3.message) });
+                        return res.status(500).json({ exito: false, mensaje: "Error al registrar la fundación: " + (errFund.sqlMessage || errFund.message) });
                     }
 
-                    res.json({ 
-                        exito: true, 
-                        mensaje: "¡Fundación registrada con éxito! Quedó en estado pendiente de aprobación." 
+                    const idFundacionGenerado = resultadoFundacion.insertId;
+
+                    // 5. Guardar el representante legal en su tabla utilizando el id_fundacion recién creado
+                    const queryRepresentante = `
+                        INSERT INTO representante (nombre_completo, documento, telefono, correo, id_fundacion) 
+                        VALUES (?, ?, ?, ?, ?)
+                    `;
+                    
+                    db.query(queryRepresentante, [
+                        rep_nombre || '', 
+                        rep_documento || '', 
+                        rep_telefono || '', 
+                        rep_correo || '', 
+                        idFundacionGenerado
+                    ], (errRep) => {
+                        if (errRep) {
+                            console.error("❌ Error al guardar representante:", errRep.sqlMessage || errRep);
+                            // Opcional: podrías limpiar aquí si deseas estricta atomicidad
+                        }
+
+                        res.json({ 
+                            exito: true, 
+                            mensaje: "¡Fundación registrada con éxito! Quedó en estado pendiente de aprobación." 
+                        });
                     });
                 });
-            });;
+            });
         });
 
     } catch (error) {
