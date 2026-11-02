@@ -17,129 +17,165 @@
         }
     </script>
     <style>
-        .perfil-fundacion-container {
-            max-width: 1100px;
-            width: 95%;
-            margin: 30px auto;
-            background: rgba(255, 240, 243, 0.75);
-            backdrop-filter: blur(12px);
-            border: 2px solid rgba(255, 255, 255, 0.9);
-            border-radius: 28px;
-            padding: 30px;
-            box-shadow: 0 12px 35px rgba(220, 150, 140, 0.12);
+        body {
+            margin: 0;
             font-family: 'Itim', cursive, sans-serif;
-            box-sizing: border-box;
+            background-color: #fce8e6;
+            overflow-x: hidden;
         }
 
-        /* BANNER Y PORTADA ESTILO FACEBOOK */
+        .main-content {
+            padding: 15px 20px;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: calc(100vh - 70px);
+        }
+
+        /* CONTENEDOR PRINCIPAL CON GLASSMORPHISM Y ANIMACIÓN SUAVE */
+        .perfil-fundacion-container {
+            max-width: 1050px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            border-radius: 26px;
+            padding: 20px 30px;
+            box-shadow: 0 15px 35px rgba(220, 150, 140, 0.15);
+            box-sizing: border-box;
+            animation: fadeInScale 0.4s ease-out forwards;
+        }
+
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.97); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* PORTADA Y FOTO FLOTANTE ESTILO FACEBOOK CORREGIDA */
         .pf-portada-contenedor {
             position: relative;
             width: 100%;
-            height: 220px;
-            border-radius: 20px;
-            overflow: hidden;
-            border: 2px solid #fca38d;
+            height: 150px;
+            border-radius: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.8);
             background: #fce4e4;
-            margin-bottom: 60px; /* Espacio para que la foto flotante no colapse */
+            margin-bottom: 45px;
+            box-shadow: 0 6px 20px rgba(230, 150, 130, 0.1);
         }
 
         .pf-portada-preview {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            border-radius: 16px;
         }
 
         .pf-avatar-flotante {
             position: absolute;
-            bottom: -50px;
-            left: 30px;
-            width: 110px;
-            height: 110px;
+            bottom: -35px;
+            left: 25px;
+            width: 85px;
+            height: 85px;
             border-radius: 50%;
             object-fit: cover;
-            border: 4px solid #ffffff;
+            border: 35px solid #ffffff;
             background: #fff;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.12);
         }
 
+        /* TÍTULO CON SOMBRA SUTIL Y ELEGANTE (SIN NEGRITAS PESADAS) */
         .pf-nombre-titulo {
-            margin: 0 0 25px 0;
+            margin: 0 0 15px 0;
             color: #2b2b2b;
-            font-size: 2rem;
-            font-weight: bold;
+            font-size: 1.7rem;
+            font-weight: 400;
+            text-shadow: 0 2px 8px rgba(230, 150, 130, 0.25);
+            letter-spacing: 0.5px;
         }
 
+        /* GRID COMPACTO PARA OCUPAR EL ESPACIO SIN DESLIZAR EXCESIVAMENTE */
         .pf-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 25px;
+            gap: 15px;
         }
 
         .pf-card-seccion {
-            background: rgba(255, 255, 255, 0.65);
-            border-radius: 20px;
-            padding: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.9);
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(230, 150, 130, 0.05);
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 12px 18px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 12px rgba(230, 150, 130, 0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .pf-card-seccion:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(230, 150, 130, 0.1);
         }
 
         .pf-label-capsula {
-            background-color: #fcae9e;
+            background-color: rgba(252, 174, 158, 0.8);
             color: #2b2b2b;
-            font-size: 1rem;
-            padding: 4px 14px;
-            border-radius: 14px;
+            font-size: 0.9rem;
+            font-weight: 400;
+            padding: 3px 12px;
+            border-radius: 12px;
             display: inline-block;
-            margin-bottom: 10px;
-            font-weight: bold;
+            margin-bottom: 6px;
+            text-shadow: 0 1px 4px rgba(255, 255, 255, 0.4);
         }
 
         .pf-texto-info {
             color: #444;
-            font-size: 0.95rem;
-            line-height: 1.5;
+            font-size: 0.9rem;
+            line-height: 1.4;
             margin: 0;
+            font-weight: 400;
         }
 
         .pf-redes-fila {
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 10px;
-            font-size: 0.95rem;
+            gap: 10px;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
             color: #333;
             text-decoration: none;
         }
 
         .pf-redes-fila i {
             color: #e06d53;
-            width: 22px;
+            width: 18px;
             text-align: center;
-            font-size: 1.1rem;
+            font-size: 1rem;
         }
 
         .btn-editar-perfil-fundacion {
             background-color: #fbc2c4;
             color: #2b2b2b;
             border: none;
-            padding: 12px 35px;
+            padding: 10px 30px;
             font-family: 'Itim', cursive;
-            font-size: 1.3rem;
-            border-radius: 25px;
+            font-size: 1.15rem;
+            border-radius: 20px;
             cursor: pointer;
             display: block;
-            margin: 25px auto 0 auto;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            transition: transform 0.2s;
+            margin: 18px auto 0 auto;
+            box-shadow: 0 4px 12px rgba(251, 194, 196, 0.4);
+            transition: all 0.2s ease;
             text-decoration: none;
             text-align: center;
             width: fit-content;
         }
 
         .btn-editar-perfil-fundacion:hover {
-            transform: scale(1.03);
+            transform: scale(1.04);
             background-color: #f9a3a6;
+            box-shadow: 0 6px 16px rgba(249, 163, 166, 0.5);
         }
     </style>
 </head>
@@ -189,7 +225,7 @@
     <main class="main-content">
         <div class="perfil-fundacion-container">
             
-            <!-- PORTADA CON FOTO OFICIAL FLOTANTE ESTILO FACEBOOK -->
+            <!-- PORTADA CON FOTO OFICIAL FLOTANTE ESTILO FACEBOOK CORREGIDA -->
             <div class="pf-portada-contenedor">
                 <img id="pf-portada" src="logo.png" alt="Portada" class="pf-portada-preview">
                 <img id="pf-avatar" src="logo.png" alt="Foto Oficial" class="pf-avatar-flotante">
@@ -206,7 +242,7 @@
                         <p id="pf-mision" class="pf-texto-info">Cargando misión...</p>
                     </div>
 
-                    <div class="pf-card-seccion">
+                    <div class="pf-card-seccion" style="margin-top: 12px;">
                         <div class="pf-label-capsula">Visión</div>
                         <p id="pf-vision" class="pf-texto-info">Cargando visión...</p>
                     </div>
@@ -219,14 +255,14 @@
                         <p id="pf-enfoque" class="pf-texto-info">Cargando enfoques...</p>
                     </div>
 
-                    <div class="pf-card-seccion">
+                    <div class="pf-card-seccion" style="margin-top: 12px;">
                         <div class="pf-label-capsula">Programas / Proyectos actuales</div>
                         <p id="pf-programas" class="pf-texto-info">Cargando proyectos...</p>
                     </div>
 
-                    <div class="pf-card-seccion">
+                    <div class="pf-card-seccion" style="margin-top: 12px;">
                         <div class="pf-label-capsula">Contáctanos y Redes</div>
-                        <div id="pf-redes-container" style="margin-top: 10px;">
+                        <div id="pf-redes-container" style="margin-top: 6px;">
                             <!-- Se inyectan dinámicamente -->
                         </div>
                     </div>
@@ -281,7 +317,7 @@
                         <div class="pf-redes-fila"><i class="fa-solid fa-phone"></i> ${data.Telefono_fundacion || 'No registrado'}</div>
                     `;
                     if (data.Pagina_web && data.Pagina_web.trim() !== '') {
-                        htmlRedes += `<div class="pf-redes-fila"><i class="fa-solid fa-globe"></i> <a href="${data.Pagina_web}" target="_blank" style="color: #e06d53;">${data.Pagina_web}</a></div>`;
+                        htmlRedes += `<div class="pf-redes-fila"><i class="fa-solid fa-globe"></i> <a href="${data.Pagina_web}" target="_blank" style="color: #e06d53; text-decoration: none;">${data.Pagina_web}</a></div>`;
                     }
                     redesContainer.innerHTML = htmlRedes;
 
