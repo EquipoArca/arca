@@ -1861,25 +1861,18 @@ input:checked + .slider:after {
     color: #ffffff;
     font-size: 0.65rem;
 }
-/* --- AJUSTE DE TAMAÑO ESPECÍFICO PARA EL ICONO DE REPORTES --- */
 
-/* Usamos una clase específica para el icono de reportes de fundación
-   para poder darle un tamaño visualmente equivalente a la casa. */
+/* --- AJUSTE DEFINITIVO PARA EL LOGO DE REPORTES DE FUNDACIÓN --- */
 .logo-card-reportes-fundacion {
-    /* Forzamos un tamaño mayor (ej. 130px o 140px) para compensar
-       el diseño fino del icono. Ajusta este valor si es necesario. */
-    width: 140px !important; /* !important asegura que anule el width: 100px general */
-    height: auto; /* Mantiene la proporción */
-
-    /* Mantenemos los estilos de sombra y transición para que combine */
+    width: 135px !important; /* Forzamos un ancho mayor para que no se vea pequeña */
+    max-width: none !important;
+    height: auto !important;
     filter: drop-shadow(4px 4px 0px rgba(0,0,0,0.05));
     transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-
-    /* Aseguramos que esté centrado verticalmente si es necesario */
-    margin-top: 10px;
+    margin-top: 5px;
 }
 
-/* Mantenemos el efecto hover también para este icono grande */
+/* Efecto de movimiento al pasar el cursor por la tarjeta */
 .card:hover .logo-card-reportes-fundacion {
-    transform: scale(1.1) rotate(-5deg);
+    transform: scale(1.12) rotate(-5deg);
 }
