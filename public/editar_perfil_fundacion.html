@@ -302,7 +302,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="script.js"></script>
-    <script>
+   <script>
         function previsualizarImagen(event, previewId) {
             const file = event.target.files[0];
             if (file) {
@@ -316,7 +316,7 @@
             }
         }
 
-        // Cargar datos actuales de la fundación al abrir la vista
+        // Cargar datos actuales de la fundación al abrir la vista de edición
         document.addEventListener('DOMContentLoaded', async () => {
             firebase.auth().onAuthStateChanged(async (user) => {
                 if (!user) {
@@ -330,22 +330,23 @@
                     
                     const data = await res.json();
 
-                    document.getElementById('nombre-publico-fundacion').value = data.nombre_comercial || data.nombre_legal || '';
-                    document.getElementById('mision-publica').value = data.descripcion_mision || '';
-                    document.getElementById('vision-publica').value = data.descripcion_vision || '';
-                    document.getElementById('programas-publicos').value = data.programas_proyectos || '';
-                    document.getElementById('red-correo').value = data.correo_fundacion || user.email;
-                    document.getElementById('red-telefono').value = data.telefono_fundacion || '';
-                    document.getElementById('red-web').value = data.pagina_web || '';
+                    // Rellenamos los inputs con los datos exactos de la BD
+                    document.getElementById('nombre-publico-fundacion').value = data.Nombre_Comercial || data.Nombre_Legal || '';
+                    document.getElementById('mision-publica').value = data.Descripcion_mision || '';
+                    document.getElementById('vision-publica').value = data.Descripcion_vision || '';
+                    document.getElementById('programas-publicos').value = data.Programas_Proyectos_Actuales || '';
+                    document.getElementById('red-correo').value = data.Correo_fundacion || user.email;
+                    document.getElementById('red-telefono').value = data.Telefono_fundacion || '';
+                    document.getElementById('red-web').value = data.Pagina_web || '';
 
-                    if (data.foto_portada) {
+                    if (data.Foto_Portada && data.Foto_Portada.trim() !== '') {
                         const imgPortada = document.getElementById('preview-portada');
-                        imgPortada.src = data.foto_portada;
+                        imgPortada.src = data.Foto_Portada;
                         imgPortada.style.display = 'block';
                     }
-                    if (data.pfp_fundacion) {
+                    if (data.PFP_Fundacion && data.PFP_Fundacion.trim() !== '') {
                         const imgOficial = document.getElementById('preview-oficial');
-                        imgOficial.src = data.pfp_fundacion;
+                        imgOficial.src = data.PFP_Fundacion;
                         imgOficial.style.display = 'block';
                     }
 
@@ -355,7 +356,7 @@
             });
         });
 
-        // Enviar cambios actualizados al servidor
+        // Enviar cambios actualizados al servidor mediante PUT
         async function guardarCambiosFundacion() {
             const user = firebase.auth().currentUser;
             if (!user) return;

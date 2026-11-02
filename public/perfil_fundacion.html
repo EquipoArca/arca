@@ -290,9 +290,14 @@
                 <img id="pf-avatar" src="logo.png" alt="Foto Oficial" class="pf-avatar-flotante">
             </div>
 
-            <!-- CABECERA CON NOMBRE Y BOTÓN EDITAR -->
+            <!-- CABECERA CON NOMBRE, CHULITO VERIFICADO Y BOTÓN EDITAR -->
             <div class="pf-header-info">
-                <h2 id="pf-nombre-fundacion" class="pf-nombre-titulo">Cargando fundación...</h2>
+                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                    <h2 id="pf-nombre-fundacion" class="pf-nombre-titulo" style="margin: 0;">Cargando fundación...</h2>
+                    <span class="badge-fundacion-lila" id="badge-verificacion-oficial" style="display: inline-flex; align-items: center; gap: 5px; background: #e8dff5; border: 1px solid #d4c5f0; color: #5e4b8b; padding: 4px 12px; border-radius: 50px; font-size: 0.95rem; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
+                        <i class="fa-solid fa-circle-check" style="color: #9b7ede;"></i> Fundación Verificada
+                    </span>
+                </div>
                 <a href="editar_perfil_fundacion.html" class="btn-editar-perfil-fundacion btn-arca-animado">
                     <i class="fa-solid fa-pen-to-square"></i> Editar perfil
                 </a>
