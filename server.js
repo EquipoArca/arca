@@ -1771,8 +1771,7 @@ app.post('/api/registrar-fundacion', express.json({ limit: '20mb' }), async (req
     const financieroBuffer = parseBase64ToBuffer(estado_financiero);
 
     try {
-        // 1. Crear la cuenta en Firebase Auth usando Firebase Admin (Backend)
-        // Esto evita crear la cuenta antes de tiempo si el usuario no termina el formulario
+        // 1. Crear la cuenta en Firebase Auth usando Firebase Admin
         let firebaseUser;
         try {
             firebaseUser = await getAuth().createUser({
@@ -1787,7 +1786,7 @@ app.post('/api/registrar-fundacion', express.json({ limit: '20mb' }), async (req
             throw firebaseErr;
         }
 
-        // 2. Guardar los documentos en la tabla 'documentacion' de MySQL
+        // 2. Guardar los documentos en la tabla 'documentacion'
         const queryDocumentacion = `
             INSERT INTO documentacion (certificado_existencia, estatuto, estado_financiero, registro_oficial) 
             VALUES (?, ?, ?, ?)
@@ -1796,7 +1795,6 @@ app.post('/api/registrar-fundacion', express.json({ limit: '20mb' }), async (req
         db.query(queryDocumentacion, [certBuffer, estatutoBuffer, financieroBuffer, registroBuffer], (err, resultadoDoc) => {
             if (err) {
                 console.error("❌ Error al guardar documentación:", err.sqlMessage || err);
-                // Si falla MySQL, borramos el usuario creado en Firebase para no dejar rastro huérfano
                 getAuth().deleteUser(firebaseUser.uid).catch(() => {});
                 return res.status(500).json({ exito: false, mensaje: "Error al guardar los documentos legales: " + (err.sqlMessage || err.message) });
             }
@@ -1804,79 +1802,71 @@ app.post('/api/registrar-fundacion', express.json({ limit: '20mb' }), async (req
             const idDocumentacionGenerado = resultadoDoc.insertId;
             const fechaActual = new Date().toISOString().slice(0, 10);
 
-            // 3. Guardar en la tabla 'usuarios' con tipo fundación y estado pendiente
+            // 3. Registrar al usuario base en la tabla 'usuarios'
             const queryUsuarios = `
-                INSERT INTO usuarios (
-                    tipo_usuario, 
-                    estado_aprobacion, 
-                    id_documentacion, 
-                    Nombre_Legal, 
-                    Nombre_Comercial, 
-                    id_representante, 
-                    Nit_Rut, 
-                    Pais, 
-                    Ciudad, 
-                    Direccion, 
-                    Telefono_fundacion, 
-                    correo_usuario, 
-                    Pagina_web, 
-                    Fecha_registro, 
-                    Descripcion_mision, 
-                    Descripcion_vision, 
-                    PFP_Fundacion, 
-                    Foto_Portada, 
-                    Programas_Proyectos_Actuales, 
-                    enfoque_otro
-                ) VALUES ('fundacion', 'pendiente', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ON DUPLICATE KEY UPDATE
-                    tipo_usuario = 'fundacion',
-                    estado_aprobacion = 'pendiente',
-                    id_documentacion = VALUES(id_documentacion),
-                    Nombre_Legal = VALUES(Nombre_Legal),
-                    Nombre_Comercial = VALUES(Nombre_Comercial),
-                    Nit_Rut = VALUES(Nit_Rut),
-                    Pais = VALUES(Pais),
-                    Ciudad = VALUES(Ciudad),
-                    Direccion = VALUES(Direccion),
-                    Telefono_fundacion = VALUES(Telefono_fundacion),
-                    Pagina_web = VALUES(Pagina_web),
-                    Descripcion_mision = VALUES(Descripcion_mision),
-                    Descripcion_vision = VALUES(Descripcion_vision),
-                    Programas_Proyectos_Actuales = VALUES(Programas_Proyectos_Actuales),
-                    enfoque_otro = VALUES(enfoque_otro);
+                INSERT INTO usuarios (tipo_usuario, estado_aprobacion, correo_usuario, Fecha_registro) 
+                VALUES ('fundacion', 'pendiente', ?, ?)
             `;
 
-            const valoresUsuarios = [
-                idDocumentacionGenerado,
-                nombre_legal || '',
-                nombre_comercial || '',
-                rep_documento || null,
-                nit_rut || '',
-                pais || 'Colombia',
-                ciudad || 'Medellín',
-                direccion || '',
-                telefono_fundacion || '',
-                correo_fundacion,
-                pagina_web || '',
-                fechaActual,
-                descripcion_mision || '',
-                descripcion_vision || '',
-                pfp_fundacion || '',
-                foto_portada || '',
-                programas_proyectos || '',
-                enfoque_otro || ''
-            ];
-
-            db.query(queryUsuarios, valoresUsuarios, (err2) => {
+            db.query(queryUsuarios, [correo_fundacion, fechaActual], (err2, resultadoUsuario) => {
                 if (err2) {
                     console.error("❌ Error al registrar en usuarios:", err2.sqlMessage || err2);
                     getAuth().deleteUser(firebaseUser.uid).catch(() => {});
-                    return res.status(500).json({ exito: false, mensaje: "Error al registrar la fundación en usuarios: " + (err2.sqlMessage || err2.message) });
+                    return res.status(500).json({ exito: false, mensaje: "Error al registrar en usuarios: " + (err2.sqlMessage || err2.message) });
                 }
 
-                res.json({ 
-                    exito: true, 
-                    mensaje: "¡Fundación registrada con éxito! Quedó en estado pendiente de aprobación." 
+                // 4. Registrar los datos específicos en la tabla 'fundacion' vinculando la documentación
+                const queryFundacion = `
+                    INSERT INTO fundacion (
+                        id_documentacion, 
+                        Nombre_Legal, 
+                        Nombre_Comercial, 
+                        id_representante, 
+                        Nit_Rut, 
+                        Pais, 
+                        Ciudad, 
+                        Direccion, 
+                        Telefono_fundacion, 
+                        Pagina_web, 
+                        Descripcion_mision, 
+                        Descripcion_vision, 
+                        PFP_Fundacion, 
+                        Foto_Portada, 
+                        Programas_Proyectos_Actuales, 
+                        enfoque_otro
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                `;
+
+                const valoresFundacion = [
+                    idDocumentacionGenerado,
+                    nombre_legal || '',
+                    nombre_comercial || '',
+                    rep_documento || null,
+                    nit_rut || '',
+                    pais || 'Colombia',
+                    ciudad || 'Medellín',
+                    direccion || '',
+                    telefono_fundacion || '',
+                    pagina_web || '',
+                    descripcion_mision || '',
+                    descripcion_vision || '',
+                    pfp_fundacion || '',
+                    foto_portada || '',
+                    programas_proyectos || '',
+                    enfoque_otro || ''
+                ];
+
+                db.query(queryFundacion, valoresFundacion, (err3) => {
+                    if (err3) {
+                        console.error("❌ Error al registrar en la tabla fundacion:", err3.sqlMessage || err3);
+                        getAuth().deleteUser(firebaseUser.uid).catch(() => {});
+                        return res.status(500).json({ exito: false, mensaje: "Error al registrar la fundación: " + (err3.sqlMessage || err3.message) });
+                    }
+
+                    res.json({ 
+                        exito: true, 
+                        mensaje: "¡Fundación registrada con éxito! Quedó en estado pendiente de aprobación." 
+                    });
                 });
             });
         });
