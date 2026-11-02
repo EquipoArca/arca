@@ -1,118 +1,87 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const formDonacion = document.getElementById('formDonacionArca'); // Asegúrate de que tu <form> tenga este ID (o cámbialo por el tuyo)
-    const inputNombre = document.getElementById('nombre');
-    const inputTelefono = document.getElementById('telefono');
-    const inputCorreo = document.getElementById('correo');
+    const btnSelectMap = document.querySelector('.btn-select-map');
+    const inputFundacion = document.querySelector('.foundation-sub-options input[type="text"]');
+    
+    let mapaDonacion = null;
+    let contenedorMapa = null;
 
-    // 1. Autocompletar datos del usuario si ya ha iniciado sesión en Firebase
-    if (typeof firebase !== 'undefined' && firebase.auth) {
-        firebase.auth().onAuthStateChanged(async (user) => {
-            if (user) {
-                if (inputCorreo && user.email) {
-                    inputCorreo.value = user.email;
-                }
-                if (inputNombre && user.displayName) {
-                    inputNombre.value = user.displayName;
-                }
+    if (btnSelectMap && inputFundacion) {
+        // Creamos el contenedor del mapa adaptado para ancho completo debajo de la fila
+        contenedorMapa = document.createElement('div');
+        contenedorMapa.id = 'contenedor-mapa-donacion-dinamico';
+        contenedorMapa.style.cssText = `
+            display: none;
+            width: 100%;
+            height: 280px;
+            margin-top: 15px;
+            border-radius: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            position: relative;
+            z-index: 10;
+        `;
+        
+        const divInterno = document.createElement('div');
+        divInterno.id = 'mapa-donacion-interno';
+        divInterno.style.cssText = 'width: 100%; height: 100%; border-radius: 18px;';
+        contenedorMapa.appendChild(divInterno);
 
-                // Opcional: autocompletar teléfono desde tu base de datos MySQL (igual que hiciste en reportes)
-                try {
-                    const respuesta = await fetch(`/api/obtener-usuario?correo=${encodeURIComponent(user.email)}`);
-                    if (respuesta.ok) {
-                        const usuario = await respuesta.json();
-                        if (inputTelefono) {
-                            inputTelefono.value = usuario.Telefono_usuario || usuario.telefono_usuario || usuario.telefono || '';
+        // Insertamos el contenedor justo después del bloque horizontal de fundaciones
+        const foundationGroup = btnSelectMap.closest('.foundation-sub-options');
+        if (foundationGroup) {
+            foundationGroup.parentNode.insertBefore(contenedorMapa, foundationGroup.nextSibling);
+        }
+
+        btnSelectMap.addEventListener('click', () => {
+            if (contenedorMapa.style.display === 'none' || contenedorMapa.style.display === '') {
+                contenedorMapa.style.display = 'block';
+                btnSelectMap.textContent = "🗺️ Ocultar mapa";
+
+                if (!mapaDonacion) {
+                    mapaDonacion = L.map('mapa-donacion-interno').setView([6.265, -75.615], 14);
+
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19,
+                        attribution: '© OpenStreetMap - ARCA'
+                    }).addTo(mapaDonacion);
+
+                    const fundacionesAliadas = [
+                        { nombre: "Refugio Huellitas de Amor 🐾", lat: 6.268, lng: -75.620, dir: "Vía principal San Cristóbal" },
+                        { nombre: "Fundación SOS Animal Medellín 🏡", lat: 6.260, lng: -75.610, dir: "Sector Central" }
+                    ];
+
+                    fundacionesAliadas.forEach(f => {
+                        const marker = L.marker([f.lat, f.lng]).addTo(mapaDonacion);
+                        marker.bindPopup(`
+                            <div style="font-family: 'Itim', cursive; text-align: center; color: #5c4033;">
+                                <b style="color: #d97736;">${f.nombre}</b>
+                                <p style="font-size: 12px; margin: 4px 0;">${f.dir}</p>
+                                <button type="button" class="btn-elegir-refugio" data-nombre="${f.nombre}" style="background: #E985A0; color: white; border: none; padding: 5px 12px; border-radius: 9999px; cursor: pointer; font-family: 'Itim', cursive;">
+                                    Elegir fundación ♡
+                                </button>
+                            </div>
+                        `);
+                    });
+
+                    document.addEventListener('click', (e) => {
+                        if (e.target.classList.contains('btn-elegir-refugio')) {
+                            const nombreElegido = e.target.getAttribute('data-nombre');
+                            inputFundacion.value = nombreElegido;
+                            contenedorMapa.style.display = 'none';
+                            btnSelectMap.textContent = "Seleccione una fundación en el mapa";
+                            
+                            mostrarAlertaArca(
+                                "¡Fundación seleccionada! 🌸",
+                                `Has elegido a: ${nombreElegido}`,
+                                { tipo: "aviso" }
+                            );
                         }
-                    }
-                } catch (err) {
-                    console.warn("No se pudo autocompletar el teléfono del usuario:", err);
-                }
-            }
-        });
-    }
-
-    // 2. Manejar el envío del formulario de donaciones
-    if (formDonacion) {
-        formDonacion.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const btnSubmit = formDonacion.querySelector('button[type="submit"]');
-            if (btnSubmit) {
-                btnSubmit.disabled = true;
-                btnSubmit.textContent = "Registrando donación...";
-            }
-
-            try {
-                // Capturar el tipo de donación seleccionado (Dinero, Juguetes, Comida, Ropa, Otro)
-                const tipoSeleccionado = document.querySelector('input[name="tipo_donacion"]:checked');
-                const tipoDonacion = tipoSeleccionado ? tipoSeleccionado.value : 'otro';
-
-                // Capturar la descripción o cantidad
-                const descripcion = document.getElementById('descripcion-donativo')?.value || '';
-
-                // Capturar la fundación (según el input que tengan habilitado)
-                const inputFundacion = document.getElementById('nombre-fundacion')?.value || '';
-
-                // Forma de entrega (Llevar personalmente o solicitar recogida)
-                const entregaSeleccionada = document.querySelector('input[name="forma_entrega"]:checked');
-                const formaEntrega = entregaSeleccionada ? entregaSeleccionada.value : 'personal';
-
-                // Datos del donante
-                const nombre = inputNombre ? inputNombre.value : '';
-                const telefono = inputTelefono ? inputTelefono.value : '';
-                const correo = inputCorreo ? inputCorreo.value : '';
-
-                // Consolidar el objeto de datos
-                const datosDonacion = {
-                    tipo_donacion: tipoDonacion,
-                    descripcion: descripcion,
-                    fundacion: inputFundacion,
-                    forma_entrega: formaEntrega,
-                    nombre_donante: nombre,
-                    telefono_donante: telefono,
-                    correo_donante: correo
-                };
-
-                // Enviar los datos al backend (Node.js / Express)
-                const respuesta = await fetch('/api/crear-donacion', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(datosDonacion)
-                });
-
-                const resultado = await respuesta.json();
-
-                if (respuesta.ok) {
-                    // Usamos tu alerta personalizada con el alCerrar para limpiar y redirigir con elegancia 🌸
-                    mostrarAlertaArca(
-                        "¡Mil gracias por tu ayuda! 💖",
-                        "Tu donación ha sido registrada con éxito. Estás haciendo una gran diferencia. ✨",
-                        {
-                            tipo: "aviso",
-                            alCerrar: () => {
-                                formDonacion.reset();
-                                window.location.href = 'index.html'; // Cámbialo por la vista que prefieras mostrar después
-                            }
-                        }
-                    );
+                    });
                 } else {
-                    throw new Error(resultado.error || "No se pudo registrar la donación en el servidor.");
+                    setTimeout(() => { mapaDonacion.invalidateSize(); }, 200);
                 }
-
-            } catch (error) {
-                console.error("Error al enviar la donación:", error);
-                mostrarAlertaArca(
-                    "Error al registrar",
-                    "No pudimos procesar tu donación en este momento. Inténtalo más tarde. ♡",
-                    { tipo: "error" }
-                );
-            } finally {
-                if (btnSubmit) {
-                    btnSubmit.disabled = false;
-                    btnSubmit.textContent = "Enviar Donación"; // El texto original de tu botón
-                }
+            } else {
+                contenedorMapa.style.display = 'none';
+                btnSelectMap.textContent = "Seleccione una fundación en el mapa";
             }
         });
     }
