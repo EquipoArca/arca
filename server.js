@@ -2115,17 +2115,29 @@ app.get('/api/obtener-fundacion-header', (req, res) => {
         res.json(results[0]);
     });
 });
-// Endpoint para actualizar el estado del reporte desde la fundación
-app.put('/api/reportes/:id/estado', async (req, res) => {
+// Endpoint para actualizar el estado del reporte desde la fundación (corregido con callback de mysql2)
+app.put('/api/reportes/:id/estado', (req, res) => {
     const { id } = req.params;
     const { estado } = req.body;
-    try {
-        await db.query('UPDATE reportes SET estado = ? WHERE id_reporte = ?', [estado, id]);
-        res.json({ success: true, message: 'Estado actualizado correctamente' });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Error al actualizar el estado' });
+
+    if (!estado) {
+        return res.status(400).json({ error: 'El estado es requerido' });
     }
+
+    const query = 'UPDATE reportes SET estado = ? WHERE id_reporte = ?';
+    
+    db.query(query, [estado, id], (err, result) => {
+        if (err) {
+            console.error("❌ Error en base de datos al actualizar estado:", err.message);
+            return res.status(500).json({ error: 'Error al actualizar el estado: ' + err.message });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Reporte no encontrado' });
+        }
+
+        res.json({ success: true, message: 'Estado actualizado correctamente' });
+    });
 });
 
 // ==========================================
