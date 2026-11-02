@@ -30,11 +30,51 @@
             font-family: 'Itim', cursive, sans-serif;
             box-sizing: border-box;
         }
+
+        /* BANNER Y PORTADA ESTILO FACEBOOK */
+        .pf-portada-contenedor {
+            position: relative;
+            width: 100%;
+            height: 220px;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 2px solid #fca38d;
+            background: #fce4e4;
+            margin-bottom: 60px; /* Espacio para que la foto flotante no colapse */
+        }
+
+        .pf-portada-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .pf-avatar-flotante {
+            position: absolute;
+            bottom: -50px;
+            left: 30px;
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #ffffff;
+            background: #fff;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        .pf-nombre-titulo {
+            margin: 0 0 25px 0;
+            color: #2b2b2b;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
         .pf-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 25px;
         }
+
         .pf-card-seccion {
             background: rgba(255, 255, 255, 0.65);
             border-radius: 20px;
@@ -43,6 +83,7 @@
             margin-bottom: 20px;
             box-shadow: 0 4px 15px rgba(230, 150, 130, 0.05);
         }
+
         .pf-label-capsula {
             background-color: #fcae9e;
             color: #2b2b2b;
@@ -50,47 +91,34 @@
             padding: 4px 14px;
             border-radius: 14px;
             display: inline-block;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             font-weight: bold;
         }
-        .pf-portada-preview {
-            width: 100%;
-            height: 130px;
-            object-fit: cover;
-            border-radius: 16px;
-            border: 2px solid #fca38d;
-            margin-bottom: 12px;
-        }
-        .pf-avatar-preview {
-            width: 90px;
-            height: 90px;
-            object-fit: cover;
-            border-radius: 50%;
-            border: 3px solid #fca38d;
-            display: block;
-            margin: 0 auto 12px auto;
-            background: #fff;
-        }
+
         .pf-texto-info {
             color: #444;
             font-size: 0.95rem;
-            line-height: 1.4;
+            line-height: 1.5;
             margin: 0;
         }
+
         .pf-redes-fila {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 8px;
+            gap: 12px;
+            margin-bottom: 10px;
             font-size: 0.95rem;
             color: #333;
             text-decoration: none;
         }
+
         .pf-redes-fila i {
             color: #e06d53;
-            width: 20px;
+            width: 22px;
             text-align: center;
+            font-size: 1.1rem;
         }
+
         .btn-editar-perfil-fundacion {
             background-color: #fbc2c4;
             color: #2b2b2b;
@@ -101,12 +129,14 @@
             border-radius: 25px;
             cursor: pointer;
             display: block;
-            margin: 20px auto 0 auto;
+            margin: 25px auto 0 auto;
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
             transition: transform 0.2s;
             text-decoration: none;
             text-align: center;
+            width: fit-content;
         }
+
         .btn-editar-perfil-fundacion:hover {
             transform: scale(1.03);
             background-color: #f9a3a6;
@@ -158,17 +188,19 @@
 
     <main class="main-content">
         <div class="perfil-fundacion-container">
+            
+            <!-- PORTADA CON FOTO OFICIAL FLOTANTE ESTILO FACEBOOK -->
+            <div class="pf-portada-contenedor">
+                <img id="pf-portada" src="logo.png" alt="Portada" class="pf-portada-preview">
+                <img id="pf-avatar" src="logo.png" alt="Foto Oficial" class="pf-avatar-flotante">
+            </div>
+
+            <h2 id="pf-nombre-fundacion" class="pf-nombre-titulo">Cargando...</h2>
+
             <div class="pf-grid">
                 
                 <!-- COLUMNA IZQUIERDA -->
                 <div>
-                    <div class="pf-card-seccion">
-                        <div class="pf-label-capsula">Portada & Foto oficial</div>
-                        <img id="pf-portada" src="logo.png" alt="Portada" class="pf-portada-preview">
-                        <img id="pf-avatar" src="logo.png" alt="Foto Oficial" class="pf-avatar-preview">
-                        <h3 id="pf-nombre-fundacion" style="text-align: center; margin: 0; color: #2b2b2b; font-size: 1.4rem;">Cargando...</h3>
-                    </div>
-
                     <div class="pf-card-seccion">
                         <div class="pf-label-capsula">Misión</div>
                         <p id="pf-mision" class="pf-texto-info">Cargando misión...</p>
@@ -202,7 +234,7 @@
 
             </div>
 
-            <!-- Botón para ir al modo editar (reciclando el formulario de registro paso 2) -->
+            <!-- Botón para ir al modo editar -->
             <a href="editar_perfil_fundacion.html" class="btn-editar-perfil-fundacion btn-arca-animado">
                 Editar perfil
             </a>
@@ -227,23 +259,29 @@
                     
                     const data = await res.json();
 
-                    document.getElementById('pf-nombre-fundacion').textContent = data.nombre_comercial || data.nombre_legal || 'Fundación ARCA';
-                    document.getElementById('pf-mision').textContent = data.descripcion_mision || 'Sin misión registrada.';
-                    document.getElementById('pf-vision').textContent = data.descripcion_vision || 'Sin visión registrada.';
+                    const nombreMostrado = data.Nombre_Comercial || data.Nombre_Legal || 'Fundación ARCA';
+                    document.getElementById('pf-nombre-fundacion').textContent = nombreMostrado;
+                    
+                    document.getElementById('pf-mision').textContent = data.Descripcion_mision || 'Sin misión registrada.';
+                    document.getElementById('pf-vision').textContent = data.Descripcion_vision || 'Sin visión registrada.';
                     document.getElementById('pf-enfoque').textContent = data.enfoque_otro || 'Rescate y adopción';
-                    document.getElementById('pf-programas').textContent = data.programas_proyectos || 'Sin proyectos actuales.';
+                    document.getElementById('pf-programas').textContent = data.Programas_Proyectos_Actuales || 'Sin proyectos actuales.';
 
-                    if (data.foto_portada) document.getElementById('pf-portada').src = data.foto_portada;
-                    if (data.pfp_fundacion) document.getElementById('pf-avatar').src = data.pfp_fundacion;
+                    if (data.Foto_Portada && data.Foto_Portada.trim() !== '') {
+                        document.getElementById('pf-portada').src = data.Foto_Portada;
+                    }
+                    if (data.PFP_Fundacion && data.PFP_Fundacion.trim() !== '') {
+                        document.getElementById('pf-avatar').src = data.PFP_Fundacion;
+                    }
 
                     // Renderizar redes y contacto
                     const redesContainer = document.getElementById('pf-redes-container');
                     let htmlRedes = `
-                        <div class="pf-redes-fila"><i class="fa-solid fa-envelope"></i> ${data.correo_fundacion || user.email}</div>
-                        <div class="pf-redes-fila"><i class="fa-solid fa-phone"></i> ${data.telefono_fundacion || 'No registrado'}</div>
+                        <div class="pf-redes-fila"><i class="fa-solid fa-envelope"></i> ${data.Correo_fundacion || user.email}</div>
+                        <div class="pf-redes-fila"><i class="fa-solid fa-phone"></i> ${data.Telefono_fundacion || 'No registrado'}</div>
                     `;
-                    if (data.pagina_web) {
-                        htmlRedes += `<div class="pf-redes-fila"><i class="fa-solid fa-globe"></i> <a href="${data.pagina_web}" target="_blank" style="color: #e06d53;">${data.pagina_web}</a></div>`;
+                    if (data.Pagina_web && data.Pagina_web.trim() !== '') {
+                        htmlRedes += `<div class="pf-redes-fila"><i class="fa-solid fa-globe"></i> <a href="${data.Pagina_web}" target="_blank" style="color: #e06d53;">${data.Pagina_web}</a></div>`;
                     }
                     redesContainer.innerHTML = htmlRedes;
 

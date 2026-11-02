@@ -2171,6 +2171,7 @@ app.get('/api/obtener-fundacion', (req, res) => {
         return res.status(400).json({ error: "Se requiere el correo de la fundación." });
     }
 
+    // Buscamos directamente en la tabla fundacion usando el correo
     const query = `
         SELECT f.*, u.nombre_usuario 
         FROM fundacion f
@@ -2188,6 +2189,7 @@ app.get('/api/obtener-fundacion', (req, res) => {
             return res.status(404).json({ error: "No se encontró un perfil de fundación asociado a este correo." });
         }
 
+        // Enviamos el objeto asegurándonos de mapear las propiedades tal cual las guardaste
         res.json(results[0]);
     });
 });
