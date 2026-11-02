@@ -1802,13 +1802,13 @@ app.post('/api/registrar-fundacion', express.json({ limit: '20mb' }), async (req
             const idDocumentacionGenerado = resultadoDoc.insertId;
             const fechaActual = new Date().toISOString().slice(0, 10);
 
-// 3. Registrar al usuario base en la tabla 'usuarios' (sin Fecha_registro)
+// 3. Registrar al usuario base en la tabla 'usuarios' incluyendo el nombre de la fundación
             const queryUsuarios = `
-                INSERT INTO usuarios (tipo_usuario, estado_aprobacion, correo_usuario) 
-                VALUES ('fundacion', 'pendiente', ?)
+                INSERT INTO usuarios (tipo_usuario, estado_aprobacion, correo_usuario, nombre_usuario) 
+                VALUES ('fundacion', 'pendiente', ?, ?)
             `;
 
-            db.query(queryUsuarios, [correo_fundacion], (err2, resultadoUsuario) => {
+            db.query(queryUsuarios, [correo_fundacion, nombre_comercial || nombre_legal || 'Fundacion'], (err2, resultadoUsuario) => {
                 if (err2) {
                     console.error("❌ Error al registrar en usuarios:", err2.sqlMessage || err2);
                     getAuth().deleteUser(firebaseUser.uid).catch(() => {});
@@ -1870,7 +1870,7 @@ app.post('/api/registrar-fundacion', express.json({ limit: '20mb' }), async (req
                         mensaje: "¡Fundación registrada con éxito! Quedó en estado pendiente de aprobación." 
                     });
                 });
-            });
+            });;
         });
 
     } catch (error) {
