@@ -15,65 +15,66 @@
         document.body.classList.add("dark-mode");
     }
     </script>
-        <style>
+    <style>
         .html, body {
-        min-height: 100vh;
-        margin: 0;
-        font-family: 'Itim', cursive, sans-serif;
-        background-color: #fce8e6;
-    }
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Itim', cursive, sans-serif;
+            background-color: #fce8e6;
+        }
 
-    .main-content {
-        padding: 30px 20px;
-        min-height: calc(100vh - 70px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-sizing: border-box;
-    }
+        .main-content {
+            padding: 30px 20px;
+            min-height: calc(100vh - 70px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+        }
 
-    .detalle-container-principal {
-        background: rgba(255, 255, 255, 0.45);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border-radius: 28px;
-        padding: 20px 30px;
-        width: 100%;
-        max-width: 1100px;
-        box-shadow: 0 12px 35px rgba(220, 150, 140, 0.12);
-        border: 2px solid rgba(255, 255, 255, 0.7);
-        box-sizing: border-box;
-    }
+        .detalle-container-principal {
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 28px;
+            padding: 20px 30px;
+            width: 100%;
+            max-width: 1100px;
+            box-shadow: 0 12px 35px rgba(220, 150, 140, 0.12);
+            border: 2px solid rgba(255, 255, 255, 0.7);
+            box-sizing: border-box;
+        }
 
-    .detalle-header-card {
-        background: rgba(253, 203, 208, 0.65);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        padding: 10px 20px;
-        border-radius: 18px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 15px;
-        border: 1px solid rgba(255, 255, 255, 0.8);
-        box-shadow: 0 4px 15px rgba(230, 160, 140, 0.08);
-    }
+        .detalle-header-card {
+            background: rgba(253, 203, 208, 0.65);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 10px 20px;
+            border-radius: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 15px rgba(230, 160, 140, 0.08);
+        }
 
-    .detalle-header-card h1 {
-        margin: 0;
-        font-size: 22px;
-        color: #2b2b2b;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
+        .detalle-header-card h1 {
+            margin: 0;
+            font-size: 22px;
+            color: #2b2b2b;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
 
-    .detalle-header-icon {
-        width: 26px;
-        height: 26px;
-        object-fit: contain;
-        border-radius: 50%;
-    }
+        .detalle-header-icon {
+            width: 26px;
+            height: 26px;
+            object-fit: contain;
+            border-radius: 50%;
+        }
+
         .header-acciones-derecha {
             display: flex;
             align-items: center;
@@ -84,9 +85,9 @@
             background: rgba(255, 255, 255, 0.8);
             border: 1px solid #f4c2c4;
             padding: 6px 14px;
-            border-radius: 14px;
+            border-radius: 50px;
             color: #d9534f;
-            font-weight: bold;
+            font-weight: 400;
             font-size: 13px;
             cursor: pointer;
             text-decoration: none;
@@ -104,7 +105,7 @@
 
         .detalle-fecha-texto {
             font-size: 13px;
-            font-weight: bold;
+            font-weight: 400;
             color: #555;
         }
 
@@ -133,7 +134,7 @@
             padding: 8px 16px;
             border-radius: 18px;
             font-size: 17px;
-            font-weight: bold;
+            font-weight: 400;
             color: #2b2b2b;
             text-align: center;
             box-shadow: 0 3px 10px rgba(230, 160, 140, 0.08);
@@ -144,7 +145,7 @@
             font-size: 13px;
             color: #666;
             margin-bottom: 2px;
-            font-weight: bold;
+            font-weight: 400;
         }
 
         .detalle-pill-situacion {
@@ -152,9 +153,9 @@
             backdrop-filter: blur(6px);
             color: #333;
             padding: 6px 14px;
-            border-radius: 14px;
+            border-radius: 50px;
             font-size: 13px;
-            font-weight: bold;
+            font-weight: 400;
             border: 1px solid #f9cab5;
             display: inline-block;
             box-shadow: 0 2px 6px rgba(0,0,0,0.02);
@@ -220,6 +221,7 @@
             display: block;
             margin-bottom: 6px;
             font-size: 13px;
+            font-weight: 400;
         }
 
         .contacto-items {
@@ -235,7 +237,7 @@
             justify-content: space-between;
             background: rgba(255, 255, 255, 0.85);
             padding: 6px 12px;
-            border-radius: 14px;
+            border-radius: 50px;
             border: 1px solid #f9cab5;
             box-shadow: 0 2px 5px rgba(0,0,0,0.03);
             gap: 10px;
@@ -247,7 +249,7 @@
             gap: 8px;
             text-decoration: none;
             color: #333;
-            font-weight: bold;
+            font-weight: 400;
             cursor: pointer;
             flex-grow: 1;
             overflow: hidden;
@@ -265,21 +267,22 @@
             cursor: pointer;
             color: #d9534f;
             font-size: 12px;
-            padding: 4px 8px;
-            border-radius: 10px;
+            padding: 4px 10px;
+            border-radius: 50px;
             transition: all 0.2s;
             display: inline-flex;
             align-items: center;
             gap: 4px;
             flex-shrink: 0;
             font-family: 'Itim', cursive, sans-serif;
+            font-weight: 400;
         }
 
         .btn-copiar-mini:hover { background: #ffe5dd; }
 
         .btn-ver-mapa-chiquito {
             color: #e06d53;
-            font-weight: bold;
+            font-weight: 400;
             text-decoration: none;
             font-size: 12.5px;
             display: inline-flex;
@@ -306,12 +309,13 @@
         .detalle-info-autor {
             font-size: 13.5px;
             color: #555;
+            font-weight: 400;
         }
 
         .detalle-info-autor a {
             color: #e06d53;
             text-decoration: none;
-            font-weight: bold;
+            font-weight: 400;
             display: inline-flex;
             align-items: center;
             gap: 4px;
@@ -327,32 +331,35 @@
             font-size: 11px;
             background: rgba(252, 185, 160, 0.4);
             padding: 2px 6px;
-            border-radius: 8px;
+            border-radius: 50px;
             color: #d9534f;
             border: 1px dashed #fca38d;
             margin-left: 4px;
         }
 
+        /* Botones generales estilo píldora orgánica (cero IA) */
         .detalle-btn-accion {
             background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(6px);
             color: #2b2b2b;
-            border: 1px solid #f4d0c5;
-            padding: 8px 20px;
-            border-radius: 16px;
+            border: 1.5px solid #f4d0c5;
+            padding: 10px 22px;
+            border-radius: 50px;
             cursor: pointer;
-            font-weight: bold;
-            font-size: 13.5px;
+            font-weight: 400;
+            font-size: 14px;
             box-shadow: 0 3px 10px rgba(230, 150, 130, 0.08);
             text-decoration: none;
-            transition: all 0.2s;
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
             display: inline-flex;
             align-items: center;
             gap: 6px;
             font-family: 'Itim', cursive, sans-serif;
+            text-align: center;
+            justify-content: center;
         }
 
-        .detalle-btn-accion:hover { background: #ffe5dd; }
+        .detalle-btn-accion:hover { background: #ffe5dd; transform: translateY(-1px); }
 
         .detalle-btn-editar {
             background: #fca38d;
@@ -361,18 +368,51 @@
         }
         .detalle-btn-editar:hover { background: #eb917b; }
 
+        /* Botones específicos de fundación (completamente redondos y colores pasteles propios) */
+        .btn-opcion-estado {
+            width: 100%;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-family: 'Itim', cursive, sans-serif;
+            font-weight: 400;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-align: center;
+            border: 1.5px solid transparent;
+            box-shadow: 0 3px 10px rgba(92, 64, 51, 0.04);
+        }
+
+        .btn-opcion-estado:hover { transform: translateY(-2px) scale(1.01); }
+
+        .btn-en-proceso {
+            background-color: #fff9e6;
+            border-color: #fce0a6;
+            color: #5c4a1e;
+        }
+        .btn-en-proceso:hover { background-color: #fff3cc; }
+
+        .btn-derivado {
+            background-color: #ffebe6;
+            border-color: #fcc4b5;
+            color: #633325;
+        }
+        .btn-derivado:hover { background-color: #ffdcd3; }
+
+        .btn-resuelto {
+            background-color: #eaf5ea;
+            border-color: #c4e8c4;
+            color: #2e522e;
+        }
+        .btn-resuelto:hover { background-color: #d8ebd8; }
+
+        /* Modal */
         .modal-arca-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.4);
             backdrop-filter: blur(4px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
+            display: none; align-items: center; justify-content: center; z-index: 1000;
         }
 
         .modal-arca-box {
@@ -391,25 +431,23 @@
             font-size: 36px;
             color: #7b5c93;
             margin-bottom: 12px;
-            display: flex;
-            justify-content: center;
-            gap: 8px;
+            display: flex; justify-content: center; gap: 8px;
         }
 
-        .modal-arca-box h3 { margin: 0 0 10px 0; color: #2b2b2b; font-size: 20px; }
+        .modal-arca-box h3 { margin: 0 0 10px 0; color: #2b2b2b; font-size: 20px; font-weight: 400; }
         .modal-arca-box p { color: #555; font-size: 15px; line-height: 1.4; margin-bottom: 20px; }
         .modal-botones-fila { display: flex; gap: 10px; justify-content: center; }
         
         .modal-btn-aceptar {
             background: #fca38d; color: #fff; border: none; padding: 10px 24px;
-            border-radius: 18px; font-weight: bold; font-size: 15px; cursor: pointer;
+            border-radius: 50px; font-weight: 400; font-size: 15px; cursor: pointer;
             font-family: 'Itim', cursive, sans-serif; box-shadow: 0 4px 12px rgba(252, 163, 141, 0.4);
         }
         .modal-btn-aceptar:hover { background: #eb917b; }
 
         .modal-btn-cancelar {
             background: #f1f1f1; color: #555; border: none; padding: 10px 20px;
-            border-radius: 18px; font-weight: bold; font-size: 15px; cursor: pointer;
+            border-radius: 50px; font-weight: 400; font-size: 15px; cursor: pointer;
             font-family: 'Itim', cursive, sans-serif;
         }
         .modal-btn-cancelar:hover { background: #e2e2e2; }
@@ -530,7 +568,7 @@
       </div>
   </main>
 
-  <!-- Modal Estilo ARCA con Huellitas para Confirmar Redirección -->
+  <!-- Modal Estilo ARCA -->
   <div id="modalConfirmacion" class="modal-arca-overlay">
       <div class="modal-arca-box">
           <div class="modal-huella-icono">
@@ -599,56 +637,41 @@
           try {
               const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`;
               const respuesta = await fetch(url, {
-                  headers: {
-                      'Accept-Language': 'es',
-                      'User-Agent': 'ARCA-App-Mascotas'
-                  }
+                  headers: { 'Accept-Language': 'es', 'User-Agent': 'ARCA-App-Mascotas' }
               });
-              
-              if (!respuesta.ok) throw new Error("Error en el servidor de mapas");
-              
+              if (!respuesta.ok) throw new Error("Error en mapas");
               const datos = await respuesta.json();
-              
               if (datos && datos.address) {
                   const addr = datos.address;
                   const calle = addr.road || addr.pedestrian || addr.footway || "";
                   const numero = addr.house_number || "";
                   const barrio = addr.neighbourhood || addr.suburb || addr.city_district || "";
                   const ciudad = addr.town || addr.city || addr.state || "Medellín";
-                  
                   if (calle) {
-                      let direccionExacta = numero ? `${calle} #${numero}` : calle;
-                      if (barrio && barrio !== calle) {
-                          direccionExacta += `, ${barrio}`;
-                      }
-                      return direccionExacta;
+                      let dir = numero ? `${calle} #${numero}` : calle;
+                      if (barrio && barrio !== calle) dir += `, ${barrio}`;
+                      return dir;
                   }
-                  
                   return barrio && barrio !== ciudad ? `${barrio}, ${ciudad}` : ciudad;
               }
-              return "San Cristóbal, Medellín (Ubicación aproximada)";
-          } catch (error) {
-              return "San Cristóbal, Medellín (Ubicación aproximada)";
+              return "San Cristóbal, Medellín";
+          } catch (e) {
+              return "San Cristóbal, Medellín";
           }
       }
 
       let urlDestinoGlobal = "";
-
       function abrirModalArca(titulo, mensaje, url) {
           document.getElementById('modalTitulo').textContent = titulo;
           document.getElementById('modalMensaje').textContent = mensaje;
           urlDestinoGlobal = url;
           document.getElementById('modalConfirmacion').style.display = 'flex';
       }
-
       function cerrarModalArca() {
           document.getElementById('modalConfirmacion').style.display = 'none';
       }
-
       document.getElementById('modalBtnAceptar').addEventListener('click', () => {
-          if (urlDestinoGlobal) {
-              window.open(urlDestinoGlobal, '_blank');
-          }
+          if (urlDestinoGlobal) window.open(urlDestinoGlobal, '_blank');
           cerrarModalArca();
       });
 
@@ -659,16 +682,15 @@
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ estado: nuevoEstado })
               });
-
               if (res.ok) {
                   alert(`¡Estado actualizado a "${nuevoEstado}" con éxito!`);
                   location.reload();
               } else {
-                  alert("No se pudo actualizar el estado del reporte.");
+                  alert("No se pudo actualizar el estado.");
               }
           } catch (err) {
-              console.error("Error al actualizar estado:", err);
-              alert("Ocurrió un error al conectar con el servidor.");
+              console.error(err);
+              alert("Error al conectar con el servidor.");
           }
       }
 
@@ -684,8 +706,7 @@
 
           try {
               const respuesta = await fetch(`/api/publicaciones-globales`);
-              if (!respuesta.ok) throw new Error("No se pudo cargar la información.");
-              
+              if (!respuesta.ok) throw new Error("No se pudo cargar.");
               const publicaciones = await respuesta.json();
               
               const reporte = publicaciones.find(r => 
@@ -694,23 +715,15 @@
                   Number(r.id_origen) === Number(reporteId)
               );
 
-              let datosReporteFinal = reporte;
-              if (!datosReporteFinal) {
+              let reporteData = reporte;
+              if (!reporteData) {
                   try {
-                      const resIndividual = await fetch(`/api/reportes/${reporteId}`);
-                      if (resIndividual.ok) {
-                          datosReporteFinal = await resIndividual.json();
-                      }
-                  } catch (e) {
-                      console.warn("No se pudo obtener por ruta individual, usando lista global.");
-                  }
+                      const resInd = await fetch(`/api/reportes/${reporteId}`);
+                      if (resInd.ok) reporteData = await resInd.json();
+                  } catch (e) {}
               }
 
-              if (!datosReporteFinal) {
-                  throw new Error("Reporte no encontrado.");
-              }
-              
-              const reporteData = datosReporteFinal;
+              if (!reporteData) throw new Error("Reporte no encontrado.");
 
               document.getElementById('lbl-fecha').textContent = `Publicado el ${reporteData.Fecha_reporte ? reporteData.Fecha_reporte.split('T')[0] : ''}`;
               document.getElementById('lbl-tipo-reporte').textContent = reporteData.nombre_tipo_reporte || reporteData.Nombre_tipo_reporte || 'Reporte General';
@@ -726,13 +739,12 @@
 
               if (textoUbicacionLimpia.includes(',')) {
                   const partes = textoUbicacionLimpia.split(',');
-                  const latPosible = parseFloat(partes[0].trim());
-                  const lonPosible = parseFloat(partes[1].trim());
-
-                  if (!isNaN(latPosible) && !isNaN(lonPosible)) {
-                      textoUbicacionFinal = await obtenerNombreUbicacion(latPosible, lonPosible);
-                      reporteData.latitud = latPosible;
-                      reporteData.longitud = lonPosible;
+                  const latP = parseFloat(partes[0].trim());
+                  const lonP = parseFloat(partes[1].trim());
+                  if (!isNaN(latP) && !isNaN(lonP)) {
+                      textoUbicacionFinal = await obtenerNombreUbicacion(latP, lonP);
+                      reporteData.latitud = latP;
+                      reporteData.longitud = lonP;
                   }
               }
 
@@ -742,11 +754,11 @@
               }
               document.getElementById('lbl-ubicacion').innerHTML = htmlUbicacion;
 
+              // Contacto
               let contactoHTML = "";
               const tel = reporteData.telefono_contacto ? reporteData.telefono_contacto.trim() : "";
               const correo = reporteData.correo_contacto ? reporteData.correo_contacto.trim() : "";
-
-              const urlGmail = correo ? `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(correo)}&su=${encodeURIComponent("Sobre tu reporte en ARCA")}&body=${encodeURIComponent("Hola, vi tu publicación en ARCA y me interesa ayudar con el caso...")}` : "";
+              const urlGmail = correo ? `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(correo)}&su=${encodeURIComponent("Sobre tu reporte en ARCA")}` : "";
               const urlWhatsapp = tel ? `https://wa.me/${tel.replace(/\D/g,'')}` : "";
 
               if (tel && correo) {
@@ -755,82 +767,69 @@
                           <a href="javascript:void(0)" onclick="abrirModalArca('Abrir WhatsApp', '¿Deseas abrir WhatsApp para escribir al número ${tel}?', '${urlWhatsapp}')" class="btn-contacto-link whatsapp">
                               <i class="fa-brands fa-whatsapp"></i> ${tel}
                           </a>
-                          <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${tel}')" title="Copiar teléfono">
-                              <i class="fa-solid fa-copy"></i> Copiar
-                          </button>
+                          <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${tel}')"><i class="fa-solid fa-copy"></i> Copiar</button>
                       </div>
                       <div class="contacto-fila-item">
-                          <a href="javascript:void(0)" onclick="abrirModalArca('Abrir Gmail', '¿Deseas redactar un correo a ${correo} usando Gmail?', '${urlGmail}')" class="btn-contacto-link correo">
+                          <a href="javascript:void(0)" onclick="abrirModalArca('Abrir Gmail', '¿Deseas redactar un correo a ${correo}?', '${urlGmail}')" class="btn-contacto-link correo">
                               <i class="fa-solid fa-envelope"></i> ${correo}
                           </a>
-                          <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${correo}')" title="Copiar correo">
-                              <i class="fa-solid fa-copy"></i> Copiar
-                          </button>
+                          <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${correo}')"><i class="fa-solid fa-copy"></i> Copiar</button>
                       </div>
                   `;
               } else if (tel) {
                   contactoHTML = `
                       <div class="contacto-fila-item">
-                          <a href="javascript:void(0)" onclick="abrirModalArca('Abrir WhatsApp', '¿Deseas abrir WhatsApp para escribir al número ${tel}?', '${urlWhatsapp}')" class="btn-contacto-link whatsapp">
+                          <a href="javascript:void(0)" onclick="abrirModalArca('Abrir WhatsApp', '¿Deseas abrir WhatsApp para ${tel}?', '${urlWhatsapp}')" class="btn-contacto-link whatsapp">
                               <i class="fa-brands fa-whatsapp"></i> ${tel}
                           </a>
-                          <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${tel}')" title="Copiar teléfono">
-                              <i class="fa-solid fa-copy"></i> Copiar
-                          </button>
+                          <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${tel}')"><i class="fa-solid fa-copy"></i> Copiar</button>
                       </div>
                   `;
               } else if (correo) {
                   contactoHTML = `
                       <div class="contacto-fila-item">
-                          <a href="javascript:void(0)" onclick="abrirModalArca('Abrir Gmail', '¿Deseas redactar un correo a ${correo} usando Gmail?', '${urlGmail}')" class="btn-contacto-link correo">
+                          <a href="javascript:void(0)" onclick="abrirModalArca('Abrir Gmail', '¿Deseas redactar un correo a ${correo}?', '${urlGmail}')" class="btn-contacto-link correo">
                               <i class="fa-solid fa-envelope"></i> ${correo}
                           </a>
-                          <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${correo}')" title="Copiar correo">
-                              <i class="fa-solid fa-copy"></i> Copiar
-                          </button>
+                          <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${correo}')"><i class="fa-solid fa-copy"></i> Copiar</button>
                       </div>
                   `;
               } else {
-                  contactoHTML = `<span style="color: #666; font-style: italic;"><i class="fa-solid fa-comments"></i> Disponible por chat interno de la app</span>`;
+                  contactoHTML = `<span style="color: #666; font-style: italic;"><i class="fa-solid fa-comments"></i> Disponible por chat interno</span>`;
               }
               document.getElementById('lbl-contacto').innerHTML = contactoHTML;
 
               const nombreUsuario = reporteData.nombre_usuario || 'usuario';
               document.getElementById('nombre-autor-texto').textContent = `@${nombreUsuario}`;
-              
-              const linkAutor = document.getElementById('link-autor');
-              if (linkAutor) {
-                  linkAutor.href = `perfil_publico.html?user=${encodeURIComponent(nombreUsuario)}`;
-              }
+              document.getElementById('link-autor').href = `perfil_publico.html?user=${encodeURIComponent(nombreUsuario)}`;
 
-              // --- VERIFICACIÓN DE ROL (FUNDACIÓN VS USUARIO NORMAL) ---
+              // --- RENDERIZADO DEL ESTADO Y BOTONES SEGÚN ROL ---
               const contenedorBoton = document.getElementById('contenedor-boton-accion');
               const tipoUsuario = localStorage.getItem('tipo_usuario') || 'usuario';
               const urlParamsGet = new URLSearchParams(window.location.search);
               const origenParam = urlParamsGet.get('origen');
+              const estadoActual = reporteData.estado || 'Sin atender';
 
               firebase.auth().onAuthStateChanged(async (user) => {
                   const correoLogueado = user ? user.email : (localStorage.getItem('correo_usuario') || localStorage.getItem('correo'));
-                  
+
+                  // 1. SI ES FUNDACIÓN: Muestra estado + 3 botones de gestión con colores pasteles individuales y redondos
                   if (tipoUsuario === 'fundacion' || origenParam === 'fundacion') {
-                      // SI ES FUNDACIÓN: Mostramos el estado actual y los 3 botones para gestionar
-                      const estadoActual = reporteData.estado || 'Sin atender';
-                      
                       contenedorBoton.innerHTML = `
-                          <div style="display: flex; flex-direction: column; gap: 8px; width: 100%; min-width: 240px;">
-                              <div style="font-size: 13px; font-weight: bold; color: #442c20; display: flex; align-items: center; justify-content: space-between;">
-                                  <span>Estado:</span>
-                                  <span style="background: #fffde8; padding: 2px 10px; border-radius: 10px; border: 1px solid #f0e6b8; color: #8a6d3b;">
+                          <div style="display: flex; flex-direction: column; gap: 8px; width: 100%; min-width: 250px;">
+                              <div style="font-size: 13.5px; font-weight: 400; color: #442c20; display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px;">
+                                  <span>Estado actual:</span>
+                                  <span style="background: #ffffff; padding: 3px 12px; border-radius: 50px; border: 1.5px solid #f9cab5; color: #5c4033; font-weight: 400;">
                                       ${estadoActual}
                                   </span>
                               </div>
-                              <button class="detalle-btn-accion" onclick="cambiarEstadoDesdeDetalle('${reporteData.id_reporte || reporteId}', 'En proceso')" style="background: #fffde8; border-color: #f0e6b8; justify-content: center; font-size: 13px; padding: 8px;">
+                              <button class="btn-opcion-estado btn-en-proceso" onclick="cambiarEstadoDesdeDetalle('${reporteData.id_reporte || reporteId}', 'En proceso')">
                                   Marcar como "En proceso"
                               </button>
-                              <button class="detalle-btn-accion" onclick="cambiarEstadoDesdeDetalle('${reporteData.id_reporte || reporteId}', 'Derivado')" style="background: #fffde8; border-color: #f0e6b8; justify-content: center; font-size: 13px; padding: 8px;">
+                              <button class="btn-opcion-estado btn-derivado" onclick="cambiarEstadoDesdeDetalle('${reporteData.id_reporte || reporteId}', 'Derivado')">
                                   Derivar a otra fundación / Vet
                               </button>
-                              <button class="detalle-btn-accion" onclick="cambiarEstadoDesdeDetalle('${reporteData.id_reporte || reporteId}', 'Resuelto')" style="background: #ebf5d7; border-color: #d8ebd0; color: #4a5a1c; justify-content: center; font-size: 13px; padding: 8px;">
+                              <button class="btn-opcion-estado btn-resuelto" onclick="cambiarEstadoDesdeDetalle('${reporteData.id_reporte || reporteId}', 'Resuelto')">
                                   Marcar como resuelto
                               </button>
                           </div>
@@ -838,8 +837,16 @@
                       return;
                   }
 
+                  // 2. SI ES USUARIO NORMAL: Muestra la cápsula con el estado actual del reporte arriba del botón de Guardar/Editar
+                  let badgeEstadoHTML = `
+                      <div style="font-size: 13px; font-weight: 400; color: #442c20; margin-bottom: 8px; text-align: right;">
+                          Estado: <span style="background: #ffffff; padding: 3px 12px; border-radius: 50px; border: 1.5px solid #f9cab5; color: #5c4033;">${estadoActual}</span>
+                      </div>
+                  `;
+
                   if (!correoLogueado) {
                       contenedorBoton.innerHTML = `
+                          ${badgeEstadoHTML}
                           <a href="login.html" class="detalle-btn-accion">
                               <i class="fa-regular fa-bookmark"></i> Inicia sesión para guardar
                           </a>
@@ -849,13 +856,12 @@
 
                   try {
                       const resUser = await fetch(`/api/obtener-usuario?correo=${encodeURIComponent(correoLogueado)}`);
-                      if (!resUser.ok) throw new Error("No se pudo obtener el usuario actual");
-                      const datosUsuarioLogueado = await resUser.json();
-                      const idUsuarioLogueado = Number(datosUsuarioLogueado.id_usuarios);
-                      const idCreadorReporte = Number(reporteData.id_usuarios);
+                      if (!resUser.ok) throw new Error("Error usuario");
+                      const datosUsr = await resUser.json();
+                      const idUsrLog = Number(datosUsr.id_usuarios);
+                      const idCreador = Number(reporteData.id_usuarios);
 
-                      let esDueño = (idUsuarioLogueado && idCreadorReporte && idUsuarioLogueado === idCreadorReporte);
-
+                      let esDueño = (idUsrLog && idCreador && idUsrLog === idCreador);
                       if (!esDueño && reporteData.correo_usuario && correoLogueado) {
                           if (reporteData.correo_usuario.toLowerCase().trim() === correoLogueado.toLowerCase().trim()) {
                               esDueño = true;
@@ -864,6 +870,7 @@
 
                       if (esDueño) {
                           contenedorBoton.innerHTML = `
+                              ${badgeEstadoHTML}
                               <div style="display: flex; gap: 8px;">
                                   <a href="formularior.html?editar=${reporteData.id_reporte || reporteId}" class="detalle-btn-accion detalle-btn-editar">
                                       <i class="fa-solid fa-pen-to-square"></i> Editar
@@ -875,80 +882,68 @@
                           `;
 
                           document.getElementById('btn-eliminar-reporte').addEventListener('click', async () => {
-                              if (confirm("¿Estás seguro de que deseas eliminar este reporte permanentemente?")) {
-                                  try {
-                                      const idAResolver = reporteData.id_reporte || reporteId;
-                                      const resDel = await fetch(`/api/reportes/${idAResolver}`, { method: 'DELETE' });
-                                      if (resDel.ok) {
-                                          alert("Reporte eliminado correctamente.");
-                                          window.location.href = 'novedades.html';
-                                      } else {
-                                          alert("No se pudo eliminar el reporte.");
-                                      }
-                                  } catch (err) {
-                                      console.error("Error al eliminar:", err);
+                              if (confirm("¿Estás seguro de eliminar este reporte permanentemente?")) {
+                                  const resDel = await fetch(`/api/reportes/${reporteData.id_reporte || reporteId}`, { method: 'DELETE' });
+                                  if (resDel.ok) {
+                                      alert("Reporte eliminado.");
+                                      window.location.href = 'novedades.html';
                                   }
                               }
                           });
-
                       } else {
-                          let pubEncontrada = publicaciones.find(p => 
+                          let pubEnc = publicaciones.find(p => 
                               (p.tipo_publicacion === 'reporte' && Number(p.id_origen) === Number(reporteId)) ||
                               Number(p.id_publicacion) === Number(reporteId) ||
                               Number(p.id_reporte) === Number(reporteId)
                           );
-                          
-                          const idPublicacionGlobal = pubEncontrada ? pubEncontrada.id_publicacion : reporteId;
-                          const resGuards = await fetch(`/api/guardados/ids/${encodeURIComponent(correoLogueado)}`);
-                          const idsGuardados = await resGuards.json();
-                          const estaGuardada = idsGuardados.map(Number).includes(Number(idPublicacionGlobal));
+                          const idPubGl = pubEnc ? pubEnc.id_publicacion : reporteId;
+                          const resG = await fetch(`/api/guardados/ids/${encodeURIComponent(correoLogueado)}`);
+                          const idsGuards = await resG.json();
+                          const estaGuardada = idsGuards.map(Number).includes(Number(idPubGl));
 
                           if (estaGuardada) {
                               contenedorBoton.innerHTML = `
+                                  ${badgeEstadoHTML}
                                   <button class="detalle-btn-accion" id="btn-accion-guardado" style="background: #ffe5dd; color: #d9534f; border-color: #f4c2c4;">
-                                      <i class="fa-solid fa-bookmark"></i> Publicación guardada
+                                      <i class="fa-solid fa-bookmark"></i> Guardada
                                   </button>
                               `;
                               document.getElementById('btn-accion-guardado').addEventListener('click', async () => {
-                                  if (confirm("¿Deseas quitar esta publicación de tus guardados?")) {
-                                      const quitRes = await fetch('/api/quitar-guardado', {
+                                  if (confirm("¿Quitar de guardados?")) {
+                                      await fetch('/api/quitar-guardado', {
                                           method: 'POST',
                                           headers: { 'Content-Type': 'application/json' },
-                                          body: JSON.stringify({ correo: correoLogueado, id_publicacion: Number(idPublicacionGlobal) })
+                                          body: JSON.stringify({ correo: correoLogueado, id_publicacion: Number(idPubGl) })
                                       });
-                                      if (quitRes.ok) {
-                                          alert("Publicación eliminada de guardados.");
-                                          location.reload();
-                                      }
+                                      location.reload();
                                   }
                               });
                           } else {
                               contenedorBoton.innerHTML = `
+                                  ${badgeEstadoHTML}
                                   <button class="detalle-btn-accion" id="btn-accion-guardado">
                                       <i class="fa-regular fa-bookmark"></i> Guardar publicación
                                   </button>
                               `;
                               document.getElementById('btn-accion-guardado').addEventListener('click', async () => {
-                                  const saveRes = await fetch('/api/guardar-publicacion', {
+                                  await fetch('/api/guardar-publicacion', {
                                       method: 'POST',
                                       headers: { 'Content-Type': 'application/json' },
-                                      body: JSON.stringify({ correo: correoLogueado, id_publicacion: Number(idPublicacionGlobal) })
+                                      body: JSON.stringify({ correo: correoLogueado, id_publicacion: Number(idPubGl) })
                                   });
-                                  if (saveRes.ok) {
-                                      alert("¡Publicación guardada con éxito!");
-                                      location.reload();
-                                  }
+                                  alert("¡Publicación guardada!");
+                                  location.reload();
                               });
                           }
                       }
-                  } catch (e) {
-                      console.error("Error al gestionar la validación del propietario:", e);
+                  } catch (err) {
+                      console.error(err);
                   }
               });
 
           } catch (error) {
-              console.error("Error al cargar detalle:", error);
-              alert("Hubo un error al cargar los detalles del reporte.");
+              console.error(error);
+              alert("Error al cargar los detalles.");
           }
       }
   </script>

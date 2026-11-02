@@ -16,30 +16,71 @@
         document.body.classList.add("dark-mode");
     }
     </script>
+    <style>
+        /* Ajuste de scroll y contenedor */
+        .main-content {
+            height: calc(100vh - 70px);
+            overflow-y: auto;
+            display: flex;
+            justify-content: center;
+            padding: 30px 20px;
+            box-sizing: border-box;
+        }
+
+        .feed-novedades {
+            width: 100%;
+            max-width: 950px;
+            padding-bottom: 40px;
+        }
+
+        .tarjeta-prototipo-estilo {
+            background: #fde8e5; 
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+            border: 2px solid #f9d5d3;
+            width: 100%;
+            font-family: 'Itim', cursive, sans-serif;
+            box-sizing: border-box;
+            margin-bottom: 25px;
+        }
+        .proto-card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+        .proto-titulo-pill { background: #fbc2c4; color: #2b2b2b; padding: 8px 32px; border-radius: 30px; font-size: 22px; font-weight: bold; }
+        .proto-fecha { font-size: 15px; font-weight: bold; color: #444; }
+        .proto-card-body { display: flex; gap: 24px; align-items: center; }
+        .proto-img-wrapper { width: 210px; height: 150px; border-radius: 20px; overflow: hidden; background: #fff; border: 2px solid #f9d5d3; flex-shrink: 0; }
+        .proto-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+        .proto-content-right { flex-grow: 1; display: flex; flex-direction: column; gap: 12px; }
+        .proto-pill-tipo { background: #fff; color: #333; padding: 8px 22px; border-radius: 20px; font-size: 15px; font-weight: bold; border: 1px solid #f3c1c3; display: inline-block; align-self: flex-start; }
+        .proto-autor { font-size: 14px; color: #555; }
+        .proto-autor a { color: #d9534f; text-decoration: none; font-weight: bold; }
+        .proto-footer-row { display: flex; justify-content: flex-end; margin-top: 5px; }
+        
+        /* Botón suave y orgánico */
+        .proto-btn-detalles { 
+            background-color: #fffde8; 
+            color: #442c20; 
+            border: 1.5px solid #f0e6b8; 
+            padding: 10px 28px; 
+            border-radius: 50px; 
+            cursor: pointer; 
+            font-weight: 400; 
+            font-size: 15px;
+            font-family: 'Itim', cursive, sans-serif;
+            transition: all 0.2s ease;
+        }
+        .proto-btn-detalles:hover { background-color: #fff9c4; transform: translateY(-1px); }
+    </style>
 </head>
 <body>
 
-  <!-- Alerta de Conexión -->
-  <div id="offline-alert-overlay" class="offline-overlay d-none">
-      <div class="offline-card">
-          <button type="button" id="close-x-btn" class="close-x">&times;</button>
-          <div class="alert-icon-circle">
-              <div class="alert-icon-inner">!</div>
-          </div>
-          <h3>¡Sin conexión a internet!</h3>
-          <p>No se pudo verificar tu cuenta. Revisa tu conexión a internet e inténtalo más tarde.</p>
-          <button type="button" id="close-offline-alert">Aceptar</button>
-      </div>
-  </div>
-
-  <!-- Barra Superior -->
   <nav class="top-nav">
     <div class="top-left">
         <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu"></i>        
         <div class="mini-logo-circle">
             <img src="logo.png" alt="Logo">
         </div>
-        <span class="page-title" id="titulo-pagina">Reportes Recientes de la Comunidad</span>
+        <span class="page-title" id="titulo-pagina">Reportes Recientes</span>
     </div>
 
     <div class="search-bar">
@@ -54,7 +95,6 @@
                 <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
                     <img src="logo.png" id="user-avatar-img" alt="Perfil">
                 </div>
-
                 <div class="mini-menu-card" id="mini-menu-card">
                     <div class="mini-menu-header">
                         <span id="mini-menu-username">Fundación</span>
@@ -70,15 +110,13 @@
                     </a>
                 </div>
             </div>
-
             <div class="notif-circle">
-                <a href="#" onclick="abrirBloqueo()"><i class="fa-solid fa-bell"></i></a>
+                <a href="#"><i class="fa-solid fa-bell"></i></a>
             </div>
         </div>
     </div>
   </nav>
 
-  <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
       <div class="side-icons">
           <a href="home.html?seccion=inicio" id="link-inicio" class="menu-fila">
@@ -104,9 +142,8 @@
       </div>
   </aside>
 
-  <!-- Contenido Principal (Sin barra de filtros lateral para que luzca limpio) -->
-  <main class="main-content" style="justify-content: center; padding: 30px;">
-      <section class="feed-novedades" id="contenedor-novedades-fundacion" style="width: 100%; max-width: 950px;">
+  <main class="main-content">
+      <section class="feed-novedades" id="contenedor-novedades-fundacion">
           <article class="tarjeta-reporte">
               <div class="header-tarjeta-reporte">
                   <div class="badge-titulo-reporte">Cargando reportes recientes...</div>
@@ -115,7 +152,6 @@
       </section>
   </main>
 
-  <!-- Firebase y Scripts Globales -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -154,7 +190,7 @@
               contenedor.innerHTML = reportes.map(item => {
                   const idRep = item.id_reporte || item.id_origen || item.id_publicacion;
                   return `
-                      <article class="tarjeta-prototipo-estilo" style="margin-bottom: 25px;">
+                      <article class="tarjeta-prototipo-estilo">
                           <div class="proto-card-top">
                               <div class="proto-titulo-pill">
                                   UBICACIÓN: <span style="font-size: 16px; font-weight: normal;">${item.Ubicacion || item.ubicacion || 'San Cristóbal'}</span>
@@ -190,31 +226,5 @@
           }
       }
   </script>
-
-  <style>
-      .tarjeta-prototipo-estilo {
-          background: #fde8e5; 
-          border-radius: 24px;
-          padding: 24px;
-          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
-          border: 2px solid #f9d5d3;
-          width: 100%;
-          font-family: 'Itim', cursive, sans-serif;
-          box-sizing: border-box;
-      }
-      .proto-card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
-      .proto-titulo-pill { background: #fbc2c4; color: #2b2b2b; padding: 8px 32px; border-radius: 30px; font-size: 22px; font-weight: bold; }
-      .proto-fecha { font-size: 15px; font-weight: bold; color: #444; }
-      .proto-card-body { display: flex; gap: 24px; align-items: center; }
-      .proto-img-wrapper { width: 210px; height: 150px; border-radius: 20px; overflow: hidden; background: #fff; border: 2px solid #f9d5d3; flex-shrink: 0; }
-      .proto-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
-      .proto-content-right { flex-grow: 1; display: flex; flexDirection: column; gap: 12px; }
-      .proto-pill-tipo { background: #fff; color: #333; padding: 8px 22px; border-radius: 20px; font-size: 15px; font-weight: bold; border: 1px solid #f3c1c3; display: inline-block; align-self: flex-start; }
-      .proto-autor { font-size: 14px; color: #555; }
-      .proto-autor a { color: #d9534f; text-decoration: none; font-weight: bold; }
-      .proto-footer-row { display: flex; justify-content: flex-end; margin-top: 5px; }
-      .proto-btn-detalles { background-color: #fffde8; color: #2b2b2b; border: 1px solid #f0e6b8; padding: 10px 28px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 15px; }
-      .proto-btn-detalles:hover { background-color: #fff9c4; }
-  </style>
 </body>
 </html>

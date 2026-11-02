@@ -2115,6 +2115,18 @@ app.get('/api/obtener-fundacion-header', (req, res) => {
         res.json(results[0]);
     });
 });
+// Endpoint para actualizar el estado del reporte desde la fundación
+app.put('/api/reportes/:id/estado', async (req, res) => {
+    const { id } = req.params;
+    const { estado } = req.body;
+    try {
+        await db.query('UPDATE reportes SET estado = ? WHERE id_reporte = ?', [estado, id]);
+        res.json({ success: true, message: 'Estado actualizado correctamente' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error al actualizar el estado' });
+    }
+});
 
 // ==========================================
 // INICIALIZACIÓN DEL SERVIDOR (Siempre al final)
