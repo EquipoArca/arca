@@ -1544,7 +1544,7 @@ function adaptarInterfazSegunRol() {
         if (tituloCard1) tituloCard1.textContent = "Reportes";
         
         if (logoCard1) {
-            logoCard1.innerHTML = `<img src="rflogo.png" alt="Logo Reportes Fundación" class="logo-card">`;
+            logoCard1.innerHTML = `<img src="rflogo.png" alt="Logo Reportes Fundación" class="logo-card-reportes-fundacion">`;
         }
 
         if (cardReportar && typeof auth !== 'undefined' && auth.currentUser) {

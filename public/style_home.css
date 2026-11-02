@@ -1825,7 +1825,7 @@ input:checked + .slider:after {
     border-radius: 28px;
     transition: all 0.3s ease;
 }
-/* Subtítulo verificado para la Fundación */
+/* --- CORRECCIÓN DEL BADGE VERIFICADO --- */
 .subtitle-fundacion {
     font-family: 'Itim', sans-serif;
     font-size: 2.2rem;
@@ -1841,18 +1841,45 @@ input:checked + .slider:after {
     filter: none;
 }
 
-/* Badge morado suave con chulito blanco incorporado */
+/* Contenedor principal de la estrellita pastel */
 .badge-verified {
     position: relative;
-    color: #a4b0ff; /* Color morado pastel de tu prototipo */
-    font-size: 1.4rem;
+    color: #a4b0ff; /* Color morado pastel */
+    font-size: 1.5rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    vertical-align: middle;
 }
 
-.check-inner {
+/* Centrado absoluto perfecto del chulito dentro de la insignia */
+.badge-verified .check-inner {
     position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     color: #ffffff;
     font-size: 0.65rem;
+}
+/* --- AJUSTE DE TAMAÑO ESPECÍFICO PARA EL ICONO DE REPORTES --- */
+
+/* Usamos una clase específica para el icono de reportes de fundación
+   para poder darle un tamaño visualmente equivalente a la casa. */
+.logo-card-reportes-fundacion {
+    /* Forzamos un tamaño mayor (ej. 130px o 140px) para compensar
+       el diseño fino del icono. Ajusta este valor si es necesario. */
+    width: 140px !important; /* !important asegura que anule el width: 100px general */
+    height: auto; /* Mantiene la proporción */
+
+    /* Mantenemos los estilos de sombra y transición para que combine */
+    filter: drop-shadow(4px 4px 0px rgba(0,0,0,0.05));
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    /* Aseguramos que esté centrado verticalmente si es necesario */
+    margin-top: 10px;
+}
+
+/* Mantenemos el efecto hover también para este icono grande */
+.card:hover .logo-card-reportes-fundacion {
+    transform: scale(1.1) rotate(-5deg);
 }
