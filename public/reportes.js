@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 2. Geolocalización con indicador de carga
+   // 2. Geolocalización con indicador de carga
     if (btnUbicacion && inputDireccion) {
         btnUbicacion.addEventListener('click', () => {
             if (navigator.geolocation) {
@@ -63,10 +63,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 );
             } else {
-                mostrarAlertaArca
+                mostrarAlertaArca(
                     "Navegador incompatible",
                     "Tu navegador no soporta geolocalización. ♡",
-                    {tipo: "error"}
+                    { tipo: "error" }
+                );
             }
         });
     }
@@ -300,8 +301,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     mostrarAlertaArca(
                         "¡Reporte guardado! ",
                         "Tu reporte ha sido guardado exitosamente. 🌸",
-                        {tipo: "aviso"}
-                    );
+                        {tipo: "aviso",
+                        alCerrar: () => {
                     formReporte.reset();
 
                     const textoArrastra = document.getElementById('texo-arrastra');
@@ -314,7 +315,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         contenedorPreview.innerHTML = '';
                     }
                     window.location.href = 'mis_publicaciones.html';
-                } else {
+                }
+            }
+        
+        );
+
+    } else {
         mostrarAlertaArca(
                 "Error en el servidor",
                 resultado.error || "No se pudo guardar el reporte, inténtalo más tarde. ♡",
@@ -327,7 +333,7 @@ document.addEventListener('DOMContentLoaded', () => {
         mostrarAlertaArca(
             "Sin conexión con el servidor",
             "No se pudo conectar con el servidor. Inténtalo nuevamente más tarde.",
-            { tipo: "conexion" } // Usamos tipo "conexion" para la tarjeta especial con !
+            { tipo: "conexion" } 
         );
     } finally {
         if (btnSubmit) {

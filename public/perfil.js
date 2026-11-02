@@ -475,6 +475,7 @@ if (btnGuardarNombre) {
                     "Tu nombre de usuario ha sido actualizado correctamente. 🌸",
                     { tipo: "aviso" }
                 );
+                alCerrar: () =>
                 cerrarModalNombre();
                 window.location.reload();
             } else {
