@@ -1987,6 +1987,117 @@ app.post('/api/desbloquear-usuario', (req, res) => {
         });
     });
 });
+async function aprobarFundacion(req, res) {
+    const { id_fundacion } = req.body; // O el correo de la fundación
+
+    try {
+        // 1. Actualizar el estado en la tabla usuarios o fundacion a 'aprobado'
+        const queryUpdate = `
+            UPDATE usuarios u 
+            JOIN fundacion f ON u.correo_usuario = f.Correo_fundacion 
+            SET u.estado_aprobacion = 'aprobado' 
+            WHERE f.id_fundacion = ?
+        `;
+        
+        db.query(queryUpdate, [id_fundacion], async (err, resultado) => {
+            if (err) {
+                return res.status(500).json({ exito: false, mensaje: "Error al actualizar estado en BD" });
+            }
+
+            // 2. Consultar el correo de la fundación para enviarle la notificación
+            const queryCorreo = `SELECT Correo_fundacion, Nombre_Comercial FROM fundacion WHERE id_fundacion = ?`;
+            db.query(queryCorreo, [id_fundacion], async (errC, resultsC) => {
+                if (errC || resultsC.length === 0) {
+                    return res.status(500).json({ exito: false, mensaje: "Fundación no encontrada" });
+                }
+
+                const correoFundacion = resultsC[0].Correo_fundacion;
+                const nombreFundacion = resultsC[0].Nombre_Comercial || 'Fundación';
+
+                // 3. Enviar el correo electrónico informando la aprobación
+                const mailOptions = {
+                    from: '"ARCA - Plataforma de Adopciones" <tu_correo@gmail.com>',
+                    to: correoFundacion,
+                    subject: '🎉 ¡Tu cuenta en ARCA ha sido aprobada!',
+                    html: `
+                        <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+                            <h2 style="color: #e57373;">¡Hola, ${nombreFundacion}!</h2>
+                            <p>Nos alegra informarte que tu solicitud ha sido revisada y <strong>aprobada</strong> con éxito por el equipo de administración de ARCA.</p>
+                            <p>Ya puedes iniciar sesión en la plataforma con el correo y la contraseña que registraste para comenzar a publicar animales y gestionar tu fundación.</p>
+                            <br>
+                            <a href="https://arca-backend-cgzt.onrender.com/home.html" style="background-color: #fbc2c4; color: #2b2b2b; padding: 10px 20px; text-decoration: none; border-radius: 20px; font-weight: bold;">Iniciar Sesión en ARCA</a>
+                            <br><br>
+                            <p>¡Bienvenido a la comunidad!</p>
+                        </div>
+                    `
+                };
+
+                await transporter.sendMail(mailOptions);
+
+                res.json({ exito: true, mensaje: "Fundación aprobada y correo de notificación enviado exitosamente." });
+            });
+        });
+
+    } catch (error) {
+        res.status(500).json({ exito: false, mensaje: error.message });
+    }
+}
+// 1. Obtener fundaciones pendientes con sus datos y documentos
+app.get('/api/admin/fundaciones-pendientes', (req, res) => {
+    const query = `
+        SELECT f.*, u.estado_aprobacion, d.certificado_existencia, d.estatuto, d.registro_oficial, d.estado_financiero
+        FROM fundacion f
+        JOIN usuarios u ON f.Correo_fundacion = u.correo_usuario
+        JOIN documentacion d ON f.id_documentacion = d.id_documentacion
+        WHERE u.estado_aprobacion = 'pendiente'
+    `;
+    db.query(query, (err, resultados) => {
+        if (err) {
+            return res.status(500).json({ exito: false, mensaje: "Error al obtener solicitudes" });
+        }
+        res.json({ exito: true, fundaciones: resultados });
+    });
+});
+
+// 2. Aprobar fundación y disparar correo
+app.post('/api/admin/aprobar-fundacion', async (req, res) => {
+    const { id_fundacion, correo_fundacion, nombre_comercial } = req.body;
+
+    const queryUpdate = `
+        UPDATE usuarios u 
+        JOIN fundacion f ON u.correo_usuario = f.Correo_fundacion 
+        SET u.estado_aprobacion = 'aprobado' 
+        WHERE f.id_fundacion = ?
+    `;
+
+    db.query(queryUpdate, [id_fundacion], async (err, resultado) => {
+        if (err) {
+            return res.status(500).json({ exito: false, mensaje: "Error al actualizar en la base de datos" });
+        }
+
+        // Aquí envías el correo con Nodemailer (como vimos en el paso anterior)
+        try {
+            const mailOptions = {
+                from: '"ARCA - Administración" <tu_correo@gmail.com>',
+                to: correo_fundacion,
+                subject: '🎉 ¡Tu cuenta en ARCA ha sido aprobada!',
+                html: `
+                    <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+                        <h2 style="color: #e57373;">¡Hola, ${nombre_comercial || 'Fundación'}!</h2>
+                        <p>Tu solicitud ha sido revisada y <strong>aprobada</strong> por la administración de ARCA.</p>
+                        <p>Ya puedes iniciar sesión en la plataforma.</p>
+                        <br>
+                        <a href="https://arca-backend-cgzt.onrender.com/home.html" style="background-color: #fbc2c4; color: #2b2b2b; padding: 10px 20px; text-decoration: none; border-radius: 20px; font-weight: bold;">Iniciar Sesión</a>
+                    </div>
+                `
+            };
+            await transporter.sendMail(mailOptions);
+            res.json({ exito: true, mensaje: "Fundación aprobada y correo enviado correctamente." });
+        } catch (mailError) {
+            res.json({ exito: true, mensaje: "Fundación aprobada, pero falló el envío del correo: " + mailError.message });
+        }
+    });
+});
 
 // ==========================================
 // INICIALIZACIÓN DEL SERVIDOR (Siempre al final)

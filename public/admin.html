@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - ARCA</title>
+    <link rel="stylesheet" href="style_home.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: 'Itim', sans-serif; background-color: #fff5f6; padding: 20px; color: #333; }
+        header { text-align: center; margin-bottom: 30px; }
+        h1 { color: #e57373; font-size: 2.5rem; }
+        .contenedor-solicitudes { max-width: 1000px; margin: 0 auto; }
+        .tarjeta-solicitud {
+            background: #ffffff;
+            border: 2px solid #fcae9e;
+            border-radius: 20px;
+            padding: 20px 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        .seccion-docs { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+        .btn-pdf {
+            background-color: #fce4e4;
+            color: #b71c1c;
+            padding: 6px 12px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            border: 1px solid #e2a0a0;
+        }
+        .btn-pdf:hover { background-color: #f9d1d1; }
+        .btn-aprobar {
+            background-color: #a5d6a7;
+            color: #1b5e20;
+            border: none;
+            padding: 10px 25px;
+            font-family: 'Itim', sans-serif;
+            font-size: 1.1rem;
+            border-radius: 15px;
+            cursor: pointer;
+            float: right;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .btn-aprobar:hover { background-color: #81c784; }
+        .limpiar { clear: both; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Panel de Verificación de Fundaciones</h1>
+        <p>Revisa la información legal y los documentos antes de aprobar el acceso a la plataforma.</p>
+    </header>
+
+    <main class="contenedor-solicitudes" id="lista-solicitudes">
+        <p style="text-align: center; color: #777;">Cargando solicitudes pendientes...</p>
+    </main>
+
+    <script>
+        async function cargarSolicitudes() {
+            try {
+                const res = await fetch('/api/admin/fundaciones-pendientes');
+                const data = await res.json();
+                
+                const contenedor = document.getElementById('lista-solicitudes');
+                contenedor.innerHTML = '';
+
+                if (!data.exito || data.fundaciones.length === 0) {
+                    contenedor.innerHTML = '<p style="text-align: center; font-size: 1.2rem; color: #555;">No hay fundaciones pendientes por aprobar 🎉</p>';
+                    return;
+                }
+
+                data.fundaciones.forEach(f => {
+                    const tarjeta = document.createElement('div');
+                    tarjeta.className = 'tarjeta-solicitud';
+                    
+                    tarjeta.innerHTML = `
+                        <h3>🐾 ${f.Nombre_Comercial || 'Sin nombre comercial'}</h3>
+                        <div class="info-grid">
+                            <div>
+                                <p><strong>Nombre Legal:</strong> ${f.Nombre_Legal}</p>
+                                <p><strong>NIT / RUT:</strong> ${f.Nit_Rut}</p>
+                                <p><strong>Correo:</strong> ${f.Correo_fundacion}</p>
+                                <p><strong>Ciudad/País:</strong> ${f.Ciudad}, ${f.Pais}</p>
+                            </div>
+                            <div>
+                                <p><strong>Dirección:</strong> ${f.Direccion}</p>
+                                <p><strong>Teléfono:</strong> ${f.Telefono_fundacion}</p>
+                                <p><strong>Sitio Web:</strong> ${f.Pagina_web || 'No registra'}</p>
+                            </div>
+                        </div>
+                        <p><strong>Misión:</strong> ${f.Descripcion_mision}</p>
+                        
+                        <div style="margin-top: 15px;">
+                            <strong>Documentos Legales (Haz clic para revisar):</strong>
+                            <div class="seccion-docs">
+                                ${f.certificado_existencia ? `<a href="${f.certificado_existencia}" target="_blank" class="btn-pdf"><i class="fa-solid fa-file-pdf"></i> Certificado de Existencia</a>` : ''}
+                                ${f.estatuto ? `<a href="${f.estatuto}" target="_blank" class="btn-pdf"><i class="fa-solid fa-file-pdf"></i> Estatutos</a>` : ''}
+                                ${f.registro_oficial ? `<a href="${f.registro_oficial}" target="_blank" class="btn-pdf"><i class="fa-solid fa-file-pdf"></i> Registro Oficial</a>` : ''}
+                                ${f.estado_financiero ? `<a href="${f.estado_financiero}" target="_blank" class="btn-pdf"><i class="fa-solid fa-file-pdf"></i> Estado Financiero</a>` : ''}
+                            </div>
+                        </div>
+                        <br>
+                        <button class="btn-aprobar" onclick="aprobar(${f.id_fundacion}, '${f.Correo_fundacion}', '${f.Nombre_Comercial}')">
+                            <i class="fa-solid fa-check"></i> Aprobar Cuenta
+                        </button>
+                        <div class="limpiar"></div>
+                    `;
+                    contenedor.appendChild(tarjeta);
+                });
+
+            } catch (error) {
+                console.error("Error al cargar solicitudes:", error);
+            }
+        }
+
+        async function aprobar(id_fundacion, correo_fundacion, nombre_comercial) {
+            if (!confirm(`¿Estás segura de aprobar a la fundación "${nombre_comercial}"? Se le enviará un correo de notificación.`)) return;
+
+            try {
+                const res = await fetch('/api/admin/aprobar-fundacion', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id_fundacion, correo_fundacion, nombre_comercial })
+                });
+                const resultado = await res.json();
+                alert(resultado.mensaje);
+                cargarSolicitudes(); // Recargar la lista
+            } catch (error) {
+                alert("Error al aprobar: " + error.message);
+            }
+        }
+
+        cargarSolicitudes();
+    </script>
+</body>
+</html>

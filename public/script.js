@@ -68,6 +68,7 @@ auth.onAuthStateChanged(async (user) => {
 
             localStorage.setItem('tipo_usuario', tipoUsuario);
             localStorage.setItem('estado_aprobacion', estadoAprobacion);
+            adaptarInterfazSegunRol();
             
             if (tipoUsuario === 'fundacion' && estadoAprobacion === 'pendiente') {
                 mostrarAlertaArca(
@@ -114,6 +115,9 @@ auth.onAuthStateChanged(async (user) => {
 
     } else {
         // MODO INVITADO
+        localStorage.removeItem('tipo_usuario');
+        adaptarInterfazSegunRol();
+        // ... el resto de tu código
         if (userDisplayName) userDisplayName.textContent = "";
         if (menuUsuario) menuUsuario.style.display = "none";
 
@@ -1496,6 +1500,51 @@ function mostrarAlertaArca(titulo, mensaje, opciones = {}) {
     document.body.appendChild(overlay);
 
     boton.focus();
+}
+// Función para adaptar la interfaz del Home según el tipo de usuario (Usuario normal vs Fundación)
+function adaptarInterfazSegunRol() {
+    const tipoUsuario = localStorage.getItem('tipo_usuario') || 'usuario';
+    
+    const brandContainer = document.getElementById('brand-title-container');
+    const tituloCard1 = document.getElementById('titulo-card-1');
+    const logoCard1 = document.getElementById('logo-card-1');
+    const cardReportar = document.getElementById('card-reportar-home');
+
+    if (tipoUsuario === 'fundacion') {
+        // 1. Cambiar el logo principal para mostrar "FUNDACIÓN" abajo
+        if (brandContainer) {
+            brandContainer.innerHTML = `
+                ARCA
+                <div style="font-size: 1.2rem; font-weight: bold; letter-spacing: 2px; color: #2b2b2b; margin-top: -5px;">FUNDACIÓN</div>
+            `;
+        }
+
+        // 2. Cambiar la primera tarjeta a "Reportes" (vista de la fundación)
+        if (tituloCard1) tituloCard1.textContent = "Reportes";
+        
+        // Si tienes una imagen o icono específico para reportes de fundación, la cambiamos aquí:
+        if (logoCard1) {
+            logoCard1.innerHTML = `<i class="fa-solid fa-file-invoice" style="font-size: 3rem; color: #777;"></i>`;
+        }
+
+        // 3. Redireccionar el botón de reportes a la vista donde la fundación gestiona los reportes
+        if (cardReportar && auth.currentUser) {
+            cardReportar.setAttribute("href", "reportes_fundacion.html");
+        }
+
+    } else {
+        // Modo Usuario Normal
+        if (brandContainer) {
+            brandContainer.innerHTML = `ARCA`;
+        }
+        if (tituloCard1) tituloCard1.textContent = "Reportar";
+        if (logoCard1) {
+            logoCard1.innerHTML = `<img src="rlogo.png" alt="Logor">`;
+        }
+        if (cardReportar && auth.currentUser) {
+            cardReportar.setAttribute("href", "formularior.html");
+        }
+    }
 }
 
     // ==========================================
