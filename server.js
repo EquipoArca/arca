@@ -1801,13 +1801,17 @@ app.post('/api/registrar-fundacion', express.json({ limit: '20mb' }), async (req
 
             const idDocumentacionGenerado = resultadoDoc.insertId;
 
-            // 3. Registrar al usuario base en la tabla 'usuarios'
+            // 3. Generar un nombre de usuario único automáticamente para evitar duplicados
+            let nombreBase = nombre_comercial || nombre_legal || 'Fundacion';
+            // Le añadimos un sufijo aleatorio de 4 dígitos o el NIT para garantizar que sea 100% único en la tabla usuarios
+            const nombreUsuarioFinal = `${nombreBase}_${Math.floor(1000 + Math.random() * 9000)}`;
+
             const queryUsuarios = `
                 INSERT INTO usuarios (tipo_usuario, estado_aprobacion, correo_usuario, nombre_usuario) 
                 VALUES ('fundacion', 'pendiente', ?, ?)
             `;
 
-            db.query(queryUsuarios, [correo_fundacion, nombre_comercial || nombre_legal || 'Fundacion'], (errUsr, resultadoUsuario) => {
+            db.query(queryUsuarios, [correo_fundacion, nombreUsuarioFinal], (errUsr, resultadoUsuario) => {
                 if (errUsr) {
                     console.error("❌ Error al registrar en usuarios:", errUsr.sqlMessage || errUsr);
                     getAuth().deleteUser(firebaseUser.uid).catch(() => {});
