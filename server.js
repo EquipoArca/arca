@@ -1802,9 +1802,8 @@ app.post('/api/registrar-fundacion', express.json({ limit: '20mb' }), async (req
             const idDocumentacionGenerado = resultadoDoc.insertId;
 
             // 3. Generar un nombre de usuario único automáticamente para evitar duplicados
-            let nombreBase = nombre_comercial || nombre_legal || 'Fundacion';
-            // Le añadimos un sufijo aleatorio de 4 dígitos o el NIT para garantizar que sea 100% único en la tabla usuarios
-            const nombreUsuarioFinal = `${nombreBase}_${Math.floor(1000 + Math.random() * 9000)}`;
+           let nombreBase = (nombre_comercial || nombre_legal || 'Fundacion').substring(0, 40);
+           const nombreUsuarioFinal = `${nombreBase}_${Math.floor(1000 + Math.random() * 9000)}`;
 
             const queryUsuarios = `
                 INSERT INTO usuarios (tipo_usuario, estado_aprobacion, correo_usuario, nombre_usuario) 
@@ -1818,7 +1817,7 @@ app.post('/api/registrar-fundacion', express.json({ limit: '20mb' }), async (req
                     return res.status(500).json({ exito: false, mensaje: "Error al registrar en usuarios: " + (errUsr.sqlMessage || errUsr.message) });
                 }
 
-                // 4. Registrar los datos específicos en la tabla 'fundacion' primero para obtener su id_fundacion
+                // 4. Registrar los datos específicos en la tabla 'fundacion' incluyendo el correo
                 const queryFundacion = `
                     INSERT INTO fundacion (
                         id_documentacion, 
@@ -1835,8 +1834,9 @@ app.post('/api/registrar-fundacion', express.json({ limit: '20mb' }), async (req
                         PFP_Fundacion, 
                         Foto_Portada, 
                         Programas_Proyectos_Actuales, 
-                        enfoque_otro
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        enfoque_otro,
+                        Correo_fundacion
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 `;
 
                 const valoresFundacion = [
@@ -1854,7 +1854,8 @@ app.post('/api/registrar-fundacion', express.json({ limit: '20mb' }), async (req
                     pfp_fundacion || '',
                     foto_portada || '',
                     programas_proyectos || '',
-                    enfoque_otro || ''
+                    enfoque_otro || '',
+                    correo_fundacion // <-- ¡Aquí pasamos el correo para cumplir con el campo obligatorio!
                 ];
 
                 db.query(queryFundacion, valoresFundacion, (errFund, resultadoFundacion) => {
