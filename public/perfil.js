@@ -160,6 +160,12 @@ firebase.auth().onAuthStateChanged(async (user) => {
             const data = await respuesta.json();
 
             if (respuesta.ok) {
+                // 🐾 NUEVO: Si es fundación y está en el perfil normal, lo redirigimos a su perfil de fundación
+                if (data.tipo_usuario === 'fundacion' && window.location.pathname.includes('perfil_usuario.html')) {
+                    window.location.href = 'perfil_fundacion.html';
+                    return; // Detenemos la ejecución aquí
+                }
+
                 const elemNombre = document.getElementById('mostrar-nombre-usuario');
                 if (elemNombre && data.nombre_usuario) {
                     elemNombre.textContent = `@${data.nombre_usuario}`;
@@ -176,7 +182,6 @@ firebase.auth().onAuthStateChanged(async (user) => {
         }
     }
 });
-
 function ejecutarBorrarFoto() {
     const user = firebase.auth().currentUser;
     if (!user) return;

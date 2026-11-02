@@ -2159,6 +2159,104 @@ app.get('/api/fundaciones-lista', (req, res) => {
         res.json(resultados);
     });
 });
+// ==========================================
+// MÓDULO PERFIL Y EDICIÓN DE FUNDACIÓN
+// ==========================================
+
+// GET: Obtener datos completos de la fundación por su correo
+app.get('/api/obtener-fundacion', (req, res) => {
+    const { correo } = req.query;
+
+    if (!correo) {
+        return res.status(400).json({ error: "Se requiere el correo de la fundación." });
+    }
+
+    const query = `
+        SELECT f.*, u.nombre_usuario 
+        FROM fundacion f
+        LEFT JOIN usuarios u ON LOWER(TRIM(f.Correo_fundacion)) = LOWER(TRIM(u.correo_usuario))
+        WHERE LOWER(TRIM(f.Correo_fundacion)) = LOWER(TRIM(?))
+    `;
+
+    db.query(query, [correo], (err, results) => {
+        if (err) {
+            console.error("❌ Error al obtener la fundación:", err.message);
+            return res.status(500).json({ error: "Error en el servidor al consultar la fundación." });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ error: "No se encontró un perfil de fundación asociado a este correo." });
+        }
+
+        res.json(results[0]);
+    });
+});
+// PUT: Actualizar datos de la fundación
+app.put('/api/actualizar-fundacion', express.json({ limit: '20mb' }), (req, res) => {
+    const {
+        correo_fundacion,
+        nombre_comercial,
+        descripcion_mision,
+        descripcion_vision,
+        programas_proyectos,
+        telefono_fundacion,
+        pagina_web,
+        foto_portada,
+        pfp_fundacion
+    } = req.body;
+
+    if (!correo_fundacion) {
+        return res.status(400).json({ exito: false, mensaje: "El correo es obligatorio para actualizar." });
+    }
+
+    // Construimos dinámicamente la consulta para actualizar solo los campos enviados o modificados
+    let query = `
+        UPDATE fundacion 
+        SET Nombre_Comercial = ?, 
+            Descripcion_mision = ?, 
+            Descripcion_vision = ?, 
+            Programas_Proyectos_Actuales = ?, 
+            Telefono_fundacion = ?, 
+            Pagina_web = ?
+    `;
+    
+    let valores = [
+        nombre_comercial || '',
+        descripcion_mision || '',
+        descripcion_vision || '',
+        programas_proyectos || '',
+        telefono_fundacion || '',
+        pagina_web || ''
+    ];
+
+    // Si mandó una nueva portada en Base64, la actualizamos
+    if (foto_portada && foto_portada.startsWith('data:')) {
+        query += `, Foto_Portada = ?`;
+        valores.push(foto_portada);
+    }
+
+    // Si mandó un nuevo logo/foto oficial en Base64, lo actualizamos
+    if (pfp_fundacion && pfp_fundacion.startsWith('data:')) {
+        query += `, PFP_Fundacion = ?`;
+        valores.push(pfp_fundacion);
+    }
+
+    query += ` WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(?))`;
+    valores.push(correo_fundacion);
+
+    db.query(query, valores, (err, resultado) => {
+        if (err) {
+            console.error("❌ Error al actualizar la fundación:", err.message);
+            return res.status(500).json({ exito: false, mensaje: "Error en el servidor al actualizar la base de datos." });
+        }
+
+        if (resultado.affectedRows === 0) {
+            return res.status(404).json({ exito: false, mensaje: "Fundación no encontrada en el sistema." });
+        }
+
+        res.json({ exito: true, mensaje: "¡Perfil de fundación actualizado con éxito!" });
+    });
+});
 
 // ==========================================
 // INICIALIZACIÓN DEL SERVIDOR (Siempre al final)

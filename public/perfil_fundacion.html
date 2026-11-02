@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil de Fundación - ARCA</title>
+    <link rel="stylesheet" href="style_home.css">
+    <link rel="stylesheet" href="perfil.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="dark-mode.css">
+    <script>
+        if (localStorage.getItem("modo_oscuro") === "true") {
+            document.body.classList.add("dark-mode");
+        }
+    </script>
+    <style>
+        .perfil-fundacion-container {
+            max-width: 1100px;
+            width: 95%;
+            margin: 30px auto;
+            background: rgba(255, 240, 243, 0.75);
+            backdrop-filter: blur(12px);
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            border-radius: 28px;
+            padding: 30px;
+            box-shadow: 0 12px 35px rgba(220, 150, 140, 0.12);
+            font-family: 'Itim', cursive, sans-serif;
+            box-sizing: border-box;
+        }
+        .pf-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+        .pf-card-seccion {
+            background: rgba(255, 255, 255, 0.65);
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(230, 150, 130, 0.05);
+        }
+        .pf-label-capsula {
+            background-color: #fcae9e;
+            color: #2b2b2b;
+            font-size: 1rem;
+            padding: 4px 14px;
+            border-radius: 14px;
+            display: inline-block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        .pf-portada-preview {
+            width: 100%;
+            height: 130px;
+            object-fit: cover;
+            border-radius: 16px;
+            border: 2px solid #fca38d;
+            margin-bottom: 12px;
+        }
+        .pf-avatar-preview {
+            width: 90px;
+            height: 90px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 3px solid #fca38d;
+            display: block;
+            margin: 0 auto 12px auto;
+            background: #fff;
+        }
+        .pf-texto-info {
+            color: #444;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            margin: 0;
+        }
+        .pf-redes-fila {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+            color: #333;
+            text-decoration: none;
+        }
+        .pf-redes-fila i {
+            color: #e06d53;
+            width: 20px;
+            text-align: center;
+        }
+        .btn-editar-perfil-fundacion {
+            background-color: #fbc2c4;
+            color: #2b2b2b;
+            border: none;
+            padding: 12px 35px;
+            font-family: 'Itim', cursive;
+            font-size: 1.3rem;
+            border-radius: 25px;
+            cursor: pointer;
+            display: block;
+            margin: 20px auto 0 auto;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: transform 0.2s;
+            text-decoration: none;
+            text-align: center;
+        }
+        .btn-editar-perfil-fundacion:hover {
+            transform: scale(1.03);
+            background-color: #f9a3a6;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAV SUPERIOR -->
+    <nav class="top-nav">
+        <div class="top-left">
+            <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu"></i>
+            <div class="mini-logo-circle"><img src="logo.png" alt="Logo ARCA"></div>
+            <span class="page-title">Perfil de Fundación</span>
+        </div>
+        <div class="search-bar">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Busca algo">
+            <i class="fa-solid fa-microphone"></i>
+        </div>
+        <div class="top-right">
+            <div class="user-header-info">
+                <div class="user-profile-menu" id="user-profile-menu">
+                    <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
+                        <img src="logo.png" id="user-avatar-img" alt="Perfil">
+                    </div>
+                    <div class="mini-menu-card" id="mini-menu-card">
+                        <div class="mini-menu-header"><span id="mini-menu-username">Fundación</span></div>
+                        <hr class="mini-menu-divider">
+                        <a href="configuracion.html" class="mini-menu-item btn-ajustes"><i class="fa-solid fa-gear"></i><span>Ajustes</span></a>
+                        <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini"><i class="fa-solid fa-right-from-bracket"></i><span>Cerrar sesión</span></a>
+                    </div>
+                </div>
+                <div class="notif-circle"><a href="notificaciones.html"><i class="fa-solid fa-bell"></i></a></div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+        <div class="side-icons">
+            <a href="home.html" class="menu-fila"><i class="fa-solid fa-house"></i><span class="menu-text">Inicio</span></a>
+            <a href="perfil_fundacion.html" class="menu-fila activa"><i class="fa-solid fa-circle-user"></i><span class="menu-text">Perfil</span></a>
+            <a href="guardados_usuario.html" class="menu-fila"><i class="fa-solid fa-bookmark"></i><span class="menu-text">Guardado</span></a>
+            <a href="mapa.html" class="menu-fila"><i class="fa-solid fa-location-dot"></i><span class="menu-text">Mapa</span></a>
+            <a href="configuracion.html" class="menu-fila"><i class="fa-solid fa-gear"></i><span class="menu-text">Ajustes</span></a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="perfil-fundacion-container">
+            <div class="pf-grid">
+                
+                <!-- COLUMNA IZQUIERDA -->
+                <div>
+                    <div class="pf-card-seccion">
+                        <div class="pf-label-capsula">Portada & Foto oficial</div>
+                        <img id="pf-portada" src="logo.png" alt="Portada" class="pf-portada-preview">
+                        <img id="pf-avatar" src="logo.png" alt="Foto Oficial" class="pf-avatar-preview">
+                        <h3 id="pf-nombre-fundacion" style="text-align: center; margin: 0; color: #2b2b2b; font-size: 1.4rem;">Cargando...</h3>
+                    </div>
+
+                    <div class="pf-card-seccion">
+                        <div class="pf-label-capsula">Misión</div>
+                        <p id="pf-mision" class="pf-texto-info">Cargando misión...</p>
+                    </div>
+
+                    <div class="pf-card-seccion">
+                        <div class="pf-label-capsula">Visión</div>
+                        <p id="pf-vision" class="pf-texto-info">Cargando visión...</p>
+                    </div>
+                </div>
+
+                <!-- COLUMNA DERECHA -->
+                <div>
+                    <div class="pf-card-seccion">
+                        <div class="pf-label-capsula">Enfoque principal</div>
+                        <p id="pf-enfoque" class="pf-texto-info">Cargando enfoques...</p>
+                    </div>
+
+                    <div class="pf-card-seccion">
+                        <div class="pf-label-capsula">Programas / Proyectos actuales</div>
+                        <p id="pf-programas" class="pf-texto-info">Cargando proyectos...</p>
+                    </div>
+
+                    <div class="pf-card-seccion">
+                        <div class="pf-label-capsula">Contáctanos y Redes</div>
+                        <div id="pf-redes-container" style="margin-top: 10px;">
+                            <!-- Se inyectan dinámicamente -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Botón para ir al modo editar (reciclando el formulario de registro paso 2) -->
+            <a href="editar_perfil_fundacion.html" class="btn-editar-perfil-fundacion btn-arca-animado">
+                Editar perfil
+            </a>
+        </div>
+    </main>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            firebase.auth().onAuthStateChanged(async (user) => {
+                if (!user) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                try {
+                    const res = await fetch(`/api/obtener-fundacion?correo=${encodeURIComponent(user.email)}`);
+                    if (!res.ok) throw new Error("No se pudo cargar la información de la fundación.");
+                    
+                    const data = await res.json();
+
+                    document.getElementById('pf-nombre-fundacion').textContent = data.nombre_comercial || data.nombre_legal || 'Fundación ARCA';
+                    document.getElementById('pf-mision').textContent = data.descripcion_mision || 'Sin misión registrada.';
+                    document.getElementById('pf-vision').textContent = data.descripcion_vision || 'Sin visión registrada.';
+                    document.getElementById('pf-enfoque').textContent = data.enfoque_otro || 'Rescate y adopción';
+                    document.getElementById('pf-programas').textContent = data.programas_proyectos || 'Sin proyectos actuales.';
+
+                    if (data.foto_portada) document.getElementById('pf-portada').src = data.foto_portada;
+                    if (data.pfp_fundacion) document.getElementById('pf-avatar').src = data.pfp_fundacion;
+
+                    // Renderizar redes y contacto
+                    const redesContainer = document.getElementById('pf-redes-container');
+                    let htmlRedes = `
+                        <div class="pf-redes-fila"><i class="fa-solid fa-envelope"></i> ${data.correo_fundacion || user.email}</div>
+                        <div class="pf-redes-fila"><i class="fa-solid fa-phone"></i> ${data.telefono_fundacion || 'No registrado'}</div>
+                    `;
+                    if (data.pagina_web) {
+                        htmlRedes += `<div class="pf-redes-fila"><i class="fa-solid fa-globe"></i> <a href="${data.pagina_web}" target="_blank" style="color: #e06d53;">${data.pagina_web}</a></div>`;
+                    }
+                    redesContainer.innerHTML = htmlRedes;
+
+                } catch (error) {
+                    console.error("Error al cargar perfil de fundación:", error);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
