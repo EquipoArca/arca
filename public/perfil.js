@@ -367,10 +367,14 @@ if (btnGuardarTel) {
                 mostrarAlertaArca(
                     "¡Número de celular actualizado con éxito!",
                     "Tu número de celular ha sido actualizado correctamente. 🌸",
-                    { tipo: "aviso" }
+                    { 
+                        tipo: "aviso",
+                        alCerrar: () => {
+                            cerrarModalTelefono();
+                            window.location.reload();
+                        }
+                    }
                 );
-                cerrarModalTelefono();
-                window.location.reload();
             } else {
                 throw new Error(resultado.mensaje || "No se pudo actualizar el teléfono.");
             }
