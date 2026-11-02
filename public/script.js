@@ -40,7 +40,7 @@ auth.onAuthStateChanged(async (user) => {
     const btnCerrarSesion = document.getElementById('btn-cerrar-sesion-mini');
     const nombrePerfilElem = document.getElementById('mostrar-nombre-usuario');
 
-    if (user) {
+   if (user) {
         console.log("Sesión detectada automáticamente para:", user.email);
         activarModoFull();
 
@@ -54,14 +54,11 @@ auth.onAuthStateChanged(async (user) => {
             };
         }
 
-        // Petición única a Node.js/MySQL para obtener datos del usuario
+        // Petición a Node.js/MySQL para obtener datos del usuario
         try {
             const response = await fetch(`/api/obtener-usuario?correo=${encodeURIComponent(user.email)}`);
-            if (!response.ok) {
-                throw new Error(`Error HTTP: ${response.status}`);
-            }
+            if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
             const data = await response.json();
-            const nombreFinal = data.nombre_usuario || (user.displayName || user.email.split('@')[0]);
             
             const tipoUsuario = data.tipo_usuario || 'usuario';
             const estadoAprobacion = data.estado_aprobacion || 'aprobado';
@@ -72,23 +69,44 @@ auth.onAuthStateChanged(async (user) => {
             
             if (tipoUsuario === 'fundacion' && estadoAprobacion === 'pendiente') {
                 mostrarAlertaArca(
-    "¡Revisión legal en proceso!",
-    "¡Tu fundación está en proceso de revisión legal por el equipo de ARCA! Te notificaremos cuando sea aprobada. 🌸",
-    { tipo: "aviso" }
-);
+                    "¡Revisión legal en proceso!",
+                    "¡Tu fundación está en proceso de revisión legal por el equipo de ARCA! Te notificaremos cuando sea aprobada. 🌸",
+                    { tipo: "aviso" }
+                );
                 auth.signOut().then(() => {
                     localStorage.clear();
                     window.location.href = "home.html";
                 });
                 return;
             }
+
+            let nombreFinal = data.nombre_usuario || (user.displayName || user.email.split('@')[0]);
+            let fotoFinal = data.foto_perfil;
+
+            // SI ES FUNDACIÓN, BUSCAMOS SU NOMBRE COMERCIAL REAL Y SU FOTO OFICIAL
+            if (tipoUsuario === 'fundacion') {
+                try {
+                    const resFund = await fetch(`/api/obtener-fundacion-header?correo=${encodeURIComponent(user.email)}`);
+                    if (resFund.ok) {
+                        const dataFund = await resFund.json();
+                        if (dataFund.nombre_comercial) {
+                            nombreFinal = dataFund.nombre_comercial; // Aquí toma "Huellitas de amor" sin el _6228
+                        }
+                        if (dataFund.pfp_fundacion) {
+                            fotoFinal = dataFund.pfp_fundacion; // Foto oficial de la fundación
+                        }
+                    }
+                } catch (e) {
+                    console.error("No se pudo cargar el perfil de la fundación para el header", e);
+                }
+            }
             
             if (nombrePerfilElem) nombrePerfilElem.textContent = `@${nombreFinal}`;
             if (userDisplayName) userDisplayName.textContent = nombreFinal;
-            if (dropdownName) dropdownName.textContent = nombreFinal;
+            if (dropdownName) dropdownName.textContent = nombreFinal; // ¡Aquí se actualiza el mini-menú sin números!
 
-            if (data.foto_perfil && avatarImg) {
-                avatarImg.src = data.foto_perfil;
+            if (fotoFinal && avatarImg) {
+                avatarImg.src = fotoFinal;
                 avatarImg.style.display = 'block';
             } else if (avatarBtn) {
                 avatarBtn.innerHTML = `
@@ -112,7 +130,7 @@ auth.onAuthStateChanged(async (user) => {
         if (linkGuardado) linkGuardado.href = "guardados_usuario.html";
         if (linkMapa) linkMapa.href = "mapa.html";
         if (linkConfig) linkConfig.href = "configuracion.html";
-
+    
     } else {
         // MODO INVITADO
         localStorage.removeItem('tipo_usuario');
@@ -1501,7 +1519,6 @@ function mostrarAlertaArca(titulo, mensaje, opciones = {}) {
 
     boton.focus();
 }
-// Función para adaptar la interfaz del Home según el tipo de usuario (Usuario normal vs Fundación)
 function adaptarInterfazSegunRol() {
     const tipoUsuario = localStorage.getItem('tipo_usuario') || 'usuario';
     
@@ -1509,27 +1526,41 @@ function adaptarInterfazSegunRol() {
     const tituloCard1 = document.getElementById('titulo-card-1');
     const logoCard1 = document.getElementById('logo-card-1');
     const cardReportar = document.getElementById('card-reportar-home');
+    const linkGuardado = document.getElementById('link-guardado');
 
     if (tipoUsuario === 'fundacion') {
-        // 1. Cambiar el logo principal para mostrar "FUNDACIÓN" abajo
+        // 1. Título principal "ARCA FUNDACIÓN"
         if (brandContainer) {
             brandContainer.innerHTML = `
                 ARCA
-                <div style="font-size: 1.2rem; font-weight: bold; letter-spacing: 2px; color: #2b2b2b; margin-top: -5px;">FUNDACIÓN</div>
+                <div style="font-size: 1.1rem; font-weight: bold; letter-spacing: 2px; color: #2b2b2b; margin-top: -6px;">FUNDACIÓN</div>
             `;
         }
 
-        // 2. Cambiar la primera tarjeta a "Reportes" (vista de la fundación)
+        // 2. Tarjeta 1 -> "Reportes" con icono pastel bonito
         if (tituloCard1) tituloCard1.textContent = "Reportes";
         
-        // Si tienes una imagen o icono específico para reportes de fundación, la cambiamos aquí:
         if (logoCard1) {
-            logoCard1.innerHTML = `<i class="fa-solid fa-file-invoice" style="font-size: 3rem; color: #777;"></i>`;
+            // Icono ilustrado estilizado con badge
+            logoCard1.innerHTML = `
+                <div style="position: relative; display: inline-block;">
+                    <i class="fa-solid fa-file-lines" style="font-size: 2.8rem; color: #d4a3a3;"></i>
+                    <i class="fa-solid fa-circle-exclamation" style="position: absolute; bottom: -2px; right: -6px; font-size: 1.3rem; color: #ffffff; background: #e57373; border-radius: 50%;"></i>
+                </div>
+            `;
         }
 
-        // 3. Redireccionar el botón de reportes a la vista donde la fundación gestiona los reportes
-        if (cardReportar && auth.currentUser) {
+        if (cardReportar && typeof auth !== 'undefined' && auth.currentUser) {
             cardReportar.setAttribute("href", "reportes_fundacion.html");
+        }
+
+        // 3. Cambio de icono en el sidebar para Fundación (Publicaciones en vez de Marcador)
+        if (linkGuardado) {
+            const iconoGuardado = linkGuardado.querySelector('i');
+            const textoGuardado = linkGuardado.querySelector('.menu-text');
+            if (iconoGuardado) iconoGuardado.className = "fa-solid fa-layer-group";
+            if (textoGuardado) textoGuardado.textContent = "Publicaciones";
+            linkGuardado.href = "publicaciones_fundacion.html";
         }
 
     } else {
@@ -1541,12 +1572,18 @@ function adaptarInterfazSegunRol() {
         if (logoCard1) {
             logoCard1.innerHTML = `<img src="rlogo.png" alt="Logor">`;
         }
-        if (cardReportar && auth.currentUser) {
+        if (cardReportar && typeof auth !== 'undefined' && auth.currentUser) {
             cardReportar.setAttribute("href", "formularior.html");
+        }
+        if (linkGuardado) {
+            const iconoGuardado = linkGuardado.querySelector('i');
+            const textoGuardado = linkGuardado.querySelector('.menu-text');
+            if (iconoGuardado) iconoGuardado.className = "fa-solid fa-bookmark";
+            if (textoGuardado) textoGuardado.textContent = "Guardado";
+            linkGuardado.href = "guardados_usuario.html";
         }
     }
 }
-
     // ==========================================
 // 9. CONTROLADOR DEL MODO OSCURO GLOBAL
 // ==========================================

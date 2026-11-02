@@ -2098,6 +2098,23 @@ app.post('/api/admin/aprobar-fundacion', async (req, res) => {
         }
     });
 });
+// Ruta para obtener los datos públicos de la fundación (Nombre comercial y foto) para el header
+app.get('/api/obtener-fundacion-header', (req, res) => {
+    const { correo } = req.query;
+    if (!correo) return res.status(400).json({ error: "Correo requerido" });
+
+    const query = `
+        SELECT Nombre_Comercial AS nombre_comercial, PFP_Fundacion AS pfp_fundacion 
+        FROM fundacion 
+        WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(?))
+    `;
+    db.query(query, [correo], (err, results) => {
+        if (err || results.length === 0) {
+            return res.json({ nombre_comercial: null, pfp_fundacion: null });
+        }
+        res.json(results[0]);
+    });
+});
 
 // ==========================================
 // INICIALIZACIÓN DEL SERVIDOR (Siempre al final)
