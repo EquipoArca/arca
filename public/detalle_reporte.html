@@ -405,7 +405,7 @@
         }
         .detalle-btn-editar:hover { background: #eb917b; }
 
-        /* Botones específicos de fundación (completamente redondos y pasteles elegantes) */
+        /* Botones específicos de fundación */
         .btn-opcion-estado {
             width: 100%;
             padding: 11px 22px;
@@ -481,7 +481,7 @@
             color: #274727;
         }
 
-        /* Alerta Estética Estilo ARCA (Más chica y preciosa) */
+        /* Modal Estilo ARCA */
         .modal-arca-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -496,7 +496,7 @@
             border-radius: 26px;
             padding: 26px 30px;
             width: 85%;
-            max-width: 330px;
+            max-width: 350px;
             text-align: center;
             box-shadow: 0 20px 40px rgba(220, 150, 140, 0.25);
             border: 2px solid #fce8e6;
@@ -517,7 +517,7 @@
         }
 
         .modal-arca-box h3 { margin: 0 0 8px 0; color: #2b2b2b; font-size: 19px; font-weight: 400; }
-        .modal-arca-box p { color: #555; font-size: 14.5px; line-height: 1.4; margin-bottom: 20px; font-weight: 400; }
+        .modal-arca-box p { color: #555; font-size: 14.5px; line-height: 1.4; margin-bottom: 16px; font-weight: 400; }
         .modal-botones-fila { display: flex; gap: 10px; justify-content: center; }
         
         .modal-btn-aceptar {
@@ -651,8 +651,10 @@
               <i class="fa-solid fa-paw" style="font-size: 22px; margin-top: 6px;"></i>
           </div>
           <h3 id="modalTitulo">Mensaje</h3>
-          <p id="modalMensaje">Contenido de la alerta...</p>
-          <div class="modal-botones-fila" id="modalBotonesFila">
+          <div id="modalContenidoDinamico">
+              <p id="modalMensaje">Contenido de la alerta...</p>
+          </div>
+          <div class="modal-botones-fila" id="modalBotonesFila" style="margin-top: 15px;">
               <button id="modalBtnAceptar" class="modal-btn-aceptar">Aceptar</button>
               <button id="modalBtnCancelar" onclick="cerrarModalArca()" class="modal-btn-cancelar" style="display: none;">Cancelar</button>
           </div>
@@ -676,10 +678,12 @@
 
       function mostrarAlertaArca(mensaje, titulo = "Aviso ARCA", callbackAceptar = null) {
           document.getElementById('modalTitulo').textContent = titulo;
+          document.getElementById('modalMensaje').style.display = 'block';
           document.getElementById('modalMensaje').textContent = mensaje;
           document.getElementById('modalBtnCancelar').style.display = 'none';
           
           const btnAceptar = document.getElementById('modalBtnAceptar');
+          btnAceptar.textContent = "Aceptar";
           btnAceptar.onclick = () => {
               cerrarModalArca();
               if (callbackAceptar) callbackAceptar();
@@ -690,10 +694,12 @@
 
       function mostrarConfirmacionArca(mensaje, titulo = "¿Estás seguro?", callbackAceptar) {
           document.getElementById('modalTitulo').textContent = titulo;
+          document.getElementById('modalMensaje').style.display = 'block';
           document.getElementById('modalMensaje').textContent = mensaje;
           document.getElementById('modalBtnCancelar').style.display = 'inline-block';
           
           const btnAceptar = document.getElementById('modalBtnAceptar');
+          btnAceptar.textContent = "Aceptar";
           btnAceptar.onclick = () => {
               cerrarModalArca();
               if (callbackAceptar) callbackAceptar();
@@ -702,7 +708,64 @@
           document.getElementById('modalConfirmacion').style.display = 'flex';
       }
 
+      // Modal interactivo para Derivar Caso a otra Fundación
+      async function abrirModalDerivarFundacion(idReporte) {
+          try {
+              const res = await fetch('/api/fundaciones-lista');
+              const fundaciones = await res.json();
+
+              let opcionesHTML = fundaciones.length > 0 
+                  ? fundaciones.map(f => `<option value="${f.Nombre_Comercial || f.Nombre_Legal}">${f.Nombre_Comercial || f.Nombre_Legal}</option>`).join('')
+                  : `<option value="">No hay fundaciones registradas aún</option>`;
+
+              document.getElementById('modalTitulo').textContent = "Derivar caso a otra fundación";
+              document.getElementById('modalMensaje').style.display = 'none'; // Ocultamos texto plano para meter el select y textarea
+              
+              // Verificamos si ya existe contenedor extra para formulario o lo creamos
+              let cajaForm = document.getElementById('formDerivacionDinamico');
+              if (!cajaForm) {
+                  cajaForm = document.createElement('div');
+                  cajaForm.id = 'formDerivacionDinamico';
+                  document.getElementById('modalContenidoDinamico').appendChild(cajaForm);
+              }
+
+              cajaForm.innerHTML = `
+                  <p style="font-size: 13.5px; color: #555; text-align: left; margin-bottom: 6px;">Listado de fundaciones aliadas:</p>
+                  <select id="selectFundacionDeriva" style="width: 100%; padding: 10px; border-radius: 12px; border: 1.5px solid #f9cab5; font-family: 'Itim', cursive; margin-bottom: 12px; background: #fff; box-sizing: border-box;">
+                      ${opcionesHTML}
+                  </select>
+                  <p style="font-size: 13.5px; color: #555; text-align: left; margin-bottom: 6px;">Comentario (opcional):</p>
+                  <textarea id="comentarioDeriva" placeholder="Ej. No tenemos capacidad en este momento, solicitamos apoyo" style="width: 100%; height: 75px; padding: 10px; border-radius: 12px; border: 1.5px solid #f9cab5; font-family: 'Itim', cursive; resize: none; background: #fff; box-sizing: border-box;"></textarea>
+              `;
+
+              document.getElementById('modalBtnCancelar').style.display = 'inline-block';
+              const btnAceptar = document.getElementById('modalBtnAceptar');
+              btnAceptar.textContent = "Enviar";
+
+              btnAceptar.onclick = async () => {
+                  const fundacionElegida = document.getElementById('selectFundacionDeriva').value;
+                  const comentarioTexto = document.getElementById('comentarioDeriva').value;
+                  
+                  if (!fundacionElegida) {
+                      mostrarAlertaArca("Por favor selecciona una fundación.", "Aviso");
+                      return;
+                  }
+
+                  // Cambiamos el estado a Derivado en la BD
+                  await cambiarEstadoDesdeDetalle(idReporte, 'Derivado');
+              };
+
+              document.getElementById('modalConfirmacion').style.display = 'flex';
+          } catch (e) {
+              console.error(e);
+              mostrarAlertaArca("No se pudieron cargar las fundaciones aliadas.", "Error de Red");
+          }
+      }
+
       function cerrarModalArca() {
+          const cajaForm = document.getElementById('formDerivacionDinamico');
+          if (cajaForm) cajaForm.innerHTML = '';
+          document.getElementById('modalMensaje').style.display = 'block';
           document.getElementById('modalConfirmacion').style.display = 'none';
       }
 
@@ -925,8 +988,15 @@
               const tipoUsuario = localStorage.getItem('tipo_usuario') || 'usuario';
               const urlParamsGet = new URLSearchParams(window.location.search);
               const origenParam = urlParamsGet.get('origen');
-              const estadoActual = reporteData.estado || 'Sin atender';
-              const claseEstadoCSS = obtenerClaseEstado(estadoActual);
+              
+              let estadoReal = reporteData.estado || 'Sin atender';
+              
+              // Si el usuario normal ve un reporte derivado, se muestra como "Sin atender"
+              let estadoVisibleParaUsuario = (tipoUsuario === 'fundacion' || origenParam === 'fundacion') 
+                  ? estadoReal 
+                  : (estadoReal === 'Derivado' ? 'Sin atender' : estadoReal);
+
+              const claseEstadoCSS = obtenerClaseEstado(estadoVisibleParaUsuario);
 
               firebase.auth().onAuthStateChanged(async (user) => {
                   const correoLogueado = user ? user.email : (localStorage.getItem('correo_usuario') || localStorage.getItem('correo'));
@@ -938,14 +1008,14 @@
                               <div style="font-size: 13.5px; color: #442c20; display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px;">
                                   <span>Estado actual:</span>
                                   <span class="badge-estado-dinamico ${claseEstadoCSS}">
-                                      ${estadoActual}
+                                      ${estadoReal}
                                   </span>
                               </div>
                               <button class="btn-opcion-estado btn-en-proceso" onclick="cambiarEstadoDesdeDetalle('${reporteData.id_reporte || reporteId}', 'En proceso')">
                                   Marcar como "En proceso"
                               </button>
-                              <button class="btn-opcion-estado btn-derivado" onclick="cambiarEstadoDesdeDetalle('${reporteData.id_reporte || reporteId}', 'Derivado')">
-                                  Derivar a otra fundación / Vet
+                              <button class="btn-opcion-estado btn-derivado" onclick="abrirModalDerivarFundacion('${reporteData.id_reporte || reporteId}')">
+                                  Derivar a otra fundación
                               </button>
                               <button class="btn-opcion-estado btn-resuelto" onclick="cambiarEstadoDesdeDetalle('${reporteData.id_reporte || reporteId}', 'Resuelto')">
                                   Marcar como resuelto
@@ -959,7 +1029,7 @@
                   let badgeEstadoHTML = `
                       <div style="font-size: 13.5px; color: #442c20; margin-bottom: 10px; text-align: right; display: flex; align-items: center; justify-content: flex-end; gap: 8px;">
                           <span>Estado:</span> 
-                          <span class="badge-estado-dinamico ${claseEstadoCSS}">${estadoActual}</span>
+                          <span class="badge-estado-dinamico ${claseEstadoCSS}">${estadoVisibleParaUsuario}</span>
                       </div>
                   `;
 

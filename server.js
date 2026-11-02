@@ -2139,6 +2139,22 @@ app.put('/api/reportes/:id/estado', (req, res) => {
         res.json({ success: true, message: 'Estado actualizado correctamente' });
     });
 });
+// GET: Obtener listado de fundaciones para derivar casos
+app.get('/api/fundaciones-lista', (req, res) => {
+    const query = `
+        SELECT f.id_fundacion, f.Nombre_Comercial, f.Nombre_Legal, f.Correo_fundacion
+        FROM fundacion f
+        JOIN usuarios u ON f.Correo_fundacion = u.correo_usuario
+        WHERE u.estado_aprobacion = 'aprobado' OR u.estado_aprobacion = 'pendiente'
+    `;
+    db.query(query, (err, resultados) => {
+        if (err) {
+            console.error("❌ Error al obtener fundaciones:", err.message);
+            return res.status(500).json({ error: "Error en el servidor al obtener fundaciones" });
+        }
+        res.json(resultados);
+    });
+});
 
 // ==========================================
 // INICIALIZACIÓN DEL SERVIDOR (Siempre al final)
