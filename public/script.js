@@ -1544,8 +1544,7 @@ function adaptarInterfazSegunRol() {
         if (tituloCard1) tituloCard1.textContent = "Reportes";
         
         if (logoCard1) {
-            // Carga directamente tu PNG de reportes para fundación
-            logoCard1.innerHTML = `<img src="rflogo.png" alt="Logo Reportes Fundación">`;
+            logoCard1.innerHTML = `<img src="rflogo.png" alt="Logo Reportes Fundación" class="logo-card">`;
         }
 
         if (cardReportar && typeof auth !== 'undefined' && auth.currentUser) {
@@ -1581,7 +1580,7 @@ function adaptarInterfazSegunRol() {
             linkGuardado.href = "guardados_usuario.html";
         }
     }
-}    // ==========================================
+}       // ==========================================
 // 9. CONTROLADOR DEL MODO OSCURO GLOBAL
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
