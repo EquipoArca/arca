@@ -241,32 +241,16 @@
 
         const datosPaso1 = JSON.parse(sessionStorage.getItem('datos_fundacion_p1') || '{}');
 
-        // Función auxiliar para convertir un objeto File a Base64
-        const convertirFileABase64 = (file) => {
-            return new Promise((resolve, reject) => {
-                if (!file) {
-                    resolve(null);
-                    return;
-                }
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = error => reject(error);
-            });
-        };
+        // Recuperamos los PDFs en Base64 directamente desde el sessionStorage
+        const certBase64 = sessionStorage.getItem('pdf_cert');
+        const estatutoBase64 = sessionStorage.getItem('pdf_estatuto');
+        const registroBase64 = sessionStorage.getItem('pdf_registro');
+        const financieroBase64 = sessionStorage.getItem('pdf_financiero');
 
-        // Verificamos si tenemos los archivos temporales en memoria de la ventana anterior o los subidos
-        // Si usas la memoria global del paso 1, asegúrate de recuperarlos o pasarlos correctamente:
-        const certFile = window.opener ? window.opener.archivosTemporalesPDF?.cert : window.archivosTemporalesPDF?.cert;
-        const estatutoFile = window.opener ? window.opener.archivosTemporalesPDF?.estatuto : window.archivosTemporalesPDF?.estatuto;
-        const registroFile = window.opener ? window.opener.archivosTemporalesPDF?.registro : window.archivosTemporalesPDF?.registro;
-        const financieroFile = window.opener ? window.opener.archivosTemporalesPDF?.financiero : window.archivosTemporalesPDF?.financiero;
-
-        // Convertimos los PDFs a Base64 para que el backend los reciba sin problemas
-        const certBase64 = await convertirFileABase64(certFile);
-        const estatutoBase64 = await convertirFileABase64(estatutoFile);
-        const registroBase64 = await convertirFileABase64(registroFile);
-        const financieroBase64 = await convertirFileABase64(financieroFile);
+        if (!certBase64 || !estatutoBase64 || !registroBase64 || !financieroBase64) {
+            alert("Faltan documentos legales. Por favor, vuelve al Paso 1 y súbelos de nuevo.");
+            return;
+        }
 
         let enfoques = [];
         if (document.getElementById('ef1')?.checked) enfoques.push('Rescate adopción');
