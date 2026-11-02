@@ -473,11 +473,14 @@ if (btnGuardarNombre) {
                 mostrarAlertaArca(
                     "¡Nombre de usuario actualizado con éxito!",
                     "Tu nombre de usuario ha sido actualizado correctamente. 🌸",
-                    { tipo: "aviso" }
-                );
-                alCerrar: () =>
+                    { tipo: "aviso",
+                        alCerrar: () => {
                 cerrarModalNombre();
                 window.location.reload();
+                    }
+                  }
+                );
+
             } else {
                 mensajeEstado.textContent = resultado.mensaje || "Error al actualizar el nombre.";
                 mensajeEstado.className = "mensaje-validacion error";
@@ -659,11 +662,15 @@ try {
             mostrarAlertaArca(
                 "¡Correo electrónico actualizado!",
                 "Tu correo electrónico ha sido actualizado correctamente. 🌸",
-                { tipo: "aviso" }
-            );
+                {tipo: "aviso",
+                    alCerrar: () => {
+           
             sessionStorage.removeItem('otp_cambio_correo');
             sessionStorage.removeItem('nuevo_correo_temporal');
             window.location.reload();
+        }
+    }
+         );
 
         } catch (error) {
             console.error("Error al actualizar correo:", error);
