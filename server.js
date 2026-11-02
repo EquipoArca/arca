@@ -1031,9 +1031,10 @@ app.get('/api/publicaciones-globales', (req, res) => {
             tr.Nombre_tipo_reporte AS nombre_tipo_reporte,
             r.telefono_contacto,
             r.correo_contacto,
-            r.estado, -- <--- ¡Esta línea es obligatoria para que no dé error al consultar!
+            r.estado,
             NULL AS nombre_animal,
             u.nombre_usuario AS nombre_usuario,
+            u.tipo_usuario AS tipo_usuario, -- <--- Agregado para reportes
             r.id_usuarios
         FROM publicaciones p
         INNER JOIN reportes r ON p.id_reporte = r.id_reporte
@@ -1062,9 +1063,10 @@ app.get('/api/publicaciones-globales', (req, res) => {
             CONCAT('Adopción: ', a.nombre_animal) AS nombre_tipo_reporte,
             pa.telefono_contacto,
             pa.correo_contacto,
-            NULL AS estado, -- Las adopciones no tienen estado de reporte, por eso va NULL
+            NULL AS estado,
             a.nombre_animal,
             u.nombre_usuario AS nombre_usuario,
+            u.tipo_usuario AS tipo_usuario, -- <--- Agregado para adopciones
             pa.id_usuarios
         FROM publicaciones p
         INNER JOIN publicaciones_adopcion pa ON p.id_publicaciones_adopcion = pa.id_publicaciones_adopcion
@@ -1408,7 +1410,9 @@ app.get('/api/adopciones/:id', (req, res) => {
             pa.telefono_contacto,
             pa.correo_contacto,
             a.*,
-            u.nombre_usuario AS nombre_usuario
+            u.nombre_usuario AS nombre_usuario,
+            u.tipo_usuario AS tipo_usuario, -- <--- ¡Esta línea es la clave para el chulito de verificación!
+            u.correo_usuario AS correo_usuario
         FROM publicaciones_adopcion pa
         INNER JOIN animal a ON pa.id_animal = a.id_animal
         INNER JOIN usuarios u ON pa.id_usuarios = u.id_usuarios

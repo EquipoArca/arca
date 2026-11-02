@@ -760,11 +760,12 @@
               }
               document.getElementById('lbl-contacto').innerHTML = contactoHTML;
 
-                const nombreUsuario = adopcion.nombre_usuario || 'usuario';
-                const autorTextoElemento = document.getElementById('nombre-autor-texto');
+             const nombreUsuario = adopcion.nombre_usuario || 'usuario';
+              const tipoUsuario = adopcion.tipo_usuario || '';
+              const autorTextoElemento = document.getElementById('nombre-autor-texto');
               
-              // Verificamos si es una cuenta de fundación para mostrar el chulito verificado
-              if (adopcion.tipo_usuario === 'fundacion' || (nombreUsuario && nombreUsuario.toLowerCase().includes('fundacion'))) {
+              // Verificación estricta por rol de base de datos o nombre comercial
+              if (tipoUsuario === 'fundacion' || (nombreUsuario && nombreUsuario.toLowerCase().includes('fundacion'))) {
                   autorTextoElemento.innerHTML = `
                       @${nombreUsuario} 
                       <span class="badge-fundacion-verificada">
