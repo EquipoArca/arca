@@ -9,6 +9,20 @@ firebase.auth().onAuthStateChanged((user) => {
     }
 });
 
+// Función auxiliar para verificar si el usuario logueado es una fundación
+async function esCuentaFundacion(email) {
+    try {
+        const res = await fetch(`/api/obtener-usuario?correo=${encodeURIComponent(email)}`);
+        if (res.ok) {
+            const data = await res.json();
+            return data.tipo_usuario === 'fundacion' || localStorage.getItem('tipo_usuario') === 'fundacion';
+        }
+    } catch (e) {
+        console.error("Error verificando rol de fundación:", e);
+    }
+    return localStorage.getItem('tipo_usuario') === 'fundacion';
+}
+
 // Manejador para el botón "Ver animales en adopción"
 async function alHacerClicVerAnimales() {
     const user = usuarioActual || firebase.auth().currentUser;
@@ -23,7 +37,6 @@ async function alHacerClicVerAnimales() {
     }
 
     try {
-        // Corregido: Usando query params (?correo=...) para que coincida con server.js
         const respuesta = await fetch(`/api/verificar-adoptante?correo=${encodeURIComponent(user.email)}`, {
             method: 'GET',
             headers: {
@@ -56,6 +69,7 @@ async function alHacerClicVerAnimales() {
         alert("Ocurrió un error al consultar tu perfil de adoptante. Revisa que el servidor Node.js esté corriendo.");
     }
 }
+
 // Manejador para el botón "Poner animal en adopción"
 async function alHacerClicPonerEnAdopcion() {
     const user = usuarioActual || firebase.auth().currentUser;
@@ -66,6 +80,13 @@ async function alHacerClicPonerEnAdopcion() {
         } else {
             alert("Por favor inicia sesión para continuar.");
         }
+        return;
+    }
+
+    // Si es cuenta de tipo fundación, se salta la restricción del perfil de adoptante y va directo al formulario
+    const fundacionTrue = await esCuentaFundacion(user.email);
+    if (fundacionTrue) {
+        window.location.href = "formulario_adopcion.html";
         return;
     }
 
@@ -98,6 +119,7 @@ async function alHacerClicPonerEnAdopcion() {
         alert("Ocurrió un error al consultar tu perfil. Revisa que el servidor Node.js esté corriendo.");
     }
 }
+
 function abrirModalAviso() {
     const modal = document.getElementById('modal-aviso-adoptante');
     if (modal) {

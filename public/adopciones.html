@@ -326,9 +326,9 @@
                 <img src="hlogo.png" alt="Logo Adopciones">
             </div>
 
-            <div class="contenedor-botones-adopcion">
-                <!-- LLAMA A LA VERIFICACIÓN DE PERFIL ANTES DE MOSTRAR EL CATÁLOGO -->
-                <button class="btn-adopcion-opcion btn-arca-animado" onclick="alHacerClicVerAnimales()">
+            <div class="contenedor-botones-adopcion" id="contenedor-botones-opciones">
+                <!-- SE OCULTARÁ AUTOMÁTICAMENTE SI EL USUARIO ES FUNDACIÓN -->
+                <button class="btn-adopcion-opcion btn-arca-animado" id="btn-ver-adopciones" onclick="alHacerClicVerAnimales()">
                     Ver animales en adopción
                 </button>
                 <button class="btn-adopcion-opcion btn-arca-animado" onclick="alHacerClicPonerEnAdopcion()">
@@ -507,6 +507,35 @@
             }
         });
     </script>
+    <script>
+        // Ocultar el botón de "Ver animales" si es fundación
+        document.addEventListener('DOMContentLoaded', async () => {
+            const tipoUsuario = localStorage.getItem('tipo_usuario');
+            const btnVerAdopciones = document.getElementById('btn-ver-adopciones');
+            
+            if (tipoUsuario === 'fundacion' && btnVerAdopciones) {
+                btnVerAdopciones.style.setProperty('display', 'none', 'important');
+            } else {
+                // Validación cruzada con Firebase/Backend por si el localStorage no está actualizado
+                firebase.auth().onAuthStateChanged(async (user) => {
+                    if (user && user.email) {
+                        try {
+                            const res = await fetch(`/api/obtener-usuario?correo=${encodeURIComponent(user.email)}`);
+                            if (res.ok) {
+                                const datosUsr = await res.json();
+                                if (datosUsr.tipo_usuario === 'fundacion' && btnVerAdopciones) {
+                                    btnVerAdopciones.style.setProperty('display', 'none', 'important');
+                                }
+                            }
+                        } catch(e) {
+                            console.error(e);
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+
 
     <!-- Motor oculto de Google Translate -->
     <div id="google_translate_element" style="display:none;"></div>

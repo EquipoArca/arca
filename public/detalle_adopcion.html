@@ -741,8 +741,15 @@
               }
               document.getElementById('lbl-contacto').innerHTML = contactoHTML;
 
-              const nombreUsuario = adopcion.nombre_usuario || 'usuario';
-              document.getElementById('nombre-autor-texto').textContent = `@${nombreUsuario}`;
+const nombreUsuario = adopcion.nombre_usuario || 'usuario';
+              const autorTextoElemento = document.getElementById('nombre-autor-texto');
+              
+              // Verificamos si el usuario es fundación para aclararlo en la interfaz
+              if (adopcion.tipo_usuario === 'fundacion' || (nombreUsuario && nombreUsuario.toLowerCase().includes('fundacion'))) {
+                  autorTextoElemento.innerHTML = `@${nombreUsuario} <span style="font-size: 12px; background: #ffe5dd; color: #d9534f; padding: 2px 8px; border-radius: 10px; margin-left: 5px;">Fundación Aliada 🐾</span>`;
+              } else {
+                  autorTextoElemento.textContent = `@${nombreUsuario}`;
+              }
               
               const linkAutor = document.getElementById('link-autor');
               if (linkAutor) {
