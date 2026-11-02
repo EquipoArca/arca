@@ -1519,6 +1519,7 @@ function mostrarAlertaArca(titulo, mensaje, opciones = {}) {
 
     boton.focus();
 }
+// Función para adaptar la interfaz del Home según el tipo de usuario (Usuario normal vs Fundación)
 function adaptarInterfazSegunRol() {
     const tipoUsuario = localStorage.getItem('tipo_usuario') || 'usuario';
     
@@ -1529,32 +1530,29 @@ function adaptarInterfazSegunRol() {
     const linkGuardado = document.getElementById('link-guardado');
 
     if (tipoUsuario === 'fundacion') {
-        // 1. Título principal "ARCA FUNDACIÓN"
+        // 1. Título con tipografía exacta y el badge de verificación pastel
         if (brandContainer) {
             brandContainer.innerHTML = `
                 ARCA
-                <div style="font-size: 1.1rem; font-weight: bold; letter-spacing: 2px; color: #2b2b2b; margin-top: -6px;">FUNDACIÓN</div>
+                <div class="subtitle-fundacion">
+                    FUNDACIÓN <i class="fa-solid fa-certificate badge-verified"><i class="fa-solid fa-check check-inner"></i></i>
+                </div>
             `;
         }
 
-        // 2. Tarjeta 1 -> "Reportes" con icono pastel bonito
+        // 2. Tarjeta 1 -> "Reportes" con su imagen PNG oficial
         if (tituloCard1) tituloCard1.textContent = "Reportes";
         
         if (logoCard1) {
-            // Icono ilustrado estilizado con badge
-            logoCard1.innerHTML = `
-                <div style="position: relative; display: inline-block;">
-                    <i class="fa-solid fa-file-lines" style="font-size: 2.8rem; color: #d4a3a3;"></i>
-                    <i class="fa-solid fa-circle-exclamation" style="position: absolute; bottom: -2px; right: -6px; font-size: 1.3rem; color: #ffffff; background: #e57373; border-radius: 50%;"></i>
-                </div>
-            `;
+            // Carga directamente tu PNG de reportes para fundación
+            logoCard1.innerHTML = `<img src="rflogo.png" alt="Logo Reportes Fundación">`;
         }
 
         if (cardReportar && typeof auth !== 'undefined' && auth.currentUser) {
             cardReportar.setAttribute("href", "reportes_fundacion.html");
         }
 
-        // 3. Cambio de icono en el sidebar para Fundación (Publicaciones en vez de Marcador)
+        // 3. Icono del Sidebar para Fundación
         if (linkGuardado) {
             const iconoGuardado = linkGuardado.querySelector('i');
             const textoGuardado = linkGuardado.querySelector('.menu-text');
@@ -1583,8 +1581,7 @@ function adaptarInterfazSegunRol() {
             linkGuardado.href = "guardados_usuario.html";
         }
     }
-}
-    // ==========================================
+}    // ==========================================
 // 9. CONTROLADOR DEL MODO OSCURO GLOBAL
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {

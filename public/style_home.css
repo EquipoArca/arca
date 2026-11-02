@@ -1825,3 +1825,34 @@ input:checked + .slider:after {
     border-radius: 28px;
     transition: all 0.3s ease;
 }
+/* Subtítulo verificado para la Fundación */
+.subtitle-fundacion {
+    font-family: 'Itim', sans-serif;
+    font-size: 2.2rem;
+    font-weight: bold;
+    letter-spacing: 2.5px;
+    color: #2b2b2b;
+    margin-top: -15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    -webkit-text-stroke: 0;
+    filter: none;
+}
+
+/* Badge morado suave con chulito blanco incorporado */
+.badge-verified {
+    position: relative;
+    color: #a4b0ff; /* Color morado pastel de tu prototipo */
+    font-size: 1.4rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.check-inner {
+    position: absolute;
+    color: #ffffff;
+    font-size: 0.65rem;
+}
