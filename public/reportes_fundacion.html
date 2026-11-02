@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportes Recientes - Fundación ARCA</title>
+    <link rel="stylesheet" href="novedades-reportes-style.css">
+    <link rel="stylesheet" href="style_home.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="dark-mode.css">
+    <script>
+    if (localStorage.getItem("modo_oscuro") === "true") {
+        document.body.classList.add("dark-mode");
+    }
+    </script>
+    <style>
+        /* Estilos específicos para la vista de Fundación y cambio de estado */
+        .badge-estado {
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 14px;
+            font-size: 13px;
+            font-weight: bold;
+            font-family: 'Itim', cursive, sans-serif;
+            margin-left: 10px;
+        }
+
+        .estado-sin-atender {
+            background-color: #ffe5e5;
+            color: #d9534f;
+            border: 1px solid #f9d5d3;
+        }
+
+        .estado-en-proceso {
+            background-color: #fffde8;
+            color: #8a6d3b;
+            border: 1px solid #f0e6b8;
+        }
+
+        .estado-resuelto {
+            background-color: #ebf5d7;
+            color: #4a5a1c;
+            border: 1px solid #d8ebd0;
+        }
+
+        /* Botones de acción redondeados estilo ARCA para las Fundaciones */
+        .contenedor-acciones-fundacion {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 15px;
+            width: 100%;
+        }
+
+        .btn-accion-fundacion {
+            background-color: #fffde8;
+            color: #2b2b2b;
+            border: 1.5px solid #f0e6b8;
+            padding: 12px 24px;
+            border-radius: 26px;
+            cursor: pointer;
+            font-family: 'Itim', cursive, sans-serif;
+            font-size: 16px;
+            font-weight: 400;
+            box-shadow: 0 4px 12px rgba(92, 64, 51, 0.06);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-align: center;
+            width: 100%;
+        }
+
+        .btn-accion-fundacion:hover {
+            transform: translateY(-2px) scale(1.02);
+            background-color: #ffffff;
+            box-shadow: 0 8px 20px rgba(229, 115, 115, 0.15);
+        }
+
+        .btn-accion-fundacion.active-proceso {
+            background-color: #fff3cd;
+            border-color: #ffeeba;
+            color: #856404;
+        }
+
+        .btn-accion-fundacion.active-resuelto {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+    </style>
+</head>
+<body>
+
+  <!-- Alerta de Conexión -->
+  <div id="offline-alert-overlay" class="offline-overlay d-none">
+      <div class="offline-card">
+          <button type="button" id="close-x-btn" class="close-x">&times;</button>
+          <div class="alert-icon-circle">
+              <div class="alert-icon-inner">!</div>
+          </div>
+          <h3>¡Sin conexión a internet!</h3>
+          <p>No se pudo verificar tu cuenta. Revisa tu conexión a internet e inténtalo más tarde.</p>
+          <button type="button" id="close-offline-alert">Aceptar</button>
+      </div>
+  </div>
+
+  <!-- Barra Superior -->
+  <nav class="top-nav">
+    <div class="top-left">
+        <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu"></i>        
+        <div class="mini-logo-circle">
+            <img src="logo.png" alt="Logo">
+        </div>
+        <span class="page-title" id="titulo-pagina">Reportes de la Comunidad</span>
+    </div>
+
+    <div class="search-bar">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" placeholder="Busca algo">
+        <i class="fa-solid fa-microphone"></i>
+    </div>
+
+    <div class="top-right">
+        <div class="user-header-info">
+            <div class="user-profile-menu" id="user-profile-menu">
+                <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
+                    <img src="logo.png" id="user-avatar-img" alt="Perfil">
+                </div>
+
+                <div class="mini-menu-card" id="mini-menu-card">
+                    <div class="mini-menu-header">
+                        <span id="mini-menu-username">Fundación</span>
+                    </div>
+                    <hr class="mini-menu-divider">
+                    <a href="javascript:void(0)" onclick="mostrarSeccion('configuracion')" class="mini-menu-item btn-ajustes">
+                        <i class="fa-solid fa-gear"></i>
+                        <span>Ajustes</span>
+                    </a>
+                    <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Cerrar sesión</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="notif-circle">
+                <a href="#" onclick="abrirBloqueo()"><i class="fa-solid fa-bell"></i></a>
+            </div>
+        </div>
+    </div>
+  </nav>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+      <div class="side-icons">
+          <a href="home.html?seccion=inicio" id="link-inicio" class="menu-fila">
+              <i class="fa-solid fa-house active"></i>
+              <span class="menu-text">Inicio</span>
+          </a>
+          <a href="home.html?seccion=perfil" id="link-perfil" class="menu-fila">
+              <i class="fa-solid fa-circle-user"></i>
+              <span class="menu-text">Perfil</span>
+          </a>
+          <a href="publicaciones_fundacion.html" id="link-guardado" class="menu-fila">
+              <i class="fa-solid fa-layer-group"></i>
+              <span class="menu-text">Publicaciones</span>
+          </a>
+          <a href="home.html?seccion=mapa" id="link-mapa" class="menu-fila">
+              <i class="fa-solid fa-location-dot"></i>
+              <span class="menu-text">Mapa</span>
+          </a>
+          <a href="home.html?seccion=configuracion" id="link-config" class="menu-fila">
+              <i class="fa-solid fa-gear"></i>
+              <span class="menu-text">Ajustes</span>
+          </a>
+      </div>
+  </aside>
+
+  <!-- Contenido Principal -->
+  <main class="main-content">
+      <aside class="panel-filtros">
+          <div class="titulo-filtro">Filtros</div>
+          <button class="btn-filtro active" onclick="filtrarEstado('todos')">Todos los reportes</button>
+          <button class="btn-filtro" onclick="filtrarEstado('sin_atender')">Sin atender</button>
+          <button class="btn-filtro" onclick="filtrarEstado('en_proceso')">En proceso</button>
+          <button class="btn-filtro" onclick="filtrarEstado('resuelto')">Resueltos</button>
+      </aside>
+
+      <section class="feed-novedades" id="contenedor-novedades-fundacion">
+          <!-- Las tarjetas de reportes se cargarán dinámicamente -->
+          <article class="tarjeta-reporte">
+              <div class="header-tarjeta-reporte">
+                  <div class="badge-titulo-reporte">Cargando reportes recientes...</div>
+              </div>
+          </article>
+      </section>
+  </main>
+
+  <!-- Modal para gestionar el Estado del Reporte por parte de la Fundación -->
+  <div id="modalGestionEstado" class="modal-arca-overlay">
+      <div class="modal-arca-box">
+          <div class="modal-huella-icono">
+              <i class="fa-solid fa-paw"></i>
+          </div>
+          <h3>Gestión del Reporte</h3>
+          <p>Selecciona una acción para actualizar el estado del caso:</p>
+          
+          <div class="contenedor-acciones-fundacion">
+              <button class="btn-accion-fundacion" onclick="cambiarEstadoReporte('En proceso')">
+                  Marcar como "En proceso"
+              </button>
+              <button class="btn-accion-fundacion" onclick="cambiarEstadoReporte('Derivado')">
+                  Derivar a otra fundación / Veterinario
+              </button>
+              <button class="btn-accion-fundacion" onclick="cambiarEstadoReporte('Resuelto')">
+                  Marcar como resuelto
+              </button>
+          </div>
+          
+          <br>
+          <button onclick="cerrarModalGestion()" class="modal-btn-cancelar">Cerrar</button>
+      </div>
+  </div>
+
+  <!-- Firebase y Scripts Globales -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="script.js"></script>
+
+  <script>
+      let reportesCargados = [];
+      let reporteSeleccionadoId = null;
+
+      document.addEventListener('DOMContentLoaded', () => {
+          const btnToggleMenu = document.getElementById('btn-toggle-menu');
+          const sidebar = document.getElementById('sidebar');
+
+          if (btnToggleMenu && sidebar) {
+              btnToggleMenu.addEventListener('click', (e) => {
+                  e.stopPropagation();
+                  sidebar.classList.toggle('sidebar-abierta'); 
+              });
+          }
+
+          cargarReportesFundacion();
+      });
+
+      async function cargarReportesFundacion() {
+          const contenedor = document.getElementById('contenedor-novedades-fundacion');
+          try {
+              const res = await fetch('/api/publicaciones-globales');
+              if (!res.ok) throw new Error("Error al consultar reportes");
+              
+              const publicaciones = await res.json();
+              reportesCargados = publicaciones.filter(p => p.tipo_publicacion === 'reporte' || p.Nombre_tipo_reporte);
+
+              renderizarTarjetas(reportesCargados);
+          } catch (error) {
+              console.error(error);
+              contenedor.innerHTML = `<p style="text-align: center; color: #555;">No se pudieron cargar los reportes en este momento.</p>`;
+          }
+      }
+
+      function renderizarTarjetas(lista) {
+          const contenedor = document.getElementById('contenedor-novedades-fundacion');
+          if (!lista || lista.length === 0) {
+              contenedor.innerHTML = `<p style="text-align: center; color: #555;">No hay reportes disponibles.</p>`;
+              return;
+          }
+
+          contenedor.innerHTML = lista.map(item => {
+              const idRep = item.id_reporte || item.id_origen || item.id_publicacion;
+              const estado = item.estado || 'Sin atender';
+              
+              let claseBadge = 'estado-sin-atender';
+              if (estado === 'En proceso') claseBadge = 'estado-en-proceso';
+              if (estado === 'Resuelto') claseBadge = 'estado-resuelto';
+
+              return `
+                  <article class="tarjeta-prototipo-estilo">
+                      <div class="proto-card-top">
+                          <div class="proto-titulo-pill">
+                              UBICACIÓN: <span style="font-size: 16px; font-weight: normal;">${item.Ubicacion || item.ubicacion || 'San Cristóbal'}</span>
+                          </div>
+                          <span class="proto-fecha">${item.Fecha_reporte ? item.Fecha_reporte.split('T')[0] : 'Reciente'}</span>
+                      </div>
+                      
+                      <div class="proto-card-body">
+                          <div class="proto-img-wrapper">
+                              <img src="${item.img_reporte || 'logo.png'}" alt="Foto reporte">
+                          </div>
+                          
+                          <div class="proto-content-right">
+                              <div style="display: flex; align-items: center; justify-content: space-between;">
+                                  <span class="proto-pill-tipo">TIPO: ${item.Nombre_tipo_reporte || item.nombre_tipo_reporte || 'Reporte General'}</span>
+                                  <span class="badge-estado ${claseBadge}">${estado}</span>
+                              </div>
+                              
+                              <div class="proto-info-extra">
+                                  <span class="proto-autor">REPORTADO POR: <a href="perfil_publico.html?user=${encodeURIComponent(item.nombre_usuario || 'usuario')}">@${item.nombre_usuario || 'usuario'}</a></span>
+                              </div>
+                              
+                              <div class="proto-footer-row" style="gap: 10px;">
+                                  <button onclick="abrirModalGestion(${idRep})" class="proto-btn-detalles" style="background-color: #fbc2c4; border-color: #f9a3a6;">
+                                      Gestionar Estado
+                                  </button>
+                                  <a href="detalle_reporte.html?id=${idRep}&origen=fundacion" class="proto-btn-detalles" style="text-decoration: none;">
+                                      Ver detalles
+                                  </a>
+                              </div>
+                          </div>
+                      </div>
+                  </article>
+              `;
+          }).join('');
+      }
+
+      function abrirModalGestion(id) {
+          reporteSeleccionadoId = id;
+          document.getElementById('modalGestionEstado').style.display = 'flex';
+      }
+
+      function cerrarModalGestion() {
+          document.getElementById('modalGestionEstado').style.display = 'none';
+      }
+
+      async function cambiarEstadoReporte(nuevoEstado) {
+          if (!reporteSeleccionadoId) return;
+
+          try {
+              const res = await fetch(`/api/reportes/${reporteSeleccionadoId}/estado`, {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ estado: nuevoEstado })
+              });
+
+              if (res.ok) {
+                  alert(`¡Estado del reporte actualizado a "${nuevoEstado}"!`);
+                  cerrarModalGestion();
+                  cargarReportesFundacion();
+              } else {
+                  alert("No se pudo actualizar el estado.");
+              }
+          } catch (err) {
+              console.error(err);
+              alert("Ocurrió un error al intentar cambiar el estado.");
+          }
+      }
+
+      function filtrarEstado(criterio) {
+          document.querySelectorAll('.panel-filtros .btn-filtro').forEach(b => b.classList.remove('active'));
+          event.target.classList.add('active');
+
+          if (criterio === 'todos') {
+              renderizarTarjetas(reportesCargados);
+          } else if (criterio === 'sin_atender') {
+              renderizarTarjetas(reportesCargados.filter(r => !r.estado || r.estado === 'Sin atender'));
+          } else if (criterio === 'en_proceso') {
+              renderizarTarjetas(reportesCargados.filter(r => r.estado === 'En proceso'));
+          } else if (criterio === 'resuelto') {
+              renderizarTarjetas(reportesCargados.filter(r => r.estado === 'Resuelto'));
+          }
+      }
+  </script>
+</body>
+</html>
