@@ -224,6 +224,62 @@
               console.error(error);
               contenedor.innerHTML = `<p style="text-align: center; color: #555;">No se pudieron cargar los reportes en este momento.</p>`;
           }
+      }async function cargarReportesFundacion() {
+          const contenedor = document.getElementById('contenedor-novedades-fundacion');
+          try {
+              const res = await fetch('/api/publicaciones-globales');
+              if (!res.ok) throw new Error("Error al consultar reportes");
+              
+              const publicaciones = await res.json();
+              const reportes = publicaciones.filter(p => p.tipo_publicacion === 'reporte' || p.Nombre_tipo_reporte);
+
+              if (!reportes || reportes.length === 0) {
+                  contenedor.innerHTML = `<p style="text-align: center; color: #555;">No hay reportes disponibles.</p>`;
+                  return;
+              }
+
+              contenedor.innerHTML = reportes.map(item => {
+                  const idRep = item.id_reporte || item.id_origen || item.id_publicacion;
+                  const estadoReporte = item.estado || 'Sin atender';
+                  
+                  return `
+                      <article class="tarjeta-prototipo-estilo">
+                          <div class="proto-card-top">
+                              <div class="proto-titulo-pill">
+                                  UBICACIÓN: <span style="font-size: 16px; font-weight: normal;">${item.Ubicacion || item.ubicacion || 'San Cristóbal'}</span>
+                              </div>
+                              <span class="proto-fecha">${item.Fecha_reporte ? item.Fecha_reporte.split('T')[0] : 'Reciente'}</span>
+                          </div>
+                          
+                          <div class="proto-card-body">
+                              <div class="proto-img-wrapper">
+                                  <img src="${item.img_reporte || 'logo.png'}" alt="Foto reporte">
+                              </div>
+                              
+                              <div class="proto-content-right">
+                                  <span class="proto-pill-tipo">TIPO: ${item.Nombre_tipo_reporte || item.nombre_tipo_reporte || 'Reporte General'}</span>
+                                  
+                                  <div class="proto-info-extra" style="display: flex; justify-content: space-between; align-items: center;">
+                                      <span class="proto-autor">REPORTADO POR: <a href="perfil_publico.html?user=${encodeURIComponent(item.nombre_usuario || 'usuario')}">@${item.nombre_usuario || 'usuario'}</a></span>
+                                      <span style="background: #ffffff; padding: 3px 12px; border-radius: 50px; border: 1.5px solid #f9cab5; color: #5c4033; font-size: 13px;">
+                                          Estado: ${estadoReporte}
+                                      </span>
+                                  </div>
+                                  
+                                  <div class="proto-footer-row">
+                                      <a href="detalle_reporte.html?id=${idRep}&origen=fundacion" class="proto-btn-detalles" style="text-decoration: none;">
+                                          Ver detalles
+                                      </a>
+                                  </div>
+                              </div>
+                          </div>
+                      </article>
+                  `;
+              }).join('');
+          } catch (error) {
+              console.error(error);
+              contenedor.innerHTML = `<p style="text-align: center; color: #555;">No se pudieron cargar los reportes en este momento.</p>`;
+          }
       }
   </script>
 </body>

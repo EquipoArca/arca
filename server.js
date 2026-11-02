@@ -1031,7 +1031,7 @@ app.get('/api/publicaciones-globales', (req, res) => {
             tr.Nombre_tipo_reporte AS nombre_tipo_reporte,
             r.telefono_contacto,
             r.correo_contacto,
-            r.estado,
+            r.estado, -- <--- ¡Esta línea es obligatoria para que no dé error al consultar!
             NULL AS nombre_animal,
             u.nombre_usuario AS nombre_usuario,
             r.id_usuarios
@@ -1040,7 +1040,6 @@ app.get('/api/publicaciones-globales', (req, res) => {
         INNER JOIN usuarios u ON r.id_usuarios = u.id_usuarios
         LEFT JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
         WHERE r.id_usuarios NOT IN (
-            -- Excluir si tú bloqueaste al autor O si el autor te bloqueó a ti
             SELECT ub.id_usuario_bloqueado FROM usuarios_bloqueados ub
             INNER JOIN usuarios u_bloq ON ub.id_usuario_bloqueador = u_bloq.id_usuarios
             WHERE LOWER(TRIM(u_bloq.correo_usuario)) = LOWER(TRIM(?))
@@ -1063,6 +1062,7 @@ app.get('/api/publicaciones-globales', (req, res) => {
             CONCAT('Adopción: ', a.nombre_animal) AS nombre_tipo_reporte,
             pa.telefono_contacto,
             pa.correo_contacto,
+            NULL AS estado, -- Las adopciones no tienen estado de reporte, por eso va NULL
             a.nombre_animal,
             u.nombre_usuario AS nombre_usuario,
             pa.id_usuarios
@@ -1084,7 +1084,6 @@ app.get('/api/publicaciones-globales', (req, res) => {
     `;
 
     const correoParam = correoVisitante || '';
-    // Pasamos el correo 4 veces para cubrir las subconsultas de exclusión mutua
     db.query(sql, [correoParam, correoParam, correoParam, correoParam], (err, rows) => {
         if (err) {
             console.error("❌ ERROR AL OBTENER PUBLICACIONES GLOBALES:", err.message);
