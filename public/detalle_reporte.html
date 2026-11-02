@@ -337,7 +337,6 @@
             margin-left: 4px;
         }
 
-        /* Botones generales estilo píldora orgánica (cero IA) */
         .detalle-btn-accion {
             background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(6px);
@@ -368,7 +367,6 @@
         }
         .detalle-btn-editar:hover { background: #eb917b; }
 
-        /* Botones específicos de fundación (completamente redondos y colores pasteles propios) */
         .btn-opcion-estado {
             width: 100%;
             padding: 10px 20px;
@@ -406,49 +404,50 @@
         }
         .btn-resuelto:hover { background-color: #d8ebd8; }
 
-        /* Modal */
+        /* Modal general y Alerta Estética Estilo ARCA (Más chica y preciosa) */
         .modal-arca-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.35);
             backdrop-filter: blur(4px);
             display: none; align-items: center; justify-content: center; z-index: 1000;
         }
 
         .modal-arca-box {
-            background: #ffffff;
-            border-radius: 28px;
-            padding: 30px;
-            width: 90%;
-            max-width: 400px;
+            background: #fffaf8;
+            border-radius: 24px;
+            padding: 24px 28px;
+            width: 85%;
+            max-width: 330px; /* Más chica y delicada como pediste */
             text-align: center;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            box-shadow: 0 15px 35px rgba(220, 150, 140, 0.2);
             border: 2px solid #fce8e6;
             font-family: 'Itim', cursive, sans-serif;
         }
 
         .modal-huella-icono {
-            font-size: 36px;
-            color: #7b5c93;
-            margin-bottom: 12px;
-            display: flex; justify-content: center; gap: 8px;
+            font-size: 30px;
+            color: #fca38d;
+            margin-bottom: 10px;
+            display: flex; justify-content: center; gap: 6px;
         }
 
-        .modal-arca-box h3 { margin: 0 0 10px 0; color: #2b2b2b; font-size: 20px; font-weight: 400; }
-        .modal-arca-box p { color: #555; font-size: 15px; line-height: 1.4; margin-bottom: 20px; }
-        .modal-botones-fila { display: flex; gap: 10px; justify-content: center; }
+        .modal-arca-box h3 { margin: 0 0 8px 0; color: #2b2b2b; font-size: 18px; font-weight: 400; }
+        .modal-arca-box p { color: #555; font-size: 14px; line-height: 1.4; margin-bottom: 18px; }
+        .modal-botones-fila { display: flex; gap: 8px; justify-content: center; }
         
         .modal-btn-aceptar {
-            background: #fca38d; color: #fff; border: none; padding: 10px 24px;
-            border-radius: 50px; font-weight: 400; font-size: 15px; cursor: pointer;
-            font-family: 'Itim', cursive, sans-serif; box-shadow: 0 4px 12px rgba(252, 163, 141, 0.4);
+            background: #fca38d; color: #fff; border: none; padding: 8px 22px;
+            border-radius: 50px; font-weight: 400; font-size: 14px; cursor: pointer;
+            font-family: 'Itim', cursive, sans-serif; box-shadow: 0 4px 12px rgba(252, 163, 141, 0.3);
+            transition: all 0.2s;
         }
-        .modal-btn-aceptar:hover { background: #eb917b; }
+        .modal-btn-aceptar:hover { background: #eb917b; transform: translateY(-1px); }
 
         .modal-btn-cancelar {
-            background: #f1f1f1; color: #555; border: none; padding: 10px 20px;
-            border-radius: 50px; font-weight: 400; font-size: 15px; cursor: pointer;
-            font-family: 'Itim', cursive, sans-serif;
+            background: #f1f1f1; color: #555; border: none; padding: 8px 18px;
+            border-radius: 50px; font-weight: 400; font-size: 14px; cursor: pointer;
+            font-family: 'Itim', cursive, sans-serif; transition: all 0.2s;
         }
         .modal-btn-cancelar:hover { background: #e2e2e2; }
     </style>
@@ -459,15 +458,13 @@
   <nav class="top-nav">
     <div class="top-left">
         <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu"></i>
-        <div class="mini-logo-circle">
-            <img src="logo.png" alt="Logo">
-        </div>
+        <div class="mini-logo-circle"><img src="logo.png" alt="Logo"></div>
         <span class="page-title" id="titulo-pagina">Publicación</span>
     </div>
 
     <div class="search-bar">
         <i class="fa-solid fa-magnifying-glass"></i>
-        <input type="text" id="input-busqueda-nav" name="busqueda" placeholder="Busca algo" aria-label="Buscar en la aplicación">
+        <input type="text" id="input-busqueda-nav" name="busqueda" placeholder="Busca algo">
         <i class="fa-solid fa-microphone"></i>
     </div>
 
@@ -478,28 +475,24 @@
                     <img src="logo.png" id="user-avatar-img" alt="Perfil">
                 </div>
                 <div class="mini-menu-card" id="mini-menu-card">
-                    <div class="mini-menu-header">
-                        <span id="mini-menu-username">Usuario</span>
-                    </div>
+                    <div class="mini-menu-header"><span id="mini-menu-username">Usuario</span></div>
                     <hr class="mini-menu-divider">
                     <a href="javascript:void(0)" onclick="mostrarSeccion('configuracion')" class="mini-menu-item btn-ajustes">
-                        <i class="fa-solid fa-gear"></i>
-                        <span>Ajustes</span>
+                        <i class="fa-solid fa-gear"></i><span>Ajustes</span>
                     </a>
                     <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini">
-                        <i class="fa-solid fa-right-from-bracket"></i>
-                        <span>Cerrar sesión</span>
+                        <i class="fa-solid fa-right-from-bracket"></i><span>Cerrar sesión</span>
                     </a>
                 </div>
             </div>
             <div class="notif-circle">
-                <a href="notificaciones.html" aria-label="Notificaciones"><i class="fa-solid fa-bell"></i></a>
+                <a href="notificaciones.html"><i class="fa-solid fa-bell"></i></a>
             </div>
         </div>
     </div>
   </nav>
 
-  <!-- Barra Lateral (Sidebar) -->
+  <!-- Barra Lateral -->
   <aside class="sidebar" id="sidebar">
       <div class="side-icons">
           <a href="home.html" class="menu-fila"><i class="fa-solid fa-house"></i><span class="menu-text">Inicio</span></a>
@@ -543,9 +536,7 @@
           <div class="detalle-footer-info">
               <div class="detalle-bloque-mini">
                   <strong>Medios de contacto:</strong>
-                  <div class="contacto-items" id="lbl-contacto">
-                      <div>Cargando...</div>
-                  </div>
+                  <div class="contacto-items" id="lbl-contacto"><div>Cargando...</div></div>
               </div>
               <div class="detalle-bloque-mini">
                   <strong>Ubicación:</strong>
@@ -556,7 +547,7 @@
           <div class="detalle-barra-inferior">
               <div class="detalle-info-autor">
                   Publicado por: 
-                  <a href="javascript:void(0)" id="link-autor" title="Ver perfil del autor">
+                  <a href="javascript:void(0)" id="link-autor">
                       <span id="nombre-autor-texto">@usuario</span>
                       <span class="badge-ver-perfil"><i class="fa-solid fa-user-check"></i> Ver perfil</span>
                   </a>
@@ -568,18 +559,18 @@
       </div>
   </main>
 
-  <!-- Modal Estilo ARCA -->
+  <!-- Modal Estilo ARCA (Único para alertas y confirmaciones) -->
   <div id="modalConfirmacion" class="modal-arca-overlay">
       <div class="modal-arca-box">
           <div class="modal-huella-icono">
               <i class="fa-solid fa-paw"></i>
-              <i class="fa-solid fa-paw" style="font-size: 26px; margin-top: 10px;"></i>
+              <i class="fa-solid fa-paw" style="font-size: 20px; margin-top: 6px;"></i>
           </div>
-          <h3 id="modalTitulo">Abrir enlace</h3>
-          <p id="modalMensaje">¿Deseas abrir esta aplicación externa?</p>
-          <div class="modal-botones-fila">
+          <h3 id="modalTitulo">Mensaje</h3>
+          <p id="modalMensaje">Contenido de la alerta...</p>
+          <div class="modal-botones-fila" id="modalBotonesFila">
               <button id="modalBtnAceptar" class="modal-btn-aceptar">Aceptar</button>
-              <button onclick="cerrarModalArca()" class="modal-btn-cancelar">Cancelar</button>
+              <button id="modalBtnCancelar" onclick="cerrarModalArca()" class="modal-btn-cancelar" style="display: none;">Cancelar</button>
           </div>
       </div>
   </div>
@@ -590,6 +581,39 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="script.js"></script>
   <script>
+      // Sistema de Alertas Estéticas ARCA (Reemplaza los alert y confirm nativos feos)
+      function mostrarAlertaArca(mensaje, titulo = "Aviso ARCA", callbackAceptar = null) {
+          document.getElementById('modalTitulo').textContent = titulo;
+          document.getElementById('modalMensaje').textContent = mensaje;
+          document.getElementById('modalBtnCancelar').style.display = 'none';
+          
+          const btnAceptar = document.getElementById('modalBtnAceptar');
+          btnAceptar.onclick = () => {
+              cerrarModalArca();
+              if (callbackAceptar) callbackAceptar();
+          };
+
+          document.getElementById('modalConfirmacion').style.display = 'flex';
+      }
+
+      function mostrarConfirmacionArca(mensaje, titulo = "¿Estás seguro?", callbackAceptar) {
+          document.getElementById('modalTitulo').textContent = titulo;
+          document.getElementById('modalMensaje').textContent = mensaje;
+          document.getElementById('modalBtnCancelar').style.display = 'inline-block';
+          
+          const btnAceptar = document.getElementById('modalBtnAceptar');
+          btnAceptar.onclick = () => {
+              cerrarModalArca();
+              if (callbackAceptar) callbackAceptar();
+          };
+
+          document.getElementById('modalConfirmacion').style.display = 'flex';
+      }
+
+      function cerrarModalArca() {
+          document.getElementById('modalConfirmacion').style.display = 'none';
+      }
+
       document.addEventListener('DOMContentLoaded', () => {
           const btnToggleMenu = document.getElementById('btn-toggle-menu');
           const sidebar = document.getElementById('sidebar');
@@ -626,7 +650,7 @@
 
       function copiarAlPortapapeles(texto) {
           navigator.clipboard.writeText(texto).then(() => {
-              alert(`¡Copiado: ${texto}!`);
+              mostrarAlertaArca(`¡Copiado con éxito: ${texto}!`, "Copiado");
           }).catch(err => {
               console.error('Error al copiar: ', err);
           });
@@ -636,9 +660,7 @@
           if (!lat || !lon) return "Ubicación no especificada";
           try {
               const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`;
-              const respuesta = await fetch(url, {
-                  headers: { 'Accept-Language': 'es', 'User-Agent': 'ARCA-App-Mascotas' }
-              });
+              const respuesta = await fetch(url, { headers: { 'Accept-Language': 'es', 'User-Agent': 'ARCA-App-Mascotas' } });
               if (!respuesta.ok) throw new Error("Error en mapas");
               const datos = await respuesta.json();
               if (datos && datos.address) {
@@ -661,19 +683,20 @@
       }
 
       let urlDestinoGlobal = "";
-      function abrirModalArca(titulo, mensaje, url) {
+      function abrirModalEnlace(titulo, mensaje, url) {
           document.getElementById('modalTitulo').textContent = titulo;
           document.getElementById('modalMensaje').textContent = mensaje;
+          document.getElementById('modalBtnCancelar').style.display = 'inline-block';
           urlDestinoGlobal = url;
+          
+          const btnAceptar = document.getElementById('modalBtnAceptar');
+          btnAceptar.onclick = () => {
+              if (urlDestinoGlobal) window.open(urlDestinoGlobal, '_blank');
+              cerrarModalArca();
+          };
+
           document.getElementById('modalConfirmacion').style.display = 'flex';
       }
-      function cerrarModalArca() {
-          document.getElementById('modalConfirmacion').style.display = 'none';
-      }
-      document.getElementById('modalBtnAceptar').addEventListener('click', () => {
-          if (urlDestinoGlobal) window.open(urlDestinoGlobal, '_blank');
-          cerrarModalArca();
-      });
 
       async function cambiarEstadoDesdeDetalle(idReporte, nuevoEstado) {
           try {
@@ -683,14 +706,15 @@
                   body: JSON.stringify({ estado: nuevoEstado })
               });
               if (res.ok) {
-                  alert(`¡Estado actualizado a "${nuevoEstado}" con éxito!`);
-                  location.reload();
+                  mostrarAlertaArca(`¡Estado actualizado a "${nuevoEstado}" con éxito!`, "Actualizado", () => {
+                      location.reload();
+                  });
               } else {
-                  alert("No se pudo actualizar el estado.");
+                  mostrarAlertaArca("No se pudo actualizar el estado.", "Error");
               }
           } catch (err) {
               console.error(err);
-              alert("Error al conectar con el servidor.");
+              mostrarAlertaArca("Error al conectar con el servidor.", "Error de Red");
           }
       }
 
@@ -699,8 +723,9 @@
           const reporteId = params.get('id');
 
           if (!reporteId) {
-              alert("No se especificó ningún reporte.");
-              window.location.href = 'novedades.html';
+              mostrarAlertaArca("No se especificó ningún reporte.", "Aviso", () => {
+                  window.location.href = 'novedades.html';
+              });
               return;
           }
 
@@ -764,13 +789,13 @@
               if (tel && correo) {
                   contactoHTML = `
                       <div class="contacto-fila-item">
-                          <a href="javascript:void(0)" onclick="abrirModalArca('Abrir WhatsApp', '¿Deseas abrir WhatsApp para escribir al número ${tel}?', '${urlWhatsapp}')" class="btn-contacto-link whatsapp">
+                          <a href="javascript:void(0)" onclick="abrirModalEnlace('Abrir WhatsApp', '¿Deseas abrir WhatsApp para escribir al número ${tel}?', '${urlWhatsapp}')" class="btn-contacto-link whatsapp">
                               <i class="fa-brands fa-whatsapp"></i> ${tel}
                           </a>
                           <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${tel}')"><i class="fa-solid fa-copy"></i> Copiar</button>
                       </div>
                       <div class="contacto-fila-item">
-                          <a href="javascript:void(0)" onclick="abrirModalArca('Abrir Gmail', '¿Deseas redactar un correo a ${correo}?', '${urlGmail}')" class="btn-contacto-link correo">
+                          <a href="javascript:void(0)" onclick="abrirModalEnlace('Abrir Gmail', '¿Deseas redactar un correo a ${correo}?', '${urlGmail}')" class="btn-contacto-link correo">
                               <i class="fa-solid fa-envelope"></i> ${correo}
                           </a>
                           <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${correo}')"><i class="fa-solid fa-copy"></i> Copiar</button>
@@ -779,7 +804,7 @@
               } else if (tel) {
                   contactoHTML = `
                       <div class="contacto-fila-item">
-                          <a href="javascript:void(0)" onclick="abrirModalArca('Abrir WhatsApp', '¿Deseas abrir WhatsApp para ${tel}?', '${urlWhatsapp}')" class="btn-contacto-link whatsapp">
+                          <a href="javascript:void(0)" onclick="abrirModalEnlace('Abrir WhatsApp', '¿Deseas abrir WhatsApp para ${tel}?', '${urlWhatsapp}')" class="btn-contacto-link whatsapp">
                               <i class="fa-brands fa-whatsapp"></i> ${tel}
                           </a>
                           <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${tel}')"><i class="fa-solid fa-copy"></i> Copiar</button>
@@ -788,7 +813,7 @@
               } else if (correo) {
                   contactoHTML = `
                       <div class="contacto-fila-item">
-                          <a href="javascript:void(0)" onclick="abrirModalArca('Abrir Gmail', '¿Deseas redactar un correo a ${correo}?', '${urlGmail}')" class="btn-contacto-link correo">
+                          <a href="javascript:void(0)" onclick="abrirModalEnlace('Abrir Gmail', '¿Deseas redactar un correo a ${correo}?', '${urlGmail}')" class="btn-contacto-link correo">
                               <i class="fa-solid fa-envelope"></i> ${correo}
                           </a>
                           <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${correo}')"><i class="fa-solid fa-copy"></i> Copiar</button>
@@ -813,7 +838,7 @@
               firebase.auth().onAuthStateChanged(async (user) => {
                   const correoLogueado = user ? user.email : (localStorage.getItem('correo_usuario') || localStorage.getItem('correo'));
 
-                  // 1. SI ES FUNDACIÓN: Muestra estado + 3 botones de gestión con colores pasteles individuales y redondos
+                  // 1. SI ES FUNDACIÓN
                   if (tipoUsuario === 'fundacion' || origenParam === 'fundacion') {
                       contenedorBoton.innerHTML = `
                           <div style="display: flex; flex-direction: column; gap: 8px; width: 100%; min-width: 250px;">
@@ -837,7 +862,7 @@
                       return;
                   }
 
-                  // 2. SI ES USUARIO NORMAL: Muestra la cápsula con el estado actual del reporte arriba del botón de Guardar/Editar
+                  // 2. SI ES USUARIO NORMAL
                   let badgeEstadoHTML = `
                       <div style="font-size: 13px; font-weight: 400; color: #442c20; margin-bottom: 8px; text-align: right;">
                           Estado: <span style="background: #ffffff; padding: 3px 12px; border-radius: 50px; border: 1.5px solid #f9cab5; color: #5c4033;">${estadoActual}</span>
@@ -881,14 +906,15 @@
                               </div>
                           `;
 
-                          document.getElementById('btn-eliminar-reporte').addEventListener('click', async () => {
-                              if (confirm("¿Estás seguro de eliminar este reporte permanentemente?")) {
+                          document.getElementById('btn-eliminar-reporte').addEventListener('click', () => {
+                              mostrarConfirmacionArca("¿Estás seguro de eliminar este reporte permanentemente?", "Eliminar Reporte", async () => {
                                   const resDel = await fetch(`/api/reportes/${reporteData.id_reporte || reporteId}`, { method: 'DELETE' });
                                   if (resDel.ok) {
-                                      alert("Reporte eliminado.");
-                                      window.location.href = 'novedades.html';
+                                      mostrarAlertaArca("Reporte eliminado con éxito.", "Eliminado", () => {
+                                          window.location.href = 'novedades.html';
+                                      });
                                   }
-                              }
+                              });
                           });
                       } else {
                           let pubEnc = publicaciones.find(p => 
@@ -908,15 +934,15 @@
                                       <i class="fa-solid fa-bookmark"></i> Guardada
                                   </button>
                               `;
-                              document.getElementById('btn-accion-guardado').addEventListener('click', async () => {
-                                  if (confirm("¿Quitar de guardados?")) {
+                              document.getElementById('btn-accion-guardado').addEventListener('click', () => {
+                                  mostrarConfirmacionArca("¿Deseas quitar esta publicación de tus guardados?", "Quitar guardado", async () => {
                                       await fetch('/api/quitar-guardado', {
                                           method: 'POST',
                                           headers: { 'Content-Type': 'application/json' },
                                           body: JSON.stringify({ correo: correoLogueado, id_publicacion: Number(idPubGl) })
                                       });
                                       location.reload();
-                                  }
+                                  });
                               });
                           } else {
                               contenedorBoton.innerHTML = `
@@ -931,8 +957,9 @@
                                       headers: { 'Content-Type': 'application/json' },
                                       body: JSON.stringify({ correo: correoLogueado, id_publicacion: Number(idPubGl) })
                                   });
-                                  alert("¡Publicación guardada!");
-                                  location.reload();
+                                  mostrarAlertaArca("¡Publicación guardada con éxito!", "Guardado", () => {
+                                      location.reload();
+                                  });
                               });
                           }
                       }
@@ -943,7 +970,7 @@
 
           } catch (error) {
               console.error(error);
-              alert("Error al cargar los detalles.");
+              mostrarAlertaArca("Hubo un error al cargar los detalles del reporte.", "Error");
           }
       }
   </script>

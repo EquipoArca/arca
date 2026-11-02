@@ -1031,6 +1031,7 @@ app.get('/api/publicaciones-globales', (req, res) => {
             tr.Nombre_tipo_reporte AS nombre_tipo_reporte,
             r.telefono_contacto,
             r.correo_contacto,
+            r.estado,
             NULL AS nombre_animal,
             u.nombre_usuario AS nombre_usuario,
             r.id_usuarios
