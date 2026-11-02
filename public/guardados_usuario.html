@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guardados - ARCA</title>
+    <link rel="stylesheet" href="style_home.css">
+    <link rel="stylesheet" href="style_guardados.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="dark-mode.css">
+    <script>
+    if (localStorage.getItem("modo_oscuro") === "true") {
+        document.body.classList.add("dark-mode");
+    }
+    </script>
+</head>
+<body>
+
+    <!-- BARRA DE NAVEGACIÓN SUPERIOR -->
+    <nav class="top-nav">
+        <div class="top-left">
+            <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu"></i>
+            <div class="mini-logo-circle">
+                <img src="logo.png" alt="Logo ARCA">
+            </div>
+            <span class="page-title">Guardados</span>
+        </div>
+        <div class="search-bar">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="input-busqueda-nav" name="busqueda" placeholder="Busca algo" aria-label="Buscar en la aplicación">
+            <i class="fa-solid fa-microphone"></i>
+        </div>
+        <div class="top-right">
+            <div class="user-header-info">
+
+            <!-- 1. PERFIL Y MINI MENÚ -->
+            <div class="user-profile-menu" id="user-profile-menu">
+                <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
+                    <img src="logo.png" id="user-avatar-img" alt="Perfil">
+                </div>
+
+                <div class="mini-menu-card" id="mini-menu-card">
+                    <div class="mini-menu-header">
+                        <span id="mini-menu-username">Usuario</span>
+                    </div>
+                    
+                    <hr class="mini-menu-divider">
+                    
+                    <a href="configuracion.html" class="mini-menu-item btn-ajustes">
+                        <i class="fa-solid fa-gear"></i>
+                        <span>Ajustes</span>
+                    </a>
+                    
+                    <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Cerrar sesión</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 2. CAMPANA DE NOTIFICACIONES -->
+            <div class="notif-circle">
+                <a href="notificaciones.html" aria-label="Notificaciones"><i class="fa-solid fa-bell"></i></a>
+            </div>
+
+        </div>
+    </div>
+  </nav>
+
+    <!-- BARRA LATERAL -->
+    <aside class="sidebar" id="sidebar">
+        <div class="side-icons">
+            <a href="home.html" class="menu-fila">
+                <i class="fa-solid fa-house"></i>
+                <span class="menu-text">Inicio</span>
+            </a>
+            <a href="perfil_usuario.html" class="menu-fila">
+                <i class="fa-solid fa-circle-user"></i>
+                <span class="menu-text">Perfil</span>
+            </a>
+            <a href="guardados_usuario.html" class="menu-fila activa">
+                <i class="fa-solid fa-bookmark"></i>
+                <span class="menu-text">Guardado</span>
+            </a>
+            <a href="mapa.html" class="menu-fila">
+                <i class="fa-solid fa-location-dot"></i>
+                <span class="menu-text">Mapa</span>
+            </a>
+            <a href="configuracion.html" class="menu-fila">
+                <i class="fa-solid fa-gear"></i>
+                <span class="menu-text">Ajustes</span>
+            </a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <section class="feed-guardados">
+            
+            <!-- Encabezado de la tarjeta -->
+            <div class="header-guardados">
+                <h2>Tus publicaciones guardadas</h2>
+                <p class="subtitulo-guardados">Aquí encontrarás todo lo que has guardado para ver más tarde</p>
+            </div>
+
+            <!-- Contenedor dinámico (JS renderiza aquí las publicaciones o el estado vacío) -->
+            <div id="contenedorGuardados" class="zona-guardados-dinamica">
+                
+                <div class="estado-vacio-guardados">
+                    <div class="ilustracion-guardados">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#d97736" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>
+                        </svg>
+                    </div>
+                    <h3>¡Aún no tienes publicaciones guardadas!</h3>
+                    <p>Explora las últimas novedades o el mapa y guarda las publicaciones que te interesen con el ícono de marcador.</p>
+                </div>
+
+            </div>
+
+        </section>
+    </main>
+
+    <!-- MODAL DE DETALLES DEL REPORTE -->
+    <div id="modal-detalle-publicacion" class="modal-foto-overlay" onclick="cerrarModalDetalleOverlay(event)">
+        <div class="modal-foto-contenido">
+            <button type="button" class="btn-cerrar-modal btn-arca-animado" onclick="cerrarModalDetalle()">&times;</button>
+            
+            <div id="contenido-detalle-dinamico">
+                <!-- Se inyecta dinámicamente desde script_guardados.js -->
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS DE FIREBASE Y LÓGICA -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    <script src="script.js"></script>
+    <script src="script_guardados.js"></script>
+    
+    <script>
+        // Script para desplegar/contraer el menú lateral
+        const btnToggleMenu = document.getElementById('btn-toggle-menu');
+        const sidebar = document.getElementById('sidebar');
+
+        if (btnToggleMenu && sidebar) {
+            btnToggleMenu.addEventListener('click', () => {
+                sidebar.classList.toggle('sidebar-abierta');
+            });
+        }
+    </script>
+    
+    <!-- Motor oculto de Google Translate -->
+    <div id="google_translate_element" style="display:none;"></div>
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({ pageLanguage: 'es', autoDisplay: false }, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('app_selected_lang');
+            if (savedLang && savedLang !== 'es') {
+                const interval = setInterval(() => {
+                    const googleCombo = document.querySelector('.goog-te-combo');
+                    if (googleCombo) {
+                        googleCombo.value = savedLang;
+                        googleCombo.dispatchEvent(new Event('change'));
+                        clearInterval(interval);
+                    }
+                }, 200);
+            }
+        });
+    </script>
+    <style>
+        .goog-te-banner-frame { display: none !important; }
+        body { top: 0 !important; }
+        .skiptranslate { display: none !important; }
+    </style>
+</body>
+</html>

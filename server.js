@@ -1,0 +1,1984 @@
+require('dotenv').config(); 
+const mysql = require('mysql2'); 
+const express = require('express'); 
+const cors = require('cors');
+const nodemailer = require('nodemailer');
+const path = require('path');
+const multer = require('multer');
+const { initializeApp, cert } = require('firebase-admin/app');
+const { getAuth } = require('firebase-admin/auth');
+
+// ==========================================
+// INICIALIZACIÓN DE FIREBASE CON ARCHIVO LOCAL
+// ==========================================
+// Inicialización de Firebase utilizando una única variable de entorno con el JSON completo
+let credentialCert;
+
+if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    try {
+        const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+        credentialCert = cert(serviceAccount);
+        console.log("✅ Credenciales de Firebase cargadas correctamente desde la variable JSON de Render.");
+    } catch (e) {
+        console.error("❌ ERROR: No se pudo parsear el FIREBASE_SERVICE_ACCOUNT de Render.", e.message);
+    }
+} else {
+    try {
+        const serviceAccount = require('./clave-firebase.json');
+        credentialCert = cert(serviceAccount);
+    } catch (e) {
+        console.error("❌ ERROR: No se encontró la configuración de Firebase.");
+    }
+}
+
+initializeApp({
+    credential: credentialCert
+});
+const app = express();
+
+app.use(express.json({ limit: '10mb' })); 
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
+app.use(cors());
+
+// ==========================================
+// ARCHIVOS ESTÁTICOS (¡ESTO ES LO QUE FALTABA!)
+// ==========================================
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Configuración de MySQL robusta adaptada a los datos de Aiven
+const db = mysql.createConnection({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME || 'defaultdb',
+    port: process.env.DB_PORT ? Number(process.env.DB_PORT) : 24612,
+    ssl: { rejectUnauthorized: false },
+    multipleStatements: true
+});
+
+// Conexión explícita con manejo detallado
+db.connect((err) => {
+    if (err) {
+        console.error('❌ Error al conectar a la base de datos MySQL:', err);
+        return;
+    }
+    console.log('✅ Conectado exitosamente a la base de datos MySQL en Aiven!');
+});
+
+const transporter = nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false,
+    auth: {
+        user: process.env.EMAIL_USER || 'arcaoficial0@gmail.com',
+        pass: process.env.EMAIL_PASS || 'darl pzpf sjgz aggx'
+    },
+    tls: {
+        rejectUnauthorized: false
+    },
+    family: 4 // <-- ¡Esta línea es la clave para evitar el error ENETUNREACH!
+});
+const codigosOTP = {};
+// ==========================================
+// AUTENTICACIÓN Y REGISTRO
+// ==========================================
+
+app.post('/registrar-usuario', (req, res) => {
+    const { Nombre_usuario, Fecha_nacimiento, Correo_usuario, Telefono_usuario } = req.body;
+    
+    if (!Nombre_usuario || !Correo_usuario) {
+        return res.status(400).json({ error: "El nombre de usuario y correo son obligatorios." });
+    }
+
+    db.query('SELECT id_usuarios FROM usuarios WHERE nombre_usuario = ?', [Nombre_usuario], (err, results) => {
+        if (err) return res.status(500).json({ error: "Error en el servidor: " + err.message });
+        
+        if (results.length > 0) {
+            return res.status(400).json({ error: "Este nombre de usuario ya está ocupado. Intenta con otro." });
+        }
+
+        const sql = 'INSERT INTO usuarios(nombre_usuario, Fecha_nacimiento, correo_usuario, Telefono_usuario) VALUES (?, ?, ?, ?)';
+        const valores = [Nombre_usuario, Fecha_nacimiento, Correo_usuario, Telefono_usuario];
+        
+        db.query(sql, valores, (err, result) => {
+            if (err) {
+                if (err.code === 'ER_DUP_ENTRY') {
+                    return res.status(400).json({ error: "El usuario o correo ya se encuentra registrado." });
+                }
+                return res.status(500).json({ error: "Error en el servidor: " + err.message });
+            }
+            res.status(201).json({ message: '¡Datos guardados con éxito!', id_usuario: result.insertId });
+        });
+    });
+});
+
+app.post('/enviar-codigo-otp', async (req, res) => {
+    const { correo } = req.body;
+
+    if (!correo) {
+        return res.status(400).json({ error: "El correo es requerido." });
+    }
+
+    const codigo = Math.floor(1000 + Math.random() * 9000).toString();
+    
+    codigosOTP[correo] = {
+        codigo: codigo,
+        expira: Date.now() + 2 * 60 * 1000
+    };
+
+    try {
+        await transporter.sendMail({
+            from: '"ARCA Cuidamos su vida, protegemos su alegría" <arcaoficial0@gmail.com>',
+            to: correo,
+            subject: 'Código de verificación - ARCA',
+            html: `
+                <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #fde8e8; border-radius: 10px;">
+                    <h2 style="color: #e57373;">¡Hola! Te damos la bienvenida a ARCA</h2>
+                    <p>Tu código de verificación para completar el registro es:</p>
+                    <h1 style="font-size: 32px; letter-spacing: 5px; color: #222;">${codigo}</h1>
+                    <p style="font-size: 0.9em; color: #666;">Este código vence en 2 minutos. No lo compartas con nadie.</p>
+                </div>
+            `
+        });
+
+        res.json({ exito: true, mensaje: "Código enviado correctamente." });
+    } catch (error) {
+        console.error("Error enviando correo:", error);
+        res.status(500).json({ error: "No se pudo enviar el correo de verificación." });
+    }
+});
+
+app.post('/verificar-otp', (req, res) => {
+    const { correo, codigo } = req.body;
+    const registroOTP = codigosOTP[correo];
+
+    if (!registroOTP) {
+        return res.status(400).json({ valido: false, error: "No hay un código solicitado para este correo." });
+    }
+
+    if (Date.now() > registroOTP.expira) {
+        delete codigosOTP[correo];
+        return res.status(400).json({ valido: false, error: "El código ha expirado. Solicita uno nuevo." });
+    }
+
+    if (registroOTP.codigo === codigo) {
+        delete codigosOTP[correo];
+        return res.json({ valido: true });
+    } else {
+        return res.status(400).json({ valido: false, error: "El código ingresado es incorrecto." });
+    }
+});
+
+// ==========================================
+// CONSULTA Y EDICIÓN DE PERFIL
+// ==========================================
+
+app.get('/api/perfil', (req, res) => {
+    const usuarioId = req.usuario ? req.usuario.id_usuarios : 7;
+    const query = 'SELECT nombre_usuario FROM usuarios WHERE id_usuarios = ?';
+
+    db.query(query, [usuarioId], (err, results) => {
+        if (err) {
+            console.error('Error en la consulta:', err);
+            return res.status(500).json({ error: 'Error al consultar la base de datos' });
+        }
+
+        if (results.length > 0) {
+            res.json({
+                status: 'success',
+                nombre_usuario: results[0].nombre_usuario
+            });
+        } else {
+            res.status(404).json({ error: 'Usuario no encontrado' });
+        }
+    });
+});
+
+app.get('/api/obtener-usuario', (req, res) => {
+    const { correo } = req.query;
+
+    if (!correo) {
+        return res.status(400).json({ error: "Se requiere el correo del usuario" });
+    }
+
+    const query = "SELECT * FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))";
+    
+    db.query(query, [correo], (err, results) => {
+        if (err) {
+            console.error("Error al consultar usuario:", err);
+            return res.status(500).json({ error: "Error en el servidor" });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ error: "Usuario no encontrado" });
+        }
+
+        res.json(results[0]);
+    });
+});
+// GET: Obtener la lista de seguidores del usuario logueado
+app.get('/api/mis-seguidores/:correo', (req, res) => {
+    const correoUsuario = req.params.correo;
+
+    const sql = `
+        SELECT u.id_usuarios, u.nombre_usuario, u.foto_perfil, s.id_seguidor
+        FROM seguidores s
+        JOIN usuarios u ON s.id_usuario_seguidor = u.id_usuarios
+        JOIN usuarios u_seguido ON s.id_usuario_seguido = u_seguido.id_usuarios
+        WHERE LOWER(TRIM(u_seguido.correo_usuario)) = LOWER(TRIM(?))
+    `;
+
+    db.query(sql, [correoUsuario], (err, results) => {
+        if (err) {
+            console.error("❌ Error al obtener seguidores:", err.message);
+            return res.status(500).json({ error: "Error en el servidor al obtener seguidores" });
+        }
+        res.json(results);
+    });
+});
+
+// DELETE: Eliminar (remover) a un seguidor
+app.delete('/api/remover-seguidor/:id_seguidor', (req, res) => {
+    const idSeguidor = req.params.id_seguidor;
+
+    const sql = "DELETE FROM seguidores WHERE id_seguidor = ?";
+    db.query(sql, [idSeguidor], (err, result) => {
+        if (err) {
+            console.error("❌ Error al remover seguidor:", err.message);
+            return res.status(500).json({ error: "Error al eliminar el seguidor de la base de datos" });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: "No se encontró el registro del seguidor" });
+        }
+
+        res.json({ mensaje: "Seguidor eliminado con éxito" });
+    });
+});
+// GET: Obtener la lista de usuarios a los que sigue el usuario logueado
+// GET: Obtener la lista de usuarios a los que sigue el usuario logueado
+app.get('/api/mis-seguidos/:correo', (req, res) => {
+    const correoUsuario = req.params.correo;
+
+    const sql = `
+        SELECT u.id_usuarios, u.nombre_usuario, u.foto_perfil, s.id_seguidor
+        FROM seguidores s
+        JOIN usuarios u ON s.id_usuario_seguido = u.id_usuarios
+        JOIN usuarios u_seguidor ON s.id_usuario_seguidor = u_seguidor.id_usuarios
+        WHERE LOWER(TRIM(u_seguidor.correo_usuario)) = LOWER(TRIM(?))
+    `;
+
+    db.query(sql, [correoUsuario], (err, results) => {
+        if (err) {
+            console.error("❌ Error al obtener seguidos:", err.message);
+            return res.status(500).json({ error: "Error en el servidor al obtener seguidos" });
+        }
+        res.json(results);
+    });
+});
+app.get('/api/datos-usuario-registro', (req, res) => {
+    let { correo } = req.query;
+
+    if (!correo) {
+        return res.status(400).json({ mensaje: "El correo es requerido." });
+    }
+
+    const correoLimpio = correo.trim().toLowerCase();
+
+    const sql = `
+        SELECT nombre_usuario, Fecha_nacimiento, Telefono_usuario, correo_usuario 
+        FROM usuarios 
+        WHERE LOWER(TRIM(correo_usuario)) = ?
+    `;
+
+    db.query(sql, [correoLimpio], (err, filas) => {
+        if (err) {
+            console.error("❌ Error en MySQL al obtener datos:", err);
+            return res.status(500).json({ mensaje: "Error interno del servidor." });
+        }
+
+        if (!filas || filas.length === 0) {
+            return res.status(404).json({ mensaje: "Usuario no encontrado." });
+        }
+
+        return res.json({
+            nombre_usuario: filas[0].nombre_usuario,
+            fecha_nacimiento: filas[0].Fecha_nacimiento,
+            telefono_usuario: filas[0].Telefono_usuario,
+            correo_usuario: filas[0].correo_usuario
+        });
+    });
+});
+
+app.post('/guardar-foto-perfil', (req, res) => {
+    const { correo_usuario, fotoBase64 } = req.body;
+
+    if (!correo_usuario) {
+        return res.status(400).json({ error: "El correo es requerido." });
+    }
+
+    const query = "UPDATE usuarios SET foto_perfil = ? WHERE correo_usuario = ?";
+
+    db.query(query, [fotoBase64 || null, correo_usuario], (err) => {
+        if (err) {
+            console.error("❌ Error al guardar foto:", err.message);
+            return res.status(500).json({ error: "Error al actualizar en la base de datos." });
+        }
+
+        res.json({ mensaje: "Foto de perfil actualizada correctamente" });
+    });
+});
+
+app.post('/cambiar-nombre-usuario', (req, res) => {
+    const { correo_usuario, nuevo_nombre } = req.body;
+
+    if (!correo_usuario || !nuevo_nombre) {
+        return res.status(400).json({ error: "Faltan datos requeridos." });
+    }
+
+    const nombreLimpio = nuevo_nombre.trim();
+    const correoLimpio = correo_usuario.trim().toLowerCase();
+
+    // 1. Primero verificamos si el nombre ya pertenece al mismo usuario que lo está pidiendo
+    const queryDueñoPropio = "SELECT id_usuarios FROM usuarios WHERE nombre_usuario = ? AND LOWER(TRIM(correo_usuario)) = ?";
+    
+    db.query(queryDueñoPropio, [nombreLimpio, correoLimpio], (errPropio, resPropio) => {
+        if (errPropio) {
+            console.error("❌ Error en consulta:", errPropio.message);
+            return res.status(500).json({ error: "Error en el servidor." });
+        }
+
+        // Si el resultado es mayor a 0, significa que ¡el nombre ya es tuyo! Dejamos pasar la actualización.
+        const esMismoUsuario = resPropio.length > 0;
+
+        // 2. Si no es tuyo, verificamos que no lo tenga OTRA persona
+        const continuarVerificacion = () => {
+            const queryVerificar = "SELECT correo_usuario FROM usuarios WHERE nombre_usuario = ? AND LOWER(TRIM(correo_usuario)) != ?";
+            db.query(queryVerificar, [nombreLimpio, correoLimpio], (err, existentes) => {
+                if (err) {
+                    console.error("❌ Error en consulta de verificación:", err.message);
+                    return res.status(500).json({ error: "Error en el servidor." });
+                }
+
+                if (existentes.length > 0) {
+                    return res.status(400).json({ mensaje: "El nombre de usuario ya está en uso por otra cuenta." });
+                }
+
+                ejecutarActualizacion();
+            });
+        };
+
+        const ejecutarActualizacion = () => {
+            // Validar restricción de los 30 días
+            db.query("SELECT ultimo_cambio_nombre FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = ?", [correoLimpio], (err, filas) => {
+                if (err || filas.length === 0) {
+                    return res.status(404).json({ mensaje: "Usuario no encontrado." });
+                }
+
+                const usuario = filas[0];
+                const fechaActual = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+                if (usuario.ultimo_cambio_nombre) {
+                    const ultimaFecha = new Date(usuario.ultimo_cambio_nombre);
+                    const diferenciaMs = new Date() - ultimaFecha;
+                    const diasTranscurridos = Math.floor(diferenciaMs / (1000 * 60 * 60 * 24));
+
+                    if (diasTranscurridos < 30) {
+                        const diasRestantes = 30 - diasTranscurridos;
+                        return res.status(400).json({ mensaje: `Debes esperar ${diasRestantes} día(s) para volver a cambiar tu nombre.` });
+                    }
+                }
+
+                // Ejecutar la actualización limpia
+                const queryUpdate = "UPDATE usuarios SET nombre_usuario = ?, ultimo_cambio_nombre = ? WHERE LOWER(TRIM(correo_usuario)) = ?";
+                db.query(queryUpdate, [nombreLimpio, fechaActual, correoLimpio], (errUpdate) => {
+                    if (errUpdate) {
+                        console.error("❌ Error al actualizar en MySQL:", errUpdate.message);
+                        return res.status(500).json({ error: "Error al guardar en la base de datos." });
+                    }
+
+                    return res.json({ mensaje: "¡Nombre actualizado con éxito!", nuevo_nombre: nombreLimpio });
+                });
+            });
+        };
+
+        if (esMismoUsuario) {
+            ejecutarActualizacion(); // Si es tuyo, actualizamos directo
+        } else {
+            continuarVerificacion(); // Si es nuevo, verificamos que nadie más lo tenga
+        }
+    });
+});
+app.get('/validar-nombre-usuario', (req, res) => {
+    const { nombre, correo_actual } = req.query;
+
+    if (!nombre) {
+        return res.status(400).json({ error: "Nombre requerido" });
+    }
+
+    const nombreLimpio = nombre.trim();
+    const correoLimpio = correo_actual ? correo_actual.trim().toLowerCase() : '';
+
+    // Buscamos si el nombre ya lo tiene CUALQUIER OTRA PERSONA (excluyendo tu correo si lo mandaron)
+    let sql = `
+        SELECT id_usuarios, correo_usuario 
+        FROM usuarios 
+        WHERE nombre_usuario = ? 
+        ${correoLimpio ? 'AND LOWER(TRIM(correo_usuario)) != ?' : ''}
+    `;
+    
+    let params = correoLimpio ? [nombreLimpio, correoLimpio] : [nombreLimpio];
+
+    db.query(sql, params, (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+
+        // Si la consulta encuentra registros, significa que OTRA PERSONA ya tiene ese nombre
+        if (results.length > 0) {
+            return res.json({ disponible: false });
+        }
+
+        // Si no hay resultados de otros usuarios, el nombre está libre para ti
+        res.json({ disponible: true });
+    });
+});
+app.post('/actualizar-telefono-usuario', (req, res) => {
+    const { correo_usuario, nuevo_telefono } = req.body;
+
+    if (!correo_usuario || !nuevo_telefono) {
+        return res.status(400).json({ error: "Faltan datos requeridos." });
+    }
+
+    const query = "UPDATE usuarios SET Telefono_usuario = ?, telefono_verificado = 0 WHERE correo_usuario = ?";
+    db.query(query, [nuevo_telefono, correo_usuario], (err) => {
+        if (err) {
+            console.error("❌ Error al actualizar teléfono:", err.message);
+            return res.status(500).json({ error: "Error al actualizar en la base de datos." });
+        }
+        res.json({ mensaje: "Número actualizado. Pendiente de verificación." });
+    });
+});
+
+app.post('/verificar-telefono-usuario', (req, res) => {
+    const { correo_usuario } = req.body;
+
+    if (!correo_usuario) {
+        return res.status(400).json({ error: "Correo requerido." });
+    }
+
+    const query = "UPDATE usuarios SET telefono_verificado = 1 WHERE correo_usuario = ?";
+    db.query(query, [correo_usuario], (err) => {
+        if (err) {
+            return res.status(500).json({ error: "Error al verificar en la base de datos." });
+        }
+        res.json({ mensaje: "¡Número de celular verificado con éxito!" });
+    });
+});
+// Ruta para actualizar el correo del usuario en la base de datos
+app.post('/actualizar-correo-usuario', (req, res) => {
+    const { correo_actual, nuevo_correo } = req.body;
+
+    if (!correo_actual || !nuevo_correo) {
+        return res.status(400).json({ success: false, mensaje: "Faltan datos requeridos." });
+    }
+
+    const correoActualLimpio = correo_actual.trim().toLowerCase();
+    const nuevoCorreoLimpio = nuevo_correo.trim().toLowerCase();
+
+    // 1. Validamos que el nuevo correo no lo tenga otro usuario registrado
+    const sqlVerificar = "SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = ?";
+    db.query(sqlVerificar, [nuevoCorreoLimpio], (errVerif, filas) => {
+        if (errVerif) {
+            console.error("❌ Error al verificar correo nuevo:", errVerif);
+            return res.status(500).json({ success: false, mensaje: "Error en el servidor." });
+        }
+
+        if (filas.length > 0) {
+            return res.status(400).json({ success: false, mensaje: "El nuevo correo ya está registrado en otra cuenta." });
+        }
+
+        // 2. Si está disponible, actualizamos en la tabla usuarios
+        const queryUpdate = 'UPDATE usuarios SET correo_usuario = ? WHERE LOWER(TRIM(correo_usuario)) = ?';
+        db.query(queryUpdate, [nuevoCorreoLimpio, correoActualLimpio], (err, result) => {
+            if (err) {
+                console.error("❌ Error en base de datos al cambiar correo:", err);
+                return res.status(500).json({ success: false, mensaje: "Error interno del servidor." });
+            }
+
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ success: false, mensaje: "No se encontró ningún usuario con el correo actual." });
+            }
+
+            // 3. También actualizamos el correo en la tabla adoptante por si tiene ficha creada
+            db.query('UPDATE adoptante SET correo = ? WHERE LOWER(TRIM(correo)) = ?', [nuevoCorreoLimpio, correoActualLimpio], () => {
+                res.json({ success: true, mensaje: "Correo actualizado con éxito en la base de datos." });
+            });
+        });
+    });
+});
+// DELETE: Eliminar el perfil de adoptante del usuario logueado
+app.delete('/api/eliminar-adoptante/:id_usuarios', (req, res) => {
+    const idUsuarios = req.params.id_usuarios;
+
+    if (!idUsuarios) {
+        return res.status(400).json({ error: "ID de usuario inválido." });
+    }
+
+    const query = "DELETE FROM adoptante WHERE id_usuarios = ?";
+    db.query(query, [idUsuarios], (err, result) => {
+        if (err) {
+            console.error("❌ Error al eliminar perfil de adoptante:", err.message);
+            return res.status(500).json({ error: "Error en el servidor al eliminar el perfil." });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: "No se encontró el perfil de adoptante." });
+        }
+
+        res.json({ mensaje: "¡Perfil de adoptante eliminado con éxito!" });
+    });
+});
+// ==========================================
+// REPORTES Y ESTADÍSTICAS
+// ==========================================
+
+app.post('/crear-reporte', (req, res) => {
+    const { 
+        id_tipo_reporte, 
+        Descripcion, 
+        Ubicacion, 
+        telefono_contacto, 
+        correo_contacto, 
+        img_reporte,
+        correo_usuario 
+    } = req.body;
+
+    if (!id_tipo_reporte || !Descripcion || !Ubicacion || !correo_usuario) {
+        return res.status(400).json({ error: "Faltan campos obligatorios para el reporte." });
+    }
+
+    db.query("SELECT id_usuarios FROM usuarios WHERE correo_usuario = ?", [correo_usuario], (err, results) => {
+        if (err || results.length === 0) {
+            console.error("Error al buscar ID del usuario:", err);
+            return res.status(500).json({ error: "No se pudo asociar el usuario al reporte." });
+        }
+
+        const id_usuarios = results[0].id_usuarios;
+        const Fecha_reporte = new Date().toISOString().split('T')[0];
+
+        const queryVerificarDuplicado = `
+            SELECT id_reporte FROM reportes 
+            WHERE id_usuarios = ? AND Descripcion = ? AND Ubicacion = ? 
+            AND Fecha_reporte = ? 
+        `;
+
+        db.query(queryVerificarDuplicado, [id_usuarios, Descripcion, Ubicacion, Fecha_reporte], (errDup, dupResults) => {
+            if (!errDup && dupResults.length > 0) {
+                return res.status(400).json({ error: "Ya has enviado este reporte recientemente. Evita duplicados." });
+            }
+
+            const queryInsertReporte = `
+                INSERT INTO reportes 
+                (id_tipo_reporte, Descripcion, Ubicacion, telefono_contacto, correo_contacto, Fecha_reporte, img_reporte, id_usuarios) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            `;
+
+            const valores = [
+                id_tipo_reporte, 
+                Descripcion, 
+                Ubicacion, 
+                telefono_contacto || null, 
+                correo_contacto || null, 
+                Fecha_reporte, 
+                img_reporte || null,
+                id_usuarios
+            ];
+
+            db.query(queryInsertReporte, valores, (errResult, result) => {
+                if (errResult) {
+                    console.error("❌ ERROR AL GUARDAR REPORTE:", errResult.message);
+                    return res.status(500).json({ error: "Error al guardar en la base de datos: " + errResult.message });
+                }
+
+                const idReporteNuevo = result.insertId;
+                const queryInsertPublicacion = `INSERT INTO publicaciones (id_reporte) VALUES (?)`;
+                
+                db.query(queryInsertPublicacion, [idReporteNuevo], (errPub) => {
+                    if (errPub) {
+                        console.error("⚠️ Advertencia: El reporte se creó pero falló al registrarse en publicaciones:", errPub.message);
+                    }
+
+                    res.status(201).json({ 
+                        mensaje: "Reporte creado exitosamente", 
+                        id_reporte: idReporteNuevo 
+                    });
+                });
+            });
+        });
+    });
+});
+
+app.get('/reportes/balance-reportes', (req, res) => {
+    const sql = `
+        SELECT
+            tr.Nombre_tipo_reporte AS tipo_emergencia,
+            COUNT(r.id_reporte) AS total_casos,
+            MONTH(r.Fecha_reporte) AS mes
+        FROM reportes r
+        INNER JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
+        GROUP BY tr.Nombre_tipo_reporte, MONTH(r.Fecha_reporte)
+        ORDER BY total_casos DESC
+    `;
+
+    db.query(sql, (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(results);
+    });
+});
+
+app.get('/api/reportes/emergencias', (req, res) => {
+    const sql = `
+        SELECT 
+            tr.Nombre_tipo_reporte AS tipo_emergencia,
+            COUNT(r.id_reporte) AS total_casos
+        FROM reportes r
+        INNER JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
+        GROUP BY tr.Nombre_tipo_reporte
+        ORDER BY total_casos DESC;
+    `;
+
+    db.query(sql, (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(results);
+    });
+});
+
+app.get('/api/reportes/usuarios-edad', (req, res) => {
+    const sql = `
+        SELECT 
+            CASE 
+                WHEN TIMESTAMPDIFF(YEAR, Fecha_nacimiento, CURDATE()) BETWEEN 18 AND 24 THEN '18-24 años'
+                WHEN TIMESTAMPDIFF(YEAR, Fecha_nacimiento, CURDATE()) BETWEEN 25 AND 34 THEN '25-34 años'
+                WHEN TIMESTAMPDIFF(YEAR, Fecha_nacimiento, CURDATE()) BETWEEN 35 AND 49 THEN '35-49 años'
+                ELSE '50+ años'
+            END AS rango_edad,
+            COUNT(id_usuarios) AS total_usuarios
+        FROM usuarios
+        WHERE Fecha_nacimiento IS NOT NULL
+        GROUP BY rango_edad
+        ORDER BY total_usuarios DESC;
+    `;
+
+    db.query(sql, (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(results);
+    });
+});
+
+// ==========================================
+// MÓDULO DE ADOPCIONES / ADOPTANTE
+// ==========================================
+
+app.get('/api/verificar-adoptante', (req, res) => {
+    const { correo } = req.query;
+
+    if (!correo) {
+        return res.status(400).json({ error: "El correo es requerido." });
+    }
+
+    const query = `
+        SELECT a.id_adoptante 
+        FROM adoptante a
+        INNER JOIN usuarios u ON a.id_usuarios = u.id_usuarios
+        WHERE u.correo_usuario = ?
+    `;
+
+    db.query(query, [correo], (err, results) => {
+        if (err) return res.status(500).json({ error: "Error interno del servidor." });
+
+        if (results.length > 0) {
+            return res.json({ tienePerfil: true, id_adoptante: results[0].id_adoptante });
+        } else {
+            return res.json({ tienePerfil: false });
+        }
+    });
+});
+
+app.get('/api/obtener-ficha-adoptante/:id_usuarios', (req, res) => {
+    const idUsuarios = req.params.id_usuarios;
+
+    const query = `
+        SELECT a.*, tv.tipo_vivienda AS tipo_vivienda_nombre 
+        FROM adoptante a
+        LEFT JOIN tipo_vivienda tv ON a.id_tipo_vivienda = tv.id_tipo_vivienda
+        WHERE a.id_usuarios = ?
+    `;
+
+    db.query(query, [idUsuarios], (err, results) => {
+        if (err) {
+            console.error("❌ Error al obtener ficha de adoptante:", err);
+            return res.status(500).json({ error: "Error en el servidor" });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ error: "Perfil de adoptante no encontrado" });
+        }
+
+        res.json(results[0]);
+    });
+});
+
+app.post('/api/guardar-adoptante', (req, res) => {
+    const {
+        correo,
+        nombre_completo,
+        fecha_nacimiento,
+        telefono,
+        ubicacion,
+        ocupacion,
+        id_tipo_vivienda,
+        vivienda_propia,
+        vivienda_arrendada,
+        mascotas_permitidas,
+        hay_niños_en_casa,
+        con_quien_vives,
+        tiene_otras_mascotas,
+        prosupuesto_mensual,
+        horas_ausente,
+        cuidador,
+        motivacion
+    } = req.body;
+
+    if (!correo) {
+        return res.status(400).json({ mensaje: "El correo del usuario es obligatorio." });
+    }
+
+    const sqlBuscarUsuario = "SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))";
+
+    db.query(sqlBuscarUsuario, [correo], (err, resultados) => {
+        if (err) {
+            console.error("❌ Error al buscar usuario:", err);
+            return res.status(500).json({ mensaje: "Error al consultar usuario en la BD." });
+        }
+
+        if (!resultados || resultados.length === 0) {
+            return res.status(404).json({ mensaje: "Usuario no encontrado en la base de datos." });
+        }
+
+        const id_usuarios = resultados[0].id_usuarios;
+
+        const telLimpio = parseInt(telefono ? telefono.toString().replace(/\D/g, '') : '0', 10);
+        const fechaValida = fecha_nacimiento ? fecha_nacimiento.split('T')[0] : '2000-01-01';
+
+        const datosInsertar = [
+            id_tipo_vivienda ? parseInt(id_tipo_vivienda, 10) : 1,
+            vivienda_propia ? 1 : 0,
+            vivienda_arrendada ? 1 : 0,
+            mascotas_permitidas ? 1 : 0,
+            hay_niños_en_casa ? 1 : 0,
+            tiene_otras_mascotas ? 1 : 0,
+            prosupuesto_mensual ? parseInt(prosupuesto_mensual, 10) : 0,
+            nombre_completo || 'Sin nombre',
+            ubicacion || 'No especificada',
+            fechaValida,
+            telLimpio,
+            correo,
+            ocupacion || 'No especificada',
+            con_quien_vives || '',
+            horas_ausente ? parseInt(horas_ausente, 10) : 0,
+            cuidador || '',
+            motivacion || '',
+            id_usuarios
+        ];
+
+        const sqlGuardar = `
+            INSERT INTO adoptante (
+                id_tipo_vivienda, vivienda_propia, vivienda_arrendada,
+                mascotas_permitidas, hay_niños_en_casa, tiene_otras_mascotas,
+                prosupuesto_mensual, nombre_completo, ubicacion,
+                fecha_nacimiento, telefono, correo, ocupacion,
+                con_quien_vives, horas_ausente, cuidador, motivacion, id_usuarios
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE
+                id_tipo_vivienda = VALUES(id_tipo_vivienda),
+                vivienda_propia = VALUES(vivienda_propia),
+                vivienda_arrendada = VALUES(vivienda_arrendada),
+                mascotas_permitidas = VALUES(mascotas_permitidas),
+                hay_niños_en_casa = VALUES(hay_niños_en_casa),
+                tiene_otras_mascotas = VALUES(tiene_otras_mascotas),
+                prosupuesto_mensual = VALUES(prosupuesto_mensual),
+                nombre_completo = VALUES(nombre_completo),
+                ubicacion = VALUES(ubicacion),
+                fecha_nacimiento = VALUES(fecha_nacimiento),
+                telefono = VALUES(telefono),
+                correo = VALUES(correo),
+                ocupacion = VALUES(ocupacion),
+                con_quien_vives = VALUES(con_quien_vives),
+                horas_ausente = VALUES(horas_ausente),
+                cuidador = VALUES(cuidador),
+                motivacion = VALUES(motivacion);
+        `;
+
+        db.query(sqlGuardar, datosInsertar, (errSave) => {
+            if (errSave) {
+                console.error("❌ Error de MySQL al guardar adoptante:", errSave.sqlMessage || errSave);
+                return res.status(500).json({ mensaje: "Error al guardar el formulario.", detalle: errSave.sqlMessage });
+            }
+
+            console.log("✅ Adoptante guardado/actualizado con éxito en id_usuarios:", id_usuarios);
+            return res.json({ mensaje: "Perfil de adoptante guardado con éxito." });
+        });
+    });
+});
+
+// ==========================================
+// GESTIÓN DE PUBLICACIONES Y GUARDADOS
+// ==========================================
+
+app.post('/api/guardar-publicacion', (req, res) => {
+    const { correo, id_publicacion } = req.body;
+
+    if (!correo || !id_publicacion) {
+        return res.status(400).json({ error: "Faltan datos requeridos (correo o id_publicacion)" });
+    }
+
+    db.query("SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))", [correo], (err, results) => {
+        if (err || results.length === 0) {
+            return res.status(404).json({ error: "No se encontró el usuario en la base de datos." });
+        }
+
+        const id_usuarios = results[0].id_usuarios;
+        const query = `INSERT INTO guardados (id_usuarios, id_publicacion) VALUES (?, ?)`;
+
+        db.query(query, [id_usuarios, id_publicacion], (errInsert) => {
+            if (errInsert) {
+                if (errInsert.code === 'ER_DUP_ENTRY') {
+                    return res.status(400).json({ error: "Ya tienes esta publicación en tus guardados." });
+                }
+                console.error("❌ ERROR AL GUARDAR:", errInsert.message);
+                return res.status(500).json({ error: "Error al guardar en la base de datos: " + errInsert.message });
+            }
+
+            res.status(201).json({ mensaje: "Publicación guardada exitosamente" });
+        });
+    });
+});
+
+app.get('/api/guardar-publicacion/:correo', (req, res) => {
+    const correo = req.params.correo;
+
+    const query = `
+        SELECT 
+            p.id_publicacion,
+            'reporte' AS tipo_publicacion,
+            r.id_reporte AS id_origen,
+            r.Descripcion,
+            r.Ubicacion,
+            r.img_reporte,
+            r.Fecha_reporte,
+            tr.Nombre_tipo_reporte AS nombre_tipo_reporte,
+            r.telefono_contacto,
+            r.correo_contacto,
+            NULL AS nombre_animal
+        FROM guardados g
+        INNER JOIN usuarios u ON g.id_usuarios = u.id_usuarios
+        INNER JOIN publicaciones p ON g.id_publicacion = p.id_publicacion
+        INNER JOIN reportes r ON p.id_reporte = r.id_reporte
+        LEFT JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
+        WHERE LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(?))
+          AND r.id_usuarios NOT IN (
+              SELECT ub.id_usuario_bloqueado 
+              FROM usuarios_bloqueados ub
+              INNER JOIN usuarios u_bloq ON ub.id_usuario_bloqueador = u_bloq.id_usuarios
+              WHERE LOWER(TRIM(u_bloq.correo_usuario)) = LOWER(TRIM(?))
+          )
+        
+        UNION ALL
+        
+        SELECT 
+            p.id_publicacion,
+            'adopcion' AS tipo_publicacion,
+            pa.id_publicaciones_adopcion AS id_origen,
+            a.descripcion_animal AS Descripcion,
+            CONCAT(a.ciudad, ', ', a.barrio) AS Ubicacion,
+            a.fotos_animal AS img_reporte,
+            NOW() AS Fecha_reporte,
+            CONCAT('Adopción: ', a.nombre_animal) AS nombre_tipo_reporte,
+            pa.telefono_contacto,
+            pa.correo_contacto,
+            a.nombre_animal
+        FROM guardados g
+        INNER JOIN usuarios u ON g.id_usuarios = u.id_usuarios
+        INNER JOIN publicaciones p ON g.id_publicacion = p.id_publicacion
+        INNER JOIN publicaciones_adopcion pa ON p.id_publicaciones_adopcion = pa.id_publicaciones_adopcion
+        INNER JOIN animal a ON pa.id_animal = a.id_animal
+        WHERE LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(?))
+          AND pa.id_usuarios NOT IN (
+              SELECT ub.id_usuario_bloqueado 
+              FROM usuarios_bloqueados ub
+              INNER JOIN usuarios u_bloq ON ub.id_usuario_bloqueador = u_bloq.id_usuarios
+              WHERE LOWER(TRIM(u_bloq.correo_usuario)) = LOWER(TRIM(?))
+          )
+
+        ORDER BY id_publicacion DESC
+    `;
+
+    // Pasamos el correo dos veces: una para identificar al usuario de los guardados y otra para verificar sus bloqueados
+    db.query(query, [correo, correo, correo, correo], (err, results) => {
+        if (err) {
+            console.error("❌ ERROR AL OBTENER GUARDADOS:", err.message);
+            return res.status(500).json({ error: "Error al obtener las publicaciones guardadas" });
+        }
+
+        res.json(results);
+    });
+});
+
+app.post('/api/quitar-guardado', (req, res) => {
+    const { correo, id_publicacion } = req.body;
+
+    if (!correo || !id_publicacion) {
+        return res.status(400).json({ error: "Faltan datos requeridos (correo o id_publicacion)" });
+    }
+
+    const query = `
+        DELETE g FROM guardados g
+        INNER JOIN usuarios u ON g.id_usuarios = u.id_usuarios
+        WHERE LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(?)) AND g.id_publicacion = ?
+    `;
+
+    db.query(query, [correo, id_publicacion], (err) => {
+        if (err) {
+            console.error("❌ ERROR AL ELIMINAR GUARDADO:", err.message);
+            return res.status(500).json({ error: "Error al eliminar de la base de datos" });
+        }
+
+        res.json({ mensaje: "Publicación eliminada de guardados con éxito" });
+    });
+});
+
+app.get('/api/guardados/ids/:correo', (req, res) => {
+    const correo = req.params.correo;
+
+    const query = `
+        SELECT g.id_publicacion 
+        FROM guardados g
+        INNER JOIN usuarios u ON g.id_usuarios = u.id_usuarios
+        WHERE LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(?))
+    `;
+
+    db.query(query, [correo], (err, results) => {
+        if (err) {
+            console.error("❌ ERROR AL OBTENER IDS GUARDADOS:", err.message);
+            return res.status(500).json({ error: "Error en el servidor" });
+        }
+        const idsGuardados = results.map(row => row.id_publicacion);
+        res.json(idsGuardados);
+    });
+});
+
+app.delete('/api/reportes/:id', (req, res) => {
+    const idReporte = req.params.id;
+
+    if (!idReporte || idReporte === 'undefined') {
+        return res.status(400).json({ error: "ID de reporte inválido." });
+    }
+
+    db.query(`SELECT id_publicacion FROM publicaciones WHERE id_reporte = ?`, [idReporte], (err, rows) => {
+        let idPub = rows && rows.length > 0 ? rows[0].id_publicacion : null;
+
+        const ejecutarBorradoFinal = () => {
+            db.query(`DELETE FROM publicaciones WHERE id_reporte = ?`, [idReporte], () => {
+                db.query(`DELETE FROM reportes WHERE id_reporte = ?`, [idReporte], (err, result) => {
+                    if (err) {
+                        console.error("❌ Error al eliminar reporte:", err.message);
+                        return res.status(500).json({ error: "Error al eliminar el reporte de la base de datos" });
+                    }
+
+                    if (result.affectedRows === 0) {
+                        return res.status(404).json({ error: "No se encontró el reporte a eliminar" });
+                    }
+
+                    return res.json({ mensaje: "¡Reporte eliminado con éxito!" });
+                });
+            });
+        };
+
+        if (idPub) {
+            db.query(`DELETE FROM guardados WHERE id_publicacion = ?`, [idPub], () => {
+                ejecutarBorradoFinal();
+            });
+        } else {
+            ejecutarBorradoFinal();
+        }
+    });
+});
+// ==========================================
+// ==========================================
+// GET: Publicaciones Globales (Filtrando bloqueados automáticamente)
+// ==========================================
+app.get('/api/publicaciones-globales', (req, res) => {
+    const correoVisitante = req.query.correo;
+
+    let sql = `
+        SELECT 
+            p.id_publicacion,
+            'reporte' AS tipo_publicacion,
+            r.id_reporte AS id_origen,
+            r.Descripcion,
+            r.Ubicacion,
+            r.img_reporte,
+            r.Fecha_reporte,
+            tr.Nombre_tipo_reporte AS nombre_tipo_reporte,
+            r.telefono_contacto,
+            r.correo_contacto,
+            NULL AS nombre_animal,
+            u.nombre_usuario AS nombre_usuario,
+            r.id_usuarios
+        FROM publicaciones p
+        INNER JOIN reportes r ON p.id_reporte = r.id_reporte
+        INNER JOIN usuarios u ON r.id_usuarios = u.id_usuarios
+        LEFT JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
+        WHERE r.id_usuarios NOT IN (
+            -- Excluir si tú bloqueaste al autor O si el autor te bloqueó a ti
+            SELECT ub.id_usuario_bloqueado FROM usuarios_bloqueados ub
+            INNER JOIN usuarios u_bloq ON ub.id_usuario_bloqueador = u_bloq.id_usuarios
+            WHERE LOWER(TRIM(u_bloq.correo_usuario)) = LOWER(TRIM(?))
+            UNION
+            SELECT ub.id_usuario_bloqueador FROM usuarios_bloqueados ub
+            INNER JOIN usuarios u_bloq ON ub.id_usuario_bloqueado = u_bloq.id_usuarios
+            WHERE LOWER(TRIM(u_bloq.correo_usuario)) = LOWER(TRIM(?))
+        )
+        
+        UNION ALL
+        
+        SELECT 
+            p.id_publicacion,
+            'adopcion' AS tipo_publicacion,
+            pa.id_publicaciones_adopcion AS id_origen,
+            a.descripcion_animal AS Descripcion,
+            CONCAT(a.ciudad, ', ', a.barrio) AS Ubicacion,
+            a.fotos_animal AS img_reporte,
+            NOW() AS Fecha_reporte,
+            CONCAT('Adopción: ', a.nombre_animal) AS nombre_tipo_reporte,
+            pa.telefono_contacto,
+            pa.correo_contacto,
+            a.nombre_animal,
+            u.nombre_usuario AS nombre_usuario,
+            pa.id_usuarios
+        FROM publicaciones p
+        INNER JOIN publicaciones_adopcion pa ON p.id_publicaciones_adopcion = pa.id_publicaciones_adopcion
+        INNER JOIN animal a ON pa.id_animal = a.id_animal
+        INNER JOIN usuarios u ON pa.id_usuarios = u.id_usuarios
+        WHERE pa.id_usuarios NOT IN (
+            SELECT ub.id_usuario_bloqueado FROM usuarios_bloqueados ub
+            INNER JOIN usuarios u_bloq ON ub.id_usuario_bloqueador = u_bloq.id_usuarios
+            WHERE LOWER(TRIM(u_bloq.correo_usuario)) = LOWER(TRIM(?))
+            UNION
+            SELECT ub.id_usuario_bloqueador FROM usuarios_bloqueados ub
+            INNER JOIN usuarios u_bloq ON ub.id_usuario_bloqueado = u_bloq.id_usuarios
+            WHERE LOWER(TRIM(u_bloq.correo_usuario)) = LOWER(TRIM(?))
+        )
+
+        ORDER BY id_publicacion DESC
+    `;
+
+    const correoParam = correoVisitante || '';
+    // Pasamos el correo 4 veces para cubrir las subconsultas de exclusión mutua
+    db.query(sql, [correoParam, correoParam, correoParam, correoParam], (err, rows) => {
+        if (err) {
+            console.error("❌ ERROR AL OBTENER PUBLICACIONES GLOBALES:", err.message);
+            return res.status(500).json({ error: 'Hubo un error al obtener las publicaciones globales', detalle: err.message });
+        }
+        res.json(rows);
+    });
+});
+app.delete('/api/adopciones/:id', (req, res) => {
+    const idAdopcion = req.params.id;
+
+    if (!idAdopcion || idAdopcion === 'undefined') {
+        return res.status(400).json({ error: "ID de adopción inválido." });
+    }
+
+    // 1. Buscamos el id_animal asociado a esta publicación de adopción
+    db.query(`SELECT id_animal FROM publicaciones_adopcion WHERE id_publicaciones_adopcion = ?`, [idAdopcion], (err, rows) => {
+        if (err) {
+            console.error("❌ Error al buscar adopción:", err.message);
+            return res.status(500).json({ error: "Error en el servidor" });
+        }
+
+        let idAnimal = rows && rows.length > 0 ? rows[0].id_animal : null;
+
+        const ejecutarBorradoAdopcionFinal = () => {
+            // Borramos de publicaciones generales usando el id_publicaciones_adopcion o id_animal
+            db.query(`DELETE FROM publicaciones WHERE id_publicaciones_adopcion = ? OR id_animal = ?`, [idAdopcion, idAnimal], () => {
+                // Borramos de publicaciones_adopcion
+                db.query(`DELETE FROM publicaciones_adopcion WHERE id_publicaciones_adopcion = ?`, [idAdopcion], () => {
+                    // Borramos el animal si existía
+                    const queryDeleteAnimal = idAnimal ? `DELETE FROM animal WHERE id_animal = ?` : null;
+                    const callbackBorrado = (errDel) => {
+                        if (errDel) {
+                            console.error("❌ Error al eliminar el animal:", errDel.message);
+                            return res.status(500).json({ error: "Error al eliminar los datos de la mascota" });
+                        }
+                        return res.json({ mensaje: "¡Publicación de adopción eliminada con éxito!" });
+                    };
+
+                    if (queryDeleteAnimal) {
+                        db.query(queryDeleteAnimal, [idAnimal], callbackBorrado);
+                    } else {
+                        res.json({ mensaje: "¡Publicación de adopción eliminada con éxito!" });
+                    }
+                });
+            });
+        };
+
+        if (idAnimal) {
+            // Borrar primero si está en guardados
+            db.query(`DELETE g FROM guardados g INNER JOIN publicaciones p ON g.id_publicacion = p.id_publicacion WHERE p.id_animal = ?`, [idAnimal], () => {
+                ejecutarBorradoAdopcionFinal();
+            });
+        } else {
+            ejecutarBorradoAdopcionFinal();
+        }
+    });
+});
+app.get('/api/reportes/:id', (req, res) => {
+    const idReporte = req.params.id;
+
+    const query = `
+        SELECT r.*, tr.Nombre_tipo_reporte 
+        FROM reportes r
+        LEFT JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
+        WHERE r.id_reporte = ?
+    `;
+
+    db.query(query, [idReporte], (err, results) => {
+        if (err) {
+            console.error("❌ Error al consultar el reporte:", err);
+            return res.status(500).json({ error: "Error en el servidor" });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ error: "Reporte no encontrado" });
+        }
+
+        res.json(results[0]);
+    });
+});
+
+app.put('/api/reportes/:id', (req, res) => {
+    const idReporte = req.params.id;
+    const { 
+        id_tipo_reporte, 
+        descripcion_reporte, 
+        Descripcion, 
+        direccion_reporte, 
+        Ubicacion, 
+        telefono_contacto, 
+        correo_contacto, 
+        img_reporte 
+    } = req.body;
+
+    const descFinal = descripcion_reporte || Descripcion;
+    const ubiFinal = direccion_reporte || Ubicacion;
+
+    const sql = `
+        UPDATE reportes 
+        SET id_tipo_reporte = ?, 
+            Descripcion = ?, 
+            Ubicacion = ?, 
+            telefono_contacto = ?, 
+            correo_contacto = ?,
+            img_reporte = ?
+        WHERE id_reporte = ?
+    `;
+
+    const valores = [
+        id_tipo_reporte, 
+        descFinal, 
+        ubiFinal, 
+        telefono_contacto || null, 
+        correo_contacto || null, 
+        img_reporte || null, 
+        idReporte
+    ];
+
+    db.query(sql, valores, (err, result) => {
+        if (err) {
+            console.error("❌ Error al actualizar el reporte:", err);
+            return res.status(500).json({ error: "Error al actualizar en la base de datos: " + err.message });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: "Reporte no encontrado" });
+        }
+
+        res.json({ mensaje: "¡Reporte actualizado con éxito!" });
+    });
+});
+// ==========================================
+// MÓDULO CREACIÓN DE ADOPCIONES
+// ==========================================
+app.post('/api/crear-adopcion', (req, res) => {
+    const {
+        nombre_animal,
+        id_especie,
+        otro_especie,
+        sexo_animal,
+        edad_aprox,           // Recibe directo "mes/año" desde tu JavaScript del frontend
+        id_raza,
+        otro_raza,
+        id_tamaño,
+        descripcion_adopcion, // Coincide con el name del HTML
+        ubicacion_adopcion,   // Coincide con el input de texto "Medellín, Castilla"
+        fotos_animal,         // Recibe el JSON de imágenes procesadas
+        correo_usuario,       // Inyectado por tu JS del cliente antes de enviar
+        correo_contacto,
+        telefono_contacto
+    } = req.body;
+
+    // Separamos la ubicación "Ciudad, Barrio" de forma limpia
+    let ciudad = "Medellín";
+    let barrio = "Desconocido";
+    if (ubicacion_adopcion && ubicacion_adopcion.includes(',')) {
+        const partes = ubicacion_adopcion.split(',');
+        ciudad = partes[0].trim();
+        barrio = partes[1].trim();
+    } else if (ubicacion_adopcion) {
+        barrio = ubicacion_adopcion.trim();
+    }
+
+    if (!nombre_animal || !id_especie || !correo_usuario) {
+        return res.status(400).json({ error: "Faltan campos obligatorios para registrar la adopción." });
+    }
+
+    db.query("SELECT id_usuarios, correo_usuario AS correo_bd, telefono_usuario AS telefono_bd FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))", [correo_usuario], (err, results) => {
+        if (err || results.length === 0) {
+            console.error("❌ Error al buscar el usuario:", err);
+            return res.status(500).json({ error: "No se pudo asociar el usuario a la adopción." });
+        }
+
+        const id_usuarios = results[0].id_usuarios;
+        const correoRegistrado = results[0].correo_bd;
+        const telefonoRegistrado = results[0].telefono_bd;
+        
+        const correoFinal = (correo_contacto && correo_contacto.trim() !== "") ? correo_contacto : correoRegistrado;
+        const telefonoFinal = (telefono_contacto && telefono_contacto.trim() !== "") ? telefono_contacto : telefonoRegistrado;
+        const id_estado = 2; // 2 = En adopción
+
+        db.beginTransaction(errTrans => {
+            if (errTrans) {
+                return res.status(500).json({ error: "Error al iniciar la transacción." });
+            }
+
+            // Insertamos usando los nombres reales y guardando edad_aprox como texto
+            const queryAnimal = `
+                INSERT INTO animal 
+                (nombre_animal, id_especie, otro_especie, id_estado, sexo_animal, fecha_nacimiento_animal_aprox, id_raza, otro_raza, id_tamaño, descripcion_animal, ciudad, barrio, fotos_animal, id_usuarios) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `;
+            
+            db.query(queryAnimal, [
+                nombre_animal, 
+                id_especie, 
+                otro_especie || null, 
+                id_estado, 
+                sexo_animal, 
+                edad_aprox,           // Se guarda el formato "mes/año" directo (ej. "06/2026")
+                id_raza, 
+                otro_raza || null, 
+                id_tamaño, 
+                descripcion_adopcion, // Mapeado correctamente desde el HTML
+                ciudad, 
+                barrio, 
+                fotos_animal || '', 
+                id_usuarios
+            ], (errAnim, resultadoAnimal) => {
+                if (errAnim) {
+                    return db.rollback(() => {
+                        res.status(500).json({ error: "Error al guardar el animal: " + errAnim.message });
+                    });
+                }
+                
+                const idAnimalGenerado = resultadoAnimal.insertId;
+
+                const queryAdopcion = "INSERT INTO publicaciones_adopcion (id_animal, id_usuarios, telefono_contacto, correo_contacto) VALUES (?, ?, ?, ?)";
+                
+                db.query(queryAdopcion, [idAnimalGenerado, id_usuarios, telefonoFinal, correoFinal], (errAdop, resultadoAdopcion) => {
+                    if (errAdop) {
+                        return db.rollback(() => {
+                            res.status(500).json({ error: "Error al guardar la adopción: " + errAdop.message });
+                        });
+                    }
+
+                    const idAdopcionGenerado = resultadoAdopcion.insertId;
+
+                    const queryPublicacion = "INSERT INTO publicaciones (id_animal, id_publicaciones_adopcion) VALUES (?, ?)";
+                    
+                    db.query(queryPublicacion, [idAnimalGenerado, idAdopcionGenerado], (errPub) => {
+                        if (errPub) {
+                            return db.rollback(() => {
+                                res.status(500).json({ error: "Error al registrar la publicación general: " + errPub.message });
+                            });
+                        }
+
+                        db.commit(errCommit => {
+                            if (errCommit) {
+                                return db.rollback(() => {
+                                    res.status(500).json({ error: "Error al confirmar la transacción." });
+                                });
+                            }
+                            res.status(200).json({ mensaje: "¡Adopción publicada con éxito!" });
+                        });
+                    });
+                });
+            });
+        });
+    });
+});
+// ==========================================
+// GET: Mis Publicaciones (Reportes + Adopciones unificadas)
+// ==========================================
+app.get('/api/mis-reportes', (req, res) => {
+    const correoUsuario = req.query.correo;
+
+    if (!correoUsuario) {
+        return res.status(400).json({ error: "Se requiere el correo del usuario" });
+    }
+
+    const sql = `
+        SELECT 
+            p.id_publicacion,
+            'reporte' AS tipo_publicacion,
+            r.id_reporte AS id_origen,
+            r.Descripcion,
+            r.Ubicacion,
+            r.img_reporte,
+            r.Fecha_reporte,
+            tr.Nombre_tipo_reporte AS nombre_tipo_reporte,
+            r.telefono_contacto,
+            r.correo_contacto,
+            NULL AS nombre_animal
+        FROM publicaciones p
+        INNER JOIN reportes r ON p.id_reporte = r.id_reporte
+        INNER JOIN usuarios u ON r.id_usuarios = u.id_usuarios
+        LEFT JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
+        WHERE LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(?))
+        
+        UNION ALL
+        
+        SELECT 
+            p.id_publicacion,
+            'adopcion' AS tipo_publicacion,
+            pa.id_publicaciones_adopcion AS id_origen,
+            a.descripcion_animal AS Descripcion,
+            CONCAT(a.ciudad, ', ', a.barrio) AS Ubicacion,
+            a.fotos_animal AS img_reporte,
+            NOW() AS Fecha_reporte,
+            CONCAT('Adopción: ', a.nombre_animal) AS nombre_tipo_reporte,
+            pa.telefono_contacto,
+            pa.correo_contacto,
+            a.nombre_animal
+        FROM publicaciones p
+        INNER JOIN publicaciones_adopcion pa ON p.id_publicaciones_adopcion = pa.id_publicaciones_adopcion
+        INNER JOIN animal a ON pa.id_animal = a.id_animal
+        INNER JOIN usuarios u ON pa.id_usuarios = u.id_usuarios
+        WHERE LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(?))
+
+        ORDER BY id_publicacion DESC
+    `;
+
+    db.query(sql, [correoUsuario, correoUsuario], (err, rows) => {
+        if (err) {
+            console.error("❌ ERROR REAL EN ADOPCIONES/REPORTES:", err.message);
+            return res.status(500).json({ error: 'Hubo un error al obtener las publicaciones', detalle: err.message });
+        }
+        res.json(rows);
+    });
+});
+// ==========================================
+// GET: Obtener datos de una adopción para editar
+// ==========================================
+app.get('/api/adopciones/:id', (req, res) => {
+    const idAdopcion = req.params.id;
+
+    const sql = `
+        SELECT 
+            pa.id_publicaciones_adopcion,
+            pa.telefono_contacto,
+            pa.correo_contacto,
+            a.*,
+            u.nombre_usuario AS nombre_usuario
+        FROM publicaciones_adopcion pa
+        INNER JOIN animal a ON pa.id_animal = a.id_animal
+        INNER JOIN usuarios u ON pa.id_usuarios = u.id_usuarios
+        WHERE pa.id_publicaciones_adopcion = ?
+    `;
+
+    db.query(sql, [idAdopcion], (err, results) => {
+        if (err) {
+            console.error("❌ Error al consultar la adopción:", err);
+            return res.status(500).json({ error: "Error en el servidor", detalle: err.message });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ error: "Publicación de adopción no encontrada" });
+        }
+
+        res.json(results[0]);
+    });
+});
+// ==========================================
+// MÓDULO ACTUALIZACIÓN DE ADOPCIONES
+// ==========================================
+app.put('/api/actualizar-adopcion/:id', (req, res) => {
+    const idAdopcion = req.params.id;
+    const {
+        nombre_animal,
+        id_especie,
+        otro_especie,
+        sexo_animal,
+        edad_aprox,
+        id_raza,
+        otro_raza,
+        id_tamaño,
+        descripcion_adopcion,
+        ubicacion_adopcion,
+        fotos_animal,
+        correo_contacto,
+        telefono_contacto
+    } = req.body;
+
+    if (!idAdopcion || !nombre_animal || !id_especie) {
+        return res.status(400).json({ error: "Faltan campos obligatorios para actualizar la adopción." });
+    }
+
+    let ciudad = "Medellín";
+    let barrio = "Desconocido";
+    if (ubicacion_adopcion && ubicacion_adopcion.includes(',')) {
+        const partes = ubicacion_adopcion.split(',');
+        ciudad = partes[0].trim();
+        barrio = partes[1].trim();
+    } else if (ubicacion_adopcion) {
+        barrio = ubicacion_adopcion.trim();
+    }
+
+    // Buscamos el id_animal asociado a esta adopción
+    db.query("SELECT id_animal FROM publicaciones_adopcion WHERE id_publicaciones_adopcion = ?", [idAdopcion], (err, rows) => {
+        if (err || rows.length === 0) {
+            return res.status(404).json({ error: "No se encontró la adopción a actualizar." });
+        }
+
+        const idAnimal = rows[0].id_animal;
+
+        db.beginTransaction(errTrans => {
+            if (errTrans) return res.status(500).json({ error: "Error en la transacción." });
+
+            // 1. Actualizar tabla animal
+            const queryUpdateAnimal = `
+                UPDATE animal 
+                SET nombre_animal = ?, id_especie = ?, otro_especie = ?, sexo_animal = ?, 
+                    fecha_nacimiento_animal_aprox = ?, id_raza = ?, otro_raza = ?, id_tamaño = ?, 
+                    descripcion_animal = ?, ciudad = ?, barrio = ?, fotos_animal = ?
+                WHERE id_animal = ?
+            `;
+
+            db.query(queryUpdateAnimal, [
+                nombre_animal, id_especie, otro_especie || null, sexo_animal,
+                edad_aprox, id_raza, otro_raza || null, id_tamaño,
+                descripcion_adopcion, ciudad, barrio, fotos_animal || '', idAnimal
+            ], (errAnim) => {
+                if (errAnim) {
+                    return db.rollback(() => res.status(500).json({ error: "Error al actualizar el animal: " + errAnim.message }));
+                }
+
+                // 2. Actualizar tabla publicaciones_adopcion
+                const queryUpdatePub = `
+                    UPDATE publicaciones_adopcion 
+                    SET telefono_contacto = ?, correo_contacto = ?
+                    WHERE id_publicaciones_adopcion = ?
+                `;
+
+                db.query(queryUpdatePub, [telefono_contacto || null, correo_contacto || null, idAdopcion], (errPub) => {
+                    if (errPub) {
+                        return db.rollback(() => res.status(500).json({ error: "Error al actualizar el contacto: " + errPub.message }));
+                    }
+
+                    db.commit(errCommit => {
+                        if (errCommit) {
+                            return db.rollback(() => res.status(500).json({ error: "Error al confirmar los cambios." }));
+                        }
+                        res.json({ mensaje: "¡Adopción actualizada con éxito!" });
+                    });
+                });
+            });
+        });
+    });
+});
+
+// GET: Obtener datos del perfil público de un usuario de forma flexible
+app.get('/api/perfil-publico/:parametro', (req, res) => {
+    const parametro = decodeURIComponent(req.params.parametro).trim();
+    const correoVisitante = req.query.correo_visitante; 
+
+    const sql = `
+        SELECT u.id_usuarios, u.nombre_usuario, u.foto_perfil, u.correo_usuario, u.Telefono_usuario
+        FROM usuarios u
+        WHERE u.nombre_usuario LIKE ? 
+           OR u.correo_usuario LIKE ?
+    `;
+
+    db.query(sql, [`%${parametro}%`, `%${parametro}%`], (err, results) => {
+        if (err || results.length === 0) {
+            return res.status(404).json({ error: "Usuario no encontrado" });
+        }
+
+        const usuario = results[0];
+
+        if (!correoVisitante) {
+            return res.json({ ...usuario, siguiendo: false, estado_solicitud: 'ninguna' });
+        }
+
+        // Verificamos si hay bloqueo en cualquiera de las dos direcciones
+        const sqlBloqueo = `
+            SELECT COUNT(*) AS bloqueado FROM usuarios_bloqueados ub
+            JOIN usuarios u1 ON ub.id_usuario_bloqueador = u1.id_usuarios
+            JOIN usuarios u2 ON ub.id_usuario_bloqueado = u2.id_usuarios
+            WHERE (LOWER(TRIM(u1.correo_usuario)) = LOWER(TRIM(?)) AND u2.id_usuarios = ?)
+               OR (LOWER(TRIM(u2.correo_usuario)) = LOWER(TRIM(?)) AND u1.id_usuarios = ?)
+        `;
+
+        db.query(sqlBloqueo, [correoVisitante, usuario.id_usuarios, correoVisitante, usuario.id_usuarios], (errB, resB) => {
+            if (resB && resB[0].bloqueado > 0) {
+                return res.status(404).json({ error: "Perfil no disponible" });
+            }
+
+            const sqlVerificaciones = `
+                SELECT 
+                    (SELECT COUNT(*) FROM seguidores WHERE id_usuario_seguidor = (SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))) AND id_usuario_seguido = ?) AS siguiendo,
+                    (SELECT estado FROM solicitudes_adoptante WHERE id_solicitante = (SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))) AND id_propietario = ?) AS estado_solicitud
+            `;
+
+            db.query(sqlVerificaciones, [correoVisitante, usuario.id_usuarios, correoVisitante, usuario.id_usuarios], (errVerif, resVerif) => {
+                const estadoFinal = (resVerif && resVerif.length > 0 && resVerif[0].estado_solicitud) ? resVerif[0].estado_solicitud : 'ninguna';
+                res.json({
+                    ...usuario,
+                    siguiendo: resVerif && resVerif.length > 0 && resVerif[0].siguiendo > 0,
+                    estado_solicitud: estadoFinal
+                });
+            });
+        });
+    });
+});
+// POST: Seguir / Dejar de seguir usuario
+app.post('/api/alternar-seguimiento', (req, res) => {
+    const { correo_seguidor, id_seguido } = req.body;
+
+    db.query("SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))", [correo_seguidor], (err, rows) => {
+        if (err || rows.length === 0) return res.status(400).json({ error: "Usuario no encontrado" });
+        const idSeguidor = rows[0].id_usuarios;
+
+        db.query("SELECT id_seguidor FROM seguidores WHERE id_usuario_seguidor = ? AND id_usuario_seguido = ?", [idSeguidor, id_seguido], (errExist, exist) => {
+            if (exist.length > 0) {
+                // Si ya lo sigue -> Dejar de seguir
+                db.query("DELETE FROM seguidores WHERE id_seguidor = ?", [exist[0].id_seguidor], () => {
+                    res.json({ siguiendo: false, mensaje: "Has dejado de seguir a este usuario." });
+                });
+            } else {
+                // Si no lo sigue -> Seguir y Notificar
+                db.query("INSERT INTO seguidores (id_usuario_seguidor, id_usuario_seguido) VALUES (?, ?)", [idSeguidor, id_seguido], () => {
+                    db.query("INSERT INTO notificaciones (id_usuario_destino, id_usuario_origen, tipo, mensaje) VALUES (?, ?, 'nuevo_seguidor', 'comenzó a seguirte.')", [id_seguido, idSeguidor]);
+                    res.json({ siguiendo: true, mensaje: "Ahora sigues a este usuario" });
+                });
+            }
+        });
+    });
+});
+
+// POST: Solicitar ver perfil de adoptante (EVITA DUPLICADOS Y BLOQUEA REENVÍO)
+app.post('/api/solicitar-ver-adoptante', (req, res) => {
+    const { correo_solicitante, id_propietario } = req.body;
+
+    db.query("SELECT id_usuarios, nombre_usuario FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))", [correo_solicitante], (err, rows) => {
+        if (err || rows.length === 0) return res.status(400).json({ error: "Error de usuario" });
+        
+        const idSolicitante = rows[0].id_usuarios;
+        const nombreSolicitante = rows[0].nombre_usuario;
+
+        if (Number(idSolicitante) === Number(id_propietario)) {
+            return res.status(400).json({ error: "No puedes solicitar ver tu propio perfil." });
+        }
+
+        // Verificamos si ya existe una solicitud activa
+        db.query("SELECT estado FROM solicitudes_adoptante WHERE id_solicitante = ? AND id_propietario = ?", [idSolicitante, id_propietario], (errExist, exist) => {
+            if (exist && exist.length > 0) {
+                const est = exist[0].estado;
+                if (est === 'pendiente') return res.json({ exito: true, mensaje: "Ya tienes una solicitud pendiente.", estado: 'pendiente' });
+                if (est === 'aceptada') return res.json({ exito: true, mensaje: "Ya tienes permiso para ver este perfil.", estado: 'aceptada' });
+            }
+
+            const sql = "INSERT INTO solicitudes_adoptante (id_solicitante, id_propietario, estado) VALUES (?, ?, 'pendiente') ON DUPLICATE KEY UPDATE estado='pendiente'";
+            db.query(sql, [idSolicitante, id_propietario], () => {
+                
+                // Notificación al dueño del perfil (evitando duplicados activos)
+                const msg = `@${nombreSolicitante} quiere ver tu perfil de adoptante.`;
+                const checkNotif = "SELECT id_notificacion FROM notificaciones WHERE id_usuario_destino = ? AND id_usuario_origen = ? AND tipo = 'solicitud_adoptante' AND leida = 0";
+                
+                db.query(checkNotif, [id_propietario, idSolicitante], (errN, resN) => {
+                    if (!resN || resN.length === 0) {
+                        db.query("INSERT INTO notificaciones (id_usuario_destino, id_usuario_origen, tipo, mensaje) VALUES (?, ?, 'solicitud_adoptante', ?)", [id_propietario, idSolicitante, msg]);
+                    }
+                    res.json({ exito: true, mensaje: "Solicitud enviada correctamente.", estado: 'pendiente' });
+                });
+            });
+        });
+    });
+});
+
+// GET: Obtener notificaciones reales del usuario logueado
+app.get('/api/notificaciones/:correo', (req, res) => {
+    const { correo } = req.params;
+
+    const sql = `
+        SELECT n.id_notificacion, n.tipo, n.mensaje, n.leida, n.fecha_notificacion,
+               u_origen.nombre_usuario AS origen_nombre, u_origen.foto_perfil AS origen_foto,
+               s.id_solicitud, s.estado AS estado_solicitud
+        FROM notificaciones n
+        JOIN usuarios u_destino ON n.id_usuario_destino = u_destino.id_usuarios
+        LEFT JOIN usuarios u_origen ON n.id_usuario_origen = u_origen.id_usuarios
+        LEFT JOIN solicitudes_adoptante s ON (s.id_solicitante = n.id_usuario_origen AND s.id_propietario = n.id_usuario_destino)
+        WHERE LOWER(TRIM(u_destino.correo_usuario)) = LOWER(TRIM(?))
+        ORDER BY n.fecha_notificacion DESC
+    `;
+
+    db.query(sql, [correo], (err, results) => {
+        if (err) {
+            console.error("Error al obtener notificaciones:", err);
+            return res.status(500).json({ error: "Error interno" });
+        }
+        res.json(results);
+    });
+});
+
+// POST: Responder solicitud de adoptante (Aceptar / Rechazar)
+app.post('/api/responder-solicitud-adoptante', (req, res) => {
+    const { id_solicitud, accion, correo_propietario } = req.body; // accion: 'aceptar' o 'rechazar'
+    const nuevoEstado = accion === 'aceptar' ? 'aceptada' : 'rechazada';
+
+    const sqlUpdate = "UPDATE solicitudes_adoptante SET estado = ? WHERE id_solicitud = ?";
+    db.query(sqlUpdate, [nuevoEstado, id_solicitud], (err) => {
+        if (err) return res.status(500).json({ error: "Error al actualizar solicitud" });
+
+        if (nuevoEstado === 'aceptada') {
+            // Notificar al solicitante que le aceptaron la solicitud (sin duplicar si ya existe)
+            const sqlNotif = `
+                INSERT INTO notificaciones (id_usuario_destino, id_usuario_origen, tipo, mensaje)
+                SELECT s.id_solicitante, s.id_propietario, 'solicitud_aceptada', 'aceptó tu solicitud para ver su perfil de adoptante.'
+                FROM solicitudes_adoptante s
+                WHERE s.id_solicitud = ?
+                  AND NOT EXISTS (
+                      SELECT 1 FROM notificaciones n 
+                      WHERE n.id_usuario_destino = s.id_solicitante 
+                        AND n.id_usuario_origen = s.id_propietario 
+                        AND n.tipo = 'solicitud_aceptada'
+                  )
+            `;
+            db.query(sqlNotif, [id_solicitud]);
+        }
+
+        res.json({ exito: true, mensaje: `Solicitud ${nuevoEstado} con éxito.` });
+    });
+});
+
+// DELETE: Borrar una notificación de MySQL
+app.delete('/api/notificaciones/:id', (req, res) => {
+    const { id } = req.params;
+    db.query("DELETE FROM notificaciones WHERE id_notificacion = ?", [id], (err) => {
+        if (err) return res.status(500).json({ error: "Error al borrar notificación" });
+        res.json({ exito: true });
+    });
+});
+
+// GET: Obtener la Ficha de Adoptante para terceros (Solo si la solicitud fue aceptada)
+app.get('/api/ficha-adoptante-publica/:username', (req, res) => {
+    const { username } = req.params;
+    const correoSolicitante = req.query.correo_solicitante;
+
+    // 1. Buscamos al usuario por su username
+    const sqlUsuario = "SELECT id_usuarios, nombre_usuario, correo_usuario, Telefono_usuario FROM usuarios WHERE LOWER(TRIM(nombre_usuario)) = LOWER(TRIM(?))";
+    db.query(sqlUsuario, [username], (err, resUser) => {
+        if (err || resUser.length === 0) return res.status(404).json({ error: "Usuario no encontrado" });
+
+        const usuarioTarget = resUser[0];
+
+        // 2. Verificamos si la solicitud entre el visitante y el dueño está 'aceptada'
+        const sqlVerificarPermiso = `
+            SELECT estado FROM solicitudes_adoptante 
+            WHERE id_solicitante = (SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))) 
+              AND id_propietario = ? AND estado = 'aceptada'
+        `;
+
+        db.query(sqlVerificarPermiso, [correoSolicitante, usuarioTarget.id_usuarios], (errPerm, resPerm) => {
+            if (errPerm || resPerm.length === 0) {
+                return res.status(403).json({ error: "No tienes permiso para ver esta ficha de adoptante." });
+            }
+
+            // 3. Traemos la información detallada de su ficha de adoptante
+            const sqlFicha = "SELECT * FROM adoptante WHERE id_usuarios = ?";
+            db.query(sqlFicha, [usuarioTarget.id_usuarios], (errFicha, resFicha) => {
+                if (errFicha || resFicha.length === 0) {
+                    return res.status(404).json({ error: "El usuario aún no ha completado su ficha de adoptante." });
+                }
+
+                res.json({
+                    usuario: usuarioTarget,
+                    ficha: resFicha[0]
+                });
+            });
+        });
+    });
+});
+// ==========================================
+// MÓDULO DE REGISTRO DE FUNDACIONES (PDFs + MySQL)
+// ==========================================
+const upload = multer({ storage: multer.memoryStorage() });
+
+app.post('/api/registrar-fundacion', express.json({ limit: '20mb' }), async (req, res) => {
+    const {
+        correo_fundacion, password,
+        nombre_legal, nombre_comercial, nit_rut, id_representante,
+        pais, ciudad, direccion, telefono_fundacion, pagina_web,
+        rep_nombre, rep_documento, rep_cargo, rep_telefono, metodos_donacion,
+        descripcion_mision, descripcion_vision, programas_proyectos, pfp_fundacion, foto_portada, enfoque_otro,
+        certificado_existencia, estatuto, registro_oficial, estado_financiero
+    } = req.body;
+
+    if (!correo_fundacion || !password) {
+        return res.status(400).json({ exito: false, mensaje: "El correo y la contraseña son obligatorios." });
+    }
+
+    const parseBase64ToBuffer = (base64Str) => {
+        if (!base64Str) return null;
+        if (base64Str.includes(',')) {
+            base64Str = base64Str.split(',')[1];
+        }
+        return Buffer.from(base64Str, 'base64');
+    };
+
+    const certBuffer = parseBase64ToBuffer(certificado_existencia);
+    const estatutoBuffer = parseBase64ToBuffer(estatuto);
+    const registroBuffer = parseBase64ToBuffer(registro_oficial);
+    const financieroBuffer = parseBase64ToBuffer(estado_financiero);
+
+    try {
+        // 1. Crear la cuenta en Firebase Auth usando Firebase Admin (Backend)
+        // Esto evita crear la cuenta antes de tiempo si el usuario no termina el formulario
+        let firebaseUser;
+        try {
+            firebaseUser = await getAuth().createUser({
+                email: correo_fundacion,
+                password: password,
+                emailVerified: false
+            });
+        } catch (firebaseErr) {
+            if (firebaseErr.code === 'auth/email-already-exists') {
+                return res.status(400).json({ exito: false, mensaje: "Este correo ya está registrado en el sistema." });
+            }
+            throw firebaseErr;
+        }
+
+        // 2. Guardar los documentos en la tabla 'documentacion' de MySQL
+        const queryDocumentacion = `
+            INSERT INTO documentacion (certificado_existencia, estatuto, estado_financiero, registro_oficial) 
+            VALUES (?, ?, ?, ?)
+        `;
+        
+        db.query(queryDocumentacion, [certBuffer, estatutoBuffer, financieroBuffer, registroBuffer], (err, resultadoDoc) => {
+            if (err) {
+                console.error("❌ Error al guardar documentación:", err.sqlMessage || err);
+                // Si falla MySQL, borramos el usuario creado en Firebase para no dejar rastro huérfano
+                getAuth().deleteUser(firebaseUser.uid).catch(() => {});
+                return res.status(500).json({ exito: false, mensaje: "Error al guardar los documentos legales: " + (err.sqlMessage || err.message) });
+            }
+
+            const idDocumentacionGenerado = resultadoDoc.insertId;
+            const fechaActual = new Date().toISOString().slice(0, 10);
+
+            // 3. Guardar en la tabla 'usuarios' con tipo fundación y estado pendiente
+            const queryUsuarios = `
+                INSERT INTO usuarios (
+                    tipo_usuario, 
+                    estado_aprobacion, 
+                    id_documentacion, 
+                    Nombre_Legal, 
+                    Nombre_Comercial, 
+                    id_representante, 
+                    Nit_Rut, 
+                    Pais, 
+                    Ciudad, 
+                    Direccion, 
+                    Telefono_fundacion, 
+                    correo_usuario, 
+                    Pagina_web, 
+                    Fecha_registro, 
+                    Descripcion_mision, 
+                    Descripcion_vision, 
+                    PFP_Fundacion, 
+                    Foto_Portada, 
+                    Programas_Proyectos_Actuales, 
+                    enfoque_otro
+                ) VALUES ('fundacion', 'pendiente', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE
+                    tipo_usuario = 'fundacion',
+                    estado_aprobacion = 'pendiente',
+                    id_documentacion = VALUES(id_documentacion),
+                    Nombre_Legal = VALUES(Nombre_Legal),
+                    Nombre_Comercial = VALUES(Nombre_Comercial),
+                    Nit_Rut = VALUES(Nit_Rut),
+                    Pais = VALUES(Pais),
+                    Ciudad = VALUES(Ciudad),
+                    Direccion = VALUES(Direccion),
+                    Telefono_fundacion = VALUES(Telefono_fundacion),
+                    Pagina_web = VALUES(Pagina_web),
+                    Descripcion_mision = VALUES(Descripcion_mision),
+                    Descripcion_vision = VALUES(Descripcion_vision),
+                    Programas_Proyectos_Actuales = VALUES(Programas_Proyectos_Actuales),
+                    enfoque_otro = VALUES(enfoque_otro);
+            `;
+
+            const valoresUsuarios = [
+                idDocumentacionGenerado,
+                nombre_legal || '',
+                nombre_comercial || '',
+                rep_documento || null,
+                nit_rut || '',
+                pais || 'Colombia',
+                ciudad || 'Medellín',
+                direccion || '',
+                telefono_fundacion || '',
+                correo_fundacion,
+                pagina_web || '',
+                fechaActual,
+                descripcion_mision || '',
+                descripcion_vision || '',
+                pfp_fundacion || '',
+                foto_portada || '',
+                programas_proyectos || '',
+                enfoque_otro || ''
+            ];
+
+            db.query(queryUsuarios, valoresUsuarios, (err2) => {
+                if (err2) {
+                    console.error("❌ Error al registrar en usuarios:", err2.sqlMessage || err2);
+                    getAuth().deleteUser(firebaseUser.uid).catch(() => {});
+                    return res.status(500).json({ exito: false, mensaje: "Error al registrar la fundación en usuarios: " + (err2.sqlMessage || err2.message) });
+                }
+
+                res.json({ 
+                    exito: true, 
+                    mensaje: "¡Fundación registrada con éxito! Quedó en estado pendiente de aprobación." 
+                });
+            });
+        });
+
+    } catch (error) {
+        console.error("Error crítico en registro de fundación:", error);
+        res.status(500).json({ exito: false, mensaje: "Error interno del servidor: " + error.message });
+    }
+});
+// Ruta para bloquear a un usuario
+app.post('/api/bloquear-usuario', (req, res) => {
+    const { correo_bloqueador, id_usuario_bloqueado } = req.body;
+
+    if (!correo_bloqueador || !id_usuario_bloqueado) {
+        return res.status(400).json({ error: "Faltan datos requeridos para bloquear." });
+    }
+
+    // 1. Buscar el ID del usuario bloqueador a partir de su correo
+    db.query(
+        'SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))', 
+        [correo_bloqueador], 
+        (err, usuarioBloqueador) => {
+            if (err || usuarioBloqueador.length === 0) {
+                return res.status(404).json({ error: "Usuario bloqueador no encontrado" });
+            }
+
+            const idBloqueador = usuarioBloqueador[0].id_usuarios;
+
+            // Evitar que se bloquee a sí mismo
+            if (Number(idBloqueador) === Number(id_usuario_bloqueado)) {
+                return res.status(400).json({ error: "No puedes bloquearte a ti mismo" });
+            }
+
+            // 2. Insertar el registro en la tabla de bloqueados
+            db.query(
+                'INSERT IGNORE INTO usuarios_bloqueados (id_usuario_bloqueador, id_usuario_bloqueado) VALUES (?, ?)',
+                [idBloqueador, id_usuario_bloqueado],
+                (errInsert) => {
+                    if (errInsert) {
+                        console.error("❌ Error al registrar el bloqueo:", errInsert.message);
+                        return res.status(500).json({ error: "Error en el servidor al bloquear usuario" });
+                    }
+
+                    res.json({ mensaje: "Usuario bloqueado exitosamente" });
+                }
+            );
+        }
+    );
+});
+// GET: Obtener la lista de usuarios bloqueados por el usuario logueado
+app.get('/api/usuarios-bloqueados/:correo', (req, res) => {
+    const correoBloqueador = req.params.correo;
+
+    const sql = `
+        SELECT u.id_usuarios, u.nombre_usuario, u.foto_perfil, u.correo_usuario
+        FROM usuarios_bloqueados ub
+        JOIN usuarios u ON ub.id_usuario_bloqueado = u.id_usuarios
+        JOIN usuarios u_bloq ON ub.id_usuario_bloqueador = u_bloq.id_usuarios
+        WHERE LOWER(TRIM(u_bloq.correo_usuario)) = LOWER(TRIM(?))
+    `;
+
+    db.query(sql, [correoBloqueador], (err, results) => {
+        if (err) {
+            console.error("❌ Error al obtener usuarios bloqueados:", err.message);
+            return res.status(500).json({ error: "Error en el servidor al obtener bloqueados" });
+        }
+        res.json(results);
+    });
+});
+
+// POST: Desbloquear a un usuario
+app.post('/api/desbloquear-usuario', (req, res) => {
+    const { correo_bloqueador, id_usuario_bloqueado } = req.body;
+
+    if (!correo_bloqueador || !id_usuario_bloqueado) {
+        return res.status(400).json({ error: "Faltan datos requeridos para desbloquear." });
+    }
+
+    const sqlBusqueda = 'SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))';
+    db.query(sqlBusqueda, [correo_bloqueador], (err, usuario) => {
+        if (err || usuario.length === 0) {
+            return res.status(404).json({ error: "Usuario bloqueador no encontrado" });
+        }
+
+        const idBloqueador = usuario[0].id_usuarios;
+
+        const sqlDelete = 'DELETE FROM usuarios_bloqueados WHERE id_usuario_bloqueador = ? AND id_usuario_bloqueado = ?';
+        db.query(sqlDelete, [idBloqueador, id_usuario_bloqueado], (errDel, result) => {
+            if (errDel) {
+                console.error("❌ Error al desbloquear usuario:", errDel.message);
+                return res.status(500).json({ error: "Error en el servidor al desbloquear" });
+            }
+
+            res.json({ mensaje: "Usuario desbloqueado exitosamente" });
+        });
+    });
+});
+
+// ==========================================
+// INICIALIZACIÓN DEL SERVIDOR (Siempre al final)
+// ==========================================
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
+});

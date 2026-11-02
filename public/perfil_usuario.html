@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil - ARCA</title>
+    <link rel="stylesheet" href="style_home.css">
+    <link rel="stylesheet" href="perfil.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="dark-mode.css">
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            if (localStorage.getItem("modo_oscuro") === "true") {
+                document.body.classList.add("dark-mode");
+            }
+        });
+    </script>
+</head>
+<body>
+
+    <nav class="top-nav">
+        <div class="top-left">
+            <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu"></i>
+            <div class="mini-logo-circle">
+                <img src="logo.png" alt="Logo ARCA">
+            </div>
+            <span class="page-title">Perfil</span>
+        </div>
+        <div class="search-bar">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="input-busqueda-nav" name="busqueda" placeholder="Busca algo" aria-label="Buscar en la aplicación">
+            <i class="fa-solid fa-microphone"></i>
+        </div>
+        <div class="top-right">
+            <div class="user-header-info">
+
+            <!-- 1. PERFIL Y MINI MENÚ -->
+            <div class="user-profile-menu" id="user-profile-menu">
+                <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
+                    <img src="logo.png" id="user-avatar-img" alt="Perfil">
+                </div>
+
+                <div class="mini-menu-card" id="mini-menu-card">
+                    <div class="mini-menu-header">
+                        <span id="mini-menu-username">Usuario</span>
+                    </div>
+                    
+                    <hr class="mini-menu-divider">
+                    
+                    <a href="javascript:void(0)" onclick="mostrarSeccion('configuracion')" class="mini-menu-item btn-ajustes">
+                        <i class="fa-solid fa-gear"></i>
+                        <span>Ajustes</span>
+                    </a>
+                    
+                    <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Cerrar sesión</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 2. CAMPANA DE NOTIFICACIONES -->
+            <div class="notif-circle">
+                <a href="notificaciones.html" aria-label="Notificaciones"><i class="fa-solid fa-bell"></i></a>
+            </div>
+
+        </div>
+    </div>
+  </nav>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="side-icons">
+            <a href="home.html" class="menu-fila">
+                <i class="fa-solid fa-house"></i>
+                <span class="menu-text">Inicio</span>
+            </a>
+            <a href="perfil_usuario.html" class="menu-fila activa">
+                <i class="fa-solid fa-circle-user"></i>
+                <span class="menu-text">Perfil</span>
+            </a>
+            <a href="guardados_usuario.html" class="menu-fila">
+                <i class="fa-solid fa-bookmark"></i>
+                <span class="menu-text">Guardado</span>
+            </a>
+            <a href="mapa.html" class="menu-fila">
+                <i class="fa-solid fa-location-dot"></i>
+                <span class="menu-text">Mapa</span>
+            </a>
+            <a href="configuracion.html" class="menu-fila">
+                <i class="fa-solid fa-gear"></i>
+                <span class="menu-text">Ajustes</span>
+            </a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="perfil-prototipo-container">
+            <div class="perfil-header-prototipo">
+                <div class="avatar-wrapper" onclick="abrirModalFoto()">
+                    <div class="avatar-circulo" id="avatar-contenedor">
+                        <svg viewBox="0 0 24 24" fill="currentColor" class="icono-silueta" id="svg-silueta">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                        <img id="foto-perfil-img" src="" alt="Foto de Perfil" style="display: none;">
+                    </div>
+                    <button type="button" class="btn-lapiz-editar" aria-label="Editar foto">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 20h9"></path>
+                            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                        </svg>
+                    </button>
+                </div>
+                <h2 id="mostrar-nombre-usuario">@cargando...</h2>
+               
+                <!-- ESTADÍSTICAS ESTILO TIKTOK -->
+                <div id="stats-seguidores-container" style="display: flex; gap: 15px; font-size: 14.5px; color: #555; margin-top: 5px; justify-content: center;">
+                    <span onclick="abrirModalSocialIndependiente('seguidos')" style="cursor: pointer; transition: opacity 0.2s;"><strong id="num-seguidos" style="color: #2b2b2b;">0</strong> Seguidos</span>
+                    <span style="color: #ccc;">|</span>
+                    <span onclick="abrirModalSocialIndependiente('seguidores')" style="cursor: pointer; transition: opacity 0.2s;"><strong id="num-seguidores" style="color: #2b2b2b;">0</strong> Seguidores</span>
+                </div>
+            </div>
+
+            <div class="perfil-grid-opciones">
+                <button type="button" class="btn-opcion-perfil" id="nombre-usuario" onclick="abrirModalNombre()">
+                    Cambiar nombre de usuario
+                </button>
+
+                <button type="button" class="btn-opcion-perfil btn-texto-largo" id="correo" onclick="abrirModalCorreo()">
+                    Editar correo electrónico
+                </button>
+
+                <button type="button" class="btn-opcion-perfil" id="celular" onclick="abrirModalTelefono()" style="display: flex; justify-content: space-between; align-items: center;">
+                    <span id="texto-estado-telefono">Cambiar número de celular</span>
+                </button>
+
+                <a href="perfil_adoptante.html" class="btn-opcion-perfil" id="adoptante">
+                    Perfil de adoptante
+                </a>
+
+                <a href="mis_publicaciones.html" class="btn-opcion-perfil" id="publicaciones">
+                    Mis publicaciones
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- MODAL FOTO DE PERFIL -->
+    <div id="modal-foto-perfil" class="modal-foto-overlay" onclick="cerrarModalFoto(event)">
+        <div class="modal-foto-contenido">
+            <button type="button" class="btn-cerrar-modal" onclick="cerrarModalFotoDirecto()">&times;</button>
+            <div class="modal-avatar-preview" id="modal-avatar-contenedor">
+                <svg viewBox="0 0 24 24" fill="currentColor" class="icono-silueta" id="modal-svg-silueta">
+                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                </svg>
+                <img id="foto-preview-ampliada" src="" alt="Vista Previa Foto" style="display: none;">
+            </div>
+            <div class="modal-foto-acciones">
+                <button type="button" class="btn-opcion-modal btn-cambiar" onclick="ejecutarCambiarFoto()">Cambiar foto de perfil</button>
+                <button type="button" class="btn-opcion-modal btn-borrar" onclick="ejecutarBorrarFoto()">Borrar foto de perfil</button>
+            </div>
+            <input type="file" id="input-nueva-foto" accept="image/*" style="display: none;" onchange="procesarNuevaFoto(event)">
+        </div>
+    </div>
+
+    <!-- MODAL CAMBIAR NOMBRE DE USUARIO -->
+    <div id="modal-cambiar-nombre" class="modal-foto-overlay" onclick="cerrarModalNombreOverlay(event)">
+        <div class="modal-foto-contenido modal-nombre-box">
+            <button type="button" class="btn-cerrar-modal" onclick="cerrarModalNombre()">&times;</button>
+            <div class="etiqueta-rosa">Nombre de usuario actual:</div>
+            <div class="nombre-actual-display" id="modal-nombre-actual">@cargando...</div>
+            <div class="etiqueta-rosa">Nuevo nombre de usuario:</div>
+            <div class="input-contenedor-nombre">
+                <span class="prefijo-at">@</span>
+                <input type="text" id="input-nuevo-nombre" placeholder="tu_nuevo_usuario" maxlength="20">
+            </div>
+            <p class="texto-restriccion">Solo puedes cambiar tu usuario una vez cada 30 días</p>
+            <p id="mensaje-estado-nombre" class="mensaje-validacion" style="margin-top: 5px; font-size: 13px;"></p>
+            <button type="button" class="btn-confirmar-nombre" id="btn-guardar-nuevo-nombre">
+                Cambiar nombre de usuario
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL CAMBIAR CORREO ELECTRÓNICO -->
+    <div id="modal-cambiar-correo" class="modal-foto-overlay" onclick="cerrarModalCorreoOverlay(event)">
+        <div class="modal-foto-contenido modal-nombre-box">
+            <button type="button" class="btn-cerrar-modal" onclick="cerrarModalCorreo()">&times;</button>
+            <div class="etiqueta-rosa">Correo actual:</div>
+            <div class="nombre-actual-display" id="modal-correo-actual" style="font-size: 16px; word-break: break-all;">@cargando...</div>
+
+            <div id="paso-nuevo-correo">
+                <div class="etiqueta-rosa">Nuevo correo electrónico:</div>
+                <div class="input-contenedor-nombre">
+                    <i class="fa-solid fa-envelope" style="margin-right: 8px; color: #555;"></i>
+                    <input type="email" id="input-nuevo-correo" placeholder="nuevo@correo.com">
+                </div>
+                <p id="mensaje-error-correo" class="mensaje-error" style="display: none;"></p>
+                <button type="button" class="btn-confirmar-nombre" id="btn-enviar-codigo-correo">
+                    Enviar código de verificación
+                </button>
+            </div>
+
+            <div id="paso-codigo-otp" style="display: none; text-align: center;">
+                <p class="texto-restriccion">Ingresa el código de 4 dígitos enviado a tu nuevo correo:</p>
+                <div class="otp-container" style="display: flex; gap: 8px; justify-content: center; margin: 15px 0;">
+                    <input type="text" maxlength="1" pattern="[0-9]" class="otp-correo-input" inputmode="numeric" style="width: 40px; height: 45px; text-align: center; font-size: 20px; border-radius: 8px; border: 1px solid #ccc;" />
+                    <input type="text" maxlength="1" pattern="[0-9]" class="otp-correo-input" inputmode="numeric" style="width: 40px; height: 45px; text-align: center; font-size: 20px; border-radius: 8px; border: 1px solid #ccc;" />
+                    <input type="text" maxlength="1" pattern="[0-9]" class="otp-correo-input" inputmode="numeric" style="width: 40px; height: 45px; text-align: center; font-size: 20px; border-radius: 8px; border: 1px solid #ccc;" />
+                    <input type="text" maxlength="1" pattern="[0-9]" class="otp-correo-input" inputmode="numeric" style="width: 40px; height: 45px; text-align: center; font-size: 20px; border-radius: 8px; border: 1px solid #ccc;" />
+                </div>
+                <p id="mensaje-error-otp-correo" class="mensaje-error" style="display: none;"></p>
+                <button type="button" class="btn-confirmar-nombre" id="btn-verificar-cambio-correo">
+                    Verificar y cambiar correo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CAMBIAR / VERIFICAR CELULAR -->
+    <div id="modal-cambiar-telefono" class="modal-foto-overlay" onclick="cerrarModalTelefonoOverlay(event)">
+        <div class="modal-foto-contenido modal-nombre-box">
+            <button type="button" class="btn-cerrar-modal" onclick="cerrarModalTelefono()">&times;</button>
+            <div class="etiqueta-rosa">Número de celular actual:</div>
+            <div class="nombre-actual-display" id="modal-telefono-actual">@cargando...</div>
+
+            <div id="paso-nuevo-telefono">
+                <div class="etiqueta-rosa">Nuevo número de celular:</div>
+                <div class="input-contenedor-nombre">
+                    <i class="fa-solid fa-phone" style="margin-right: 8px; color: #555;"></i>
+                    <input type="tel" id="input-nuevo-telefono" placeholder="+573001234567" maxlength="15">
+                </div>
+                <p id="mensaje-error-telefono" class="mensaje-error" style="display: none;"></p>
+                <button type="button" class="btn-confirmar-nombre" id="btn-guardar-y-verificar-tel">
+                    Guardar número
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL SOCIAL INDEPENDIENTE (CON ID PROPIO PARA EVITAR CONFLICTOS CSS) -->
+    <div id="modal-social-unico" onclick="cerrarModalSocialOverlay(event)" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.4); z-index: 999999; align-items: center; justify-content: center; backdrop-filter: blur(8px);">
+        <div style="background: #fff; padding: 25px; border-radius: 20px; width: 90%; max-width: 450px; max-height: 80vh; overflow-y: auto; position: relative; font-family: 'Itim', cursive; box-shadow: 0 15px 35px rgba(0,0,0,0.2);">
+            <button type="button" onclick="cerrarModalSocialUnico()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 22px; cursor: pointer;">&times;</button>
+            <h3 id="modal-social-titulo" style="margin-top: 0; color: #2b2b2b; text-align: center; border-bottom: 2px solid #fde8e5; padding-bottom: 10px;">Lista</h3>
+            
+            <div id="lista-social-container" style="display: flex; flex-direction: column; gap: 12px; margin-top: 15px;">
+                <p style="text-align: center; color: #666; font-style: italic;">Cargando...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SDK de Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    
+    <!-- SDK Global de EmailJS -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function(){
+            emailjs.init("AVpXUrYdpwa9oh438");
+        })();
+    </script>
+
+    <!-- SCRIPTS DE LA APP -->
+    <script src="script.js"></script>
+    <script src="perfil.js"></script>
+
+    <!-- SCRIPT SOCIAL INDEPENDIENTE -->
+    <script>
+        window.abrirModalSocialIndependiente = async function(tipo) {
+            const modal = document.getElementById('modal-social-unico');
+            const titulo = document.getElementById('modal-social-titulo');
+            
+            if (modal) {
+                modal.style.display = 'flex';
+                if (titulo) {
+                    titulo.textContent = tipo === 'seguidos' ? 'Personas que sigues' : 'Tus seguidores';
+                }
+                await cargarContenidoSocialIndependiente(tipo);
+            }
+        };
+
+        window.cerrarModalSocialUnico = function() {
+            const modal = document.getElementById('modal-social-unico');
+            if (modal) modal.style.display = 'none';
+        };
+
+        window.cerrarModalSocialOverlay = function(event) {
+            if (event.target.id === 'modal-social-unico') {
+                window.cerrarModalSocialUnico();
+            }
+        };
+
+        async function cargarContadoresPerfil() {
+            const user = firebase.auth().currentUser;
+            if (!user || !user.email) return;
+
+            try {
+                const [resSeguidos, resSeguidores] = await Promise.all([
+                    fetch(`/api/mis-seguidos/${encodeURIComponent(user.email)}`),
+                    fetch(`/api/mis-seguidores/${encodeURIComponent(user.email)}`)
+                ]);
+
+                const listaSeguidos = await resSeguidos.json();
+                const listaSeguidores = await resSeguidores.json();
+
+                const elemSeguidos = document.getElementById('num-seguidos');
+                const elemSeguidores = document.getElementById('num-seguidores');
+
+                if (elemSeguidos) elemSeguidos.textContent = Array.isArray(listaSeguidos) ? listaSeguidos.length : 0;
+                if (elemSeguidores) elemSeguidores.textContent = Array.isArray(listaSeguidores) ? listaSeguidores.length : 0;
+            } catch (e) {
+                console.error("Error al cargar contadores:", e);
+            }
+        }
+
+        async function cargarContenidoSocialIndependiente(tipo) {
+            const contenedor = document.getElementById('lista-social-container');
+            if (!contenedor) return;
+            
+            contenedor.innerHTML = '<p style="text-align: center; color: #666; font-style: italic;">Cargando...</p>';
+
+            const user = firebase.auth().currentUser;
+            if (!user || !user.email) {
+                contenedor.innerHTML = '<p style="text-align: center; color: #d9534f;">Inicia sesión para ver esta lista.</p>';
+                return;
+            }
+
+            const endpoint = tipo === 'seguidos' ? `/api/mis-seguidos/${encodeURIComponent(user.email)}` : `/api/mis-seguidores/${encodeURIComponent(user.email)}`;
+
+            try {
+                const res = await fetch(endpoint);
+                const datos = await res.json();
+
+                if (Array.isArray(datos) && datos.length > 0) {
+                    contenedor.innerHTML = '';
+                    datos.forEach(item => {
+                        const avatar = item.foto_perfil || 'logo.png';
+                        const fila = document.createElement('div');
+                        fila.style.cssText = 'display: flex; align-items: center; justify-content: space-between; background: #fffde8; padding: 10px 15px; border-radius: 14px; border: 1px solid #f0e6b8;';
+                        
+                        let botonAccion = '';
+                        if (tipo === 'seguidores') {
+                            botonAccion = `<button onclick="eliminarSeguidorIndependiente(${item.id_seguidor}, '${tipo}')" style="background: #d9534f; color: white; border: none; padding: 6px 10px; border-radius: 10px; cursor: pointer; font-family: 'Itim'; font-size: 13px;">Eliminar</button>`;
+                        }
+
+                        fila.innerHTML = `
+                            <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="window.location.href='perfil_publico.html?user=${encodeURIComponent(item.nombre_usuario)}'">
+                                <img src="${avatar}" alt="Avatar" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #fca38d;">
+                                <span style="font-weight: bold; color: #2b2b2b;">@${item.nombre_usuario}</span>
+                            </div>
+                            <div style="display: flex; gap: 6px;">
+                                <button onclick="window.location.href='perfil_publico.html?user=${encodeURIComponent(item.nombre_usuario)}'" style="background: #fca38d; color: white; border: none; padding: 6px 10px; border-radius: 10px; cursor: pointer; font-family: 'Itim'; font-size: 13px;">Ver perfil</button>
+                                ${botonAccion}
+                            </div>
+                        `;
+                        contenedor.appendChild(fila);
+                    });
+                } else {
+                    contenedor.innerHTML = `<p style="text-align: center; color: #666; font-style: italic;">No hay elementos para mostrar.</p>`;
+                }
+            } catch (e) {
+                console.error("Error al cargar contenido social:", e);
+                contenedor.innerHTML = `<p style="text-align: center; color: #d9534f;">Error al conectar con el servidor.</p>`;
+            }
+        }
+
+        window.eliminarSeguidorIndependiente = async function(idSeguidor, tipo) {
+            if (!confirm("¿Deseas eliminar a este seguidor?")) return;
+            try {
+                const res = await fetch(`/api/remover-seguidor/${idSeguidor}`, { method: 'DELETE' });
+                if (res.ok) {
+                    cargarContenidoSocialIndependiente(tipo);
+                    cargarContadoresPerfil();
+                }
+            } catch (e) {
+                alert("Error al eliminar.");
+            }
+        };
+
+        // Sincronización automática con Firebase Auth
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                cargarContadoresPerfil();
+            }
+        });
+    </script>
+</body>
+</html>

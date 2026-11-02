@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa de Reportes y Veterinarias - ARCA</title>
+    <link rel="stylesheet" href="style_home.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="dark-mode.css">
+    <script>
+    if (localStorage.getItem("modo_oscuro") === "true") {
+        document.body.classList.add("dark-mode");
+    }
+    </script>
+
+    <style>
+        html, body {
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Itim', cursive, sans-serif;
+            color: #000000;
+        }
+
+        .main-content {
+            height: calc(100vh - 70px);
+            display: flex;
+            flex-direction: column;
+            padding: 15px 25px;
+            box-sizing: border-box;
+            animation: arcaEntrada 0.5s ease-in-out;
+        }
+
+        @keyframes arcaEntrada {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes flotarSoft {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-5px) rotate(2deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+
+        @keyframes arcaEntradaPop {
+            0% { opacity: 0; transform: scale(0.85) translateY(24px) rotate(-1.5deg); }
+            65% { opacity: 1; transform: scale(1.03) translateY(-4px) rotate(0.5deg); }
+            100% { opacity: 1; transform: scale(1) translateY(0) rotate(0deg); }
+        }
+
+        /* BOTONES INTERACTIVOS CON ANIMACIÓN */
+        .btn-arca-animado {
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+        }
+        .btn-arca-animado:hover {
+            transform: translateY(-2px) scale(1.03) !important;
+            box-shadow: 0 8px 18px rgba(92, 64, 51, 0.15) !important;
+        }
+        .btn-arca-animado:active {
+            transform: translateY(1px) scale(0.97) !important;
+        }
+
+        .mapa-container-principal {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border-radius: 38px;
+            padding: 20px;
+            width: 100%;
+            height: 100%;
+            box-shadow: 0 16px 40px rgba(92, 64, 51, 0.08);
+            border: 2px solid rgba(255, 255, 255, 0.95);
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: relative;
+        }
+
+        .mapa-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(253, 203, 208, 0.65);
+            padding: 12px 24px;
+            border-radius: 28px;
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 4px 14px rgba(92, 64, 51, 0.05);
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .mapa-header h1 {
+            margin: 0;
+            font-size: 22px;
+            color: #5c4033;
+            font-weight: 400;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .mapa-header-icon {
+            color: #d97736;
+            font-size: 24px;
+            animation: flotarSoft 3s infinite ease-in-out;
+        }
+
+        .controles-mapa-superior {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .buscador-mapa-container {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #e8a87c;
+            border-radius: 9999px;
+            padding: 5px 14px;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(92, 64, 51, 0.05);
+        }
+
+        .buscador-mapa-container input {
+            border: none;
+            outline: none;
+            font-family: 'Itim', cursive, sans-serif;
+            font-size: 14px;
+            background: transparent;
+            width: 170px;
+            color: #5c4033;
+            font-weight: 400;
+        }
+
+        .buscador-mapa-container button, .btn-escanear-zona, .btn-ver-cercanas-toggle {
+            background: #e8a87c;
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            color: white;
+            padding: 7px 16px;
+            border-radius: 9999px;
+            cursor: pointer;
+            font-family: 'Itim', cursive, sans-serif;
+            font-size: 13px;
+            font-weight: 400;
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 4px 10px rgba(232, 168, 124, 0.3);
+        }
+
+        .btn-escanear-zona {
+            background: #62c385;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 10px rgba(98, 195, 133, 0.3);
+        }
+
+        .btn-ver-cercanas-toggle {
+            background: #6bbbe7;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 10px rgba(107, 187, 231, 0.3);
+        }
+
+        .filtros-mapa {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .filtro-btn {
+            background: rgba(255, 255, 255, 0.85);
+            border: 2px solid #e8a87c;
+            padding: 6px 16px;
+            border-radius: 9999px;
+            font-family: 'Itim', cursive, sans-serif;
+            font-size: 13.5px;
+            color: #775a4c;
+            font-weight: 400;
+            cursor: pointer;
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 3px 8px rgba(92, 64, 51, 0.04);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .filtro-btn:hover, .filtro-btn.active {
+            background: #e8a87c;
+            color: white;
+            border-color: white;
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 6px 16px rgba(232, 168, 124, 0.4);
+        }
+
+        .filtro-btn.active i {
+            color: white !important;
+        }
+
+        .mapa-layout-cuerpo {
+            display: flex;
+            flex-grow: 1;
+            gap: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #mapa-arca {
+            width: 100%;
+            height: 100%;
+            border-radius: 32px;
+            border: 3px solid rgba(255, 255, 255, 0.95);
+            box-shadow: 0 10px 30px rgba(92, 64, 51, 0.08);
+            z-index: 1;
+            transition: width 0.3s ease;
+        }
+
+        .panel-cercanas {
+            width: 0;
+            background: rgba(255, 248, 235, 0.95);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 32px;
+            border: 0px solid #e8a87c;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 12px 30px rgba(92, 64, 51, 0.12);
+            z-index: 5;
+        }
+
+        .panel-cercanas.abierto {
+            width: 320px;
+            border: 2px solid rgba(255, 255, 255, 0.95);
+            padding: 18px;
+        }
+
+        .panel-cercanas-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px dashed rgba(232, 168, 124, 0.5);
+            padding-bottom: 12px;
+            margin-bottom: 12px;
+        }
+
+        .panel-cercanas-header h3 {
+            margin: 0;
+            color: #d97736;
+            font-size: 16px;
+            font-weight: 400;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-cerrar-panel {
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #775a4c;
+            cursor: pointer;
+            transition: transform 0.25s ease, color 0.25s ease;
+        }
+        .btn-cerrar-panel:hover { color: #e57373; transform: scale(1.2) rotate(90deg); }
+
+        .lista-cercanas-container {
+            overflow-y: auto;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding-right: 4px;
+        }
+
+        .card-vet-cercana {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(232, 168, 124, 0.4);
+            border-radius: 24px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            box-shadow: 0 4px 12px rgba(92, 64, 51, 0.04);
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .card-vet-cercana:hover {
+            transform: translateY(-3px);
+            border-color: #e8a87c;
+            box-shadow: 0 8px 20px rgba(92, 64, 51, 0.08);
+        }
+
+        .card-vet-cercana .vet-nombre {
+            font-size: 14px;
+            font-weight: 400;
+            color: #5c4033;
+            margin: 0;
+        }
+
+        .card-vet-cercana .vet-distancia {
+            font-size: 11.5px;
+            background: #faedcd;
+            color: #8c6d3f;
+            padding: 3px 10px;
+            border-radius: 9999px;
+            align-self: flex-start;
+            font-weight: 400;
+        }
+
+        .card-vet-cercana .vet-dir {
+            font-size: 12px;
+            color: #775a4c;
+            margin: 0;
+            font-weight: 400;
+        }
+
+        .acciones-vet-cercana {
+            display: flex;
+            gap: 8px;
+            margin-top: 6px;
+        }
+
+        .btn-accion-card {
+            flex: 1;
+            padding: 6px 10px;
+            border-radius: 9999px;
+            font-family: 'Itim', cursive, sans-serif;
+            font-size: 12px;
+            text-align: center;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 400;
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            transition: all 0.3s ease;
+        }
+
+        .btn-mapa-exacto {
+            background: #62c385;
+            color: white;
+            box-shadow: 0 3px 10px rgba(98, 195, 133, 0.3);
+        }
+        .btn-enfocar-mapa {
+            background: #e8a87c;
+            color: white;
+            box-shadow: 0 3px 10px rgba(232, 168, 124, 0.3);
+        }
+
+        .btn-centrar-mapa {
+            position: absolute;
+            bottom: 25px;
+            right: 25px;
+            background: rgba(255, 255, 255, 0.92);
+            color: #d97736;
+            border: 2px solid rgba(255, 255, 255, 0.95);
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 19px;
+            cursor: pointer;
+            box-shadow: 0 8px 22px rgba(92, 64, 51, 0.15);
+            z-index: 1000;
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .btn-centrar-mapa:hover { background: #e8a87c; color: white; transform: scale(1.15); }
+
+        .leaflet-popup-content-wrapper {
+            background: rgba(255, 248, 235, 0.95) !important;
+            backdrop-filter: blur(12px);
+            border-radius: 28px !important;
+            padding: 6px !important;
+            box-shadow: 0 14px 35px rgba(92, 64, 51, 0.18) !important;
+            border: 2px solid rgba(255, 255, 255, 0.95);
+        }
+
+        .popup-card-arca {
+            font-family: 'Itim', cursive, sans-serif;
+            text-align: center;
+            max-width: 180px;
+            padding: 4px;
+            color: #5c4033;
+        }
+        .popup-card-arca img {
+            width: 100%; height: 95px; object-fit: cover; border-radius: 18px; margin-bottom: 6px; border: 2px solid rgba(255, 255, 255, 0.9);
+        }
+        .popup-card-sin-foto {
+            background: rgba(250, 237, 205, 0.8);
+            border-radius: 18px; padding: 10px; margin-bottom: 6px; border: 2px dashed #e8a87c; display: flex; flex-direction: column; align-items: center; gap: 4px;
+        }
+        .popup-card-arca b { color: #d97736; font-size: 14px; font-weight: 400; display: block; margin-bottom: 2px; }
+        .popup-card-arca p { font-size: 12px; color: #775a4c; margin: 0 0 8px 0; line-height: 1.3; font-weight: 400; }
+        .btn-ver-caso {
+            background: #e8a87c; color: white; padding: 5px 12px; border-radius: 9999px; text-decoration: none; font-size: 12px; display: inline-block; font-weight: 400; transition: all 0.3s ease; border: 1.5px solid rgba(255,255,255,0.9);
+        }
+        .btn-ver-caso:hover { background: #d97736; transform: scale(1.05); }
+
+        .leaflet-tooltip.label-nombre-pin {
+            background: rgba(255, 255, 255, 0.92);
+            border: 2px solid #e8a87c;
+            border-radius: 9999px;
+            font-family: 'Itim', cursive, sans-serif;
+            font-size: 11.5px;
+            font-weight: 400;
+            color: #5c4033;
+            padding: 3px 10px;
+            box-shadow: 0 4px 12px rgba(92, 64, 51, 0.1);
+        }
+    </style>
+</head>
+<body>
+
+  <nav class="top-nav">
+    <div class="top-left">
+        <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu"></i>
+        <div class="mini-logo-circle"><img src="logo.png" alt="Logo"></div>
+        <span class="page-title" id="titulo-pagina">Mapa de Casos</span>
+    </div>
+    <div class="search-bar">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="input-busqueda-nav" name="busqueda" placeholder="Busca algo" aria-label="Buscar">
+        <i class="fa-solid fa-microphone"></i>
+    </div>
+    <div class="top-right">
+        <div class="user-header-info">
+            <div class="user-profile-menu" id="user-profile-menu">
+                <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()"><img src="logo.png" id="user-avatar-img" alt="Perfil"></div>
+                <div class="mini-menu-card" id="mini-menu-card">
+                    <div class="mini-menu-header"><span id="mini-menu-username">Usuario</span></div>
+                    <hr class="mini-menu-divider">
+                    <a href="configuracion.html" class="mini-menu-item btn-ajustes"><i class="fa-solid fa-gear"></i><span>Ajustes</span></a>
+                    <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini"><i class="fa-solid fa-right-from-bracket"></i><span>Cerrar sesión</span></a>
+                </div>
+            </div>
+            <div class="notif-circle"><a href="notificaciones.html" aria-label="Notificaciones"><i class="fa-solid fa-bell"></i></a></div>
+        </div>
+    </div>
+  </nav>
+
+  <aside class="sidebar" id="sidebar">
+      <div class="side-icons">
+          <a href="home.html" class="menu-fila"><i class="fa-solid fa-house"></i><span class="menu-text">Inicio</span></a>
+          <a href="perfil_usuario.html" class="menu-fila"><i class="fa-solid fa-circle-user"></i><span class="menu-text">Perfil</span></a>
+          <a href="guardados_usuario.html" class="menu-fila"><i class="fa-solid fa-bookmark"></i><span class="menu-text">Guardado</span></a>
+          <a href="mapa.html" class="menu-fila" style="color: #e06d53;"><i class="fa-solid fa-location-dot"></i><span class="menu-text">Mapa</span></a>
+          <a href="configuracion.html" class="menu-fila"><i class="fa-solid fa-gear"></i><span class="menu-text">Ajustes</span></a>
+      </div>
+  </aside>
+
+  <main class="main-content">
+      <div class="mapa-container-principal">
+          <div class="mapa-header">
+              <h1><i class="fa-solid fa-map-location-dot mapa-header-icon"></i> Mapa interactivo ARCA</h1>
+              
+              <div class="controles-mapa-superior">
+                  <div class="buscador-mapa-container">
+                      <i class="fa-solid fa-magnifying-glass" style="color: #e8a87c; font-size: 13px;"></i>
+                      <input type="text" id="input-buscar-lugar" placeholder="Ej. Las Flores, Cantares">
+                      <button id="btn-ir-lugar" class="btn-arca-animado">Ir</button>
+                  </div>
+
+                  <button class="btn-escanear-zona btn-arca-animado" id="btn-escanear" title="Cargar veterinarias y centros de animales">
+                      <i class="fa-solid fa-radar"></i> Buscar aquí
+                  </button>
+
+                  <button class="btn-ver-cercanas-toggle btn-arca-animado" id="btn-toggle-cercanas">
+                      <i class="fa-solid fa-list-ul"></i> <span id="texto-btn-cercanas">Ver más cercanas</span>
+                  </button>
+              </div>
+
+              <div class="filtros-mapa">
+                  <button class="filtro-btn active" data-filtro="todos"><i class="fa-solid fa-paw"></i> Todos</button>
+                  <button class="filtro-btn" data-filtro="reporte"><i class="fa-solid fa-triangle-exclamation" style="color: #e57373;"></i> Reportes</button>
+                  <button class="filtro-btn" data-filtro="adopcion"><i class="fa-solid fa-heart" style="color: #e985a0;"></i> Adopciones</button>
+                  <button class="filtro-btn" data-filtro="evento"><i class="fa-solid fa-calendar-days" style="color: #6bbbe7;"></i> Eventos</button>
+                  <button class="filtro-btn" data-filtro="veterinaria"><i class="fa-solid fa-hospital" style="color: #62c385;"></i> Veterinarias</button>
+              </div>
+          </div>
+
+          <div class="mapa-layout-cuerpo">
+              <div id="mapa-arca"></div>
+              
+              <div class="panel-cercanas" id="panel-cercanas">
+                  <div class="panel-cercanas-header">
+                      <h3 id="titulo-panel-cercanas"><i class="fa-solid fa-compass"></i> Cercanos a mí</h3>
+                      <button class="btn-cerrar-panel" id="btn-cerrar-panel"><i class="fa-solid fa-xmark"></i></button>
+                  </div>
+                  <div class="lista-cercanas-container" id="lista-cercanas">
+                      <p style="font-size: 13px; color: #775a4c; text-align: center; margin-top: 20px; font-weight: 400;">Escanea o busca una zona para ver los elementos más cercanos.</p>
+                  </div>
+              </div>
+
+              <button class="btn-centrar-mapa" id="btn-centrar" title="Volver a mi ubicación real">
+                  <i class="fa-solid fa-location-crosshairs"></i>
+              </button>
+          </div>
+      </div>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="script.js"></script>
+
+  <script>
+      /* VECTORES SVG PERSONALIZADOS ARCA */
+      const vectoresArca = {
+          casita: `<svg style="width:28px;height:28px;vertical-align:middle;" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 32L32 12L54 32V50C54 52.2 52.2 54 50 54H14C11.8 54 10 52.2 10 50V32Z" fill="#FCE4EC" stroke="#E8A87C" stroke-width="4" stroke-linejoin="round"/><path d="M26 54V36C26 33.8 27.8 32 30 32H34C36.2 32 38 33.8 38 36V54" stroke="#D97736" stroke-width="4" stroke-linecap="round"/><circle cx="32" cy="24" r="4" fill="#E8A87C"/></svg>`,
+          corazon: `<svg width="42" height="42" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M32 54C32 54 10 38 10 23C10 15 16 9 23 9C27.5 9 31 11.5 32 13.5C33 11.5 36.5 9 41 9C48 9 54 15 54 23C54 38 32 54 32 54Z" fill="#FAD4DE" stroke="#E985A0" stroke-width="4" stroke-linejoin="round"/></svg>`,
+          huellita: `<svg width="42" height="42" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="18" cy="22" rx="6" ry="8" fill="#E8A87C"/><ellipse cx="46" cy="22" rx="6" ry="8" fill="#E8A87C"/><ellipse cx="29" cy="15" rx="5.5" ry="7.5" fill="#E8A87C"/><ellipse cx="35" cy="15" rx="5.5" ry="7.5" fill="#E8A87C"/><path d="M18 42C18 32 25 28 32 28C39 28 46 32 46 42C46 50 39 52 32 52C25 52 18 50 18 42Z" fill="#E8A87C"/></svg>`,
+          nube: `<svg width="42" height="42" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16 46H48C53.5 46 58 41.5 58 36C58 30.8 54 26.5 49 26.1C47.8 17.5 40.5 11 31.5 11C23 11 16 16.8 14.3 24.8C9.6 25.8 6 30 6 35C6 41.1 10.5 46 16 46Z" fill="#E0F2FE" stroke="#7DD3FC" stroke-width="4" stroke-linejoin="round"/></svg>`
+      };
+
+      /* SISTEMA DE ALERTAS PERSONALIZADAS ARCA */
+      function mostrarAlertaArca(titulo, mensaje, opciones = {}) {
+          const {
+              tipo = "error",
+              textoBoton = "Entendido",
+              alCerrar = null
+          } = opciones;
+
+          document.getElementById("alerta-arca-personalizada")?.remove();
+
+          if (!document.getElementById("estilos-alerta-arca")) {
+              const estilos = document.createElement("style");
+              estilos.id = "estilos-alerta-arca";
+              estilos.textContent = `
+                  .arca-alerta-overlay {
+                      position: fixed;
+                      inset: 0;
+                      z-index: 999999;
+                      display: flex;
+                      justify-content: center;
+                      align-items: center;
+                      padding: 20px;
+                      background: rgba(92, 64, 51, 0.45);
+                      backdrop-filter: blur(10px);
+                      -webkit-backdrop-filter: blur(10px);
+                      animation: arcaAparecer .25s ease;
+                  }
+
+                  .arca-alerta-tarjeta {
+                      width: min(100%, 380px);
+                      padding: 35px 28px 28px;
+                      border: 2px solid rgba(255, 255, 255, 0.95);
+                      border-radius: 40px;
+                      background: rgba(255, 241, 242, 0.94);
+                      backdrop-filter: blur(18px);
+                      -webkit-backdrop-filter: blur(18px);
+                      box-shadow: 0 24px 50px rgba(92, 64, 51, 0.22);
+                      text-align: center;
+                      font-family: 'Itim', cursive, sans-serif;
+                      animation: arcaEntradaPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+                  }
+
+                  .arca-alerta-icono-wrapper {
+                      display: flex;
+                      justify-content: center;
+                      align-items: center;
+                      width: 76px;
+                      height: 76px;
+                      margin: 0 auto 18px;
+                      border: 4px solid #ffffff;
+                      border-radius: 50%;
+                      background: rgba(250, 212, 222, 0.9);
+                      box-shadow: 0 8px 20px rgba(233, 133, 160, 0.35);
+                      animation: flotarSoft 3.5s ease-in-out infinite;
+                  }
+
+                  .arca-alerta-titulo {
+                      margin: 0 0 10px;
+                      color: #5c4033;
+                      font-size: 25px;
+                      font-weight: 400;
+                      letter-spacing: 0.5px;
+                  }
+
+                  .arca-alerta-mensaje {
+                      margin: 0 0 24px;
+                      color: #775a4c;
+                      font-size: 16.5px;
+                      font-weight: 400;
+                      line-height: 1.5;
+                      overflow-wrap: anywhere;
+                      letter-spacing: 0.3px;
+                  }
+
+                  .arca-alerta-botones {
+                      display: flex;
+                      gap: 12px;
+                  }
+
+                  .arca-alerta-boton {
+                      flex: 1;
+                      padding: 13px 20px;
+                      border: 2px solid rgba(255, 255, 255, 0.9);
+                      border-radius: 9999px;
+                      background: #E985A0;
+                      color: white;
+                      font-family: 'Itim', cursive, sans-serif;
+                      font-size: 17px;
+                      font-weight: 400;
+                      letter-spacing: 0.5px;
+                      cursor: pointer;
+                      box-shadow: 0 6px 15px rgba(233, 133, 160, 0.3);
+                      transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+                  }
+
+                  .arca-alerta-boton:hover {
+                      background: #D96F8D;
+                      transform: translateY(-3px) scale(1.03);
+                      box-shadow: 0 10px 25px rgba(233, 133, 160, 0.4);
+                  }
+
+                  .arca-alerta-boton-secundario {
+                      background: rgba(255, 255, 255, 0.85);
+                      color: #5c4033;
+                      border: 2px solid rgba(233, 133, 160, 0.4);
+                      box-shadow: 0 4px 12px rgba(92, 64, 51, 0.05);
+                  }
+
+                  @keyframes arcaAparecer {
+                      from { opacity: 0; }
+                      to { opacity: 1; }
+                  }
+              `;
+              document.head.appendChild(estilos);
+          }
+
+          const overlay = document.createElement("div");
+          overlay.id = "alerta-arca-personalizada";
+          overlay.className = "arca-alerta-overlay";
+          overlay.setAttribute("role", "alertdialog");
+
+          const tarjeta = document.createElement("div");
+          tarjeta.className = "arca-alerta-tarjeta";
+
+          const iconoWrap = document.createElement("div");
+          iconoWrap.className = "arca-alerta-icono-wrapper";
+          
+          let vectorHtml = vectoresArca.corazon;
+          if (tipo === 'pregunta') vectorHtml = vectoresArca.huellita;
+          if (tipo === 'conexion') vectorHtml = vectoresArca.nube;
+          
+          iconoWrap.innerHTML = vectorHtml;
+
+          const encabezado = document.createElement("h2");
+          encabezado.className = "arca-alerta-titulo";
+          encabezado.textContent = titulo;
+
+          const texto = document.createElement("p");
+          texto.className = "arca-alerta-mensaje";
+          texto.textContent = mensaje;
+
+          const contenedorBotones = document.createElement("div");
+          contenedorBotones.className = "arca-alerta-botones";
+
+          const boton = document.createElement("button");
+          boton.type = "button";
+          boton.className = "arca-alerta-boton btn-arca-animado";
+          boton.textContent = textoBoton;
+
+          boton.addEventListener("click", () => {
+              overlay.remove();
+              if (typeof alCerrar === "function") alCerrar(true);
+          });
+
+          contenedorBotones.appendChild(boton);
+
+          if (opciones.conCancelar) {
+              const botonCancelar = document.createElement("button");
+              botonCancelar.type = "button";
+              botonCancelar.className = "arca-alerta-boton arca-alerta-boton-secundario btn-arca-animado";
+              botonCancelar.textContent = opciones.textoCancelar || "Cancelar";
+              botonCancelar.addEventListener("click", () => {
+                  overlay.remove();
+                  if (typeof alCerrar === "function") alCerrar(false);
+              });
+              contenedorBotones.prepend(botonCancelar);
+          }
+
+          tarjeta.append(iconoWrap, encabezado, texto, contenedorBotones);
+          overlay.appendChild(tarjeta);
+          document.body.appendChild(overlay);
+
+          boton.focus();
+      }
+
+      document.addEventListener('DOMContentLoaded', async () => {
+          const btnToggleMenu = document.getElementById('btn-toggle-menu');
+          const sidebar = document.getElementById('sidebar');
+          if (btnToggleMenu && sidebar) {
+              btnToggleMenu.addEventListener('click', (e) => {
+                  e.stopPropagation();
+                  sidebar.classList.toggle('sidebar-abierta');
+              });
+          }
+
+          let latActual = 6.25184;
+          let lngActual = -75.56359;
+          let zoomInicial = 13;
+
+          const params = new URLSearchParams(window.location.search);
+          const latParam = parseFloat(params.get('lat'));
+          const lngParam = parseFloat(params.get('lng'));
+
+          if (!isNaN(latParam) && !isNaN(lngParam)) {
+              latActual = latParam;
+              lngActual = lngParam;
+              zoomInicial = 16;
+          }
+
+          const map = L.map('mapa-arca').setView([latActual, lngActual], zoomInicial);
+
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+              maxZoom: 19,
+              attribution: '© OpenStreetMap contributors - ARCA'
+          }).addTo(map);
+
+          let markerMiUbicacion = null;
+
+          function irAMiUbicacionReal(conAlertaError = false) {
+              if (navigator.geolocation) {
+                  navigator.geolocation.getCurrentPosition(
+                      (position) => {
+                          latActual = position.coords.latitude;
+                          lngActual = position.coords.longitude;
+                          map.setView([latActual, lngActual], 16);
+
+                          if (markerMiUbicacion) {
+                              markerMiUbicacion.setLatLng([latActual, lngActual]);
+                          } else {
+                              const iconoUsuario = L.divIcon({
+                                  className: 'custom-pin-user',
+                                  html: `<div style="background-color: #6bbbe7; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 12px rgba(107, 187, 231, 0.8);"></div>`,
+                                  iconSize: [20, 20], iconAnchor: [10, 10]
+                              });
+                              markerMiUbicacion = L.marker([latActual, lngActual], { icon: iconoUsuario }).addTo(map);
+                              markerMiUbicacion.bindTooltip("¡Estás aquí!", { permanent: false, direction: 'top' });
+                          }
+                          cargarVeterinariasDeLaZona();
+                      },
+                      (error) => {
+                          if (conAlertaError) {
+                              mostrarAlertaArca("Ubicación no encontrada", "No pudimos acceder a tu ubicación GPS. Revisa los permisos de tu navegador.", { tipo: "conexion" });
+                          }
+                      },
+                      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                  );
+              }
+          }
+
+          if (isNaN(latParam)) {
+              irAMiUbicacionReal(false);
+          }
+
+          document.getElementById('btn-centrar').addEventListener('click', () => {
+              irAMiUbicacionReal(true);
+          });
+
+          let markersLayer = L.layerGroup().addTo(map);
+          let todosLosElementos = [];
+
+          const panelCercanas = document.getElementById('panel-cercanas');
+          const btnToggleCercanas = document.getElementById('btn-toggle-cercanas');
+          const btnCerrarPanel = document.getElementById('btn-cerrar-panel');
+
+          btnToggleCercanas.addEventListener('click', () => {
+              panelCercanas.classList.toggle('abierto');
+              actualizarListaCercanas();
+          });
+          btnCerrarPanel.addEventListener('click', () => {
+              panelCercanas.classList.remove('abierto');
+          });
+
+          function calcularDistancia(lat1, lon1, lat2, lon2) {
+              const R = 6371;
+              const dLat = (lat2 - lat1) * Math.PI / 180;
+              const dLon = (lon2 - lon1) * Math.PI / 180;
+              const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                        Math.sin(dLon/2) * Math.sin(dLon/2);
+              const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+              return R * c;
+          }
+
+          function actualizarListaCercanas() {
+              const contenedorLista = document.getElementById('lista-cercanas');
+              const tituloPanel = document.getElementById('titulo-panel-cercanas');
+              const centroMapa = map.getCenter();
+              
+              const filtroActivo = document.querySelector('.filtro-btn.active').getAttribute('data-filtro');
+
+              const elementosFiltrados = todosLosElementos.filter(item => {
+                  const t = (item.tipo || '').toLowerCase();
+                  if (filtroActivo === 'todos') return true;
+                  if (filtroActivo === 'reporte') return t.includes('report') || t.includes('emergencia') || t.includes('alerta');
+                  if (filtroActivo === 'adopcion') return t.includes('adop') || t.includes('adopt');
+                  if (filtroActivo === 'evento') return t.includes('evento') || t.includes('fundacion');
+                  if (filtroActivo === 'veterinaria') return t.includes('veterinaria') || t.includes('clinica') || t.includes('mascota') || t.includes('animal');
+                  return true;
+              });
+
+              if (filtroActivo === 'veterinaria') tituloPanel.innerHTML = `<i class="fa-solid fa-hospital"></i> Veterinarias Cercanas`;
+              else if (filtroActivo === 'reporte') tituloPanel.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Reportes Cercanos`;
+              else if (filtroActivo === 'adopcion') tituloPanel.innerHTML = `<i class="fa-solid fa-heart"></i> Adopciones Cercanas`;
+              else if (filtroActivo === 'evento') tituloPanel.innerHTML = `<i class="fa-solid fa-calendar-days"></i> Eventos Cercanos`;
+              else tituloPanel.innerHTML = `<i class="fa-solid fa-compass"></i> Elementos Cercanos`;
+
+              if (elementosFiltrados.length === 0) {
+                  contenedorLista.innerHTML = `<p style="font-size: 13px; color: #775a4c; text-align: center; margin-top: 20px; font-weight: 400;">No hay elementos de esta categoría en esta vista. Presiona "Buscar aquí" o cambia de filtro.</p>`;
+                  return;
+              }
+
+              elementosFiltrados.forEach(el => {
+                  el.distanciaKm = calcularDistancia(centroMapa.lat, centroMapa.lng, el.lat, el.lng);
+              });
+
+              elementosFiltrados.sort((a, b) => a.distanciaKm - b.distanciaKm);
+
+              let htmlItems = '';
+              elementosFiltrados.forEach(el => {
+                  const distanciaTexto = el.distanciaKm < 1 ? 
+                      `${Math.round(el.distanciaKm * 1000)} m` : 
+                      `${el.distanciaKm.toFixed(1)} km`;
+
+                  let queryMaps = "";
+                  if (el.lat && el.lng) {
+                      queryMaps = `${el.lat},${el.lng}`;
+                  } else if (el.id_reporte) {
+                      queryMaps = encodeURIComponent(`${el.Ubicacion || 'San Cristóbal'}, Medellín, Antioquia, Colombia`);
+                  } else {
+                      queryMaps = encodeURIComponent(`${el.direccion || el.nombre}, San Cristóbal, Medellín, Colombia`);
+                  }
+                  const urlMaps = `https://www.google.com/maps/search/?api=1&query=${queryMaps}`;
+                  const nombreMostrar = el.nombre || el.nombre_tipo_reporte || 'Punto';
+                  const direccionMostrar = el.direccion || (el.Ubicacion && !el.Ubicacion.includes("Ubicacion GPS") ? el.Ubicacion : "San Cristóbal, Medellín");
+
+                  htmlItems += `
+                      <div class="card-vet-cercana">
+                          <p class="vet-nombre">${nombreMostrar}</p>
+                          <span class="vet-distancia"><i class="fa-solid fa-location-arrow"></i> A ${distanciaTexto} de ti</span>
+                          <p class="vet-dir"><i class="fa-solid fa-location-dot" style="color: #62c385;"></i> ${direccionMostrar}</p>
+                          <div class="acciones-vet-cercana">
+                              <a href="${urlMaps}" target="_blank" class="btn-accion-card btn-mapa-exacto btn-arca-animado">Abrir en Maps</a>
+                              <button class="btn-accion-card btn-enfocar-mapa btn-arca-animado" onclick="enfocarElemento(${el.lat}, ${el.lng})">Ver en mapa</button>
+                          </div>
+                      </div>
+                  `;
+              });
+
+              contenedorLista.innerHTML = htmlItems;
+          }
+
+          window.enfocarElemento = function(lat, lng) {
+              map.setView([lat, lng], 17);
+          };
+
+          function renderizarMarcadores(filtro = 'todos') {
+              markersLayer.clearLayers();
+
+              todosLosElementos.forEach(item => {
+                  const tipo = (item.tipo || '').toLowerCase();
+
+                  if (filtro !== 'todos') {
+                      if (filtro === 'reporte' && !tipo.includes('report') && !tipo.includes('emergencia') && !tipo.includes('alerta')) return;
+                      if (filtro === 'adopcion' && !tipo.includes('adop') && !tipo.includes('adopt')) return;
+                      if (filtro === 'evento' && !tipo.includes('evento') && !tipo.includes('fundacion')) return;
+                      if (filtro === 'veterinaria' && !tipo.includes('veterinaria') && !tipo.includes('clinica') && !tipo.includes('mascota') && !tipo.includes('animal')) return;
+                  }
+
+                  let colorPin = '#e8a87c';
+                  let iconoClase = 'fa-paw';
+                  let nombreTexto = item.nombre || item.nombre_tipo_reporte || 'Punto ARCA';
+
+                  if (tipo.includes('report') || tipo.includes('emergencia') || tipo.includes('alerta')) {
+                      colorPin = '#e57373'; 
+                      iconoClase = 'fa-triangle-exclamation';
+                  } else if (tipo.includes('adop') || tipo.includes('adopt')) {
+                      colorPin = '#e985a0'; 
+                      iconoClase = 'fa-heart';
+                  } else if (tipo.includes('evento') || tipo.includes('fundacion')) {
+                      colorPin = '#6bbbe7'; 
+                      iconoClase = 'fa-calendar-days';
+                  } else if (tipo.includes('veterinaria') || tipo.includes('clinica') || tipo.includes('mascota') || tipo.includes('animal')) {
+                      colorPin = '#62c385'; 
+                      iconoClase = 'fa-hospital';
+                  }
+
+                  const customIcon = L.divIcon({
+                      className: 'custom-pin-arca',
+                      html: `
+                          <div style="background-color: ${colorPin}; width: 36px; height: 36px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 16px rgba(92,64,51,0.2); border: 2px solid white;">
+                              <i class="fa-solid ${iconoClase}" style="transform: rotate(45deg); color: white; font-size: 14px;"></i>
+                          </div>
+                      `,
+                      iconSize: [36, 36], iconAnchor: [18, 36], popupAnchor: [0, -36]
+                  });
+
+                  const marker = L.marker([item.lat, item.lng], { icon: customIcon });
+
+                  marker.bindTooltip(nombreTexto, {
+                      permanent: true, direction: 'right', className: 'label-nombre-pin', offset: [10, -20]
+                  });
+
+                  let popupContenido = '';
+                  if (tipo !== 'veterinaria') {
+                      const urlMapsReporte = `https://www.google.com/maps/search/?api=1&query=${item.lat},${item.lng}`;
+                      const idReal = item.id_origen || item.id_publicacion || '';
+                      const esAdopcion = item.tipo_publicacion === 'adopcion';
+                      const paginaDetalle = esAdopcion ? `detalle_adopcion.html?id=${idReal}` : `detalle_reporte.html?id=${idReal}`;
+
+                      popupContenido = `
+                          <div class="popup-card-arca">
+                              <img src="${item.img_reporte || 'logo.png'}" alt="Foto">
+                              <b>${item.nombre_tipo_reporte || 'Publicación'}</b>
+                              <p>${item.Ubicacion && !item.Ubicacion.includes("Ubicacion GPS") ? item.Ubicacion : 'San Cristóbal, Medellín'}</p>
+                              <div style="display: flex; gap: 6px; justify-content: center; margin-top: 6px;">
+                                  <a href="${paginaDetalle}" class="btn-ver-caso btn-arca-animado" style="padding: 5px 10px; font-size: 11.5px;">Ver caso</a>
+                                  <a href="${urlMapsReporte}" target="_blank" class="btn-ver-caso btn-arca-animado" style="background: #62c385; padding: 5px 10px; font-size: 11.5px;">Maps</a>
+                              </div>
+                          </div>
+                      `;
+                  } else {
+                      const urlMapsVet = `https://www.google.com/maps/search/?api=1&query=${item.lat},${item.lng}`;
+                      popupContenido = `
+                          <div class="popup-card-arca">
+                              <div class="popup-card-sin-foto">
+                                  <i class="fa-solid fa-hospital-user" style="color: #62c385; font-size: 20px;"></i>
+                                  <span style="font-size: 11.5px; font-weight: 400; color: #5c4033;">Veterinaria Aliada</span>
+                              </div>
+                              <b style="color: #d97736;">${item.nombre}</b>
+                              <p><i class="fa-solid fa-location-dot" style="color: #62c385;"></i> ${item.direccion || 'San Cristóbal, Medellín'}</p>
+                              <a href="${urlMapsVet}" target="_blank" class="btn-ver-caso btn-arca-animado" style="background: #62c385;">Abrir en Maps</a>
+                          </div>
+                      `;
+                  }
+
+                  marker.bindPopup(popupContenido);
+                  markersLayer.addLayer(marker);
+              });
+          }
+
+          async function cargarVeterinariasDeLaZona() {
+              const bounds = map.getBounds();
+              const southWest = bounds.getSouthWest();
+              const northEast = bounds.getNorthEast();
+
+              const overpassQuery = `
+                  [out:json][timeout:25];
+                  (
+                    node["amenity"="veterinary"](${southWest.lat},${southWest.lng},${northEast.lat},${northEast.lng});
+                    way["amenity"="veterinary"](${southWest.lat},${southWest.lng},${northEast.lat},${northEast.lng});
+                    relation["amenity"="veterinary"](${southWest.lat},${southWest.lng},${northEast.lat},${northEast.lng});
+
+                    node["shop"="pet"](${southWest.lat},${southWest.lng},${northEast.lat},${northEast.lng});
+                    way["shop"="pet"](${southWest.lat},${southWest.lng},${northEast.lat},${northEast.lng});
+
+                    node["healthcare"="veterinary"](${southWest.lat},${southWest.lng},${northEast.lat},${northEast.lng});
+                    way["healthcare"="veterinary"](${southWest.lat},${southWest.lng},${northEast.lat},${northEast.lng});
+                  );
+                  out body;
+                  >;
+                  out skel qt;
+              `;
+
+              const endpoints = [
+                  'https://overpass-api.de/api/interpreter',
+                  'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
+                  'https://overpass.kumi.systems/api/interpreter'
+              ];
+
+              let datosValidos = null;
+
+              for (const url of endpoints) {
+                  try {
+                      const res = await fetch(url, {
+                          method: 'POST',
+                          body: overpassQuery,
+                          signal: AbortSignal.timeout(8000)
+                      });
+
+                      if (res.ok) {
+                          datosValidos = await res.json();
+                          break;
+                      }
+                  } catch (e) {
+                      console.warn(`Falló el servidor ${url}, probando siguiente...`);
+                  }
+              }
+
+              if (datosValidos && datosValidos.elements) {
+                  datosValidos.elements.forEach(element => {
+                      let lat = element.lat;
+                      let lon = element.lon;
+
+                      if (lat && lon && element.tags) {
+                          const nombreTag = element.tags.name || element.tags.brand || "";
+                          const tipoAmenity = element.tags.amenity || "";
+                          const tipoShop = element.tags.shop || "";
+                          const tipoHealthcare = element.tags.healthcare || "";
+
+                          if (tipoAmenity === 'veterinary' || tipoShop === 'pet' || tipoHealthcare === 'veterinary') {
+                              const nombreVet = nombreTag ? nombreTag : "Centro Veterinario / Mascotas";
+                              const direccionVet = (element.tags['addr:street'] || element.tags['addr:city']) ? 
+                                  `${element.tags['addr:street'] || ''} ${element.tags['addr:city'] || 'San Cristóbal'}` : "San Cristóbal, Medellín";
+
+                              const nuevaVetObj = {
+                                  nombre: nombreVet,
+                                  tipo: 'veterinaria',
+                                  lat: lat,
+                                  lng: lon,
+                                  direccion: direccionVet
+                              };
+
+                              const existe = todosLosElementos.some(e => Math.abs(e.lat - lat) < 0.00005 && Math.abs(e.lng - lon) < 0.00005);
+                              if (!existe) {
+                                  todosLosElementos.push(nuevaVetObj);
+                              }
+                          }
+                      }
+                  });
+
+                  renderizarMarcadores(document.querySelector('.filtro-btn.active').getAttribute('data-filtro'));
+                  if (panelCercanas.classList.contains('abierto')) {
+                      actualizarListaCercanas();
+                  }
+              }
+          }
+
+          document.getElementById('btn-escanear').addEventListener('click', () => {
+              cargarVeterinariasDeLaZona();
+              mostrarAlertaArca("Escaneando zona", "Buscando veterinarias y centros de animales cercanos...", { tipo: "aviso" });
+          });
+
+          const inputBuscarLugar = document.getElementById('input-buscar-lugar');
+          const btnIrLugar = document.getElementById('btn-ir-lugar');
+
+          async function buscarLugarGeneral() {
+              const query = inputBuscarLugar.value.trim();
+              if (!query) return;
+
+              const queryCompleta = `${query}, San Cristóbal, Medellín, Antioquia, Colombia`;
+
+              try {
+                  const respuesta = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(queryCompleta)}`);
+                  const resultados = await respuesta.json();
+
+                  if (resultados && resultados.length > 0) {
+                      const lat = parseFloat(resultados[0].lat);
+                      const lon = parseFloat(resultados[0].lon);
+                      map.setView([lat, lon], 17);
+                      setTimeout(cargarVeterinariasDeLaZona, 600);
+                  } else {
+                      const respuestaAlt = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ", Medellín, Colombia")}`);
+                      const resultadosAlt = await respuestaAlt.json();
+                      if (resultadosAlt && resultadosAlt.length > 0) {
+                          map.setView([parseFloat(resultadosAlt[0].lat), parseFloat(resultadosAlt[0].lon)], 16);
+                          setTimeout(cargarVeterinariasDeLaZona, 600);
+                      } else {
+                          mostrarAlertaArca("Lugar no encontrado", "No encontramos esa calle o sector específico. Intenta con otro nombre.", { tipo: "error" });
+                      }
+                  }
+              } catch (error) {
+                  console.error("Error buscando ubicación:", error);
+              }
+          }
+
+          btnIrLugar.addEventListener('click', buscarLugarGeneral);
+          inputBuscarLugar.addEventListener('keypress', (e) => {
+              if (e.key === 'Enter') buscarLugarGeneral();
+          });
+
+          auth.onAuthStateChanged(async (user) => {
+              try {
+                  const correoActual = (user && user.email) ? user.email : '';
+                  const respuestaReportes = await fetch(`/api/publicaciones-globales?correo=${encodeURIComponent(correoActual)}`);
+                  
+                  if (respuestaReportes.ok) {
+                      const reportes = await respuestaReportes.json();
+                      reportes.forEach(reporte => {
+                          const textoUbicacion = reporte.Ubicacion || "";
+                          const matches = textoUbicacion.match(/(-?\d+\.\d+),\s*(-?\d+\.\d+)/);
+
+                          if (matches && matches.length >= 3) {
+                              const lat = parseFloat(matches[1]);
+                              const lng = parseFloat(matches[2]);
+
+                              if (!isNaN(lat) && !isNaN(lng)) {
+                                  todosLosElementos.push({
+                                      id_origen: reporte.id_origen,
+                                      id_publicacion: reporte.id_publicacion,
+                                      tipo_publicacion: reporte.tipo_publicacion,
+                                      nombre_tipo_reporte: reporte.nombre_tipo_reporte,
+                                      tipo: reporte.tipo_publicacion || 'reporte',
+                                      lat: lat,
+                                      lng: lng,
+                                      Ubicacion: reporte.Ubicacion,
+                                      img_reporte: reporte.img_reporte,
+                                      nombre: reporte.nombre_tipo_reporte
+                                  });
+                              }
+                          }
+                      });
+                  }
+              } catch (error) {
+                  console.error("Error al cargar reportes del servidor:", error);
+              }
+
+              renderizarMarcadores('todos');
+              cargarVeterinariasDeLaZona();
+          });
+
+          const botonesFiltro = document.querySelectorAll('.filtro-btn');
+          botonesFiltro.forEach(btn => {
+              btn.addEventListener('click', () => {
+                  botonesFiltro.forEach(b => b.classList.remove('active'));
+                  btn.classList.add('active');
+                  const categoria = btn.getAttribute('data-filtro');
+                  renderizarMarcadores(categoria);
+                  
+                  const textoBtnCercanas = document.getElementById('texto-btn-cercanas');
+                  if (categoria === 'veterinaria') textoBtnCercanas.textContent = "Ver vets cercanas";
+                  else if (categoria === 'reporte') textoBtnCercanas.textContent = "Ver reportes cercanos";
+                  else if (categoria === 'adopcion') textoBtnCercanas.textContent = "Ver adopciones cercanas";
+                  else if (categoria === 'evento') textoBtnCercanas.textContent = "Ver eventos cercanos";
+                  else textoBtnCercanas.textContent = "Ver más cercanas";
+
+                  if (panelCercanas.classList.contains('abierto')) {
+                      actualizarListaCercanas();
+                  }
+              });
+          });
+      });
+  </script>
+
+  <!-- Motor oculto de Google Translate -->
+  <div id="google_translate_element" style="display:none;"></div>
+  <script type="text/javascript">
+      function googleTranslateElementInit() {
+          new google.translate.TranslateElement({ pageLanguage: 'es', autoDisplay: false }, 'google_translate_element');
+      }
+  </script>
+  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+  <script>
+      document.addEventListener('DOMContentLoaded', () => {
+          const savedLang = localStorage.getItem('app_selected_lang');
+          if (savedLang && savedLang !== 'es') {
+              const interval = setInterval(() => {
+                  const googleCombo = document.querySelector('.goog-te-combo');
+                  if (googleCombo) {
+                      googleCombo.value = savedLang;
+                      googleCombo.dispatchEvent(new Event('change'));
+                      clearInterval(interval);
+                  }
+              }, 200);
+          }
+      });
+  </script>
+  <style>
+      .goog-te-banner-frame { display: none !important; }
+      body { top: 0 !important; }
+      .skiptranslate { display: none !important; }
+  </style>
+</body>
+</html>

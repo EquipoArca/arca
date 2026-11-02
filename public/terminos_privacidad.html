@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Condiciones y Privacidad - ARCA</title>
+    <link rel="stylesheet" href="style_home.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="dark-mode.css">
+    <script>
+    if (localStorage.getItem("modo_oscuro") === "true") {
+        document.body.classList.add("dark-mode");
+    }
+    </script>
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            width: 100%;
+            overflow-y: auto;
+            font-family: 'Itim', cursive, sans-serif;
+            background-color: #fcf9f5;
+            color: #5c4033;
+            margin: 0;
+        }
+
+        .main-content {
+           
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+           
+        }
+        
+        .legal-container {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 12px 40px rgba(92, 64, 51, 0.08);
+            border: 1px solid rgba(247, 214, 208, 0.6);
+            width: 90%;
+            max-width: 800px;
+        }
+
+        /* Pestañas de navegación interna */
+        .legal-tabs {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #fae1dd;
+            padding-bottom: 15px;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            font-family: 'Itim', cursive, sans-serif;
+            font-size: 18px;
+            font-weight: bold;
+            color: #8c7365;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn.active {
+            background-color: #e8a598;
+            color: white;
+            box-shadow: 0 4px 10px rgba(232, 165, 152, 0.3);
+        }
+
+        .legal-section {
+            display: none;
+        }
+
+        .legal-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 { 
+            color: #e8a598; 
+            font-size: 26px; 
+            margin-top: 0;
+            margin-bottom: 5px; 
+        }
+
+        .fecha-mod { 
+            font-size: 13px; 
+            color: #8c7365; 
+            margin-bottom: 25px; 
+            font-weight: 600;
+            display: inline-block;
+            background: rgba(232, 165, 152, 0.15);
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        h3 { 
+            color: #5c4033; 
+            font-size: 18px; 
+            margin-top: 25px; 
+            margin-bottom: 10px;
+            border-bottom: 1px solid #fae1dd; 
+            padding-bottom: 6px; 
+        }
+        
+        p, li { 
+            font-size: 15px; 
+            margin-bottom: 10px; 
+            color: #5c4033; 
+            line-height: 1.6;
+        }
+        
+        ul { padding-left: 20px; margin-bottom: 15px; }
+
+        .btn-volver { 
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 30px; 
+            padding: 10px 20px; 
+            background-color: #e8a598; 
+            color: white; 
+            text-decoration: none; 
+            border-radius: 12px; 
+            font-weight: 600; 
+            transition: background 0.2s;
+        }
+        .btn-volver:hover { background-color: #d1887b; }
+    </style>
+</head>
+<body>
+
+  <!-- Barra de Navegación Superior -->
+  <nav class="top-nav">
+    <div class="top-left">
+        <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu"></i>
+        <div class="mini-logo-circle">
+            <img src="logo.png" alt="Logo">
+        </div>
+        <span class="page-title" id="titulo-pagina">Legal</span>
+    </div>
+
+    <div class="search-bar">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="input-busqueda-nav" name="busqueda" placeholder="Busca algo" aria-label="Buscar">
+        <i class="fa-solid fa-microphone"></i>
+    </div>
+
+    <div class="top-right">
+        <div class="user-header-info">
+            <div class="user-profile-menu" id="user-profile-menu">
+                <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
+                    <img src="logo.png" id="user-avatar-img" alt="Perfil">
+                </div>
+                <div class="mini-menu-card" id="mini-menu-card">
+                    <div class="mini-menu-header"><span id="mini-menu-username">Usuario</span></div>
+                    <hr class="mini-menu-divider">
+                    <a href="configuracion.html" class="mini-menu-item btn-ajustes"><i class="fa-solid fa-gear"></i><span>Ajustes</span></a>
+                    <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini"><i class="fa-solid fa-right-from-bracket"></i><span>Cerrar sesión</span></a>
+                </div>
+            </div>
+            <div class="notif-circle">
+                <a href="notificaciones.html" aria-label="Notificaciones"><i class="fa-solid fa-bell"></i></a>
+            </div>
+        </div>
+    </div>
+  </nav>
+
+    <!-- Barra Lateral (Sidebar) -->
+    <aside class="sidebar" id="sidebar">
+        <div class="side-icons">
+            <a href="home.html" class="menu-fila"><i class="fa-solid fa-house"></i><span class="menu-text">Inicio</span></a>
+            <a href="perfil_usuario.html" class="menu-fila"><i class="fa-solid fa-circle-user"></i><span class="menu-text">Perfil</span></a>
+            <a href="guardados_usuario.html" class="menu-fila"><i class="fa-solid fa-bookmark"></i><span class="menu-text">Guardado</span></a>
+            <a href="mapa.html" class="menu-fila"><i class="fa-solid fa-location-dot"></i><span class="menu-text">Mapa</span></a>
+            <a href="configuracion.html" class="menu-fila"><i class="fa-solid fa-gear"></i><span class="menu-text">Ajustes</span></a>
+        </div>
+    </aside>
+
+    <!-- Contenido Principal -->
+    <main class="main-content">
+        <div class="legal-container">
+            
+            <!-- Pestañas para alternar -->
+            <div class="legal-tabs">
+                <button class="tab-btn active" onclick="switchTab('condiciones', event)">Condiciones de uso</button>
+                <button class="tab-btn" onclick="switchTab('politicas', event)">Políticas de Privacidad</button>
+            </div>
+
+            <!-- SECCIÓN 1: CONDICIONES DE USO -->
+            <div id="condiciones" class="legal-section active">
+    <h2>Condiciones de uso</h2>
+    <div class="fecha-mod">Última modificación: 23/09/2026</div>
+    
+    <p>Bienvenido a ARCA, una aplicación diseñada para conectar personas solidarias con animales que necesitan ayuda, y para facilitar la colaboración con fundaciones y refugios aliados.</p>
+    <p>Al instalar o usar ARCA, aceptas cumplir estas Condiciones de Uso. Si no estás de acuerdo con alguna parte, por favor no utilices la aplicación.</p>
+
+    <h3>Requisitos de Uso</h3>
+    <p>Para utilizar ARCA debes tener al menos 18 años o contar con la supervisión y autorización explícita de un padre, madre o tutor legal.</p>
+
+    <h3>Funcionalidad de ARCA</h3>
+    <p>ARCA ofrece servicios que incluyen:</p>
+    <ul>
+        <li>Reporte de animales en situación de riesgo o abandono.</li>
+        <li>Visualización de refugios y fundaciones cercanas.</li>
+        <li>Seguimiento de casos y adopciones.</li>
+        <li>Enlace a voluntariado y donaciones.</li>
+        <li>Acceso a contenido educativo como noticias.</li>
+    </ul>
+
+    <h3>Propiedad Intelectual y Contenido del Usuario</h3>
+    <p>Todos los derechos sobre el diseño, marca y código de la app pertenecen a ARCA. Queda prohibida su reproducción sin autorización.</p>
+    <p>Al subir fotos, descripciones o reportes sobre animales, garantizas que eres el autor o posees los derechos sobre dicho contenido y otorgas a ARCA una licencia gratuita y no exclusiva para difundirlo dentro de la plataforma con fines de rescate, adopción o concientización.</p>
+
+    <h3>Uso de datos y Privacidad</h3>
+    <p>Al usar ARCA aceptas la recolección de:</p>
+    <ul>
+        <li><strong>Ubicación en tiempo real:</strong> Para mostrar animales o refugios cercanos.</li>
+        <li><strong>Información personal básica:</strong> Nombre, correo electrónico y número de teléfono necesarios para crear una cuenta o contactarte.</li>
+        <li><strong>Contenido subido por el usuario:</strong> Fotos, datos y reportes compartidos voluntariamente.</li>
+    </ul>
+    <p>Toda la información será tratada bajo las máximas medidas de seguridad conforme a nuestra Política de Privacidad y no será compartida sin tu consentimiento.</p>
+
+    <h3>Responsabilidad del Usuario y Cancelación de Cuenta</h3>
+    <p>Al usar ARCA, te comprometes a:</p>
+    <ul>
+        <li>Proporcionar información veraz y confiable de forma responsable.</li>
+        <li>No realizar reportes falsos, engañosos o maliciosos.</li>
+        <li>Respetar la privacidad y normas de otros usuarios y fundaciones.</li>
+        <li>No hacer uso comercial no autorizado de la app.</li>
+    </ul>
+    <p>ARCA se reserva el derecho de suspender o eliminar de forma definitiva cualquier cuenta que infrinja estas normas o haga un uso malicioso de la plataforma.</p>
+
+    <h3>Colaboración con Fundaciones y Donaciones</h3>
+    <p>ARCA trabaja en alianza con fundaciones y refugios registrados. Cada organización es responsable de sus propios procesos de adopción, rescate y voluntariado. ARCA no actúa como intermediario legal ni procesa directamente pagos de donaciones salvo que se indique explícitamente.</p>
+
+    <h3>Limitación de responsabilidad</h3>
+    <p>ARCA y su equipo de trabajo no se hacen responsables por:</p>
+    <ul>
+        <li>Errores en los datos ingresados por el usuario o terceros.</li>
+        <li>Acuerdos, adopciones o interacciones entre usuarios y fundaciones fuera de la app.</li>
+        <li>Problemas técnicos o interrupciones fuera de nuestro control.</li>
+    </ul>
+
+    <h3>Modificaciones</h3>
+    <p>Nos reservamos el derecho de modificar estas condiciones en cualquier momento. Te notificaremos sobre cambios sustanciales a través de la aplicación.</p>
+
+    <h3>Contacto</h3>
+    <p>Para dudas o comentarios, escríbenos a: 
+        <a href="https://mail.google.com/mail/?view=cm&fs=1&to=arcaoficial0@gmail.com&su=Dudas%20o%20comentarios%20sobre%20ARCA&body=Hola%20equipo%20de%20ARCA,%20tengo%20la%20siguiente%20consulta:" 
+           target="_blank" 
+           style="color: #1128ff; text-decoration: underline; font-weight: bold;">
+            arcaoficial0@gmail.com
+        </a>
+    </p>
+
+    <a href="configuracion.html" class="btn-volver"><i class="fa-solid fa-arrow-left"></i> Volver a Ajustes</a>
+</div>
+
+         <div id="politicas" class="legal-section">
+    <h2>Política de Privacidad</h2>
+    <div class="fecha-mod">Última modificación: 24/09/2026</div>
+
+    <p>En ARCA nos tomamos muy en serio tu privacidad. En esta política te explicamos qué información recopilamos, cómo la usamos, cómo la protegemos y cuáles son tus derechos. Al usar ARCA, aceptas las prácticas descritas a continuación.</p>
+
+    <h3>Información que recopilamos</h3>
+    <p>Dependiendo de cómo uses ARCA, podemos recopilar la siguiente información:</p>
+    <ul>
+        <li><strong>Usuarios particulares:</strong> Nombre, correo electrónico, número de teléfono, foto de perfil y el contenido (fotos, descripciones y ubicaciones) de los reportes de animales que publiques voluntariamente.</li>
+        <li><strong>Fundaciones y Refugios aliados:</strong> Nombre legal de la organización, correo institucional, teléfono de contacto, documentos de verificación de identidad/registro, logo, descripción y publicaciones de campañas o animales en adopción.</li>
+    </ul>
+
+    <h3>¿Para qué usamos tu información?</h3>
+    <p>Utilizamos tus datos para:</p>
+    <ul>
+        <li>Mostrar animales, reportes, casos de rescate y refugios cercanos a tu ubicación.</li>
+        <li>Facilitar la comunicación directa entre usuarios, fundaciones y posibles adoptantes.</li>
+        <li>Enviar notificaciones sobre el estado de tus reportes, casos cercanos o actualizaciones importantes de la app.</li>
+        <li>Verificar la autenticidad de las fundaciones aliadas y prevenir reportes falsos o actividades fraudulentas.</li>
+        <li>Mejorar el funcionamiento técnico y la seguridad de la plataforma.</li>
+    </ul>
+    <p>Nunca venderemos tu información personal a terceros ni la usaremos para fines comerciales no autorizados.</p>
+
+    <h3>Uso de Cookies y Almacenamiento Local</h3>
+    <p>ARCA utiliza herramientas de almacenamiento local en tu navegador o dispositivo (como <code>localStorage</code> y <code>sessionStorage</code>) para recordar tus preferencias (por ejemplo, la activación del modo oscuro) y mantener tu sesión activa de manera segura. No utilizamos estas tecnologías para rastrear tu actividad externa ni con fines publicitarios.</p>
+
+    <h3>Permisos del dispositivo y Uso de la Ubicación</h3>
+    <p>Para ofrecer sus funciones principales, ARCA puede solicitar acceso a:</p>
+    <ul>
+        <li><strong>Ubicación en tiempo real:</strong> Se utiliza únicamente para ubicarte dentro del mapa, mostrarte refugios o reportes cercanos y contextualizar los casos de emergencia. Puedes activar o desactivar este permiso desde los ajustes de tu dispositivo.</li>
+        <li><strong>Cámara y Galería de fotos:</strong> Se utiliza exclusivamente para que puedas adjuntar fotografías al crear reportes de animales o actualizar tu imagen de perfil.</li>
+    </ul>
+
+    <h3>Visibilidad de Datos y Compartición con la Comunidad</h3>
+    <p>Para cumplir con la finalidad social de la plataforma, cuando realizas un reporte público de un animal en riesgo o inicias un proceso de adopción, ciertos datos (como las fotos, la ubicación del reporte y tu nombre o teléfono de contacto) serán visibles para otros usuarios y fundaciones aliadas con el único propósito de coordinar el rescate o la adopción.</p>
+
+    <h3>Proveedores de Servicios e Infraestructura de Terceros</h3>
+    <p>Para garantizar un funcionamiento seguro y estable, ARCA utiliza la infraestructura de <strong>Google Firebase</strong> para la gestión de bases de datos, almacenamiento de imágenes, autenticación de usuarios y hosting. Estos proveedores procesan y resguardan la información bajo estrictas normativas globales de privacidad y seguridad.</p>
+
+    <h3>Seguridad de la información</h3>
+    <p>Adoptamos medidas técnicas y organizativas para proteger tus datos personales, incluyendo:</p>
+    <ul>
+        <li>Cifrado de datos sensibles en tránsito y almacenamiento.</li>
+        <li>Acceso restringido a los paneles de administración y perfiles de fundaciones.</li>
+        <li>Autenticación segura para el inicio de sesión.</li>
+    </ul>
+    <p>Sin embargo, ningún sistema en internet es 100% infalible. En caso de detectarse alguna brecha de seguridad que afecte tu información, te notificaremos a la brevedad.</p>
+
+    <h3>Retención y Eliminación de Datos</h3>
+    <p>Conservaremos tu información personal únicamente mientras mantengas tu cuenta activa en ARCA. Si decides eliminar tu cuenta o solicitar la cancelación de tus datos, eliminaremos permanentemente tus registros personales en un plazo no mayor a 30 días hábiles, exceptuando la información que debamos conservar por mandato legal.</p>
+
+    <h3>Protección de Menores de Edad</h3>
+    <p>ARCA no recopila a sabiendas información de menores de 14 años sin la autorización expresa de sus padres o tutores legales. Si detectamos que un menor ha registrado datos sin consentimiento previa verificación, procederemos a la eliminación inmediata de dicha cuenta.</p>
+
+    <h3>Sus Derechos sobre sus Datos (Habeas Data)</h3>
+    <p>Tienes derecho a conocer, actualizar, corregir o solicitar la eliminación definitiva de tu cuenta y datos personales de nuestros registros en cualquier momento. Para ejercer este derecho, basta con enviar una solicitud a nuestro correo de contacto.</p>
+
+    <h3>Modificaciones a esta Política</h3>
+    <p>Nos reservamos el derecho de actualizar esta Política de Privacidad cuando sea necesario. Te notificaremos sobre cambios significativos a través de la aplicación.</p>
+
+    <h3>Contacto</h3>
+    <p>Si tienes preguntas sobre esta Política de Privacidad o deseas solicitar la eliminación de tus datos, escríbenos a: 
+        <a href="https://mail.google.com/mail/?view=cm&fs=1&to=arcaoficial0@gmail.com&su=Consulta%20sobre%20Politica%20de%20Privacidad&body=Hola%20equipo%20de%20ARCA,%20tengo%20la%20siguiente%20consulta:" 
+           target="_blank" 
+           style="color: #1128ff; text-decoration: underline; font-weight: bold;">
+            arcaoficial0@gmail.com
+        </a>
+    </p>
+
+    <a href="configuracion.html" class="btn-volver"><i class="fa-solid fa-arrow-left"></i> Volver a Ajustes</a>
+</div>
+</main>
+    
+
+    <!-- Script para alternar pestañas -->
+    <script>
+        function switchTab(tabId, event) {
+            document.querySelectorAll('.legal-section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+    </script>
+
+    <!-- Firebase y Scripts globales -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    <script src="script.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btnToggleMenu = document.getElementById('btn-toggle-menu');
+            const sidebar = document.getElementById('sidebar');
+            if (btnToggleMenu && sidebar) {
+                btnToggleMenu.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    sidebar.classList.toggle('sidebar-abierta');
+                });
+            }
+        });
+    </script>
+</body>
+</html>
