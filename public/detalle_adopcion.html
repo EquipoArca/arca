@@ -445,6 +445,25 @@
         .modal-btn-cancelar:hover {
             background: #e2e2e2;
         }
+        .badge-fundacion-verificada {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #fff3cc;
+    border: 1px solid #fce0a6;
+    color: #705814;
+    padding: 2px 8px;
+    border-radius: 50px;
+    font-size: 12px;
+    font-weight: 400;
+    margin-left: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+}
+
+.badge-fundacion-verificada i {
+    color: #e09f1f;
+    font-size: 11px;
+}
     </style>
 </head>
 <body>
@@ -741,12 +760,17 @@
               }
               document.getElementById('lbl-contacto').innerHTML = contactoHTML;
 
-const nombreUsuario = adopcion.nombre_usuario || 'usuario';
-              const autorTextoElemento = document.getElementById('nombre-autor-texto');
+                const nombreUsuario = adopcion.nombre_usuario || 'usuario';
+                const autorTextoElemento = document.getElementById('nombre-autor-texto');
               
-              // Verificamos si el usuario es fundación para aclararlo en la interfaz
+              // Verificamos si es una cuenta de fundación para mostrar el chulito verificado
               if (adopcion.tipo_usuario === 'fundacion' || (nombreUsuario && nombreUsuario.toLowerCase().includes('fundacion'))) {
-                  autorTextoElemento.innerHTML = `@${nombreUsuario} <span style="font-size: 12px; background: #ffe5dd; color: #d9534f; padding: 2px 8px; border-radius: 10px; margin-left: 5px;">Fundación Aliada 🐾</span>`;
+                  autorTextoElemento.innerHTML = `
+                      @${nombreUsuario} 
+                      <span class="badge-fundacion-verificada">
+                          <i class="fa-solid fa-circle-check"></i> Fundación Verificada
+                      </span>
+                  `;
               } else {
                   autorTextoElemento.textContent = `@${nombreUsuario}`;
               }

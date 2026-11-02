@@ -159,8 +159,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const resultado = await response.json();
                 if (response.ok) {
-                    alert(resultado.mensaje || "¡Operación realizada con éxito!");
-                    window.location.href = "mis_publicaciones.html";
+                    mostrarAlertaArca(" Adopción publicada con éxito",() => {
+                    window.location.href = 'home.html';
+                });
                 } else {
                     alert("Error: " + (resultado.error || resultado.mensaje || "No se pudo procesar."));
                 }
