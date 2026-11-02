@@ -24,7 +24,6 @@
     }
 
     .main-content {
-        /* Cambiamos a padding superior en lugar de margin-top para respetar el flujo */
         padding: 30px 20px;
         min-height: calc(100vh - 70px);
         display: flex;
@@ -256,17 +255,9 @@
             white-space: nowrap;
         }
 
-        .btn-contacto-link.whatsapp {
-            color: #25d366;
-        }
-
-        .btn-contacto-link.correo {
-            color: #007bff;
-        }
-
-        .btn-contacto-link:hover {
-            text-decoration: underline;
-        }
+        .btn-contacto-link.whatsapp { color: #25d366; }
+        .btn-contacto-link.correo { color: #007bff; }
+        .btn-contacto-link:hover { text-decoration: underline; }
 
         .btn-copiar-mini {
             background: #fff;
@@ -284,9 +275,7 @@
             font-family: 'Itim', cursive, sans-serif;
         }
 
-        .btn-copiar-mini:hover {
-            background: #ffe5dd;
-        }
+        .btn-copiar-mini:hover { background: #ffe5dd; }
 
         .btn-ver-mapa-chiquito {
             color: #e06d53;
@@ -363,18 +352,14 @@
             font-family: 'Itim', cursive, sans-serif;
         }
 
-        .detalle-btn-accion:hover {
-            background: #ffe5dd;
-        }
+        .detalle-btn-accion:hover { background: #ffe5dd; }
 
         .detalle-btn-editar {
             background: #fca38d;
             color: #fff;
             border: none;
         }
-        .detalle-btn-editar:hover {
-            background: #eb917b;
-        }
+        .detalle-btn-editar:hover { background: #eb917b; }
 
         .modal-arca-overlay {
             position: fixed;
@@ -400,12 +385,6 @@
             box-shadow: 0 15px 35px rgba(0,0,0,0.15);
             border: 2px solid #fce8e6;
             font-family: 'Itim', cursive, sans-serif;
-            animation: modalScale 0.2s ease-in-out;
-        }
-
-        @keyframes modalScale {
-            from { transform: scale(0.9); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
         }
 
         .modal-huella-icono {
@@ -417,59 +396,23 @@
             gap: 8px;
         }
 
-        .modal-arca-box h3 {
-            margin: 0 0 10px 0;
-            color: #2b2b2b;
-            font-size: 20px;
-        }
-
-        .modal-arca-box p {
-            color: #555;
-            font-size: 15px;
-            line-height: 1.4;
-            margin-bottom: 20px;
-        }
-
-        .modal-botones-fila {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
-
+        .modal-arca-box h3 { margin: 0 0 10px 0; color: #2b2b2b; font-size: 20px; }
+        .modal-arca-box p { color: #555; font-size: 15px; line-height: 1.4; margin-bottom: 20px; }
+        .modal-botones-fila { display: flex; gap: 10px; justify-content: center; }
+        
         .modal-btn-aceptar {
-            background: #fca38d;
-            color: #fff;
-            border: none;
-            padding: 10px 24px;
-            border-radius: 18px;
-            font-weight: bold;
-            font-size: 15px;
-            cursor: pointer;
-            font-family: 'Itim', cursive, sans-serif;
-            box-shadow: 0 4px 12px rgba(252, 163, 141, 0.4);
-            transition: background 0.2s;
+            background: #fca38d; color: #fff; border: none; padding: 10px 24px;
+            border-radius: 18px; font-weight: bold; font-size: 15px; cursor: pointer;
+            font-family: 'Itim', cursive, sans-serif; box-shadow: 0 4px 12px rgba(252, 163, 141, 0.4);
         }
-
-        .modal-btn-aceptar:hover {
-            background: #eb917b;
-        }
+        .modal-btn-aceptar:hover { background: #eb917b; }
 
         .modal-btn-cancelar {
-            background: #f1f1f1;
-            color: #555;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 18px;
-            font-weight: bold;
-            font-size: 15px;
-            cursor: pointer;
+            background: #f1f1f1; color: #555; border: none; padding: 10px 20px;
+            border-radius: 18px; font-weight: bold; font-size: 15px; cursor: pointer;
             font-family: 'Itim', cursive, sans-serif;
-            transition: background 0.2s;
         }
-
-        .modal-btn-cancelar:hover {
-            background: #e2e2e2;
-        }
+        .modal-btn-cancelar:hover { background: #e2e2e2; }
     </style>
 </head>
 <body>
@@ -631,6 +574,9 @@
               } else if (origen === 'mis-reportes') {
                   btnVolver.innerHTML = `<i class="fa-solid fa-arrow-left"></i> Volver a mis reportes`;
                   btnVolver.href = 'mis_reportes.html';
+              } else if (origen === 'fundacion') {
+                  btnVolver.innerHTML = `<i class="fa-solid fa-arrow-left"></i> Volver a reportes`;
+                  btnVolver.href = 'reportes_fundacion.html';
               } else {
                   btnVolver.innerHTML = `<i class="fa-solid fa-arrow-left"></i> Volver a novedades`;
                   btnVolver.href = 'novedades.html';
@@ -705,6 +651,26 @@
           }
           cerrarModalArca();
       });
+
+      async function cambiarEstadoDesdeDetalle(idReporte, nuevoEstado) {
+          try {
+              const res = await fetch(`/api/reportes/${idReporte}/estado`, {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ estado: nuevoEstado })
+              });
+
+              if (res.ok) {
+                  alert(`¡Estado actualizado a "${nuevoEstado}" con éxito!`);
+                  location.reload();
+              } else {
+                  alert("No se pudo actualizar el estado del reporte.");
+              }
+          } catch (err) {
+              console.error("Error al actualizar estado:", err);
+              alert("Ocurrió un error al conectar con el servidor.");
+          }
+      }
 
       async function cargarDetalleReporte() {
           const params = new URLSearchParams(window.location.search);
@@ -836,132 +802,155 @@
               if (linkAutor) {
                   linkAutor.href = `perfil_publico.html?user=${encodeURIComponent(nombreUsuario)}`;
               }
-// --- VERIFICACIÓN DE AUTOR ROBUSTA POR ID Y CORREO ---
-                const contenedorBoton = document.getElementById('contenedor-novedades') || document.getElementById('contenedor-boton-accion');
 
-                firebase.auth().onAuthStateChanged(async (user) => {
-                    const correoLogueado = user ? user.email : (localStorage.getItem('correo_usuario') || localStorage.getItem('correo'));
-                    
-                    if (!correoLogueado) {
-                        contenedorBoton.innerHTML = `
-                            <a href="login.html" class="detalle-btn-accion">
-                                <i class="fa-regular fa-bookmark"></i> Inicia sesión para guardar
-                            </a>
-                        `;
-                        return;
-                    }
+              // --- VERIFICACIÓN DE ROL (FUNDACIÓN VS USUARIO NORMAL) ---
+              const contenedorBoton = document.getElementById('contenedor-boton-accion');
+              const tipoUsuario = localStorage.getItem('tipo_usuario') || 'usuario';
+              const urlParamsGet = new URLSearchParams(window.location.search);
+              const origenParam = urlParamsGet.get('origen');
 
-                    try {
-                        // 1. Consultamos el ID del usuario logueado actualmente en la base de datos
-                        const resUser = await fetch(`/api/obtener-usuario?correo=${encodeURIComponent(correoLogueado)}`);
-                        if (!resUser.ok) throw new Error("No se pudo obtener el usuario actual");
-                        const datosUsuarioLogueado = await resUser.json();
-                        const idUsuarioLogueado = Number(datosUsuarioLogueado.id_usuarios);
+              firebase.auth().onAuthStateChanged(async (user) => {
+                  const correoLogueado = user ? user.email : (localStorage.getItem('correo_usuario') || localStorage.getItem('correo'));
+                  
+                  if (tipoUsuario === 'fundacion' || origenParam === 'fundacion') {
+                      // SI ES FUNDACIÓN: Mostramos el estado actual y los 3 botones para gestionar
+                      const estadoActual = reporteData.estado || 'Sin atender';
+                      
+                      contenedorBoton.innerHTML = `
+                          <div style="display: flex; flex-direction: column; gap: 8px; width: 100%; min-width: 240px;">
+                              <div style="font-size: 13px; font-weight: bold; color: #442c20; display: flex; align-items: center; justify-content: space-between;">
+                                  <span>Estado:</span>
+                                  <span style="background: #fffde8; padding: 2px 10px; border-radius: 10px; border: 1px solid #f0e6b8; color: #8a6d3b;">
+                                      ${estadoActual}
+                                  </span>
+                              </div>
+                              <button class="detalle-btn-accion" onclick="cambiarEstadoDesdeDetalle('${reporteData.id_reporte || reporteId}', 'En proceso')" style="background: #fffde8; border-color: #f0e6b8; justify-content: center; font-size: 13px; padding: 8px;">
+                                  Marcar como "En proceso"
+                              </button>
+                              <button class="detalle-btn-accion" onclick="cambiarEstadoDesdeDetalle('${reporteData.id_reporte || reporteId}', 'Derivado')" style="background: #fffde8; border-color: #f0e6b8; justify-content: center; font-size: 13px; padding: 8px;">
+                                  Derivar a otra fundación / Vet
+                              </button>
+                              <button class="detalle-btn-accion" onclick="cambiarEstadoDesdeDetalle('${reporteData.id_reporte || reporteId}', 'Resuelto')" style="background: #ebf5d7; border-color: #d8ebd0; color: #4a5a1c; justify-content: center; font-size: 13px; padding: 8px;">
+                                  Marcar como resuelto
+                              </button>
+                          </div>
+                      `;
+                      return;
+                  }
 
-                        // 2. Obtenemos el ID del creador del reporte (viene en reporteData.id_usuarios)
-                        const idCreadorReporte = Number(reporteData.id_usuarios);
+                  if (!correoLogueado) {
+                      contenedorBoton.innerHTML = `
+                          <a href="login.html" class="detalle-btn-accion">
+                              <i class="fa-regular fa-bookmark"></i> Inicia sesión para guardar
+                          </a>
+                      `;
+                      return;
+                  }
 
-                        // Comparamos directamente por ID de base de datos (¡Infalible!)
-                        let esDueño = (idUsuarioLogueado && idCreadorReporte && idUsuarioLogueado === idCreadorReporte);
+                  try {
+                      const resUser = await fetch(`/api/obtener-usuario?correo=${encodeURIComponent(correoLogueado)}`);
+                      if (!resUser.ok) throw new Error("No se pudo obtener el usuario actual");
+                      const datosUsuarioLogueado = await resUser.json();
+                      const idUsuarioLogueado = Number(datosUsuarioLogueado.id_usuarios);
+                      const idCreadorReporte = Number(reporteData.id_usuarios);
 
-                        // Respaldo por si el reporte no traía el id_usuarios pero sí el correo
-                        if (!esDueño && reporteData.correo_usuario && correoLogueado) {
-                            if (reporteData.correo_usuario.toLowerCase().trim() === correoLogueado.toLowerCase().trim()) {
-                                esDueño = true;
-                            }
-                        }
+                      let esDueño = (idUsuarioLogueado && idCreadorReporte && idUsuarioLogueado === idCreadorReporte);
 
-                        if (esDueño) {
-                            // SI ES EL DUEÑO: Botones Editar y Eliminar
-                            contenedorBoton.innerHTML = `
-                                <div style="display: flex; gap: 8px;">
-                                    <a href="formularior.html?editar=${reporteData.id_reporte || reporteId}" class="detalle-btn-accion detalle-btn-editar">
-                                        <i class="fa-solid fa-pen-to-square"></i> Editar
-                                    </a>
-                                    <button class="detalle-btn-accion" id="btn-eliminar-reporte" style="background: #ffe5dd; color: #d9534f; border-color: #f4c2c4;">
-                                        <i class="fa-solid fa-trash"></i> Eliminar
-                                    </button>
-                                </div>
-                            `;
+                      if (!esDueño && reporteData.correo_usuario && correoLogueado) {
+                          if (reporteData.correo_usuario.toLowerCase().trim() === correoLogueado.toLowerCase().trim()) {
+                              esDueño = true;
+                          }
+                      }
 
-                            document.getElementById('btn-eliminar-reporte').addEventListener('click', async () => {
-                                if (confirm("¿Estás seguro de que deseas eliminar este reporte permanentemente?")) {
-                                    try {
-                                        const idAResolver = reporteData.id_reporte || reporteId;
-                                        const resDel = await fetch(`/api/reportes/${idAResolver}`, { method: 'DELETE' });
-                                        if (resDel.ok) {
-                                            alert("Reporte eliminado correctamente.");
-                                            window.location.href = 'novedades.html';
-                                        } else {
-                                            alert("No se pudo eliminar el reporte.");
-                                        }
-                                    } catch (err) {
-                                        console.error("Error al eliminar:", err);
-                                    }
-                                }
-                            });
+                      if (esDueño) {
+                          contenedorBoton.innerHTML = `
+                              <div style="display: flex; gap: 8px;">
+                                  <a href="formularior.html?editar=${reporteData.id_reporte || reporteId}" class="detalle-btn-accion detalle-btn-editar">
+                                      <i class="fa-solid fa-pen-to-square"></i> Editar
+                                  </a>
+                                  <button class="detalle-btn-accion" id="btn-eliminar-reporte" style="background: #ffe5dd; color: #d9534f; border-color: #f4c2c4;">
+                                      <i class="fa-solid fa-trash"></i> Eliminar
+                                  </button>
+                              </div>
+                          `;
 
-                        } else {
-                            // SI NO ES EL DUEÑO: Lógica de guardado normal
-                            let pubEncontrada = publicaciones.find(p => 
-                                (p.tipo_publicacion === 'reporte' && Number(p.id_origen) === Number(reporteId)) ||
-                                Number(p.id_publicacion) === Number(reporteId) ||
-                                Number(p.id_reporte) === Number(reporteId)
-                            );
-                            
-                            const idPublicacionGlobal = pubEncontrada ? pubEncontrada.id_publicacion : reporteId;
-                            const resGuards = await fetch(`/api/guardados/ids/${encodeURIComponent(correoLogueado)}`);
-                            const idsGuardados = await resGuards.json();
-                            const estaGuardada = idsGuardados.map(Number).includes(Number(idPublicacionGlobal));
+                          document.getElementById('btn-eliminar-reporte').addEventListener('click', async () => {
+                              if (confirm("¿Estás seguro de que deseas eliminar este reporte permanentemente?")) {
+                                  try {
+                                      const idAResolver = reporteData.id_reporte || reporteId;
+                                      const resDel = await fetch(`/api/reportes/${idAResolver}`, { method: 'DELETE' });
+                                      if (resDel.ok) {
+                                          alert("Reporte eliminado correctamente.");
+                                          window.location.href = 'novedades.html';
+                                      } else {
+                                          alert("No se pudo eliminar el reporte.");
+                                      }
+                                  } catch (err) {
+                                      console.error("Error al eliminar:", err);
+                                  }
+                              }
+                          });
 
-                            if (estaGuardada) {
-                                contenedorBoton.innerHTML = `
-                                    <button class="detalle-btn-accion" id="btn-accion-guardado" style="background: #ffe5dd; color: #d9534f; border-color: #f4c2c4;">
-                                        <i class="fa-solid fa-bookmark"></i> Publicación guardada
-                                    </button>
-                                `;
-                                document.getElementById('btn-accion-guardado').addEventListener('click', async () => {
-                                    if (confirm("¿Deseas quitar esta publicación de tus guardados?")) {
-                                        const quitRes = await fetch('/api/quitar-guardado', {
-                                            method: 'POST',
-                                            headers: { 'Content-Type': 'application/json' },
-                                            body: JSON.stringify({ correo: correoLogueado, id_publicacion: Number(idPublicacionGlobal) })
-                                        });
-                                        if (quitRes.ok) {
-                                            alert("Publicación eliminada de guardados.");
-                                            location.reload();
-                                        }
-                                    }
-                                });
-                            } else {
-                                contenedorBoton.innerHTML = `
-                                    <button class="detalle-btn-accion" id="btn-accion-guardado">
-                                        <i class="fa-regular fa-bookmark"></i> Guardar publicación
-                                    </button>
-                                `;
-                                document.getElementById('btn-accion-guardado').addEventListener('click', async () => {
-                                    const saveRes = await fetch('/api/guardar-publicacion', {
-                                        method: 'POST',
-                                        headers: { 'Content-Type': 'application/json' },
-                                        body: JSON.stringify({ correo: correoLogueado, id_publicacion: Number(idPublicacionGlobal) })
-                                    });
-                                    if (saveRes.ok) {
-                                        alert("¡Publicación guardada con éxito!");
-                                        location.reload();
-                                    }
-                                });
-                            }
-                        }
-                    } catch (e) {
-                        console.error("Error al gestionar la validación del propietario:", e);
-                    }
-                });
+                      } else {
+                          let pubEncontrada = publicaciones.find(p => 
+                              (p.tipo_publicacion === 'reporte' && Number(p.id_origen) === Number(reporteId)) ||
+                              Number(p.id_publicacion) === Number(reporteId) ||
+                              Number(p.id_reporte) === Number(reporteId)
+                          );
+                          
+                          const idPublicacionGlobal = pubEncontrada ? pubEncontrada.id_publicacion : reporteId;
+                          const resGuards = await fetch(`/api/guardados/ids/${encodeURIComponent(correoLogueado)}`);
+                          const idsGuardados = await resGuards.json();
+                          const estaGuardada = idsGuardados.map(Number).includes(Number(idPublicacionGlobal));
 
-            } catch (error) {
-                console.error("Error al cargar detalle:", error);
-                alert("Hubo un error al cargar los detalles del reporte.");
-            }
-        }
+                          if (estaGuardada) {
+                              contenedorBoton.innerHTML = `
+                                  <button class="detalle-btn-accion" id="btn-accion-guardado" style="background: #ffe5dd; color: #d9534f; border-color: #f4c2c4;">
+                                      <i class="fa-solid fa-bookmark"></i> Publicación guardada
+                                  </button>
+                              `;
+                              document.getElementById('btn-accion-guardado').addEventListener('click', async () => {
+                                  if (confirm("¿Deseas quitar esta publicación de tus guardados?")) {
+                                      const quitRes = await fetch('/api/quitar-guardado', {
+                                          method: 'POST',
+                                          headers: { 'Content-Type': 'application/json' },
+                                          body: JSON.stringify({ correo: correoLogueado, id_publicacion: Number(idPublicacionGlobal) })
+                                      });
+                                      if (quitRes.ok) {
+                                          alert("Publicación eliminada de guardados.");
+                                          location.reload();
+                                      }
+                                  }
+                              });
+                          } else {
+                              contenedorBoton.innerHTML = `
+                                  <button class="detalle-btn-accion" id="btn-accion-guardado">
+                                      <i class="fa-regular fa-bookmark"></i> Guardar publicación
+                                  </button>
+                              `;
+                              document.getElementById('btn-accion-guardado').addEventListener('click', async () => {
+                                  const saveRes = await fetch('/api/guardar-publicacion', {
+                                      method: 'POST',
+                                      headers: { 'Content-Type': 'application/json' },
+                                      body: JSON.stringify({ correo: correoLogueado, id_publicacion: Number(idPublicacionGlobal) })
+                                  });
+                                  if (saveRes.ok) {
+                                      alert("¡Publicación guardada con éxito!");
+                                      location.reload();
+                                  }
+                              });
+                          }
+                      }
+                  } catch (e) {
+                      console.error("Error al gestionar la validación del propietario:", e);
+                  }
+              });
+
+          } catch (error) {
+              console.error("Error al cargar detalle:", error);
+              alert("Hubo un error al cargar los detalles del reporte.");
+          }
+      }
   </script>
 </body>
 </html>

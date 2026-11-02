@@ -16,79 +16,6 @@
         document.body.classList.add("dark-mode");
     }
     </script>
-    <style>
-        /* Estilos específicos para la vista de Fundación y cambio de estado */
-        .badge-estado {
-            display: inline-block;
-            padding: 4px 14px;
-            border-radius: 14px;
-            font-size: 13px;
-            font-weight: bold;
-            font-family: 'Itim', cursive, sans-serif;
-            margin-left: 10px;
-        }
-
-        .estado-sin-atender {
-            background-color: #ffe5e5;
-            color: #d9534f;
-            border: 1px solid #f9d5d3;
-        }
-
-        .estado-en-proceso {
-            background-color: #fffde8;
-            color: #8a6d3b;
-            border: 1px solid #f0e6b8;
-        }
-
-        .estado-resuelto {
-            background-color: #ebf5d7;
-            color: #4a5a1c;
-            border: 1px solid #d8ebd0;
-        }
-
-        /* Botones de acción redondeados estilo ARCA para las Fundaciones */
-        .contenedor-acciones-fundacion {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-top: 15px;
-            width: 100%;
-        }
-
-        .btn-accion-fundacion {
-            background-color: #fffde8;
-            color: #2b2b2b;
-            border: 1.5px solid #f0e6b8;
-            padding: 12px 24px;
-            border-radius: 26px;
-            cursor: pointer;
-            font-family: 'Itim', cursive, sans-serif;
-            font-size: 16px;
-            font-weight: 400;
-            box-shadow: 0 4px 12px rgba(92, 64, 51, 0.06);
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            text-align: center;
-            width: 100%;
-        }
-
-        .btn-accion-fundacion:hover {
-            transform: translateY(-2px) scale(1.02);
-            background-color: #ffffff;
-            box-shadow: 0 8px 20px rgba(229, 115, 115, 0.15);
-        }
-
-        .btn-accion-fundacion.active-proceso {
-            background-color: #fff3cd;
-            border-color: #ffeeba;
-            color: #856404;
-        }
-
-        .btn-accion-fundacion.active-resuelto {
-            background-color: #d4edda;
-            border-color: #c3e6cb;
-            color: #155724;
-        }
-    </style>
 </head>
 <body>
 
@@ -112,7 +39,7 @@
         <div class="mini-logo-circle">
             <img src="logo.png" alt="Logo">
         </div>
-        <span class="page-title" id="titulo-pagina">Reportes de la Comunidad</span>
+        <span class="page-title" id="titulo-pagina">Reportes Recientes de la Comunidad</span>
     </div>
 
     <div class="search-bar">
@@ -177,18 +104,9 @@
       </div>
   </aside>
 
-  <!-- Contenido Principal -->
-  <main class="main-content">
-      <aside class="panel-filtros">
-          <div class="titulo-filtro">Filtros</div>
-          <button class="btn-filtro active" onclick="filtrarEstado('todos')">Todos los reportes</button>
-          <button class="btn-filtro" onclick="filtrarEstado('sin_atender')">Sin atender</button>
-          <button class="btn-filtro" onclick="filtrarEstado('en_proceso')">En proceso</button>
-          <button class="btn-filtro" onclick="filtrarEstado('resuelto')">Resueltos</button>
-      </aside>
-
-      <section class="feed-novedades" id="contenedor-novedades-fundacion">
-          <!-- Las tarjetas de reportes se cargarán dinámicamente -->
+  <!-- Contenido Principal (Sin barra de filtros lateral para que luzca limpio) -->
+  <main class="main-content" style="justify-content: center; padding: 30px;">
+      <section class="feed-novedades" id="contenedor-novedades-fundacion" style="width: 100%; max-width: 950px;">
           <article class="tarjeta-reporte">
               <div class="header-tarjeta-reporte">
                   <div class="badge-titulo-reporte">Cargando reportes recientes...</div>
@@ -196,32 +114,6 @@
           </article>
       </section>
   </main>
-
-  <!-- Modal para gestionar el Estado del Reporte por parte de la Fundación -->
-  <div id="modalGestionEstado" class="modal-arca-overlay">
-      <div class="modal-arca-box">
-          <div class="modal-huella-icono">
-              <i class="fa-solid fa-paw"></i>
-          </div>
-          <h3>Gestión del Reporte</h3>
-          <p>Selecciona una acción para actualizar el estado del caso:</p>
-          
-          <div class="contenedor-acciones-fundacion">
-              <button class="btn-accion-fundacion" onclick="cambiarEstadoReporte('En proceso')">
-                  Marcar como "En proceso"
-              </button>
-              <button class="btn-accion-fundacion" onclick="cambiarEstadoReporte('Derivado')">
-                  Derivar a otra fundación / Veterinario
-              </button>
-              <button class="btn-accion-fundacion" onclick="cambiarEstadoReporte('Resuelto')">
-                  Marcar como resuelto
-              </button>
-          </div>
-          
-          <br>
-          <button onclick="cerrarModalGestion()" class="modal-btn-cancelar">Cerrar</button>
-      </div>
-  </div>
 
   <!-- Firebase y Scripts Globales -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -231,9 +123,6 @@
   <script src="script.js"></script>
 
   <script>
-      let reportesCargados = [];
-      let reporteSeleccionadoId = null;
-
       document.addEventListener('DOMContentLoaded', () => {
           const btnToggleMenu = document.getElementById('btn-toggle-menu');
           const sidebar = document.getElementById('sidebar');
@@ -255,115 +144,77 @@
               if (!res.ok) throw new Error("Error al consultar reportes");
               
               const publicaciones = await res.json();
-              reportesCargados = publicaciones.filter(p => p.tipo_publicacion === 'reporte' || p.Nombre_tipo_reporte);
+              const reportes = publicaciones.filter(p => p.tipo_publicacion === 'reporte' || p.Nombre_tipo_reporte);
 
-              renderizarTarjetas(reportesCargados);
+              if (!reportes || reportes.length === 0) {
+                  contenedor.innerHTML = `<p style="text-align: center; color: #555;">No hay reportes disponibles.</p>`;
+                  return;
+              }
+
+              contenedor.innerHTML = reportes.map(item => {
+                  const idRep = item.id_reporte || item.id_origen || item.id_publicacion;
+                  return `
+                      <article class="tarjeta-prototipo-estilo" style="margin-bottom: 25px;">
+                          <div class="proto-card-top">
+                              <div class="proto-titulo-pill">
+                                  UBICACIÓN: <span style="font-size: 16px; font-weight: normal;">${item.Ubicacion || item.ubicacion || 'San Cristóbal'}</span>
+                              </div>
+                              <span class="proto-fecha">${item.Fecha_reporte ? item.Fecha_reporte.split('T')[0] : 'Reciente'}</span>
+                          </div>
+                          
+                          <div class="proto-card-body">
+                              <div class="proto-img-wrapper">
+                                  <img src="${item.img_reporte || 'logo.png'}" alt="Foto reporte">
+                              </div>
+                              
+                              <div class="proto-content-right">
+                                  <span class="proto-pill-tipo">TIPO: ${item.Nombre_tipo_reporte || item.nombre_tipo_reporte || 'Reporte General'}</span>
+                                  
+                                  <div class="proto-info-extra">
+                                      <span class="proto-autor">REPORTADO POR: <a href="perfil_publico.html?user=${encodeURIComponent(item.nombre_usuario || 'usuario')}">@${item.nombre_usuario || 'usuario'}</a></span>
+                                  </div>
+                                  
+                                  <div class="proto-footer-row">
+                                      <a href="detalle_reporte.html?id=${idRep}&origen=fundacion" class="proto-btn-detalles" style="text-decoration: none;">
+                                          Ver detalles
+                                      </a>
+                                  </div>
+                              </div>
+                          </div>
+                      </article>
+                  `;
+              }).join('');
           } catch (error) {
               console.error(error);
               contenedor.innerHTML = `<p style="text-align: center; color: #555;">No se pudieron cargar los reportes en este momento.</p>`;
           }
       }
-
-      function renderizarTarjetas(lista) {
-          const contenedor = document.getElementById('contenedor-novedades-fundacion');
-          if (!lista || lista.length === 0) {
-              contenedor.innerHTML = `<p style="text-align: center; color: #555;">No hay reportes disponibles.</p>`;
-              return;
-          }
-
-          contenedor.innerHTML = lista.map(item => {
-              const idRep = item.id_reporte || item.id_origen || item.id_publicacion;
-              const estado = item.estado || 'Sin atender';
-              
-              let claseBadge = 'estado-sin-atender';
-              if (estado === 'En proceso') claseBadge = 'estado-en-proceso';
-              if (estado === 'Resuelto') claseBadge = 'estado-resuelto';
-
-              return `
-                  <article class="tarjeta-prototipo-estilo">
-                      <div class="proto-card-top">
-                          <div class="proto-titulo-pill">
-                              UBICACIÓN: <span style="font-size: 16px; font-weight: normal;">${item.Ubicacion || item.ubicacion || 'San Cristóbal'}</span>
-                          </div>
-                          <span class="proto-fecha">${item.Fecha_reporte ? item.Fecha_reporte.split('T')[0] : 'Reciente'}</span>
-                      </div>
-                      
-                      <div class="proto-card-body">
-                          <div class="proto-img-wrapper">
-                              <img src="${item.img_reporte || 'logo.png'}" alt="Foto reporte">
-                          </div>
-                          
-                          <div class="proto-content-right">
-                              <div style="display: flex; align-items: center; justify-content: space-between;">
-                                  <span class="proto-pill-tipo">TIPO: ${item.Nombre_tipo_reporte || item.nombre_tipo_reporte || 'Reporte General'}</span>
-                                  <span class="badge-estado ${claseBadge}">${estado}</span>
-                              </div>
-                              
-                              <div class="proto-info-extra">
-                                  <span class="proto-autor">REPORTADO POR: <a href="perfil_publico.html?user=${encodeURIComponent(item.nombre_usuario || 'usuario')}">@${item.nombre_usuario || 'usuario'}</a></span>
-                              </div>
-                              
-                              <div class="proto-footer-row" style="gap: 10px;">
-                                  <button onclick="abrirModalGestion(${idRep})" class="proto-btn-detalles" style="background-color: #fbc2c4; border-color: #f9a3a6;">
-                                      Gestionar Estado
-                                  </button>
-                                  <a href="detalle_reporte.html?id=${idRep}&origen=fundacion" class="proto-btn-detalles" style="text-decoration: none;">
-                                      Ver detalles
-                                  </a>
-                              </div>
-                          </div>
-                      </div>
-                  </article>
-              `;
-          }).join('');
-      }
-
-      function abrirModalGestion(id) {
-          reporteSeleccionadoId = id;
-          document.getElementById('modalGestionEstado').style.display = 'flex';
-      }
-
-      function cerrarModalGestion() {
-          document.getElementById('modalGestionEstado').style.display = 'none';
-      }
-
-      async function cambiarEstadoReporte(nuevoEstado) {
-          if (!reporteSeleccionadoId) return;
-
-          try {
-              const res = await fetch(`/api/reportes/${reporteSeleccionadoId}/estado`, {
-                  method: 'PUT',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ estado: nuevoEstado })
-              });
-
-              if (res.ok) {
-                  alert(`¡Estado del reporte actualizado a "${nuevoEstado}"!`);
-                  cerrarModalGestion();
-                  cargarReportesFundacion();
-              } else {
-                  alert("No se pudo actualizar el estado.");
-              }
-          } catch (err) {
-              console.error(err);
-              alert("Ocurrió un error al intentar cambiar el estado.");
-          }
-      }
-
-      function filtrarEstado(criterio) {
-          document.querySelectorAll('.panel-filtros .btn-filtro').forEach(b => b.classList.remove('active'));
-          event.target.classList.add('active');
-
-          if (criterio === 'todos') {
-              renderizarTarjetas(reportesCargados);
-          } else if (criterio === 'sin_atender') {
-              renderizarTarjetas(reportesCargados.filter(r => !r.estado || r.estado === 'Sin atender'));
-          } else if (criterio === 'en_proceso') {
-              renderizarTarjetas(reportesCargados.filter(r => r.estado === 'En proceso'));
-          } else if (criterio === 'resuelto') {
-              renderizarTarjetas(reportesCargados.filter(r => r.estado === 'Resuelto'));
-          }
-      }
   </script>
+
+  <style>
+      .tarjeta-prototipo-estilo {
+          background: #fde8e5; 
+          border-radius: 24px;
+          padding: 24px;
+          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+          border: 2px solid #f9d5d3;
+          width: 100%;
+          font-family: 'Itim', cursive, sans-serif;
+          box-sizing: border-box;
+      }
+      .proto-card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+      .proto-titulo-pill { background: #fbc2c4; color: #2b2b2b; padding: 8px 32px; border-radius: 30px; font-size: 22px; font-weight: bold; }
+      .proto-fecha { font-size: 15px; font-weight: bold; color: #444; }
+      .proto-card-body { display: flex; gap: 24px; align-items: center; }
+      .proto-img-wrapper { width: 210px; height: 150px; border-radius: 20px; overflow: hidden; background: #fff; border: 2px solid #f9d5d3; flex-shrink: 0; }
+      .proto-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+      .proto-content-right { flex-grow: 1; display: flex; flexDirection: column; gap: 12px; }
+      .proto-pill-tipo { background: #fff; color: #333; padding: 8px 22px; border-radius: 20px; font-size: 15px; font-weight: bold; border: 1px solid #f3c1c3; display: inline-block; align-self: flex-start; }
+      .proto-autor { font-size: 14px; color: #555; }
+      .proto-autor a { color: #d9534f; text-decoration: none; font-weight: bold; }
+      .proto-footer-row { display: flex; justify-content: flex-end; margin-top: 5px; }
+      .proto-btn-detalles { background-color: #fffde8; color: #2b2b2b; border: 1px solid #f0e6b8; padding: 10px 28px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 15px; }
+      .proto-btn-detalles:hover { background-color: #fff9c4; }
+  </style>
 </body>
 </html>
