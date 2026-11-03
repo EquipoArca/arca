@@ -117,6 +117,24 @@ body {
     max-width: 380px;
 }
 
+.btn-adopcion-opcion {
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border: 2px solid rgba(255, 255, 255, 0.95) !important;
+    color: #5c4033 !important;
+    font-family: 'Itim', cursive, sans-serif;
+    font-size: 1.15rem;
+    padding: 14px 24px;
+    border-radius: 9999px !important;
+    cursor: pointer;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
 /* BOTÓN ROSA PALO MÁGICO */
 .btn-adopcion-opcion:first-of-type {
     background: rgba(242, 193, 196, 0.78) !important;
