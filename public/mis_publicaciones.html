@@ -557,10 +557,31 @@
     let misReportesCache = [];
 
     firebase.auth().onAuthStateChanged(async (user) => {
-        if (user) {
-            await cargarMisPublicaciones(user.email);
+    if (user) {
+        await cargarMisPublicaciones(user.email);
+
+        // Consultamos si el usuario logueado es una fundación
+        try {
+            const res = await fetch(`/api/obtener-fundacion?correo=${encodeURIComponent(user.email)}`);
+            if (res.ok) {
+                // Es una fundación: transformamos el contenido del modal flotante (+)
+                const contenedorOpcionesModal = document.querySelector('#modal-nueva-publicacion .modal-contenido-arca div[style*="display: flex"]');
+                if (contenedorOpcionesModal) {
+                    contenedorOpcionesModal.innerHTML = `
+                        <a href="formulario_adopcion.html" class="btn-opcion-modal-tipo" style="background-color: rgba(252, 228, 236, 0.9);">
+                            Poner animal en adopción
+                        </a>
+                        <a href="formulario_evento.html" class="btn-opcion-modal-tipo" style="background-color: rgba(224, 242, 254, 0.9);">
+                            Publicar evento
+                        </a>
+                    `;
+                }
+            }
+        } catch (e) {
+            // Si da error es un usuario normal y el modal se queda con sus opciones de siempre
         }
-    });
+    }
+});
 
     async function cargarMisPublicaciones(correo) {
         const grid = document.getElementById('grid-mis-publicaciones');
