@@ -17,38 +17,40 @@ let credentialCert;
 
 if (process.env.FIREBASE_SERVICE_ACCOUNT) {
     try {
-        let serviceAccount;
-        // Verificamos si viene como texto plano o JSON y parseamos de forma segura
-        let rawEnv = process.env.FIREBASE_SERVICE_ACCOUNT;
+        let rawEnv = process.env.FIREBASE_SERVICE_ACCOUNT.trim();
         
-        if (typeof rawEnv === 'string') {
-            // Aseguramos que los saltos de línea en la clave privada se procesen bien
-            serviceAccount = JSON.parse(rawEnv);
-        } else {
-            serviceAccount = rawEnv;
-        }
+        // Limpiamos posibles saltos de línea mal formateados antes de parsear
+        let serviceAccount = typeof rawEnv === 'string' ? JSON.parse(rawEnv) : rawEnv;
 
+        // Corregimos los saltos de línea de la llave privada si vienen escapados como \n
         if (serviceAccount.private_key) {
             serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
         }
 
         credentialCert = cert(serviceAccount);
     } catch (e) {
-        console.error("❌ ERROR: No se pudo parsear el JSON de FIREBASE_SERVICE_ACCOUNT:", e.message);
+        console.error("❌ ERROR CRÍTICO AL PARSEAR FIREBASE_SERVICE_ACCOUNT:", e.message);
     }
-} else {
+} 
+
+if (!credentialCert) {
     try {
         const serviceAccount = require('./clave-firebase.json');
         credentialCert = cert(serviceAccount);
     } catch (e) {
-        console.error("❌ ERROR: No se encontró la configuración de Firebase ni en variables de entorno ni en archivo local.");
+        console.error("❌ ERROR: No se encontró la configuración de Firebase en variables de entorno ni local.");
     }
 }
 
-initializeApp({
-    credential: credentialCert
-});
-
+// Solo inicializamos si tenemos una credencial válida
+if (credentialCert) {
+    initializeApp({
+        credential: credentialCert
+    });
+    console.log("✅ Firebase Admin inicializado correctamente.");
+} else {
+    console.error("❌ FATAL: No se pudo inicializar Firebase Admin por falta de credenciales.");
+}
 // ==========================================
 // ARCHIVOS ESTÁTICOS
 // ==========================================
