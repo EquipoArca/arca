@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 );
+    });
 
     if (form) {
         form.addEventListener('input', () => { formularioModificado = true; });
@@ -103,7 +104,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-});
 
 // Función para cargar datos cuando se presiona "Editar Perfil"
 async function cargarDatosCompletosAdoptante(correo) {

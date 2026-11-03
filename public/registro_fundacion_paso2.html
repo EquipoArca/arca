@@ -112,13 +112,18 @@
             height: 110px;
             background-color: #fce4e4;
             border: 2px dashed #e2a0a0;
-            border-radius: 20px;
+            border-radius: 15px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             text-align: center;
+            transition: background-color 0.2s;
+        }
+
+        .zona-subida-foto:hover {
+            background-color: #f9d1d1;
         }
 
         .checkbox-enfoque {
@@ -127,6 +132,34 @@
             gap: 10px;
             margin-bottom: 8px;
             font-size: 1.05rem;
+        }
+
+        .input-redes-container {
+            display: flex;
+            align-items: center;
+            background-color: #ffffff;
+            border: 1px solid #e2c0c0;
+            border-radius: 12px;
+            padding: 0 10px;
+            margin-bottom: 10px;
+            height: 38px;
+        }
+
+        .input-redes-container i {
+            color: #666;
+            margin-right: 10px;
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .input-redes-container input {
+            border: none;
+            outline: none;
+            width: 100%;
+            font-family: 'Itim', sans-serif;
+            font-size: 0.95rem;
+            background: transparent;
         }
 
         .btn-finalizar-paso2 {
@@ -168,16 +201,22 @@
                     <div style="display: flex; gap: 20px; margin-bottom: 15px;">
                         <div style="flex: 1;">
                             <div class="sub-capsula">Portada</div>
-                            <img src="logo.png" style="width: 100%; height: 110px; object-fit: cover; border-radius: 15px; border: 1px solid #ddd;">
+                            <div class="zona-subida-foto" onclick="document.getElementById('input-foto-portada').click()">
+                                <i class="fa-solid fa-image" style="font-size: 1.5rem; color: #888;"></i>
+                                <span style="font-size: 0.8rem; color: #777; margin-top: 4px;">Sube tu portada</span>
+                                <input type="file" id="input-foto-portada" accept="image/*" style="display:none;" onchange="previsualizarImagen(event, 'preview-portada')">
+                            </div>
+                            <img id="preview-portada" src="" style="width: 100%; height: 110px; object-fit: cover; border-radius: 15px; border: 1px solid #ddd; display: none; margin-top: -110px; position: relative;">
                         </div>
+                        
                         <div style="flex: 1;">
                             <div class="sub-capsula">Foto oficial</div>
                             <div class="zona-subida-foto" onclick="document.getElementById('input-foto-oficial').click()">
-                                <i class="fa-solid fa-image-user" style="font-size: 1.8rem; color: #888;"></i>
-                                <span style="font-size: 0.85rem; color: #777;">O arrastra una imagen aquí</span>
-                                <button type="button" style="margin-top: 5px; border-radius: 10px; border: none; padding: 3px 10px; font-size: 0.8rem;">Sube un archivo</button>
-                                <input type="file" id="input-foto-oficial" accept="image/*" style="display:none;">
+                                <i class="fa-solid fa-image-user" style="font-size: 1.5rem; color: #888;"></i>
+                                <span style="font-size: 0.8rem; color: #777; margin-top: 4px;">Sube tu logo/foto</span>
+                                <input type="file" id="input-foto-oficial" accept="image/*" style="display:none;" onchange="previsualizarImagen(event, 'preview-oficial')">
                             </div>
+                            <img id="preview-oficial" src="" style="width: 100%; height: 110px; object-fit: cover; border-radius: 15px; border: 1px solid #ddd; display: none; margin-top: -110px; position: relative;">
                         </div>
                     </div>
 
@@ -193,7 +232,7 @@
 
                     <div style="margin-bottom: 12px;">
                         <div class="sub-capsula">Descripción general (visión)</div>
-                        <textarea id="vision-publica" class="input-paso2"></textarea>
+                        <textarea id="vision-publica" class="input-paso2" placeholder="Ser la fundación líder en..."></textarea>
                     </div>
 
                     <div>
@@ -201,24 +240,36 @@
                         <div class="checkbox-enfoque"><input type="checkbox" id="ef1"> Rescate adopción</div>
                         <div class="checkbox-enfoque"><input type="checkbox" id="ef2"> Esterilización y control poblacional</div>
                         <div class="checkbox-enfoque"><input type="checkbox" id="ef3"> Rehabilitación de animales maltratados</div>
-                        <div class="checkbox-enfoque"><input type="checkbox" id="ef4"> Otro: <input type="text" class="input-paso2" style="height: 28px; width: 200px;"></div>
+                        <div class="checkbox-enfoque"><input type="checkbox" id="ef4"> Otro: <input type="text" class="input-paso2" style="height: 28px; width: 180px;" placeholder="Especificar"></div>
                     </div>
                 </div>
 
                 <!-- COLUMNA DERECHA -->
                 <div>
                     <div style="margin-bottom: 15px;">
-                        <div class="sub-capsula">Programas/ Proyectos actuales</div>
+                        <div class="sub-capsula">Programas / Proyectos actuales</div>
                         <textarea id="programas-publicos" class="input-paso2" style="height: 100px;" placeholder="Proyecto actual dentro del programa: 'Alimento para Todos'"></textarea>
                     </div>
 
                     <div>
-                        <div class="sub-capsula">Enlaces a redes sociales oficiales</div>
-                        <div style="margin-top: 5px;">
-                            <p style="font-size: 0.9rem; color: #444;"><i class="fa-solid fa-envelope"></i> fundacion_huellitas_de_amor@gmail.com</p>
-                            <p style="font-size: 0.9rem; color: #444;"><i class="fa-brands fa-facebook"></i> Fundación Huellitas de Amor_Oficial</p>
-                            <p style="font-size: 0.9rem; color: #444;"><i class="fa-brands fa-tiktok"></i> Fundacion_Huellitas_De_Amor_Oficial</p>
-                            <p style="font-size: 0.9rem; color: #444;"><i class="fa-brands fa-instagram"></i> Fundacion Huellitas de Amor_Oficial</p>
+                        <div class="sub-capsula">Enlaces a redes sociales y contacto</div>
+                        <div style="margin-top: 8px;">
+                            <div class="input-redes-container">
+                                <i class="fa-solid fa-envelope"></i>
+                                <input type="email" id="red-correo" placeholder="Correo de contacto oficial">
+                            </div>
+                            <div class="input-redes-container">
+                                <i class="fa-brands fa-facebook"></i>
+                                <input type="text" id="red-facebook" placeholder="Enlace o usuario de Facebook">
+                            </div>
+                            <div class="input-redes-container">
+                                <i class="fa-brands fa-tiktok"></i>
+                                <input type="text" id="red-tiktok" placeholder="Enlace o usuario de TikTok">
+                            </div>
+                            <div class="input-redes-container">
+                                <i class="fa-brands fa-instagram"></i>
+                                <input type="text" id="red-instagram" placeholder="Enlace o usuario de Instagram">
+                            </div>
                         </div>
                     </div>
                 </div>

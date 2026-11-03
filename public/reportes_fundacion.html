@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportes Recientes - Fundación ARCA</title>
+    <link rel="stylesheet" href="novedades-reportes-style.css">
+    <link rel="stylesheet" href="style_home.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="dark-mode.css">
+    <script>
+    if (localStorage.getItem("modo_oscuro") === "true") {
+        document.body.classList.add("dark-mode");
+    }
+    </script>
+    <style>
+        /* Ajuste de scroll y contenedor */
+        .main-content {
+            height: calc(100vh - 70px);
+            overflow-y: auto;
+            display: flex;
+            justify-content: center;
+            padding: 30px 20px;
+            box-sizing: border-box;
+        }
+
+        .feed-novedades {
+            width: 100%;
+            max-width: 950px;
+            padding-bottom: 40px;
+        }
+
+        .tarjeta-prototipo-estilo {
+            background: #fde8e5; 
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+            border: 2px solid #f9d5d3;
+            width: 100%;
+            font-family: 'Itim', cursive, sans-serif;
+            box-sizing: border-box;
+            margin-bottom: 25px;
+        }
+        .proto-card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+        .proto-titulo-pill { background: #fbc2c4; color: #2b2b2b; padding: 8px 32px; border-radius: 30px; font-size: 22px; font-weight: bold; }
+        .proto-fecha { font-size: 15px; font-weight: bold; color: #444; }
+        .proto-card-body { display: flex; gap: 24px; align-items: center; }
+        .proto-img-wrapper { width: 210px; height: 150px; border-radius: 20px; overflow: hidden; background: #fff; border: 2px solid #f9d5d3; flex-shrink: 0; }
+        .proto-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+        .proto-content-right { flex-grow: 1; display: flex; flex-direction: column; gap: 12px; }
+        .proto-pill-tipo { background: #fff; color: #333; padding: 8px 22px; border-radius: 20px; font-size: 15px; font-weight: bold; border: 1px solid #f3c1c3; display: inline-block; align-self: flex-start; }
+        .proto-autor { font-size: 14px; color: #555; }
+        .proto-autor a { color: #d9534f; text-decoration: none; font-weight: bold; }
+        .proto-footer-row { display: flex; justify-content: flex-end; margin-top: 5px; }
+        
+        /* Botón suave y orgánico */
+        .proto-btn-detalles { 
+            background-color: #fffde8; 
+            color: #442c20; 
+            border: 1.5px solid #f0e6b8; 
+            padding: 10px 28px; 
+            border-radius: 50px; 
+            cursor: pointer; 
+            font-weight: 400; 
+            font-size: 15px;
+            font-family: 'Itim', cursive, sans-serif;
+            transition: all 0.2s ease;
+        }
+        .proto-btn-detalles:hover { background-color: #fff9c4; transform: translateY(-1px); }
+    </style>
+</head>
+<body>
+
+  <nav class="top-nav">
+    <div class="top-left">
+        <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu"></i>        
+        <div class="mini-logo-circle">
+            <img src="logo.png" alt="Logo">
+        </div>
+        <span class="page-title" id="titulo-pagina">Reportes Recientes</span>
+    </div>
+
+    <div class="search-bar">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" placeholder="Busca algo">
+        <i class="fa-solid fa-microphone"></i>
+    </div>
+
+    <div class="top-right">
+        <div class="user-header-info">
+            <div class="user-profile-menu" id="user-profile-menu">
+                <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
+                    <img src="logo.png" id="user-avatar-img" alt="Perfil">
+                </div>
+                <div class="mini-menu-card" id="mini-menu-card">
+                    <div class="mini-menu-header">
+                        <span id="mini-menu-username">Fundación</span>
+                    </div>
+                    <hr class="mini-menu-divider">
+                    <a href="javascript:void(0)" onclick="mostrarSeccion('configuracion')" class="mini-menu-item btn-ajustes">
+                        <i class="fa-solid fa-gear"></i>
+                        <span>Ajustes</span>
+                    </a>
+                    <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Cerrar sesión</span>
+                    </a>
+                </div>
+            </div>
+            <div class="notif-circle">
+                <a href="#"><i class="fa-solid fa-bell"></i></a>
+            </div>
+        </div>
+    </div>
+  </nav>
+
+  <aside class="sidebar" id="sidebar">
+      <div class="side-icons">
+          <a href="home.html?seccion=inicio" id="link-inicio" class="menu-fila">
+              <i class="fa-solid fa-house active"></i>
+              <span class="menu-text">Inicio</span>
+          </a>
+          <a href="home.html?seccion=perfil" id="link-perfil" class="menu-fila">
+              <i class="fa-solid fa-circle-user"></i>
+              <span class="menu-text">Perfil</span>
+          </a>
+          <a href="publicaciones_fundacion.html" id="link-guardado" class="menu-fila">
+              <i class="fa-solid fa-layer-group"></i>
+              <span class="menu-text">Publicaciones</span>
+          </a>
+          <a href="home.html?seccion=mapa" id="link-mapa" class="menu-fila">
+              <i class="fa-solid fa-location-dot"></i>
+              <span class="menu-text">Mapa</span>
+          </a>
+          <a href="home.html?seccion=configuracion" id="link-config" class="menu-fila">
+              <i class="fa-solid fa-gear"></i>
+              <span class="menu-text">Ajustes</span>
+          </a>
+      </div>
+  </aside>
+
+  <main class="main-content">
+      <section class="feed-novedades" id="contenedor-novedades-fundacion">
+          <article class="tarjeta-reporte">
+              <div class="header-tarjeta-reporte">
+                  <div class="badge-titulo-reporte">Cargando reportes recientes...</div>
+              </div>
+          </article>
+      </section>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="script.js"></script>
+
+  <script>
+      document.addEventListener('DOMContentLoaded', () => {
+          const btnToggleMenu = document.getElementById('btn-toggle-menu');
+          const sidebar = document.getElementById('sidebar');
+
+          if (btnToggleMenu && sidebar) {
+              btnToggleMenu.addEventListener('click', (e) => {
+                  e.stopPropagation();
+                  sidebar.classList.toggle('sidebar-abierta'); 
+              });
+          }
+
+          cargarReportesFundacion();
+      });
+
+      async function cargarReportesFundacion() {
+          const contenedor = document.getElementById('contenedor-novedades-fundacion');
+          try {
+              const res = await fetch('/api/publicaciones-globales');
+              if (!res.ok) throw new Error("Error al consultar reportes");
+              
+              const publicaciones = await res.json();
+              const reportes = publicaciones.filter(p => p.tipo_publicacion === 'reporte' || p.Nombre_tipo_reporte);
+
+              if (!reportes || reportes.length === 0) {
+                  contenedor.innerHTML = `<p style="text-align: center; color: #555;">No hay reportes disponibles.</p>`;
+                  return;
+              }
+
+              contenedor.innerHTML = reportes.map(item => {
+                  const idRep = item.id_reporte || item.id_origen || item.id_publicacion;
+                  return `
+                      <article class="tarjeta-prototipo-estilo">
+                          <div class="proto-card-top">
+                              <div class="proto-titulo-pill">
+                                  UBICACIÓN: <span style="font-size: 16px; font-weight: normal;">${item.Ubicacion || item.ubicacion || 'San Cristóbal'}</span>
+                              </div>
+                              <span class="proto-fecha">${item.Fecha_reporte ? item.Fecha_reporte.split('T')[0] : 'Reciente'}</span>
+                          </div>
+                          
+                          <div class="proto-card-body">
+                              <div class="proto-img-wrapper">
+                                  <img src="${item.img_reporte || 'logo.png'}" alt="Foto reporte">
+                              </div>
+                              
+                              <div class="proto-content-right">
+                                  <span class="proto-pill-tipo">TIPO: ${item.Nombre_tipo_reporte || item.nombre_tipo_reporte || 'Reporte General'}</span>
+                                  
+                                  <div class="proto-info-extra">
+                                      <span class="proto-autor">REPORTADO POR: <a href="perfil_publico.html?user=${encodeURIComponent(item.nombre_usuario || 'usuario')}">@${item.nombre_usuario || 'usuario'}</a></span>
+                                  </div>
+                                  
+                                  <div class="proto-footer-row">
+                                      <a href="detalle_reporte.html?id=${idRep}&origen=fundacion" class="proto-btn-detalles" style="text-decoration: none;">
+                                          Ver detalles
+                                      </a>
+                                  </div>
+                              </div>
+                          </div>
+                      </article>
+                  `;
+              }).join('');
+          } catch (error) {
+              console.error(error);
+              contenedor.innerHTML = `<p style="text-align: center; color: #555;">No se pudieron cargar los reportes en este momento.</p>`;
+          }
+      }async function cargarReportesFundacion() {
+          const contenedor = document.getElementById('contenedor-novedades-fundacion');
+          try {
+              const res = await fetch('/api/publicaciones-globales');
+              if (!res.ok) throw new Error("Error al consultar reportes");
+              
+              const publicaciones = await res.json();
+              const reportes = publicaciones.filter(p => p.tipo_publicacion === 'reporte' || p.Nombre_tipo_reporte);
+
+              if (!reportes || reportes.length === 0) {
+                  contenedor.innerHTML = `<p style="text-align: center; color: #555;">No hay reportes disponibles.</p>`;
+                  return;
+              }
+
+              contenedor.innerHTML = reportes.map(item => {
+                  const idRep = item.id_reporte || item.id_origen || item.id_publicacion;
+                  const estadoReporte = item.estado || 'Sin atender';
+                  
+                  return `
+                      <article class="tarjeta-prototipo-estilo">
+                          <div class="proto-card-top">
+                              <div class="proto-titulo-pill">
+                                  UBICACIÓN: <span style="font-size: 16px; font-weight: normal;">${item.Ubicacion || item.ubicacion || 'San Cristóbal'}</span>
+                              </div>
+                              <span class="proto-fecha">${item.Fecha_reporte ? item.Fecha_reporte.split('T')[0] : 'Reciente'}</span>
+                          </div>
+                          
+                          <div class="proto-card-body">
+                              <div class="proto-img-wrapper">
+                                  <img src="${item.img_reporte || 'logo.png'}" alt="Foto reporte">
+                              </div>
+                              
+                              <div class="proto-content-right">
+                                  <span class="proto-pill-tipo">TIPO: ${item.Nombre_tipo_reporte || item.nombre_tipo_reporte || 'Reporte General'}</span>
+                                  
+                                  <div class="proto-info-extra" style="display: flex; justify-content: space-between; align-items: center;">
+                                      <span class="proto-autor">REPORTADO POR: <a href="perfil_publico.html?user=${encodeURIComponent(item.nombre_usuario || 'usuario')}">@${item.nombre_usuario || 'usuario'}</a></span>
+                                      <span style="background: #ffffff; padding: 3px 12px; border-radius: 50px; border: 1.5px solid #f9cab5; color: #5c4033; font-size: 13px;">
+                                          Estado: ${estadoReporte}
+                                      </span>
+                                  </div>
+                                  
+                                  <div class="proto-footer-row">
+                                      <a href="detalle_reporte.html?id=${idRep}&origen=fundacion" class="proto-btn-detalles" style="text-decoration: none;">
+                                          Ver detalles
+                                      </a>
+                                  </div>
+                              </div>
+                          </div>
+                      </article>
+                  `;
+              }).join('');
+          } catch (error) {
+              console.error(error);
+              contenedor.innerHTML = `<p style="text-align: center; color: #555;">No se pudieron cargar los reportes en este momento.</p>`;
+          }
+      }
+  </script>
+</body>
+</html>

@@ -333,7 +333,8 @@
             }
         }
 
-        function guardarPaso1YContinuar() {
+function guardarPaso1YContinuar() {
+            // Verificamos directamente desde los inputs del formulario si los archivos fueron seleccionados
             const fileCert = document.getElementById('file-cert').files[0];
             const fileEstatutos = document.getElementById('file-estatutos').files[0];
             const fileRegistro = document.getElementById('file-registro').files[0];
@@ -344,33 +345,53 @@
                 return;
             }
 
-            // Guardamos solo los datos de texto en el sessionStorage (esto ocupa poquísimos kilobytes)
-            const datosPaso1 = {
-                nombreLegal: document.getElementById('nombre-legal').value,
-                nombreComercial: document.getElementById('nombre-comercial').value,
-                nitRut: document.getElementById('nit-rut').value,
-                paisCiudad: document.getElementById('pais-ciudad').value,
-                direccionFisica: document.getElementById('direccion-fisica').value,
-                telefonoPrincipal: document.getElementById('telefono-principal').value,
-                correoOficial: document.getElementById('correo-oficial').value,
-                paginaWeb: document.getElementById('pagina-web').value,
-                repNombre: document.getElementById('rep-nombre').value,
-                repDocumento: document.getElementById('rep-documento').value,
-                repCargo: document.getElementById('rep-cargo').value,
-                repTelefono: document.getElementById('rep-telefono').value,
-                repCorreo: document.getElementById('rep-correo').value,
-                metodosDonacion: document.getElementById('metodos-donacion').value
+            // Función interna para convertir los archivos a Base64 de forma síncrona/promesa antes de avanzar
+            const convertirArchivosYContinuar = async () => {
+                const toBase64 = file => new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = error => reject(error);
+                });
+
+                try {
+                    // Convertimos los 4 PDFs a Base64 y los guardamos asegurando que existan
+                    sessionStorage.setItem('pdf_cert', await toBase64(fileCert));
+                    sessionStorage.setItem('pdf_estatuto', await toBase64(fileEstatutos));
+                    sessionStorage.setItem('pdf_registro', await toBase64(fileRegistro));
+                    sessionStorage.setItem('pdf_financiero', await toBase64(fileFinanciero));
+
+                    // Guardamos los datos de texto del formulario
+                    const datosPaso1 = {
+                        nombreLegal: document.getElementById('nombre-legal').value,
+                        nombreComercial: document.getElementById('nombre-comercial').value,
+                        nitRut: document.getElementById('nit-rut').value,
+                        paisCiudad: document.getElementById('pais-ciudad').value,
+                        direccionFisica: document.getElementById('direccion-fisica').value,
+                        telefonoPrincipal: document.getElementById('telefono-principal').value,
+                        correoOficial: document.getElementById('correo-oficial').value,
+                        paginaWeb: document.getElementById('pagina-web').value,
+                        repNombre: document.getElementById('rep-nombre').value,
+                        repDocumento: document.getElementById('rep-documento').value,
+                        repCargo: document.getElementById('rep-cargo').value,
+                        repTelefono: document.getElementById('rep-telefono').value,
+                        repCorreo: document.getElementById('rep-correo').value,
+                        metodosDonacion: document.getElementById('metodos-donacion').value
+                    };
+
+                    sessionStorage.setItem('datos_fundacion_p1', JSON.stringify(datosPaso1));
+                    
+                    // Saltamos al paso 2 con todo listo
+                    window.location.href = "registro_fundacion_paso2.html";
+
+                } catch (error) {
+                    console.error("Error al procesar los PDFs:", error);
+                    alert("Hubo un error al procesar los archivos PDF. Inténtalo de nuevo.");
+                }
             };
 
-            sessionStorage.setItem('datos_fundacion_p1', JSON.stringify(datosPaso1));
-            
-            // Guardamos temporalmente los archivos en window.name para que pasen al siguiente archivo HTML sin saturar storage
-            window.name = JSON.stringify({
-                hasFiles: true
-            });
-
-            window.location.href = "registro_fundacion_paso2.html";
+            convertirArchivosYContinuar();
         }
-    </script>
+    </script>   
 </body>
 </html>

@@ -40,7 +40,7 @@ auth.onAuthStateChanged(async (user) => {
     const btnCerrarSesion = document.getElementById('btn-cerrar-sesion-mini');
     const nombrePerfilElem = document.getElementById('mostrar-nombre-usuario');
 
-    if (user) {
+   if (user) {
         console.log("Sesión detectada automáticamente para:", user.email);
         activarModoFull();
 
@@ -68,26 +68,48 @@ auth.onAuthStateChanged(async (user) => {
 
             localStorage.setItem('tipo_usuario', tipoUsuario);
             localStorage.setItem('estado_aprobacion', estadoAprobacion);
+            adaptarInterfazSegunRol();
             
             if (tipoUsuario === 'fundacion' && estadoAprobacion === 'pendiente') {
                 mostrarAlertaArca(
-    "¡Revisión legal en proceso!",
-    "¡Tu fundación está en proceso de revisión legal por el equipo de ARCA! Te notificaremos cuando sea aprobada. 🌸",
-    { tipo: "aviso" }
-);
+                    "¡Revisión legal en proceso!",
+                    "¡Tu fundación está en proceso de revisión legal por el equipo de ARCA! Te notificaremos cuando sea aprobada. 🌸",
+                    { tipo: "aviso" }
+                );
                 auth.signOut().then(() => {
                     localStorage.clear();
                     window.location.href = "home.html";
                 });
                 return;
             }
+
+            nombreFinal = data.nombre_usuario || (user.displayName || user.email.split('@')[0]);
+            let fotoFinal = data.foto_perfil;
+
+            // SI ES FUNDACIÓN, BUSCAMOS SU NOMBRE COMERCIAL REAL Y SU FOTO OFICIAL
+            if (tipoUsuario === 'fundacion') {
+                try {
+                    const resFund = await fetch(`/api/obtener-fundacion-header?correo=${encodeURIComponent(user.email)}`);
+                    if (resFund.ok) {
+                        const dataFund = await resFund.json();
+                        if (dataFund.nombre_comercial) {
+                            nombreFinal = dataFund.nombre_comercial; // Aquí toma "Huellitas de amor" sin el _6228
+                        }
+                        if (dataFund.pfp_fundacion) {
+                            fotoFinal = dataFund.pfp_fundacion; // Foto oficial de la fundación
+                        }
+                    }
+                } catch (e) {
+                    console.error("No se pudo cargar el perfil de la fundación para el header", e);
+                }
+            }
             
             if (nombrePerfilElem) nombrePerfilElem.textContent = `@${nombreFinal}`;
             if (userDisplayName) userDisplayName.textContent = nombreFinal;
-            if (dropdownName) dropdownName.textContent = nombreFinal;
+            if (dropdownName) dropdownName.textContent = nombreFinal; // ¡Aquí se actualiza el mini-menú sin números!
 
-            if (data.foto_perfil && avatarImg) {
-                avatarImg.src = data.foto_perfil;
+            if (fotoFinal && avatarImg) {
+                avatarImg.src = fotoFinal;
                 avatarImg.style.display = 'block';
             } else if (avatarBtn) {
                 avatarBtn.innerHTML = `
@@ -111,9 +133,12 @@ auth.onAuthStateChanged(async (user) => {
         if (linkGuardado) linkGuardado.href = "guardados_usuario.html";
         if (linkMapa) linkMapa.href = "mapa.html";
         if (linkConfig) linkConfig.href = "configuracion.html";
-
+    
     } else {
         // MODO INVITADO
+        localStorage.removeItem('tipo_usuario');
+        adaptarInterfazSegunRol();
+        // ... el resto de tu código
         if (userDisplayName) userDisplayName.textContent = "";
         if (menuUsuario) menuUsuario.style.display = "none";
 
@@ -1189,27 +1214,19 @@ async function verificarOtpYIrAlRegistro() {
     inputs.forEach(inp => codigoIngresado += inp.value);
 
     if (codigoIngresado === codigoOtpGenerado || codigoIngresado === "1234") {
-        try {
-            await auth.createUserWithEmailAndPassword(correoValidado, passwordFundacionTemporal);
-            
-            // 👇 ¡ESTO ES LO QUE FALTA! Guarda las credenciales para el Paso 2
-            sessionStorage.setItem('pass_fundacion_temp', passwordFundacionTemporal);
-            sessionStorage.setItem('correo_fundacion_temp', correoValidado);
-            
-            localStorage.removeItem('flujo_fundacion');
-            mostrarAlertaArca(
-                "¡Correo verificado con éxito! 🌸",
-                "Ahora completemos los datos legales de tu fundación.",
-                { tipo: "aviso" }
-            );
-            window.location.href = `registro_fundacion.html?email=${encodeURIComponent(correoValidado)}`;
-        } catch (error) {
-         mostrarAlertaArca(
-    "Error al registrar cuenta",
-    "No se pudo crear las credenciales en Firebase. ♡ " + error.message,
-    { tipo: "error" }
-);
-        }
+        // ❌ Eliminamos el auth.createUserWithEmailAndPassword de aquí para que no se cree antes de tiempo.
+        
+        // Guardamos las credenciales temporalmente en sessionStorage para usarlas al final del Paso 2
+        sessionStorage.setItem('pass_fundacion_temp', passwordFundacionTemporal);
+        sessionStorage.setItem('correo_fundacion_temp', correoValidado);
+        
+        localStorage.removeItem('flujo_fundacion');
+        mostrarAlertaArca(
+            "¡Correo verificado con éxito! 🌸",
+            "Ahora completemos los datos legales de tu fundación.",
+            { tipo: "aviso" }
+        );
+        window.location.href = `registro_fundacion.html?email=${encodeURIComponent(correoValidado)}`;
 
     } else {
         mostrarAlertaArca(
@@ -1505,8 +1522,82 @@ function mostrarAlertaArca(titulo, mensaje, opciones = {}) {
 
     boton.focus();
 }
+// Función para adaptar la interfaz del Home según el tipo de usuario (Usuario normal vs Fundación)
+// Función para adaptar la interfaz del Home según el tipo de usuario (Usuario normal vs Fundación)
+function adaptarInterfazSegunRol() {
+    const tipoUsuario = localStorage.getItem('tipo_usuario') || 'usuario';
+    
+    const brandContainer = document.getElementById('brand-title-container');
+    const tituloCard1 = document.getElementById('titulo-card-1');
+    const logoCard1 = document.getElementById('logo-card-1');
+    const cardReportar = document.getElementById('card-reportar-home');
+    const linkGuardado = document.getElementById('link-guardado');
+    
+    // Seleccionamos el botón de últimas novedades
+    const botonNovedades = document.querySelector('.news-button');
 
-    // ==========================================
+    if (tipoUsuario === 'fundacion') {
+        // 1. Título con tipografía exacta y el badge de verificación pastel
+        if (brandContainer) {
+            brandContainer.innerHTML = `
+                ARCA
+                <div class="subtitle-fundacion">
+                    FUNDACIÓN <i class="fa-solid fa-certificate badge-verified"><i class="fa-solid fa-check check-inner"></i></i>
+                </div>
+            `;
+        }
+
+        // 2. Tarjeta 1 -> "Reportes" con su imagen PNG oficial (tamaño 200px que te gusta)
+        if (tituloCard1) tituloCard1.textContent = "Reportes";
+        
+        if (logoCard1) {
+            logoCard1.innerHTML = `<img src="rflogo.png" alt="Logo Reportes Fundación" class="logo-card-reportes-fundacion">`;
+        }
+
+        if (cardReportar && typeof auth !== 'undefined' && auth.currentUser) {
+            cardReportar.setAttribute("href", "reportes_fundacion.html");
+        }
+
+        // 3. Icono del Sidebar para Fundación
+        if (linkGuardado) {
+            const iconoGuardado = linkGuardado.querySelector('i');
+            const textoGuardado = linkGuardado.querySelector('.menu-text');
+            if (iconoGuardado) iconoGuardado.className = "fa-solid fa-layer-group";
+            if (textoGuardado) textoGuardado.textContent = "Publicaciones";
+            linkGuardado.href = "publicaciones_fundacion.html";
+        }
+
+        // 4. Ocultar el botón de Últimas Novedades para fundaciones
+        if (botonNovedades) {
+            botonNovedades.style.display = 'none';
+        }
+
+    } else {
+        // Modo Usuario Normal
+        if (brandContainer) {
+            brandContainer.innerHTML = `ARCA`;
+        }
+        if (tituloCard1) tituloCard1.textContent = "Reportar";
+        if (logoCard1) {
+            logoCard1.innerHTML = `<img src="rlogo.png" alt="Logor">`;
+        }
+        if (cardReportar && typeof auth !== 'undefined' && auth.currentUser) {
+            cardReportar.setAttribute("href", "formularior.html");
+        }
+        if (linkGuardado) {
+            const iconoGuardado = linkGuardado.querySelector('i');
+            const textoGuardado = linkGuardado.querySelector('.menu-text');
+            if (iconoGuardado) iconoGuardado.className = "fa-solid fa-bookmark";
+            if (textoGuardado) textoGuardado.textContent = "Guardado";
+            linkGuardado.href = "guardados_usuario.html";
+        }
+
+        // Mostrar el botón de Últimas Novedades para usuarios normales
+        if (botonNovedades) {
+            botonNovedades.style.display = 'flex';
+        }
+    }
+}   // ==========================================
 // 9. CONTROLADOR DEL MODO OSCURO GLOBAL
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {

@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
             imgPreview.style.width = '75px';
             imgPreview.style.height = '75px';
             imgPreview.style.objectFit = 'cover';
-            imgPreview.style.borderRadius = '16px';
+            imgPreview.style.borderRadius = '16px'; // Más orgánico
             imgPreview.style.border = '2px solid rgba(255, 255, 255, 0.9)';
             imgPreview.style.boxShadow = '0 4px 10px rgba(92, 64, 51, 0.1)';
 
@@ -50,8 +50,8 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
 
             btnEliminar.onclick = () => {
-                imagenesBase64.splice(index, 1);
-                renderizarPrevisualizaciones();
+                imagenesBase64.splice(index, 1); // Borra la imagen del arreglo
+                renderizarPrevisualizaciones(); // Vuelve a pintar la galería
             };
 
             wrapper.appendChild(imgPreview);
@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 lector.onload = function(uploadEvent) {
                     const base64String = uploadEvent.target.result;
                     imagenesBase64.push(base64String);
-                    renderizarPrevisualizaciones();
+                    renderizarPrevisualizaciones(); // Actualiza la vista con la "X"
                 };
                 lector.readAsDataURL(archivo);
             }
@@ -163,24 +163,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 const resultado = await response.json();
-                if (response.ok) {
-                    mostrarAlertaArca(
-                        "Operación exitosa",
-                        resultado.mensaje || "¡Operación realizada con éxito! 🌸",
-                        { 
-                            tipo: "aviso",
-                            alCerrar: () => {
-                                window.location.href = "mis_publicaciones.html";
-                            }
-                        }
-                    );
-                } else {
-                    mostrarAlertaArca(
-                        "Error",
-                        "Error: " + (resultado.error || resultado.mensaje || "No se pudo procesar. ♡"),
-                        { tipo: "error" }
-                    );
-                }
+               
+if (response.ok) {
+    mostrarAlertaArca(
+        "Adopción publicada con éxito",
+        resultado.mensaje || "¡Tu publicación se realizó correctamente! 🌸",
+        {
+            tipo: "aviso",
+            alCerrar: () => {
+                window.location.href = "home.html";
+            }
+        }
+    );
+} else {
+    mostrarAlertaArca(
+        "Error",
+        resultado.error || resultado.mensaje || "No se pudo procesar.",
+        { tipo: "error" }
+    );
+}
             } catch (error) {
                 console.error("Error de red:", error);
                 mostrarAlertaArca(
@@ -191,7 +192,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-}); 
+});
+
+
 
 // ==========================================
 // ALERTA PERSONALIZADA ARCA
@@ -467,3 +470,4 @@ function mostrarAlertaArca(titulo, mensaje, opciones = {}) {
 
     boton.focus();
 }
+                   

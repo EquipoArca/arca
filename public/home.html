@@ -124,26 +124,35 @@
 
     <main class="main-content">
         
-        <div id="pantalla-inicio" class="seccion-arca">
-            <div class="brand-title">ARCA</div>
+ <div id="pantalla-inicio" class="seccion-arca">
+            <!-- Título del Logo que cambiará dinámicamente -->
+            <div class="brand-title" id="brand-title-container">
+                ARCA
+            </div>
 
+            <!-- Contenedor de Tarjetas -->
             <section class="cards-container">
-                <a href="#" class="card report" onclick="abrirBloqueo()">
-                    <h2>Reportar</h2>
-                    <div class="report-logo"><img src="rlogo.png" alt="Logor"></div>
+                <!-- Tarjeta 1 (Reportar / Reportes) -->
+                <a href="#" class="card report" id="card-reportar-home" onclick="abrirBloqueo()">
+                    <h2 id="titulo-card-1">Reportar</h2>
+                    <div class="report-logo" id="logo-card-1"><img src="rlogo.png" alt="Logor"></div>
                 </a>
-                <a href="#" class="card adopt" onclick="abrirBloqueo()">
+
+                <!-- Tarjeta 2 (Adopciones) -->
+                <a href="#" class="card adopt" id="card-adopciones-home" onclick="abrirBloqueo()">
                     <h2>Adopciones</h2>
                     <div class="adopt-logo"><img src="hlogo.png" alt="Logoh"></div>
                 </a>
-                <a href="#" class="card donate" onclick="abrirBloqueo()">
+
+                <!-- Tarjeta 3 (Donaciones) -->
+                <a href="#" class="card donate" id="card-donaciones-home" onclick="abrirBloqueo()">
                     <h2>Donaciones</h2>
                     <div class="donate-logo"><img src="dlogo.png" alt="Logod"></div>
                 </a>
             </section>
 
             <a href="novedades.html" class="news-button">
-                <span class="plus"> Novedades</span>
+                <span class="plus">Ultimas Novedades</span>
             </a>
         </div>
 

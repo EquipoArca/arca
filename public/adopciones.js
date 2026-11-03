@@ -9,6 +9,20 @@ firebase.auth().onAuthStateChanged((user) => {
     }
 });
 
+// Función auxiliar para verificar si el usuario logueado es una fundación
+async function esCuentaFundacion(email) {
+    try {
+        const res = await fetch(`/api/obtener-usuario?correo=${encodeURIComponent(email)}`);
+        if (res.ok) {
+            const data = await res.json();
+            return data.tipo_usuario === 'fundacion' || localStorage.getItem('tipo_usuario') === 'fundacion';
+        }
+    } catch (e) {
+        console.error("Error verificando rol de fundación:", e);
+    }
+    return localStorage.getItem('tipo_usuario') === 'fundacion';
+}
+
 // Manejador para el botón "Ver animales en adopción"
 async function alHacerClicVerAnimales() {
     const user = usuarioActual || firebase.auth().currentUser;
@@ -26,7 +40,6 @@ async function alHacerClicVerAnimales() {
     }
 
     try {
-        // Corregido: Usando query params (?correo=...) para que coincida con server.js
         const respuesta = await fetch(`/api/verificar-adoptante?correo=${encodeURIComponent(user.email)}`, {
             method: 'GET',
             headers: {
@@ -80,6 +93,13 @@ async function alHacerClicPonerEnAdopcion() {
         return;
     }
 
+    // Si es cuenta de tipo fundación, se salta la restricción del perfil de adoptante y va directo al formulario
+    const fundacionTrue = await esCuentaFundacion(user.email);
+    if (fundacionTrue) {
+        window.location.href = "formulario_adopcion.html";
+        return;
+    }
+
     try {
         // Verificamos si también tiene perfil de adoptante antes de permitir publicar
         const respuesta = await fetch(`/api/verificar-adoptante?correo=${encodeURIComponent(user.email)}`, {
@@ -94,10 +114,13 @@ async function alHacerClicPonerEnAdopcion() {
         }
 
         const data = await respuesta.json();
-if (data.tienePerfil) {
+
+        if (data.tienePerfil) {
+            // ¡Tiene perfil! Guardamos su ubicación y lo mandamos al formulario de publicación
             localStorage.setItem('ubicacion_adoptante', data.ubicacion || data.ciudad || '');
             window.location.href = "formulario_adopcion.html";
         } else {
+            // No tiene perfil -> Muestra el modal de aviso para que lo cree primero
             abrirModalAviso();
         }
 

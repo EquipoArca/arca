@@ -1791,90 +1791,104 @@ app.post('/api/registrar-fundacion', express.json({ limit: '20mb' }), async (req
             VALUES (?, ?, ?, ?)
         `;
         
-        db.query(queryDocumentacion, [certBuffer, estatutoBuffer, financieroBuffer, registroBuffer], (err, resultadoDoc) => {
-            if (err) {
-                console.error("❌ Error al guardar documentación:", err.sqlMessage || err);
-                // Si falla MySQL, borramos el usuario creado en Firebase para no dejar rastro huérfano
+        db.query(queryDocumentacion, [certBuffer, estatutoBuffer, financieroBuffer, registroBuffer], (errDoc, resultadoDoc) => {
+            if (errDoc) {
+                console.error("❌ Error al guardar documentación:", errDoc.sqlMessage || errDoc);
                 getAuth().deleteUser(firebaseUser.uid).catch(() => {});
-                return res.status(500).json({ exito: false, mensaje: "Error al guardar los documentos legales: " + (err.sqlMessage || err.message) });
+                return res.status(500).json({ exito: false, mensaje: "Error al guardar los documentos legales: " + (errDoc.sqlMessage || errDoc.message) });
             }
 
             const idDocumentacionGenerado = resultadoDoc.insertId;
-            const fechaActual = new Date().toISOString().slice(0, 10);
 
-            // 3. Guardar en la tabla 'usuarios' con tipo fundación y estado pendiente
+            // 3. Generar un nombre de usuario único automáticamente para evitar duplicados
+           let nombreBase = (nombre_comercial || nombre_legal || 'Fundacion').substring(0, 40);
+           const nombreUsuarioFinal = `${nombreBase}_${Math.floor(1000 + Math.random() * 9000)}`;
+
             const queryUsuarios = `
-                INSERT INTO usuarios (
-                    tipo_usuario, 
-                    estado_aprobacion, 
-                    id_documentacion, 
-                    Nombre_Legal, 
-                    Nombre_Comercial, 
-                    id_representante, 
-                    Nit_Rut, 
-                    Pais, 
-                    Ciudad, 
-                    Direccion, 
-                    Telefono_fundacion, 
-                    correo_usuario, 
-                    Pagina_web, 
-                    Fecha_registro, 
-                    Descripcion_mision, 
-                    Descripcion_vision, 
-                    PFP_Fundacion, 
-                    Foto_Portada, 
-                    Programas_Proyectos_Actuales, 
-                    enfoque_otro
-                ) VALUES ('fundacion', 'pendiente', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ON DUPLICATE KEY UPDATE
-                    tipo_usuario = 'fundacion',
-                    estado_aprobacion = 'pendiente',
-                    id_documentacion = VALUES(id_documentacion),
-                    Nombre_Legal = VALUES(Nombre_Legal),
-                    Nombre_Comercial = VALUES(Nombre_Comercial),
-                    Nit_Rut = VALUES(Nit_Rut),
-                    Pais = VALUES(Pais),
-                    Ciudad = VALUES(Ciudad),
-                    Direccion = VALUES(Direccion),
-                    Telefono_fundacion = VALUES(Telefono_fundacion),
-                    Pagina_web = VALUES(Pagina_web),
-                    Descripcion_mision = VALUES(Descripcion_mision),
-                    Descripcion_vision = VALUES(Descripcion_vision),
-                    Programas_Proyectos_Actuales = VALUES(Programas_Proyectos_Actuales),
-                    enfoque_otro = VALUES(enfoque_otro);
+                INSERT INTO usuarios (tipo_usuario, estado_aprobacion, correo_usuario, nombre_usuario) 
+                VALUES ('fundacion', 'pendiente', ?, ?)
             `;
 
-            const valoresUsuarios = [
-                idDocumentacionGenerado,
-                nombre_legal || '',
-                nombre_comercial || '',
-                rep_documento || null,
-                nit_rut || '',
-                pais || 'Colombia',
-                ciudad || 'Medellín',
-                direccion || '',
-                telefono_fundacion || '',
-                correo_fundacion,
-                pagina_web || '',
-                fechaActual,
-                descripcion_mision || '',
-                descripcion_vision || '',
-                pfp_fundacion || '',
-                foto_portada || '',
-                programas_proyectos || '',
-                enfoque_otro || ''
-            ];
-
-            db.query(queryUsuarios, valoresUsuarios, (err2) => {
-                if (err2) {
-                    console.error("❌ Error al registrar en usuarios:", err2.sqlMessage || err2);
+            db.query(queryUsuarios, [correo_fundacion, nombreUsuarioFinal], (errUsr, resultadoUsuario) => {
+                if (errUsr) {
+                    console.error("❌ Error al registrar en usuarios:", errUsr.sqlMessage || errUsr);
                     getAuth().deleteUser(firebaseUser.uid).catch(() => {});
-                    return res.status(500).json({ exito: false, mensaje: "Error al registrar la fundación en usuarios: " + (err2.sqlMessage || err2.message) });
+                    return res.status(500).json({ exito: false, mensaje: "Error al registrar en usuarios: " + (errUsr.sqlMessage || errUsr.message) });
                 }
 
-                res.json({ 
-                    exito: true, 
-                    mensaje: "¡Fundación registrada con éxito! Quedó en estado pendiente de aprobación." 
+                // 4. Registrar los datos específicos en la tabla 'fundacion' incluyendo el correo
+                const queryFundacion = `
+                    INSERT INTO fundacion (
+                        id_documentacion, 
+                        Nombre_Legal, 
+                        Nombre_Comercial, 
+                        Nit_Rut, 
+                        Pais, 
+                        Ciudad, 
+                        Direccion, 
+                        Telefono_fundacion, 
+                        Pagina_web, 
+                        Descripcion_mision, 
+                        Descripcion_vision, 
+                        PFP_Fundacion, 
+                        Foto_Portada, 
+                        Programas_Proyectos_Actuales, 
+                        enfoque_otro,
+                        Correo_fundacion
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                `;
+
+                const valoresFundacion = [
+                    idDocumentacionGenerado,
+                    nombre_legal || '',
+                    nombre_comercial || '',
+                    nit_rut || '',
+                    pais || 'Colombia',
+                    ciudad || 'Medellín',
+                    direccion || '',
+                    telefono_fundacion || '',
+                    pagina_web || '',
+                    descripcion_mision || '',
+                    descripcion_vision || '',
+                    pfp_fundacion || '',
+                    foto_portada || '',
+                    programas_proyectos || '',
+                    enfoque_otro || '',
+                    correo_fundacion // <-- ¡Aquí pasamos el correo para cumplir con el campo obligatorio!
+                ];
+
+                db.query(queryFundacion, valoresFundacion, (errFund, resultadoFundacion) => {
+                    if (errFund) {
+                        console.error("❌ Error al registrar en la tabla fundacion:", errFund.sqlMessage || errFund);
+                        getAuth().deleteUser(firebaseUser.uid).catch(() => {});
+                        return res.status(500).json({ exito: false, mensaje: "Error al registrar la fundación: " + (errFund.sqlMessage || errFund.message) });
+                    }
+
+                    const idFundacionGenerado = resultadoFundacion.insertId;
+
+                    // 5. Guardar el representante legal en su tabla utilizando el id_fundacion recién creado
+                    const queryRepresentante = `
+                        INSERT INTO representante (nombre_completo, documento, telefono, correo, id_fundacion) 
+                        VALUES (?, ?, ?, ?, ?)
+                    `;
+                    
+                    db.query(queryRepresentante, [
+                        rep_nombre || '', 
+                        rep_documento || '', 
+                        rep_telefono || '', 
+                        rep_correo || '', 
+                        idFundacionGenerado
+                    ], (errRep) => {
+                        if (errRep) {
+                            console.error("❌ Error al guardar representante:", errRep.sqlMessage || errRep);
+                            // Opcional: podrías limpiar aquí si deseas estricta atomicidad
+                        }
+
+                        res.json({ 
+                            exito: true, 
+                            mensaje: "¡Fundación registrada con éxito! Quedó en estado pendiente de aprobación." 
+                        });
+                    });
                 });
             });
         });
@@ -1972,7 +1986,6 @@ app.post('/api/desbloquear-usuario', (req, res) => {
         });
     });
 });
-
 // ==========================================
 // INICIALIZACIÓN DEL SERVIDOR (Siempre al final)
 // ==========================================
