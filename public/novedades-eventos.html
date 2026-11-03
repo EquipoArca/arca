@@ -126,7 +126,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="script.js"></script>
     
-   <script>
+<script>
     // Control del Sidebar
     document.addEventListener('DOMContentLoaded', () => {
         const btnToggleMenu = document.getElementById('btn-toggle-menu');
@@ -139,10 +139,10 @@
             });
         }
 
-        cargarEventosEstiloGeneral();
+        cargarEventosEstiloIdetico();
     });
 
-    async function cargarEventosEstiloGeneral() {
+    async function cargarEventosEstiloIdetico() {
         const contenedor = document.getElementById('contenedor-novedades');
         if (!contenedor) return;
 
@@ -170,6 +170,9 @@
                     ? await obtenerNombreUbicacionGlobal(ubicacionTextoBruta) 
                     : ubicacionTextoBruta;
 
+                // Nombre comercial o identificador para el enlace al perfil público
+                const nombreOrganizador = evento.entidad_organizadora || 'Fundación';
+
                 const tarjeta = document.createElement('article');
                 tarjeta.className = 'tarjeta-prototipo-estilo';
                 
@@ -180,17 +183,18 @@
                     </div>
 
                     <div class="proto-card-body">
-                        <!-- Espacio de imagen decorativa o logo para mantener la misma estructura idéntica -->
+                        <!-- Contenedor izquierdo idéntico al de imágenes, pero con el icono de calendario estético -->
                         <div class="proto-img-wrapper" style="display: flex; align-items: center; justify-content: center; background: #f0f9ff;">
                             <i class="fa-solid fa-calendar-days" style="font-size: 48px; color: #3b82f6;"></i>
                         </div>
 
+                        <!-- Contenedor derecho idéntico al de las demás novedades -->
                         <div class="proto-content-right">
                             <div class="proto-pill-tipo">${evento.nombre_evento}</div>
                             <div class="proto-info-extra">
-                                <span class="proto-autor">Organiza: <strong>${evento.entidad_organizadora || 'Fundación'}</strong></span>
+                                <span class="proto-autor">Publicado por: <a href="perfil_publico.html?user=${encodeURIComponent(nombreOrganizador)}">@${nombreOrganizador}</a></span>
                                 <p class="proto-ubicacion"><i class="fa-solid fa-location-dot"></i> ${evento.lugar} (${ubicacionBonita})</p>
-                                <p class="proto-autor" style="margin-top: 5px; color: #555;">${evento.detalles_adicionales || ''}</p>
+                                <p class="proto-autor" style="margin-top: 4px; color: #555;">${evento.detalles_adicionales || ''}</p>
                             </div>
                             <div class="proto-footer-row">
                                 <button class="proto-btn-detalles" onclick="window.location.href='detalle_evento.html?id=${evento.id_evento}'">Ver detalles</button>
@@ -205,7 +209,6 @@
         }
     }
 </script>
-
     <style>
     /* Estilos unificados para mantener la misma línea visual prototipo */
     .tarjeta-prototipo-estilo {
