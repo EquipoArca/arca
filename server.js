@@ -1,6 +1,6 @@
-require('dotenv').config(); 
-const mysql = require('mysql2'); 
-const express = require('express'); 
+require('dotenv').config();
+const mysql = require('mysql2');
+const express = require('express');
 const cors = require('cors');
 const nodemailer = require('nodemailer');
 const path = require('path');
@@ -8,49 +8,37 @@ const multer = require('multer');
 const { initializeApp, cert } = require('firebase-admin/app');
 const { getAuth } = require('firebase-admin/auth');
 
-
-
 // ==========================================
-// INICIALIZACIÓN DE FIREBASE CON VARIABLE ÚNICA
+// INICIALIZACIÓN DE FIREBASE CON ARCHIVO LOCAL
 // ==========================================
 let credentialCert;
 
 if (process.env.FIREBASE_SERVICE_ACCOUNT) {
     try {
-        let rawEnv = process.env.FIREBASE_SERVICE_ACCOUNT.trim();
-        
-        // Limpiamos posibles saltos de línea mal formateados antes de parsear
-        let serviceAccount = typeof rawEnv === 'string' ? JSON.parse(rawEnv) : rawEnv;
-
-        // Corregimos los saltos de línea de la llave privada si vienen escapados como \n
-        if (serviceAccount.private_key) {
-            serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
-        }
-
+        const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
         credentialCert = cert(serviceAccount);
+        console.log("✅ Credenciales de Firebase cargadas correctamente desde la variable JSON de Render.");
     } catch (e) {
-        console.error("❌ ERROR CRÍTICO AL PARSEAR FIREBASE_SERVICE_ACCOUNT:", e.message);
+        console.error("❌ ERROR: No se pudo parsear el FIREBASE_SERVICE_ACCOUNT de Render.", e.message);
     }
-} 
-
-if (!credentialCert) {
+} else {
     try {
         const serviceAccount = require('./clave-firebase.json');
         credentialCert = cert(serviceAccount);
     } catch (e) {
-        console.error("❌ ERROR: No se encontró la configuración de Firebase en variables de entorno ni local.");
+        console.error("❌ ERROR: No se encontró la configuración de Firebase.");
     }
 }
 
-// Solo inicializamos si tenemos una credencial válida
-if (credentialCert) {
-    initializeApp({
-        credential: credentialCert
-    });
-    console.log("✅ Firebase Admin inicializado correctamente.");
-} else {
-    console.error("❌ FATAL: No se pudo inicializar Firebase Admin por falta de credenciales.");
-}
+initializeApp({
+    credential: credentialCert
+});
+const app = express();
+
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
+app.use(cors());
+
 // ==========================================
 // ARCHIVOS ESTÁTICOS
 // ==========================================
@@ -96,21 +84,21 @@ const codigosOTP = {};
 // ==========================================
 app.post('/registrar-usuario', (req, res) => {
     const { Nombre_usuario, Fecha_nacimiento, Correo_usuario, Telefono_usuario } = req.body;
-    
+   
     if (!Nombre_usuario || !Correo_usuario) {
         return res.status(400).json({ error: "El nombre de usuario y correo son obligatorios." });
     }
 
     db.query('SELECT id_usuarios FROM usuarios WHERE nombre_usuario = ?', [Nombre_usuario], (err, results) => {
         if (err) return res.status(500).json({ error: "Error en el servidor: " + err.message });
-        
+       
         if (results.length > 0) {
             return res.status(400).json({ error: "Este nombre de usuario ya está ocupado. Intenta con otro." });
         }
 
         const sql = 'INSERT INTO usuarios(nombre_usuario, Fecha_nacimiento, correo_usuario, Telefono_usuario) VALUES (?, ?, ?, ?)';
         const valores = [Nombre_usuario, Fecha_nacimiento, Correo_usuario, Telefono_usuario];
-        
+       
         db.query(sql, valores, (err, result) => {
             if (err) {
                 if (err.code === 'ER_DUP_ENTRY') {
@@ -131,7 +119,7 @@ app.post('/enviar-codigo-otp', async (req, res) => {
     }
 
     const codigo = Math.floor(1000 + Math.random() * 9000).toString();
-    
+   
     codigosOTP[correo] = {
         codigo: codigo,
         expira: Date.now() + 2 * 60 * 1000
@@ -212,7 +200,7 @@ app.get('/api/obtener-usuario', (req, res) => {
     }
 
     const query = "SELECT * FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))";
-    
+   
     db.query(query, [correo], (err, results) => {
         if (err) {
             console.error("Error al consultar usuario:", err);
@@ -295,8 +283,8 @@ app.get('/api/datos-usuario-registro', (req, res) => {
     const correoLimpio = correo.trim().toLowerCase();
 
     const sql = `
-        SELECT nombre_usuario, Fecha_nacimiento, Telefono_usuario, correo_usuario 
-        FROM usuarios 
+        SELECT nombre_usuario, Fecha_nacimiento, Telefono_usuario, correo_usuario
+        FROM usuarios
         WHERE LOWER(TRIM(correo_usuario)) = ?
     `;
 
@@ -349,7 +337,7 @@ app.post('/cambiar-nombre-usuario', (req, res) => {
     const correoLimpio = correo_usuario.trim().toLowerCase();
 
     const queryDueñoPropio = "SELECT id_usuarios FROM usuarios WHERE nombre_usuario = ? AND LOWER(TRIM(correo_usuario)) = ?";
-    
+   
     db.query(queryDueñoPropio, [nombreLimpio, correoLimpio], (errPropio, resPropio) => {
         if (errPropio) {
             console.error("❌ Error en consulta:", errPropio.message);
@@ -425,12 +413,12 @@ app.get('/validar-nombre-usuario', (req, res) => {
     const correoLimpio = correo_actual ? correo_actual.trim().toLowerCase() : '';
 
     let sql = `
-        SELECT id_usuarios, correo_usuario 
-        FROM usuarios 
-        WHERE nombre_usuario = ? 
+        SELECT id_usuarios, correo_usuario
+        FROM usuarios
+        WHERE nombre_usuario = ?
         ${correoLimpio ? 'AND LOWER(TRIM(correo_usuario)) != ?' : ''}
     `;
-    
+   
     let params = correoLimpio ? [nombreLimpio, correoLimpio] : [nombreLimpio];
 
     db.query(sql, params, (err, results) => {
@@ -542,14 +530,14 @@ app.delete('/api/eliminar-adoptante/:id_usuarios', (req, res) => {
 // REPORTES Y ESTADÍSTICAS
 // ==========================================
 app.post('/crear-reporte', (req, res) => {
-    const { 
-        id_tipo_reporte, 
-        Descripcion, 
-        Ubicacion, 
-        telefono_contacto, 
-        correo_contacto, 
+    const {
+        id_tipo_reporte,
+        Descripcion,
+        Ubicacion,
+        telefono_contacto,
+        correo_contacto,
         img_reporte,
-        correo_usuario 
+        correo_usuario
     } = req.body;
 
     if (!id_tipo_reporte || !Descripcion || !Ubicacion || !correo_usuario) {
@@ -566,9 +554,9 @@ app.post('/crear-reporte', (req, res) => {
         const Fecha_reporte = new Date().toISOString().split('T')[0];
 
         const queryVerificarDuplicado = `
-            SELECT id_reporte FROM reportes 
-            WHERE id_usuarios = ? AND Descripcion = ? AND Ubicacion = ? 
-            AND Fecha_reporte = ? 
+            SELECT id_reporte FROM reportes
+            WHERE id_usuarios = ? AND Descripcion = ? AND Ubicacion = ?
+            AND Fecha_reporte = ?
         `;
 
         db.query(queryVerificarDuplicado, [id_usuarios, Descripcion, Ubicacion, Fecha_reporte], (errDup, dupResults) => {
@@ -577,18 +565,18 @@ app.post('/crear-reporte', (req, res) => {
             }
 
             const queryInsertReporte = `
-                INSERT INTO reportes 
-                (id_tipo_reporte, Descripcion, Ubicacion, telefono_contacto, correo_contacto, Fecha_reporte, img_reporte, id_usuarios) 
+                INSERT INTO reportes
+                (id_tipo_reporte, Descripcion, Ubicacion, telefono_contacto, correo_contacto, Fecha_reporte, img_reporte, id_usuarios)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             `;
 
             const valores = [
-                id_tipo_reporte, 
-                Descripcion, 
-                Ubicacion, 
-                telefono_contacto || null, 
-                correo_contacto || null, 
-                Fecha_reporte, 
+                id_tipo_reporte,
+                Descripcion,
+                Ubicacion,
+                telefono_contacto || null,
+                correo_contacto || null,
+                Fecha_reporte,
                 img_reporte || null,
                 id_usuarios
             ];
@@ -601,15 +589,15 @@ app.post('/crear-reporte', (req, res) => {
 
                 const idReporteNuevo = result.insertId;
                 const queryInsertPublicacion = `INSERT INTO publicaciones (id_reporte) VALUES (?)`;
-                
+               
                 db.query(queryInsertPublicacion, [idReporteNuevo], (errPub) => {
                     if (errPub) {
                         console.error("⚠️ Advertencia: El reporte se creó pero falló al registrarse en publicaciones:", errPub.message);
                     }
 
-                    res.status(201).json({ 
-                        mensaje: "Reporte creado exitosamente", 
-                        id_reporte: idReporteNuevo 
+                    res.status(201).json({
+                        mensaje: "Reporte creado exitosamente",
+                        id_reporte: idReporteNuevo
                     });
                 });
             });
@@ -637,7 +625,7 @@ app.get('/reportes/balance-reportes', (req, res) => {
 
 app.get('/api/reportes/emergencias', (req, res) => {
     const sql = `
-        SELECT 
+        SELECT
             tr.Nombre_tipo_reporte AS tipo_emergencia,
             COUNT(r.id_reporte) AS total_casos
         FROM reportes r
@@ -654,8 +642,8 @@ app.get('/api/reportes/emergencias', (req, res) => {
 
 app.get('/api/reportes/usuarios-edad', (req, res) => {
     const sql = `
-        SELECT 
-            CASE 
+        SELECT
+            CASE
                 WHEN TIMESTAMPDIFF(YEAR, Fecha_nacimiento, CURDATE()) BETWEEN 18 AND 24 THEN '18-24 años'
                 WHEN TIMESTAMPDIFF(YEAR, Fecha_nacimiento, CURDATE()) BETWEEN 25 AND 34 THEN '25-34 años'
                 WHEN TIMESTAMPDIFF(YEAR, Fecha_nacimiento, CURDATE()) BETWEEN 35 AND 49 THEN '35-49 años'
@@ -685,7 +673,7 @@ app.get('/api/verificar-adoptante', (req, res) => {
     }
 
     const query = `
-        SELECT a.id_adoptante 
+        SELECT a.id_adoptante
         FROM adoptante a
         INNER JOIN usuarios u ON a.id_usuarios = u.id_usuarios
         WHERE u.correo_usuario = ?
@@ -706,7 +694,7 @@ app.get('/api/obtener-ficha-adoptante/:id_usuarios', (req, res) => {
     const idUsuarios = req.params.id_usuarios;
 
     const query = `
-        SELECT a.*, tv.tipo_vivienda AS tipo_vivienda_nombre 
+        SELECT a.*, tv.tipo_vivienda AS tipo_vivienda_nombre
         FROM adoptante a
         LEFT JOIN tipo_vivienda tv ON a.id_tipo_vivienda = tv.id_tipo_vivienda
         WHERE a.id_usuarios = ?
@@ -864,7 +852,7 @@ app.get('/api/guardar-publicacion/:correo', (req, res) => {
     const correo = req.params.correo;
 
     const query = `
-        SELECT 
+        SELECT
             p.id_publicacion,
             'reporte' AS tipo_publicacion,
             r.id_reporte AS id_origen,
@@ -883,15 +871,15 @@ app.get('/api/guardar-publicacion/:correo', (req, res) => {
         LEFT JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
         WHERE LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(?))
           AND r.id_usuarios NOT IN (
-              SELECT ub.id_usuario_bloqueado 
+              SELECT ub.id_usuario_bloqueado
               FROM usuarios_bloqueados ub
               INNER JOIN usuarios u_bloq ON ub.id_usuario_bloqueador = u_bloq.id_usuarios
               WHERE LOWER(TRIM(u_bloq.correo_usuario)) = LOWER(TRIM(?))
           )
-        
+       
         UNION ALL
-        
-        SELECT 
+       
+        SELECT
             p.id_publicacion,
             'adopcion' AS tipo_publicacion,
             pa.id_publicaciones_adopcion AS id_origen,
@@ -910,7 +898,7 @@ app.get('/api/guardar-publicacion/:correo', (req, res) => {
         INNER JOIN animal a ON pa.id_animal = a.id_animal
         WHERE LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(?))
           AND pa.id_usuarios NOT IN (
-              SELECT ub.id_usuario_bloqueado 
+              SELECT ub.id_usuario_bloqueado
               FROM usuarios_bloqueados ub
               INNER JOIN usuarios u_bloq ON ub.id_usuario_bloqueador = u_bloq.id_usuarios
               WHERE LOWER(TRIM(u_bloq.correo_usuario)) = LOWER(TRIM(?))
@@ -918,7 +906,7 @@ app.get('/api/guardar-publicacion/:correo', (req, res) => {
 
         UNION ALL
 
-        SELECT 
+        SELECT
             p.id_publicacion,
             'evento' AS tipo_publicacion,
             e.id_evento AS id_origen,
@@ -968,7 +956,7 @@ app.post('/api/crear-notificacion-recordatorio', (req, res) => {
         const idUsuarioDestino = results[0].id_usuarios;
 
         const queryNotif = `
-            INSERT INTO notificaciones (id_usuario_destino, id_usuario_origen, tipo, mensaje) 
+            INSERT INTO notificaciones (id_usuario_destino, id_usuario_origen, tipo, mensaje)
             VALUES (?, NULL, 'recordatorio_evento', ?)
         `;
 
@@ -1009,7 +997,7 @@ app.get('/api/guardados/ids/:correo', (req, res) => {
     const correo = req.params.correo;
 
     const query = `
-        SELECT g.id_publicacion 
+        SELECT g.id_publicacion
         FROM guardados g
         INNER JOIN usuarios u ON g.id_usuarios = u.id_usuarios
         WHERE LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(?))
@@ -1066,7 +1054,7 @@ app.get('/api/publicaciones-globales', (req, res) => {
     const correoVisitante = req.query.correo;
 
     let sql = `
-        SELECT 
+        SELECT
             p.id_publicacion,
             'reporte' AS tipo_publicacion,
             r.id_reporte AS id_origen,
@@ -1077,6 +1065,7 @@ app.get('/api/publicaciones-globales', (req, res) => {
             tr.Nombre_tipo_reporte AS nombre_tipo_reporte,
             r.telefono_contacto,
             r.correo_contacto,
+            r.estado,
             NULL AS nombre_animal,
             u.nombre_usuario AS nombre_usuario,
             u.tipo_usuario AS tipo_usuario,
@@ -1086,7 +1075,6 @@ app.get('/api/publicaciones-globales', (req, res) => {
         INNER JOIN usuarios u ON r.id_usuarios = u.id_usuarios
         LEFT JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
         WHERE r.id_usuarios NOT IN (
-            -- Excluir si tú bloqueaste al autor O si el autor te bloqueó a ti
             SELECT ub.id_usuario_bloqueado FROM usuarios_bloqueados ub
             INNER JOIN usuarios u_bloq ON ub.id_usuario_bloqueador = u_bloq.id_usuarios
             WHERE LOWER(TRIM(u_bloq.correo_usuario)) = LOWER(TRIM(?))
@@ -1095,10 +1083,10 @@ app.get('/api/publicaciones-globales', (req, res) => {
             INNER JOIN usuarios u_bloq ON ub.id_usuario_bloqueado = u_bloq.id_usuarios
             WHERE LOWER(TRIM(u_bloq.correo_usuario)) = LOWER(TRIM(?))
         )
-        
+       
         UNION ALL
-        
-        SELECT 
+       
+        SELECT
             p.id_publicacion,
             'adopcion' AS tipo_publicacion,
             pa.id_publicaciones_adopcion AS id_origen,
@@ -1109,6 +1097,7 @@ app.get('/api/publicaciones-globales', (req, res) => {
             CONCAT('Adopción: ', a.nombre_animal) AS nombre_tipo_reporte,
             pa.telefono_contacto,
             pa.correo_contacto,
+            NULL AS estado,
             a.nombre_animal,
             u.nombre_usuario AS nombre_usuario,
             u.tipo_usuario AS tipo_usuario,
@@ -1129,7 +1118,7 @@ app.get('/api/publicaciones-globales', (req, res) => {
 
         UNION ALL
 
-        SELECT 
+        SELECT
             p.id_publicacion,
             'evento' AS tipo_publicacion,
             e.id_evento AS id_origen,
@@ -1153,7 +1142,6 @@ app.get('/api/publicaciones-globales', (req, res) => {
     `;
 
     const correoParam = correoVisitante || '';
-    // Pasamos el correo 4 veces para cubrir las subconsultas de exclusión mutua
     db.query(sql, [correoParam, correoParam, correoParam, correoParam], (err, rows) => {
         if (err) {
             console.error("❌ ERROR AL OBTENER PUBLICACIONES GLOBALES:", err.message);
@@ -1212,7 +1200,7 @@ app.get('/api/reportes/:id', (req, res) => {
     const idReporte = req.params.id;
 
     const query = `
-        SELECT r.*, tr.Nombre_tipo_reporte 
+        SELECT r.*, tr.Nombre_tipo_reporte
         FROM reportes r
         LEFT JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
         WHERE r.id_reporte = ?
@@ -1234,38 +1222,38 @@ app.get('/api/reportes/:id', (req, res) => {
 
 app.put('/api/reportes/:id', (req, res) => {
     const idReporte = req.params.id;
-    const { 
-        id_tipo_reporte, 
-        descripcion_reporte, 
-        Descripcion, 
-        direccion_reporte, 
-        Ubicacion, 
-        telefono_contacto, 
-        correo_contacto, 
-        img_reporte 
+    const {
+        id_tipo_reporte,
+        descripcion_reporte,
+        Descripcion,
+        direccion_reporte,
+        Ubicacion,
+        telefono_contacto,
+        correo_contacto,
+        img_reporte
     } = req.body;
 
     const descFinal = descripcion_reporte || Descripcion;
     const ubiFinal = direccion_reporte || Ubicacion;
 
     const sql = `
-        UPDATE reportes 
-        SET id_tipo_reporte = ?, 
-            Descripcion = ?, 
-            Ubicacion = ?, 
-            telefono_contacto = ?, 
+        UPDATE reportes
+        SET id_tipo_reporte = ?,
+            Descripcion = ?,
+            Ubicacion = ?,
+            telefono_contacto = ?,
             correo_contacto = ?,
             img_reporte = ?
         WHERE id_reporte = ?
     `;
 
     const valores = [
-        id_tipo_reporte, 
-        descFinal, 
-        ubiFinal, 
-        telefono_contacto || null, 
-        correo_contacto || null, 
-        img_reporte || null, 
+        id_tipo_reporte,
+        descFinal,
+        ubiFinal,
+        telefono_contacto || null,
+        correo_contacto || null,
+        img_reporte || null,
         idReporte
     ];
 
@@ -1327,7 +1315,7 @@ app.post('/api/crear-adopcion', (req, res) => {
         const id_usuarios = results[0].id_usuarios;
         const correoRegistrado = results[0].correo_bd;
         const telefonoRegistrado = results[0].telefono_bd;
-        
+       
         const correoFinal = (correo_contacto && correo_contacto.trim() !== "") ? correo_contacto : correoRegistrado;
         const telefonoFinal = (telefono_contacto && telefono_contacto.trim() !== "") ? telefono_contacto : telefonoRegistrado;
         const id_estado = 2;
@@ -1338,25 +1326,25 @@ app.post('/api/crear-adopcion', (req, res) => {
             }
 
             const queryAnimal = `
-                INSERT INTO animal 
-                (nombre_animal, id_especie, otro_especie, id_estado, sexo_animal, fecha_nacimiento_animal_aprox, id_raza, otro_raza, id_tamaño, descripcion_animal, ciudad, barrio, fotos_animal, id_usuarios) 
+                INSERT INTO animal
+                (nombre_animal, id_especie, otro_especie, id_estado, sexo_animal, fecha_nacimiento_animal_aprox, id_raza, otro_raza, id_tamaño, descripcion_animal, ciudad, barrio, fotos_animal, id_usuarios)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
-            
+           
             db.query(queryAnimal, [
-                nombre_animal, 
-                id_especie, 
-                otro_especie || null, 
-                id_estado, 
-                sexo_animal, 
+                nombre_animal,
+                id_especie,
+                otro_especie || null,
+                id_estado,
+                sexo_animal,
                 edad_aprox,
-                id_raza, 
-                otro_raza || null, 
-                id_tamaño, 
-                descripcion_adopcion, 
-                ciudad, 
-                barrio, 
-                fotos_animal || '', 
+                id_raza,
+                otro_raza || null,
+                id_tamaño,
+                descripcion_adopcion,
+                ciudad,
+                barrio,
+                fotos_animal || '',
                 id_usuarios
             ], (errAnim, resultadoAnimal) => {
                 if (errAnim) {
@@ -1364,10 +1352,10 @@ app.post('/api/crear-adopcion', (req, res) => {
                         res.status(500).json({ error: "Error al guardar el animal: " + errAnim.message });
                     });
                 }
-                
+               
                 const idAnimalGenerado = resultadoAnimal.insertId;
                 const queryAdopcion = "INSERT INTO publicaciones_adopcion (id_animal, id_usuarios, telefono_contacto, correo_contacto) VALUES (?, ?, ?, ?)";
-                
+               
                 db.query(queryAdopcion, [idAnimalGenerado, id_usuarios, telefonoFinal, correoFinal], (errAdop, resultadoAdopcion) => {
                     if (errAdop) {
                         return db.rollback(() => {
@@ -1377,7 +1365,7 @@ app.post('/api/crear-adopcion', (req, res) => {
 
                     const idAdopcionGenerado = resultadoAdopcion.insertId;
                     const queryPublicacion = "INSERT INTO publicaciones (id_animal, id_publicaciones_adopcion) VALUES (?, ?)";
-                    
+                   
                     db.query(queryPublicacion, [idAnimalGenerado, idAdopcionGenerado], (errPub) => {
                         if (errPub) {
                             return db.rollback(() => {
@@ -1408,7 +1396,7 @@ app.get('/api/mis-reportes', (req, res) => {
     }
 
     const sql = `
-        SELECT 
+        SELECT
             p.id_publicacion,
             'reporte' AS tipo_publicacion,
             r.id_reporte AS id_origen,
@@ -1425,10 +1413,10 @@ app.get('/api/mis-reportes', (req, res) => {
         INNER JOIN usuarios u ON r.id_usuarios = u.id_usuarios
         LEFT JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
         WHERE LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(?))
-        
+       
         UNION ALL
-        
-        SELECT 
+       
+        SELECT
             p.id_publicacion,
             'adopcion' AS tipo_publicacion,
             pa.id_publicaciones_adopcion AS id_origen,
@@ -1448,7 +1436,7 @@ app.get('/api/mis-reportes', (req, res) => {
 
         UNION ALL
 
-        SELECT 
+        SELECT
             p.id_publicacion,
             'evento' AS tipo_publicacion,
             e.id_evento AS id_origen,
@@ -1481,7 +1469,7 @@ app.get('/api/adopciones/:id', (req, res) => {
     const idAdopcion = req.params.id;
 
     const sql = `
-        SELECT 
+        SELECT
             pa.id_publicaciones_adopcion,
             pa.telefono_contacto,
             pa.correo_contacto,
@@ -1552,9 +1540,9 @@ app.put('/api/actualizar-adopcion/:id', (req, res) => {
             if (errTrans) return res.status(500).json({ error: "Error en la transacción." });
 
             const queryUpdateAnimal = `
-                UPDATE animal 
-                SET nombre_animal = ?, id_especie = ?, otro_especie = ?, sexo_animal = ?, 
-                    fecha_nacimiento_animal_aprox = ?, id_raza = ?, otro_raza = ?, id_tamaño = ?, 
+                UPDATE animal
+                SET nombre_animal = ?, id_especie = ?, otro_especie = ?, sexo_animal = ?,
+                    fecha_nacimiento_animal_aprox = ?, id_raza = ?, otro_raza = ?, id_tamaño = ?,
                     descripcion_animal = ?, ciudad = ?, barrio = ?, fotos_animal = ?
                 WHERE id_animal = ?
             `;
@@ -1569,7 +1557,7 @@ app.put('/api/actualizar-adopcion/:id', (req, res) => {
                 }
 
                 const queryUpdatePub = `
-                    UPDATE publicaciones_adopcion 
+                    UPDATE publicaciones_adopcion
                     SET telefono_contacto = ?, correo_contacto = ?
                     WHERE id_publicaciones_adopcion = ?
                 `;
@@ -1593,12 +1581,12 @@ app.put('/api/actualizar-adopcion/:id', (req, res) => {
 
 app.get('/api/perfil-publico/:parametro', (req, res) => {
     const parametro = decodeURIComponent(req.params.parametro).trim();
-    const correoVisitante = req.query.correo_visitante; 
+    const correoVisitante = req.query.correo_visitante;
 
     const sql = `
         SELECT u.id_usuarios, u.nombre_usuario, u.foto_perfil, u.correo_usuario, u.Telefono_usuario
         FROM usuarios u
-        WHERE u.nombre_usuario LIKE ? 
+        WHERE u.nombre_usuario LIKE ?
            OR u.correo_usuario LIKE ?
     `;
 
@@ -1627,7 +1615,7 @@ app.get('/api/perfil-publico/:parametro', (req, res) => {
             }
 
             const sqlVerificaciones = `
-                SELECT 
+                SELECT
                     (SELECT COUNT(*) FROM seguidores WHERE id_usuario_seguidor = (SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))) AND id_usuario_seguido = ?) AS siguiendo,
                     (SELECT estado FROM solicitudes_adoptante WHERE id_solicitante = (SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))) AND id_propietario = ?) AS estado_solicitud
             `;
@@ -1671,7 +1659,7 @@ app.post('/api/solicitar-ver-adoptante', (req, res) => {
 
     db.query("SELECT id_usuarios, nombre_usuario FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))", [correo_solicitante], (err, rows) => {
         if (err || rows.length === 0) return res.status(400).json({ error: "Error de usuario" });
-        
+       
         const idSolicitante = rows[0].id_usuarios;
         const nombreSolicitante = rows[0].nombre_usuario;
 
@@ -1690,7 +1678,7 @@ app.post('/api/solicitar-ver-adoptante', (req, res) => {
             db.query(sql, [idSolicitante, id_propietario], () => {
                 const msg = `@${nombreSolicitante} quiere ver tu perfil de adoptante.`;
                 const checkNotif = "SELECT id_notificacion FROM notificaciones WHERE id_usuario_destino = ? AND id_usuario_origen = ? AND tipo = 'solicitud_adoptante' AND leida = 0";
-                
+               
                 db.query(checkNotif, [id_propietario, idSolicitante], (errN, resN) => {
                     if (!resN || resN.length === 0) {
                         db.query("INSERT INTO notificaciones (id_usuario_destino, id_usuario_origen, tipo, mensaje) VALUES (?, ?, 'solicitud_adoptante', ?)", [id_propietario, idSolicitante, msg]);
@@ -1741,9 +1729,9 @@ app.post('/api/responder-solicitud-adoptante', (req, res) => {
                 FROM solicitudes_adoptante s
                 WHERE s.id_solicitud = ?
                   AND NOT EXISTS (
-                      SELECT 1 FROM notificaciones n 
-                      WHERE n.id_usuario_destino = s.id_solicitante 
-                        AND n.id_usuario_origen = s.id_propietario 
+                      SELECT 1 FROM notificaciones n
+                      WHERE n.id_usuario_destino = s.id_solicitante
+                        AND n.id_usuario_origen = s.id_propietario
                         AND n.tipo = 'solicitud_aceptada'
                   )
             `;
@@ -1773,8 +1761,8 @@ app.get('/api/ficha-adoptante-publica/:username', (req, res) => {
         const usuarioTarget = resUser[0];
 
         const sqlVerificarPermiso = `
-            SELECT estado FROM solicitudes_adoptante 
-            WHERE id_solicitante = (SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))) 
+            SELECT estado FROM solicitudes_adoptante
+            WHERE id_solicitante = (SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?)))
               AND id_propietario = ? AND estado = 'aceptada'
         `;
 
@@ -1806,9 +1794,9 @@ const upload = multer({ storage: multer.memoryStorage() });
 app.post('/api/registrar-fundacion', express.json({ limit: '20mb' }), async (req, res) => {
     const {
         correo_fundacion, password,
-        nombre_legal, nombre_comercial, nit_rut, id_representante,
+        nombre_legal, nombre_comercial, nit_rut,
         pais, ciudad, direccion, telefono_fundacion, pagina_web,
-        rep_nombre, rep_documento, rep_cargo, rep_telefono, metodos_donacion,
+        rep_nombre, rep_documento, rep_cargo, rep_telefono, rep_correo, metodos_donacion,
         descripcion_mision, descripcion_vision, programas_proyectos, pfp_fundacion, foto_portada, enfoque_otro,
         certificado_existencia, estatuto, registro_oficial, estado_financiero
     } = req.body;
@@ -1831,8 +1819,6 @@ app.post('/api/registrar-fundacion', express.json({ limit: '20mb' }), async (req
     const financieroBuffer = parseBase64ToBuffer(estado_financiero);
 
     try {
-        // 1. Crear la cuenta en Firebase Auth usando Firebase Admin (Backend)
-        // Esto evita crear la cuenta antes de tiempo si el usuario no termina el formulario
         let firebaseUser;
         try {
             firebaseUser = await getAuth().createUser({
@@ -1847,12 +1833,11 @@ app.post('/api/registrar-fundacion', express.json({ limit: '20mb' }), async (req
             throw firebaseErr;
         }
 
-        // 2. Guardar los documentos en la tabla 'documentacion' de MySQL
         const queryDocumentacion = `
-            INSERT INTO documentacion (certificado_existencia, estatuto, estado_financiero, registro_oficial) 
+            INSERT INTO documentacion (certificado_existencia, estatuto, estado_financiero, registro_oficial)
             VALUES (?, ?, ?, ?)
         `;
-        
+       
         db.query(queryDocumentacion, [certBuffer, estatutoBuffer, financieroBuffer, registroBuffer], (errDoc, resultadoDoc) => {
             if (errDoc) {
                 console.error("❌ Error al guardar documentación:", errDoc.sqlMessage || errDoc);
@@ -1865,7 +1850,7 @@ app.post('/api/registrar-fundacion', express.json({ limit: '20mb' }), async (req
             const nombreUsuarioFinal = `${nombreBase}_${Math.floor(1000 + Math.random() * 9000)}`;
 
             const queryUsuarios = `
-                INSERT INTO usuarios (tipo_usuario, estado_aprobacion, correo_usuario, nombre_usuario) 
+                INSERT INTO usuarios (tipo_usuario, estado_aprobacion, correo_usuario, nombre_usuario)
                 VALUES ('fundacion', 'pendiente', ?, ?)
             `;
 
@@ -1878,8 +1863,8 @@ app.post('/api/registrar-fundacion', express.json({ limit: '20mb' }), async (req
 
                 const queryFundacion = `
                     INSERT INTO fundacion (
-                        id_documentacion, Nombre_Legal, Nombre_Comercial, Nit_Rut, Pais, Ciudad, Direccion, 
-                        Telefono_fundacion, Pagina_web, Descripcion_mision, Descripcion_vision, 
+                        id_documentacion, Nombre_Legal, Nombre_Comercial, Nit_Rut, Pais, Ciudad, Direccion,
+                        Telefono_fundacion, Pagina_web, Descripcion_mision, Descripcion_vision,
                         PFP_Fundacion, Foto_Portada, Programas_Proyectos_Actuales, enfoque_otro, Correo_fundacion
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 `;
@@ -1912,10 +1897,10 @@ app.post('/api/registrar-fundacion', express.json({ limit: '20mb' }), async (req
 
                     const idFundacionGenerado = resultadoFundacion.insertId;
                     const queryRepresentante = `
-                        INSERT INTO representante (nombre_completo, documento, telefono, correo, id_fundacion) 
+                        INSERT INTO representante (nombre_completo, documento, telefono, correo, id_fundacion)
                         VALUES (?, ?, ?, ?, ?)
                     `;
-                    
+                   
                     db.query(queryRepresentante, [rep_nombre || '', rep_documento || '', rep_telefono || '', rep_correo || '', idFundacionGenerado], () => {
                         res.json({ exito: true, mensaje: "¡Fundación registrada con éxito!" });
                     });
@@ -2008,9 +1993,9 @@ app.post('/api/admin/aprobar-fundacion', async (req, res) => {
     const { id_fundacion, correo_fundacion, nombre_comercial } = req.body;
 
     const queryUpdate = `
-        UPDATE usuarios u 
-        JOIN fundacion f ON u.correo_usuario = f.Correo_fundacion 
-        SET u.estado_aprobacion = 'aprobado' 
+        UPDATE usuarios u
+        JOIN fundacion f ON u.correo_usuario = f.Correo_fundacion
+        SET u.estado_aprobacion = 'aprobado'
         WHERE f.id_fundacion = ?
     `;
 
@@ -2043,8 +2028,8 @@ app.get('/api/obtener-fundacion-header', (req, res) => {
     if (!correo) return res.status(400).json({ error: "Correo requerido" });
 
     const query = `
-        SELECT Nombre_Comercial AS nombre_comercial, PFP_Fundacion AS pfp_fundacion 
-        FROM fundacion 
+        SELECT Nombre_Comercial AS nombre_comercial, PFP_Fundacion AS pfp_fundacion
+        FROM fundacion
         WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(?))
     `;
     db.query(query, [correo], (err, results) => {
@@ -2094,7 +2079,7 @@ app.get('/api/obtener-fundacion', (req, res) => {
     }
 
     const query = `
-        SELECT f.*, u.nombre_usuario 
+        SELECT f.*, u.nombre_usuario
         FROM fundacion f
         LEFT JOIN usuarios u ON LOWER(TRIM(f.Correo_fundacion)) = LOWER(TRIM(u.correo_usuario))
         WHERE LOWER(TRIM(f.Correo_fundacion)) = LOWER(TRIM(?))
@@ -2137,11 +2122,11 @@ app.put('/api/actualizar-fundacion', express.json({ limit: '50mb' }), express.ur
 
     // 1. Construimos la consulta base con los campos de texto
     let campos = [
-        "Nombre_Comercial = ?", 
-        "Descripcion_mision = ?", 
-        "Descripcion_vision = ?", 
-        "Programas_Proyectos_Actuales = ?", 
-        "Telefono_fundacion = ?", 
+        "Nombre_Comercial = ?",
+        "Descripcion_mision = ?",
+        "Descripcion_vision = ?",
+        "Programas_Proyectos_Actuales = ?",
+        "Telefono_fundacion = ?",
         "Instagram = ?",
         "Facebook = ?",
         "TikTok = ?",
@@ -2247,7 +2232,7 @@ app.post('/api/crear-evento', (req, res) => {
                 // Enviar notificación a todos los usuarios normales
                 const mensajeNotif = `¡Nueva fundación organizó el evento '${nombre_evento}'!`;
                 const queryUsuariosNormales = `SELECT id_usuarios FROM usuarios WHERE tipo_usuario = 'usuario' OR tipo_usuario IS NULL`;
-                
+               
                 db.query(queryUsuariosNormales, (errU, usuarios) => {
                     if (!errU && usuarios && usuarios.length > 0) {
                         db.query("SELECT id_usuarios FROM usuarios WHERE correo_usuario = ?", [correo_fundacion], (errUsr, resUsr) => {
@@ -2312,7 +2297,7 @@ app.put('/api/eventos/:id', (req, res) => {
         const id_fundacion = resFund[0].id_fundacion;
 
         const queryUpdate = `
-            UPDATE eventos 
+            UPDATE eventos
             SET nombre_evento = ?, lugar = ?, ubicacion = ?, fecha_hora = ?, detalles_adicionales = ?
             WHERE id_evento = ? AND id_fundacion = ?
         `;
@@ -2347,7 +2332,7 @@ app.put('/api/eventos/:id', (req, res) => {
 // ==========================================
 app.get('/api/novedades', (req, res) => {
     const query = `
-        SELECT 
+        SELECT
             p.id_publicacion,
             'reporte' AS tipo_publicacion,
             r.id_reporte AS id_origen,
@@ -2361,10 +2346,10 @@ app.get('/api/novedades', (req, res) => {
         INNER JOIN reportes r ON p.id_reporte = r.id_reporte
         INNER JOIN usuarios u ON r.id_usuarios = u.id_usuarios
         LEFT JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
-        
+       
         UNION ALL
-        
-        SELECT 
+       
+        SELECT
             p.id_publicacion,
             'adopcion' AS tipo_publicacion,
             pa.id_publicaciones_adopcion AS id_origen,
@@ -2381,7 +2366,7 @@ app.get('/api/novedades', (req, res) => {
 
         UNION ALL
 
-        SELECT 
+        SELECT
             p.id_publicacion,
             'evento' AS tipo_publicacion,
             e.id_evento AS id_origen,
