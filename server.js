@@ -2082,6 +2082,102 @@ app.put('/api/actualizar-fundacion', express.json({ limit: '50mb' }), express.ur
     });
 });
 // ==========================================
+// MÓDULO DE CREACIÓN Y GESTIÓN DE EVENTOS
+// ==========================================
+app.post('/api/crear-evento', (req, res) => {
+    const {
+        nombre_evento,
+        entidad_organizadora, // Se puede guardar o usar para la entidad
+        ubicacion,
+        lugar,
+        fecha_hora,
+        tipo_evento,          // id_tipo_evento o texto
+        animales_aplicables,  // id_animales_aplicables o texto
+        detalles_adicionales,
+        correo_fundacion
+    } = req.body;
+
+    if (!nombre_evento || !lugar || !fecha_hora || !correo_fundacion) {
+        return res.status(400).json({ error: "Faltan campos obligatorios para registrar el evento." });
+    }
+
+    // Primero buscamos el id_fundacion usando el correo
+    db.query("SELECT id_fundacion FROM fundacion WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(?))", [correo_fundacion], (errF, resFund) => {
+        if (errF || resFund.length === 0) {
+            return res.status(404).json({ error: "No se encontró la fundación asociada a este correo." });
+        }
+
+        const id_fundacion = resFund[0].id_fundacion;
+
+        const queryEvento = `
+            INSERT INTO eventos (id_fundacion, nombre_evento, ubicacion, lugar, fecha_hora, detalles_adicionales)
+            VALUES (?, ?, ?, ?, ?, ?)
+        `;
+
+        db.query(queryEvento, [
+            id_fundacion,
+            nombre_evento,
+            ubicacion || 'Medellín',
+            lugar,
+            fecha_hora,
+            detalles_adicionales || ''
+        ], (err, resultado) => {
+            if (err) {
+                console.error("❌ Error al guardar el evento en MySQL:", err.sqlMessage || err.message);
+                return res.status(500).json({ error: "Error en el servidor al guardar el evento: " + (err.sqlMessage || err.message) });
+            }
+
+            const idEventoGenerado = resultado.insertId;
+
+            // Registrar en publicaciones generales para el feed y guardados
+            const queryPub = `INSERT INTO publicaciones (id_evento) VALUES (?)`;
+            db.query(queryPub, [idEventoGenerado], (errPub) => {
+                if (errPub) {
+                    console.error("⚠️ Advertencia: El evento se creó pero falló en publicaciones:", errPub.message);
+                }
+
+                // Enviar notificación a todos los usuarios normales
+                const mensajeNotif = `¡Nueva fundación organizó el evento '${nombre_evento}'!`;
+                const queryUsuariosNormales = `SELECT id_usuarios FROM usuarios WHERE tipo_usuario = 'usuario' OR tipo_usuario IS NULL`;
+                
+                db.query(queryUsuariosNormales, (errU, usuarios) => {
+                    if (!errU && usuarios && usuarios.length > 0) {
+                        db.query("SELECT id_usuarios FROM usuarios WHERE correo_usuario = ?", [correo_fundacion], (errUsr, resUsr) => {
+                            const idOrigen = (resUsr && resUsr.length > 0) ? resUsr[0].id_usuarios : 1;
+
+                            usuarios.forEach(u => {
+                                db.query(
+                                    "INSERT INTO notificaciones (id_usuario_destino, id_usuario_origen, tipo, mensaje) VALUES (?, ?, 'nuevo_evento', ?)",
+                                    [u.id_usuarios, idOrigen, mensajeNotif]
+                                );
+                            });
+                        });
+                    }
+                });
+
+                res.status(201).json({ mensaje: "¡Evento publicado con éxito y notificaciones enviadas!", id_evento: idEventoGenerado });
+            });
+        });
+    });
+});
+
+// Endpoint para listar los eventos en la sección de novedades
+app.get('/api/eventos', (req, res) => {
+    const query = `
+        SELECT e.*, f.Nombre_Comercial AS entidad_organizadora, f.PFP_Fundacion AS foto_fundacion
+        FROM eventos e
+        LEFT JOIN fundacion f ON e.id_fundacion = f.id_fundacion
+        ORDER BY e.id_evento DESC
+    `;
+    db.query(query, (err, results) => {
+        if (err) {
+            console.error("❌ Error al obtener eventos:", err.message);
+            return res.status(500).json({ error: "Error al obtener los eventos." });
+        }
+        res.json(results);
+    });
+});
+// ==========================================
 // INICIALIZACIÓN DEL SERVIDOR
 // ==========================================
 const PORT = process.env.PORT || 3000;
