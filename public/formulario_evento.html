@@ -8,6 +8,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="dark-mode.css">
     <script>
@@ -238,9 +240,21 @@
                     <input type="text" id="input-nombre-evento" class="evento-input" placeholder="Ej. Jornada de Vacunación" required>
                 </div>
 
-                <div class="evento-grupo-campo">
-                    <span class="evento-label melocoton">Lugar exacto</span>
-                    <input type="text" id="input-lugar" class="evento-input" placeholder="Ej. Parque Principal de Robledo" required>
+                <div class="evento-grupo-campo ancho-completo">
+                    <span class="evento-label melocoton">Selecciona la ubicación exacta en el mapa:</span>
+                    <div style="font-size: 12.5px; color: #775a4c; margin-bottom: 6px;">Escribe el lugar en el buscador o arrastra el pin sobre el mapa en Medellín.</div>
+                    
+                    <!-- Buscador interno para el mini mapa -->
+                    <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                        <input type="text" id="buscador-mini-mapa" class="evento-input" placeholder="Ej. Parque de Robledo, Medellín" style="flex: 1;">
+                        <button type="button" id="btn-buscar-mini-mapa" class="btn-publicar-evento" style="padding: 6px 16px; font-size: 0.9rem;">Buscar</button>
+                    </div>
+
+                    <!-- Contenedor del Mini Mapa -->
+                    <div id="mini- mapa-selector" style="width: 100%; height: 220px; border-radius: 16px; border: 1.5px solid rgba(255,255,255,0.9);"></div>
+                    
+                    <!-- Input oculto o visible donde se guardarán las coordenadas automáticamente -->
+                    <input type="hidden" id="input-ubicacion-coords" name="ubicacion">
                 </div>
 
                <div class="evento-grupo-campo">
@@ -390,6 +404,70 @@
                 }
             });
         }
+    });
+    </script>
+<script>
+    let miniMap, miniMarker;
+
+    function inicializarMiniMapa() {
+        // Coordenadas iniciales por defecto en Medellín
+        const latDefault = 6.25184;
+        const lngDefault = -75.56359;
+
+        // Inicializar el mapa en el contenedor pequeño
+        miniMap = L.map('mini-mapa-selector').setView([latDefault, lngDefault], 14);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(miniMap);
+
+        // Crear un pin movible (draggable)
+        miniMarker = L.marker([latDefault, lngDefault], { draggable: true }).addTo(miniMap);
+
+        // Actualizar el campo oculto de coordenadas cuando se mueve el pin
+        miniMarker.on('dragend', function (e) {
+            const position = miniMarker.getLatLng();
+            document.getElementById('input-ubicacion-coords').value = `${position.lat.toFixed(5)}, ${position.lng.toFixed(5)}`;
+        });
+
+        // También actualizar si hacen clic en cualquier parte del mapa
+        miniMap.on('click', function (e) {
+            miniMarker.setLatLng(e.latlng);
+            document.getElementById('input-ubicacion-coords').value = `${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)}`;
+        });
+
+        // Establecer valor inicial por defecto
+        document.getElementById('input-ubicacion-coords').value = `${latDefault}, ${lngDefault}`;
+    }
+
+    // Lógica del buscador con la lupa interna del formulario
+    document.getElementById('btn-buscar-mini-mapa').addEventListener('click', async () => {
+        const query = document.getElementById('buscador-mini-mapa').value.trim();
+        if (!query) return;
+
+        try {
+            const respuesta = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ", Medellín, Colombia")}`);
+            const resultados = await respuesta.json();
+
+            if (resultados && resultados.length > 0) {
+                const lat = parseFloat(resultados[0].lat);
+                const lon = parseFloat(resultados[0].lon);
+                
+                miniMap.setView([lat, lon], 16);
+                miniMarker.setLatLng([lat, lon]);
+                document.getElementById('input-ubicacion-coords').value = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+            } else {
+                alert("No encontramos ese lugar exacto en Medellín. Intenta ser más específico.");
+            }
+        } catch (error) {
+            console.error("Error buscando ubicación:", error);
+        }
+    });
+
+    // Llamar a esta función al cargar la página del formulario
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(inicializarMiniMapa, 300); // Pequeño delay para asegurar que el DOM cargó el div
     });
     </script>
 </body>
