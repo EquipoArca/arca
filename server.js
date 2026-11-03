@@ -1063,6 +1063,28 @@ app.get('/api/publicaciones-globales', (req, res) => {
             WHERE LOWER(TRIM(u_bloq.correo_usuario)) = LOWER(TRIM(?))
         )
 
+        UNION ALL
+
+        SELECT 
+            p.id_publicacion,
+            'evento' AS tipo_publicacion,
+            e.id_evento AS id_origen,
+            e.detalles_adicionales AS Descripcion,
+            e.ubicacion AS Ubicacion,
+            NULL AS img_reporte,
+            e.fecha_hora AS Fecha_reporte,
+            CONCAT('Evento: ', e.nombre_evento) AS nombre_tipo_reporte,
+            NULL AS telefono_contacto,
+            f.Correo_fundacion AS correo_contacto,
+            NULL AS estado,
+            NULL AS nombre_animal,
+            f.Nombre_Comercial AS nombre_usuario,
+            'fundacion' AS tipo_usuario,
+            NULL AS id_usuarios
+        FROM publicaciones p
+        INNER JOIN eventos e ON p.id_evento = e.id_evento
+        INNER JOIN fundacion f ON e.id_fundacion = f.id_fundacion
+
         ORDER BY id_publicacion DESC
     `;
 
@@ -1075,7 +1097,6 @@ app.get('/api/publicaciones-globales', (req, res) => {
         res.json(rows);
     });
 });
-
 app.delete('/api/adopciones/:id', (req, res) => {
     const idAdopcion = req.params.id;
 
