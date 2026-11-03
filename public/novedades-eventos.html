@@ -126,71 +126,85 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="script.js"></script>
     
-    <script>
-        // Control del Sidebar
-        document.addEventListener('DOMContentLoaded', () => {
-            const btnToggleMenu = document.getElementById('btn-toggle-menu');
-            const sidebar = document.getElementById('sidebar');
+   <script>
+    // Control del Sidebar
+    document.addEventListener('DOMContentLoaded', () => {
+        const btnToggleMenu = document.getElementById('btn-toggle-menu');
+        const sidebar = document.getElementById('sidebar');
 
-            if (btnToggleMenu && sidebar) {
-                btnToggleMenu.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    sidebar.classList.toggle('sidebar-abierta'); 
-                });
+        if (btnToggleMenu && sidebar) {
+            btnToggleMenu.addEventListener('click', (e) => {
+                e.stopPropagation();
+                sidebar.classList.toggle('sidebar-abierta'); 
+            });
+        }
+
+        cargarEventosEstiloGeneral();
+    });
+
+    async function cargarEventosEstiloGeneral() {
+        const contenedor = document.getElementById('contenedor-novedades');
+        if (!contenedor) return;
+
+        try {
+            const res = await fetch('/api/eventos');
+            const eventos = await res.json();
+
+            contenedor.innerHTML = '';
+
+            if (!eventos || eventos.length === 0) {
+                contenedor.innerHTML = `
+                    <div class="estado-vacio" style="text-align: center; padding: 40px; font-family: 'Itim', cursive; width: 100%;">
+                        <i class="fa-solid fa-calendar-xmark icono-vacio" style="font-size: 40px; color: #ff758c; margin-bottom: 10px;"></i>
+                        <h2>¡Aún no hay eventos próximos!</h2>
+                        <p>&lt;3</p>
+                    </div>
+                `;
+                return;
             }
 
-            // Cargar eventos dinámicamente con el diseño prototipo unificado
-            cargarEventosFiltro();
-        });
+            for (const evento of eventos) {
+                const fechaFormateada = evento.fecha_hora ? evento.fecha_hora.split('T')[0] : '';
+                let ubicacionTextoBruta = evento.ubicacion || 'Medellín';
+                let ubicacionBonita = typeof obtenerNombreUbicacionGlobal === 'function' 
+                    ? await obtenerNombreUbicacionGlobal(ubicacionTextoBruta) 
+                    : ubicacionTextoBruta;
 
-        async function cargarEventosFiltro() {
-            const contenedor = document.getElementById('contenedor-novedades');
-            if (!contenedor) return;
+                const tarjeta = document.createElement('article');
+                tarjeta.className = 'tarjeta-prototipo-estilo';
+                
+                tarjeta.innerHTML = `
+                    <div class="proto-card-top">
+                        <div class="proto-titulo-pill" style="background-color: #e0f2fe; color: #2b5b84;">Evento</div>
+                        <span class="proto-fecha">${fechaFormateada}</span>
+                    </div>
 
-            try {
-                const res = await fetch('/api/eventos');
-                const eventos = await res.json();
-
-                contenedor.innerHTML = '';
-
-                if (!eventos || eventos.length === 0) {
-                    contenedor.innerHTML = `
-                        <article class="tarjeta-prototipo-estilo" style="text-align: center;">
-                            <h3 style="color: #4a3832; margin: 0;">No hay eventos próximos registrados.</h3>
-                        </article>
-                    `;
-                    return;
-                }
-
-                eventos.forEach(evento => {
-                    const tarjeta = document.createElement('article');
-                    tarjeta.className = 'tarjeta-prototipo-estilo';
-                    tarjeta.innerHTML = `
-                        <div class="proto-card-top">
-                            <span class="proto-titulo-pill" style="background-color: #e0f2fe; color: #2b5b84;">Evento</span>
-                            <span class="proto-fecha">${evento.fecha_hora || '--/--/----'}</span>
+                    <div class="proto-card-body">
+                        <!-- Espacio de imagen decorativa o logo para mantener la misma estructura idéntica -->
+                        <div class="proto-img-wrapper" style="display: flex; align-items: center; justify-content: center; background: #f0f9ff;">
+                            <i class="fa-solid fa-calendar-days" style="font-size: 48px; color: #3b82f6;"></i>
                         </div>
-                        <div class="proto-card-body">
-                            <div class="proto-content-right" style="width: 100%;">
-                                <h3 style="margin: 0 0 8px 0; font-size: 1.3rem; color: #4a3832;">${evento.nombre_evento}</h3>
-                                <div class="proto-info-extra">
-                                    <p class="proto-ubicacion"><strong>Lugar:</strong> ${evento.lugar} (${evento.ubicacion || 'Medellín'})</p>
-                                    <p class="proto-autor">Organiza: <strong>${evento.entidad_organizadora || 'Fundación'}</strong></p>
-                                    <p class="proto-autor" style="margin-top: 5px; color: #555;">${evento.detalles_adicionales || ''}</p>
-                                </div>
+
+                        <div class="proto-content-right">
+                            <div class="proto-pill-tipo">${evento.nombre_evento}</div>
+                            <div class="proto-info-extra">
+                                <span class="proto-autor">Organiza: <strong>${evento.entidad_organizadora || 'Fundación'}</strong></span>
+                                <p class="proto-ubicacion"><i class="fa-solid fa-location-dot"></i> ${evento.lugar} (${ubicacionBonita})</p>
+                                <p class="proto-autor" style="margin-top: 5px; color: #555;">${evento.detalles_adicionales || ''}</p>
+                            </div>
+                            <div class="proto-footer-row">
+                                <button class="proto-btn-detalles" onclick="window.location.href='detalle_evento.html?id=${evento.id_evento}'">Ver detalles</button>
                             </div>
                         </div>
-                        <div class="proto-footer-row">
-                            <button class="proto-btn-detalles" onclick="window.location.href='detalle_evento.html?id=${evento.id_evento}'">Ver detalles</button>
-                        </div>
-                    `;
-                    contenedor.appendChild(tarjeta);
-                });
-            } catch (e) {
-                console.error("Error al cargar eventos:", e);
+                    </div>
+                `;
+                contenedor.appendChild(tarjeta);
             }
+        } catch (e) {
+            console.error("Error al cargar eventos:", e);
         }
-    </script>
+    }
+</script>
 
     <style>
     /* Estilos unificados para mantener la misma línea visual prototipo */
