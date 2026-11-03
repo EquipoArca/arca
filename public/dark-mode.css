@@ -1351,3 +1351,138 @@ body.dark-mode .grid-configuracion .setting-row {
         padding: 0 15px !important;
     }
 }
+
+/* ==========================================
+   NOVEDADES EN MODO OSCURO
+   ========================================== */
+
+   body.dark-mode:has(.panel-filtros) .main-content {
+    width: calc(100% - 60px) !important;
+    margin-left: 60px !important;
+    max-width: 100vw !important;
+    height: calc(100vh - 60px) !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: stretch !important;
+    overflow-y: hidden !important;
+    padding-bottom: 0 !important;
+}
+
+/* Panel lateral de filtros */
+body.dark-mode .panel-filtros {
+    background-color: rgba(43, 35, 33, 0.85) !important;
+    border-right-color: #382c28 !important;
+    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.3) !important;
+}
+
+body.dark-mode .titulo-filtro {
+    background-color: #382c28 !important;
+    color: #f7d6d0 !important;
+    border: 1px solid #4a3b32 !important;
+}
+
+body.dark-mode .btn-filtro {
+    background-color: #352b28 !important;
+    color: #f4ebd0 !important;
+    border: 1px solid #4a3b32 !important;
+}
+
+body.dark-mode .btn-filtro:hover, 
+body.dark-mode .btn-filtro.active {
+    background-color: #8c5d5b !important;
+    color: #ffffff !important;
+    border-color: #8c5d5b !important;
+    box-shadow: 0 6px 15px rgba(140, 93, 91, 0.4) !important;
+}
+
+/* Feed general de novedades */
+body.dark-mode .feed-novedades {
+    background-color: rgba(35, 27, 26, 0.75) !important;
+    border-color: #382c28 !important;
+}
+
+/* Tarjetas de novedades (tarjeta-prototipo-estilo) */
+body.dark-mode .tarjeta-prototipo-estilo {
+    background: #2b2321 !important;
+    border: 2px solid #4a3b32 !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important;
+    color: #f4ebd0 !important;
+}
+
+body.dark-mode .proto-titulo-pill {
+    background: #382c28 !important;
+    color: #f7d6d0 !important;
+    border: 1px solid #4a3b32 !important;
+}
+
+body.dark-mode .proto-fecha {
+    color: #b59b8e !important;
+}
+
+body.dark-mode .proto-img-wrapper {
+    background: #352b28 !important;
+    border-color: #4a3b32 !important;
+}
+
+body.dark-mode .proto-pill-tipo {
+    background: #352b28 !important;
+    color: #f4ebd0 !important;
+    border-color: #4a3b32 !important;
+}
+
+body.dark-mode .proto-autor {
+    color: #b59b8e !important;
+}
+
+body.dark-mode .proto-autor a {
+    color: #f7d6d0 !important;
+}
+
+body.dark-mode .proto-ubicacion {
+    color: #9e8578 !important;
+}
+
+body.dark-mode .proto-btn-detalles {
+    background-color: #3a4528 !important;
+    color: #d8ecc0 !important;
+    border: 1px solid #4d5c36 !important;
+}
+
+body.dark-mode .proto-btn-detalles:hover {
+    background-color: #4d5c36 !important;
+    color: #ffffff !important;
+}
+
+/* Tarjeta dinámica básica (.card-novedad) */
+body.dark-mode .card-novedad {
+    background-color: #2b2321 !important;
+    border-color: #4a3b32 !important;
+}
+
+body.dark-mode .card-banner {
+    background-color: #382c28 !important;
+    color: #f7d6d0 !important;
+}
+
+body.dark-mode .card-fecha {
+    color: #b59b8e !important;
+}
+
+body.dark-mode .card-img-container {
+    border-color: #8c5d5b !important;
+}
+
+body.dark-mode .pill-info {
+    background-color: #352b28 !important;
+    border-color: #4a3b32 !important;
+    color: #f4ebd0 !important;
+}
+
+body.dark-mode .btn-detalles {
+    background-color: #8c5d5b !important;
+    color: #f4ebd0 !important;
+}
+
+body.dark-mode .btn-detalles:hover {
+    background-color: #6a4544 !important;
+}
