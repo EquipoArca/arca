@@ -2253,6 +2253,9 @@ app.put('/api/eventos/:id', (req, res) => {
 // ==========================================
 // ENDPOINT GLOBAL DE NOVEDADES (FEED GENERAL)
 // ==========================================
+// ==========================================
+// ENDPOINT GLOBAL DE NOVEDADES (FEED GENERAL)
+// ==========================================
 app.get('/api/novedades', (req, res) => {
     const query = `
         SELECT 
