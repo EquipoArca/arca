@@ -860,22 +860,25 @@
     }
 
     function abrirEditarPub(id, tipo) {
-        const mensajeTexto = tipo === 'adopcion' 
-            ? "¡Vamos a cargar los datos de tu adopción para que puedas editarlos!" 
-            : "¡Vamos a cargar los datos de tu reporte para que puedas editarlos!";
+    let mensajeTexto = "¡Vamos a cargar los datos de tu reporte para que puedas editarlos!";
+    let urlDestino = `formularior.html?editar=${id}`;
 
-        mostrarAlertaArca("Editar publicación", mensajeTexto, {
-            tipo: "aviso",
-            textoBoton: "Continuar",
-            alCerrar: () => {
-                if (tipo === 'adopcion') {
-                    window.location.href = `formulario_adopcion.html?editar=${id}`;
-                } else {
-                    window.location.href = `formularior.html?editar=${id}`;
-                }
-            }
-        });
+    if (tipo === 'adopcion') {
+        mensajeTexto = "¡Vamos a cargar los datos de tu adopción para que puedas editarlos!";
+        urlDestino = `formulario_adopcion.html?editar=${id}`;
+    } else if (tipo === 'evento') {
+        mensajeTexto = "¡Vamos a cargar los datos de tu evento para que puedas editarlos!";
+        urlDestino = `formulario_evento.html?editar=${id}`;
     }
+
+    mostrarAlertaArca("Editar publicación", mensajeTexto, {
+        tipo: "aviso",
+        textoBoton: "Continuar",
+        alCerrar: () => {
+            window.location.href = urlDestino;
+        }
+    });
+}
 
     async function toggleGuardarPublicacion(idPublicacion) {
         const user = firebase.auth().currentUser;

@@ -228,7 +228,7 @@
     <main class="main-content">
         <div class="evento-container">
             <div class="evento-header-titulo">
-                <span class="evento-titulo-badge">Nuevo Evento</span>
+                <span id="titulo-modo-evento" class="evento-titulo-badge">Nuevo Evento</span>
             </div>
 
             <form id="form-evento" class="evento-grid-formulario">
@@ -245,7 +245,7 @@
 
                <div class="evento-grupo-campo">
                     <span class="evento-label rosa">Fecha y hora</span>
-                    <input type="datetime-local" id="input-fecha" class="evento-input" required>
+                    <input type="text" id="input-fecha" class="evento-input" placeholder="Ej. 10 de Junio - 8:00 am" required>
                </div>
 
                 <div class="evento-grupo-campo">
@@ -299,7 +299,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="script.js"></script>
     <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
         const btnToggleMenu = document.getElementById('btn-toggle-menu');
         const sidebar = document.getElementById('sidebar');
         if (btnToggleMenu && sidebar) {
@@ -308,6 +308,34 @@
             });
         }
 
+        // --- DETECTAR SI VENIMOS A EDITAR UN EVENTO ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const idEventoEditar = urlParams.get('editar');
+        const btnPublicar = document.getElementById('btn-publicar-evento');
+
+        if (idEventoEditar) {
+            document.getElementById('titulo-modo-evento').textContent = "Editar Evento";
+            if (btnPublicar) btnPublicar.textContent = "Guardar cambios";
+
+            try {
+                const res = await fetch(`/api/eventos`);
+                if (res.ok) {
+                    const eventos = await res.json();
+                    const eventoActual = eventos.find(e => e.id_evento == idEventoEditar);
+                    if (eventoActual) {
+                        document.getElementById('input-nombre-evento').value = eventoActual.nombre_evento || '';
+                        document.getElementById('input-lugar').value = eventoActual.lugar || '';
+                        document.getElementById('input-fecha').value = eventoActual.fecha_hora || '';
+                        document.getElementById('input-ubicacion').value = eventoActual.ubicacion || 'Medellín';
+                        document.getElementById('input-detalles').value = eventoActual.detalles_adicionales || '';
+                    }
+                }
+            } catch (err) {
+                console.error("Error al cargar datos del evento para editar:", err);
+            }
+        }
+
+        // --- MANEJO DE ENVÍO (CREAR O EDITAR) ---
         const formEvento = document.getElementById('form-evento');
         if (formEvento) {
             formEvento.addEventListener('submit', async (e) => {
@@ -315,7 +343,7 @@
 
                 const user = firebase.auth().currentUser;
                 if (!user) {
-                    alert("Debes iniciar sesión para publicar un evento.");
+                    alert("Debes iniciar sesión para realizar esta acción.");
                     return;
                 }
 
@@ -339,23 +367,26 @@
                     correo_fundacion: user.email
                 };
 
+                const endpoint = idEventoEditar ? `/api/eventos/${idEventoEditar}` : '/api/crear-evento';
+                const metodo = idEventoEditar ? 'PUT' : 'POST';
+
                 try {
-                    const respuesta = await fetch('/api/crear-evento', {
-                        method: 'POST',
+                    const respuesta = await fetch(endpoint, {
+                        method: metodo,
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(datosEvento)
                     });
 
                     const resultado = await respuesta.json();
                     if (respuesta.ok) {
-                        alert("¡Evento publicado con éxito!");
+                        alert(idEventoEditar ? "¡Evento actualizado con éxito!" : "¡Evento publicado con éxito!");
                         window.location.href = "mis_publicaciones.html";
                     } else {
-                        throw new Error(resultado.error || "No se pudo registrar el evento.");
+                        throw new Error(resultado.error || "No se pudo procesar el evento.");
                     }
                 } catch (error) {
                     console.error("Error:", error);
-                    alert("Hubo un error al publicar el evento: " + error.message);
+                    alert("Hubo un error: " + error.message);
                 }
             });
         }
