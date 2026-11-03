@@ -950,6 +950,9 @@ document.addEventListener('DOMContentLoaded', () => {
 let peticionNovedadesEnCurso = false;
 
 async function cargarNovedadesSeguras() {
+    // Si estamos en la página de eventos, evitamos que este script borre los eventos
+    if (window.location.pathname.includes('novedades-eventos')) return;
+
     const contenedor = document.getElementById('contenedor-novedades');
     if (!contenedor || peticionNovedadesEnCurso) return;
     
