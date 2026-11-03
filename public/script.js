@@ -54,14 +54,11 @@ auth.onAuthStateChanged(async (user) => {
             };
         }
 
-        // Petición única a Node.js/MySQL para obtener datos del usuario
+        // Petición a Node.js/MySQL para obtener datos del usuario
         try {
             const response = await fetch(`/api/obtener-usuario?correo=${encodeURIComponent(user.email)}`);
-            if (!response.ok) {
-                throw new Error(`Error HTTP: ${response.status}`);
-            }
+            if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
             const data = await response.json();
-            const nombreFinal = data.nombre_usuario || (user.displayName || user.email.split('@')[0]);
             
             const tipoUsuario = data.tipo_usuario || 'usuario';
             const estadoAprobacion = data.estado_aprobacion || 'aprobado';
@@ -83,8 +80,11 @@ auth.onAuthStateChanged(async (user) => {
                 return;
             }
 
-            nombreFinal = data.nombre_usuario || (user.displayName || user.email.split('@')[0]);
-            let fotoFinal = data.foto_perfil;
+            // --- AQUÍ VA CORRECTAMENTE DENTRO DEL TRY ---
+            const perfilUsuario = {
+                nombre: data.nombre_usuario || (user.displayName || user.email.split('@')[0]),
+                foto: data.foto_perfil
+            };
 
             // SI ES FUNDACIÓN, BUSCAMOS SU NOMBRE COMERCIAL REAL Y SU FOTO OFICIAL
             if (tipoUsuario === 'fundacion') {
@@ -93,10 +93,10 @@ auth.onAuthStateChanged(async (user) => {
                     if (resFund.ok) {
                         const dataFund = await resFund.json();
                         if (dataFund.nombre_comercial) {
-                            nombreFinal = dataFund.nombre_comercial; // Aquí toma "Huellitas de amor" sin el _6228
+                            perfilUsuario.nombre = dataFund.nombre_comercial; 
                         }
                         if (dataFund.pfp_fundacion) {
-                            fotoFinal = dataFund.pfp_fundacion; // Foto oficial de la fundación
+                            perfilUsuario.foto = dataFund.pfp_fundacion; 
                         }
                     }
                 } catch (e) {
@@ -104,12 +104,12 @@ auth.onAuthStateChanged(async (user) => {
                 }
             }
             
-            if (nombrePerfilElem) nombrePerfilElem.textContent = `@${nombreFinal}`;
-            if (userDisplayName) userDisplayName.textContent = nombreFinal;
-            if (dropdownName) dropdownName.textContent = nombreFinal; // ¡Aquí se actualiza el mini-menú sin números!
+            if (nombrePerfilElem) nombrePerfilElem.textContent = `@${perfilUsuario.nombre}`;
+            if (userDisplayName) userDisplayName.textContent = perfilUsuario.nombre;
+            if (dropdownName) dropdownName.textContent = perfilUsuario.nombre;
 
-            if (fotoFinal && avatarImg) {
-                avatarImg.src = fotoFinal;
+            if (perfilUsuario.foto && avatarImg) {
+                avatarImg.src = perfilUsuario.foto;
                 avatarImg.style.display = 'block';
             } else if (avatarBtn) {
                 avatarBtn.innerHTML = `
@@ -118,7 +118,8 @@ auth.onAuthStateChanged(async (user) => {
                     </svg>
                 `;
             }
-        } catch (error) {
+
+        } catch (error) { // <-- Aquí cierra el try y abre el catch correctamente
             console.error("Error al obtener el usuario de Node.js:", error);
             const nombreFallback = user.displayName || user.email.split('@')[0];
 
@@ -126,7 +127,6 @@ auth.onAuthStateChanged(async (user) => {
             if (userDisplayName) userDisplayName.textContent = nombreFallback;
             if (dropdownName) dropdownName.textContent = nombreFallback;
         }
-
         // Redirección de enlaces (Autenticado)
         if (linkInicio) linkInicio.href = "home.html";
         if (linkPerfil) linkPerfil.href = "perfil_usuario.html";
