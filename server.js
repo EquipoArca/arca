@@ -11,17 +11,30 @@ const { getAuth } = require('firebase-admin/auth');
 
 
 // ==========================================
-// INICIALIZACIÓN DE FIREBASE CON JSON ÚNICO
+// INICIALIZACIÓN DE FIREBASE CON VARIABLE ÚNICA
 // ==========================================
 let credentialCert;
 
 if (process.env.FIREBASE_SERVICE_ACCOUNT) {
     try {
-        // Parseamos el JSON que viene de la variable de entorno de Render
-        const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+        let serviceAccount;
+        // Verificamos si viene como texto plano o JSON y parseamos de forma segura
+        let rawEnv = process.env.FIREBASE_SERVICE_ACCOUNT;
+        
+        if (typeof rawEnv === 'string') {
+            // Aseguramos que los saltos de línea en la clave privada se procesen bien
+            serviceAccount = JSON.parse(rawEnv);
+        } else {
+            serviceAccount = rawEnv;
+        }
+
+        if (serviceAccount.private_key) {
+            serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+        }
+
         credentialCert = cert(serviceAccount);
     } catch (e) {
-        console.error("❌ ERROR: El JSON de FIREBASE_SERVICE_ACCOUNT no tiene un formato válido.");
+        console.error("❌ ERROR: No se pudo parsear el JSON de FIREBASE_SERVICE_ACCOUNT:", e.message);
     }
 } else {
     try {
