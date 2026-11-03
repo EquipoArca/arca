@@ -11,7 +11,6 @@ const { getAuth } = require('firebase-admin/auth');
 // ==========================================
 // INICIALIZACIÓN DE FIREBASE CON ARCHIVO LOCAL
 // ==========================================
-// Inicialización de Firebase utilizando una única variable de entorno con el JSON completo
 let credentialCert;
 
 if (process.env.FIREBASE_SERVICE_ACCOUNT) {
@@ -41,7 +40,7 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(cors());
 
 // ==========================================
-// ARCHIVOS ESTÁTICOS (¡ESTO ES LO QUE FALTABA!)
+// ARCHIVOS ESTÁTICOS
 // ==========================================
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -56,7 +55,6 @@ const db = mysql.createConnection({
     multipleStatements: true
 });
 
-// Conexión explícita con manejo detallado
 db.connect((err) => {
     if (err) {
         console.error('❌ Error al conectar a la base de datos MySQL:', err);
@@ -76,13 +74,14 @@ const transporter = nodemailer.createTransport({
     tls: {
         rejectUnauthorized: false
     },
-    family: 4 // <-- ¡Esta línea es la clave para evitar el error ENETUNREACH!
+    family: 4
 });
+
 const codigosOTP = {};
+
 // ==========================================
 // AUTENTICACIÓN Y REGISTRO
 // ==========================================
-
 app.post('/registrar-usuario', (req, res) => {
     const { Nombre_usuario, Fecha_nacimiento, Correo_usuario, Telefono_usuario } = req.body;
     
@@ -172,7 +171,6 @@ app.post('/verificar-otp', (req, res) => {
 // ==========================================
 // CONSULTA Y EDICIÓN DE PERFIL
 // ==========================================
-
 app.get('/api/perfil', (req, res) => {
     const usuarioId = req.usuario ? req.usuario.id_usuarios : 7;
     const query = 'SELECT nombre_usuario FROM usuarios WHERE id_usuarios = ?';
@@ -216,7 +214,7 @@ app.get('/api/obtener-usuario', (req, res) => {
         res.json(results[0]);
     });
 });
-// GET: Obtener la lista de seguidores del usuario logueado
+
 app.get('/api/mis-seguidores/:correo', (req, res) => {
     const correoUsuario = req.params.correo;
 
@@ -237,7 +235,6 @@ app.get('/api/mis-seguidores/:correo', (req, res) => {
     });
 });
 
-// DELETE: Eliminar (remover) a un seguidor
 app.delete('/api/remover-seguidor/:id_seguidor', (req, res) => {
     const idSeguidor = req.params.id_seguidor;
 
@@ -255,8 +252,7 @@ app.delete('/api/remover-seguidor/:id_seguidor', (req, res) => {
         res.json({ mensaje: "Seguidor eliminado con éxito" });
     });
 });
-// GET: Obtener la lista de usuarios a los que sigue el usuario logueado
-// GET: Obtener la lista de usuarios a los que sigue el usuario logueado
+
 app.get('/api/mis-seguidos/:correo', (req, res) => {
     const correoUsuario = req.params.correo;
 
@@ -276,6 +272,7 @@ app.get('/api/mis-seguidos/:correo', (req, res) => {
         res.json(results);
     });
 });
+
 app.get('/api/datos-usuario-registro', (req, res) => {
     let { correo } = req.query;
 
@@ -339,7 +336,6 @@ app.post('/cambiar-nombre-usuario', (req, res) => {
     const nombreLimpio = nuevo_nombre.trim();
     const correoLimpio = correo_usuario.trim().toLowerCase();
 
-    // 1. Primero verificamos si el nombre ya pertenece al mismo usuario que lo está pidiendo
     const queryDueñoPropio = "SELECT id_usuarios FROM usuarios WHERE nombre_usuario = ? AND LOWER(TRIM(correo_usuario)) = ?";
     
     db.query(queryDueñoPropio, [nombreLimpio, correoLimpio], (errPropio, resPropio) => {
@@ -348,10 +344,8 @@ app.post('/cambiar-nombre-usuario', (req, res) => {
             return res.status(500).json({ error: "Error en el servidor." });
         }
 
-        // Si el resultado es mayor a 0, significa que ¡el nombre ya es tuyo! Dejamos pasar la actualización.
         const esMismoUsuario = resPropio.length > 0;
 
-        // 2. Si no es tuyo, verificamos que no lo tenga OTRA persona
         const continuarVerificacion = () => {
             const queryVerificar = "SELECT correo_usuario FROM usuarios WHERE nombre_usuario = ? AND LOWER(TRIM(correo_usuario)) != ?";
             db.query(queryVerificar, [nombreLimpio, correoLimpio], (err, existentes) => {
@@ -369,7 +363,6 @@ app.post('/cambiar-nombre-usuario', (req, res) => {
         };
 
         const ejecutarActualizacion = () => {
-            // Validar restricción de los 30 días
             db.query("SELECT ultimo_cambio_nombre FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = ?", [correoLimpio], (err, filas) => {
                 if (err || filas.length === 0) {
                     return res.status(404).json({ mensaje: "Usuario no encontrado." });
@@ -389,7 +382,6 @@ app.post('/cambiar-nombre-usuario', (req, res) => {
                     }
                 }
 
-                // Ejecutar la actualización limpia
                 const queryUpdate = "UPDATE usuarios SET nombre_usuario = ?, ultimo_cambio_nombre = ? WHERE LOWER(TRIM(correo_usuario)) = ?";
                 db.query(queryUpdate, [nombreLimpio, fechaActual, correoLimpio], (errUpdate) => {
                     if (errUpdate) {
@@ -403,12 +395,13 @@ app.post('/cambiar-nombre-usuario', (req, res) => {
         };
 
         if (esMismoUsuario) {
-            ejecutarActualizacion(); // Si es tuyo, actualizamos directo
+            ejecutarActualizacion();
         } else {
-            continuarVerificacion(); // Si es nuevo, verificamos que nadie más lo tenga
+            continuarVerificacion();
         }
     });
 });
+
 app.get('/validar-nombre-usuario', (req, res) => {
     const { nombre, correo_actual } = req.query;
 
@@ -419,7 +412,6 @@ app.get('/validar-nombre-usuario', (req, res) => {
     const nombreLimpio = nombre.trim();
     const correoLimpio = correo_actual ? correo_actual.trim().toLowerCase() : '';
 
-    // Buscamos si el nombre ya lo tiene CUALQUIER OTRA PERSONA (excluyendo tu correo si lo mandaron)
     let sql = `
         SELECT id_usuarios, correo_usuario 
         FROM usuarios 
@@ -432,15 +424,14 @@ app.get('/validar-nombre-usuario', (req, res) => {
     db.query(sql, params, (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
 
-        // Si la consulta encuentra registros, significa que OTRA PERSONA ya tiene ese nombre
         if (results.length > 0) {
             return res.json({ disponible: false });
         }
 
-        // Si no hay resultados de otros usuarios, el nombre está libre para ti
         res.json({ disponible: true });
     });
 });
+
 app.post('/actualizar-telefono-usuario', (req, res) => {
     const { correo_usuario, nuevo_telefono } = req.body;
 
@@ -473,7 +464,7 @@ app.post('/verificar-telefono-usuario', (req, res) => {
         res.json({ mensaje: "¡Número de celular verificado con éxito!" });
     });
 });
-// Ruta para actualizar el correo del usuario en la base de datos
+
 app.post('/actualizar-correo-usuario', (req, res) => {
     const { correo_actual, nuevo_correo } = req.body;
 
@@ -484,7 +475,6 @@ app.post('/actualizar-correo-usuario', (req, res) => {
     const correoActualLimpio = correo_actual.trim().toLowerCase();
     const nuevoCorreoLimpio = nuevo_correo.trim().toLowerCase();
 
-    // 1. Validamos que el nuevo correo no lo tenga otro usuario registrado
     const sqlVerificar = "SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = ?";
     db.query(sqlVerificar, [nuevoCorreoLimpio], (errVerif, filas) => {
         if (errVerif) {
@@ -496,7 +486,6 @@ app.post('/actualizar-correo-usuario', (req, res) => {
             return res.status(400).json({ success: false, mensaje: "El nuevo correo ya está registrado en otra cuenta." });
         }
 
-        // 2. Si está disponible, actualizamos en la tabla usuarios
         const queryUpdate = 'UPDATE usuarios SET correo_usuario = ? WHERE LOWER(TRIM(correo_usuario)) = ?';
         db.query(queryUpdate, [nuevoCorreoLimpio, correoActualLimpio], (err, result) => {
             if (err) {
@@ -508,14 +497,13 @@ app.post('/actualizar-correo-usuario', (req, res) => {
                 return res.status(404).json({ success: false, mensaje: "No se encontró ningún usuario con el correo actual." });
             }
 
-            // 3. También actualizamos el correo en la tabla adoptante por si tiene ficha creada
             db.query('UPDATE adoptante SET correo = ? WHERE LOWER(TRIM(correo)) = ?', [nuevoCorreoLimpio, correoActualLimpio], () => {
                 res.json({ success: true, mensaje: "Correo actualizado con éxito en la base de datos." });
             });
         });
     });
 });
-// DELETE: Eliminar el perfil de adoptante del usuario logueado
+
 app.delete('/api/eliminar-adoptante/:id_usuarios', (req, res) => {
     const idUsuarios = req.params.id_usuarios;
 
@@ -537,10 +525,10 @@ app.delete('/api/eliminar-adoptante/:id_usuarios', (req, res) => {
         res.json({ mensaje: "¡Perfil de adoptante eliminado con éxito!" });
     });
 });
+
 // ==========================================
 // REPORTES Y ESTADÍSTICAS
 // ==========================================
-
 app.post('/crear-reporte', (req, res) => {
     const { 
         id_tipo_reporte, 
@@ -677,7 +665,6 @@ app.get('/api/reportes/usuarios-edad', (req, res) => {
 // ==========================================
 // MÓDULO DE ADOPCIONES / ADOPTANTE
 // ==========================================
-
 app.get('/api/verificar-adoptante', (req, res) => {
     const { correo } = req.query;
 
@@ -824,7 +811,6 @@ app.post('/api/guardar-adoptante', (req, res) => {
                 return res.status(500).json({ mensaje: "Error al guardar el formulario.", detalle: errSave.sqlMessage });
             }
 
-            console.log("✅ Adoptante guardado/actualizado con éxito en id_usuarios:", id_usuarios);
             return res.json({ mensaje: "Perfil de adoptante guardado con éxito." });
         });
     });
@@ -833,7 +819,6 @@ app.post('/api/guardar-adoptante', (req, res) => {
 // ==========================================
 // GESTIÓN DE PUBLICACIONES Y GUARDADOS
 // ==========================================
-
 app.post('/api/guardar-publicacion', (req, res) => {
     const { correo, id_publicacion } = req.body;
 
@@ -922,7 +907,6 @@ app.get('/api/guardar-publicacion/:correo', (req, res) => {
         ORDER BY id_publicacion DESC
     `;
 
-    // Pasamos el correo dos veces: una para identificar al usuario de los guardados y otra para verificar sus bloqueados
     db.query(query, [correo, correo, correo, correo], (err, results) => {
         if (err) {
             console.error("❌ ERROR AL OBTENER GUARDADOS:", err.message);
@@ -1012,10 +996,7 @@ app.delete('/api/reportes/:id', (req, res) => {
         }
     });
 });
-// ==========================================
-// ==========================================
-// GET: Publicaciones Globales (Filtrando bloqueados automáticamente)
-// ==========================================
+
 app.get('/api/publicaciones-globales', (req, res) => {
     const correoVisitante = req.query.correo;
 
@@ -1034,7 +1015,7 @@ app.get('/api/publicaciones-globales', (req, res) => {
             r.estado,
             NULL AS nombre_animal,
             u.nombre_usuario AS nombre_usuario,
-            u.tipo_usuario AS tipo_usuario, -- <--- Agregado para reportes
+            u.tipo_usuario AS tipo_usuario,
             r.id_usuarios
         FROM publicaciones p
         INNER JOIN reportes r ON p.id_reporte = r.id_reporte
@@ -1066,7 +1047,7 @@ app.get('/api/publicaciones-globales', (req, res) => {
             NULL AS estado,
             a.nombre_animal,
             u.nombre_usuario AS nombre_usuario,
-            u.tipo_usuario AS tipo_usuario, -- <--- Agregado para adopciones
+            u.tipo_usuario AS tipo_usuario,
             pa.id_usuarios
         FROM publicaciones p
         INNER JOIN publicaciones_adopcion pa ON p.id_publicaciones_adopcion = pa.id_publicaciones_adopcion
@@ -1094,6 +1075,7 @@ app.get('/api/publicaciones-globales', (req, res) => {
         res.json(rows);
     });
 });
+
 app.delete('/api/adopciones/:id', (req, res) => {
     const idAdopcion = req.params.id;
 
@@ -1101,7 +1083,6 @@ app.delete('/api/adopciones/:id', (req, res) => {
         return res.status(400).json({ error: "ID de adopción inválido." });
     }
 
-    // 1. Buscamos el id_animal asociado a esta publicación de adopción
     db.query(`SELECT id_animal FROM publicaciones_adopcion WHERE id_publicaciones_adopcion = ?`, [idAdopcion], (err, rows) => {
         if (err) {
             console.error("❌ Error al buscar adopción:", err.message);
@@ -1111,11 +1092,8 @@ app.delete('/api/adopciones/:id', (req, res) => {
         let idAnimal = rows && rows.length > 0 ? rows[0].id_animal : null;
 
         const ejecutarBorradoAdopcionFinal = () => {
-            // Borramos de publicaciones generales usando el id_publicaciones_adopcion o id_animal
             db.query(`DELETE FROM publicaciones WHERE id_publicaciones_adopcion = ? OR id_animal = ?`, [idAdopcion, idAnimal], () => {
-                // Borramos de publicaciones_adopcion
                 db.query(`DELETE FROM publicaciones_adopcion WHERE id_publicaciones_adopcion = ?`, [idAdopcion], () => {
-                    // Borramos el animal si existía
                     const queryDeleteAnimal = idAnimal ? `DELETE FROM animal WHERE id_animal = ?` : null;
                     const callbackBorrado = (errDel) => {
                         if (errDel) {
@@ -1135,7 +1113,6 @@ app.delete('/api/adopciones/:id', (req, res) => {
         };
 
         if (idAnimal) {
-            // Borrar primero si está en guardados
             db.query(`DELETE g FROM guardados g INNER JOIN publicaciones p ON g.id_publicacion = p.id_publicacion WHERE p.id_animal = ?`, [idAnimal], () => {
                 ejecutarBorradoAdopcionFinal();
             });
@@ -1144,6 +1121,7 @@ app.delete('/api/adopciones/:id', (req, res) => {
         }
     });
 });
+
 app.get('/api/reportes/:id', (req, res) => {
     const idReporte = req.params.id;
 
@@ -1218,6 +1196,7 @@ app.put('/api/reportes/:id', (req, res) => {
         res.json({ mensaje: "¡Reporte actualizado con éxito!" });
     });
 });
+
 // ==========================================
 // MÓDULO CREACIÓN DE ADOPCIONES
 // ==========================================
@@ -1227,19 +1206,18 @@ app.post('/api/crear-adopcion', (req, res) => {
         id_especie,
         otro_especie,
         sexo_animal,
-        edad_aprox,           // Recibe directo "mes/año" desde tu JavaScript del frontend
+        edad_aprox,
         id_raza,
         otro_raza,
         id_tamaño,
-        descripcion_adopcion, // Coincide con el name del HTML
-        ubicacion_adopcion,   // Coincide con el input de texto "Medellín, Castilla"
-        fotos_animal,         // Recibe el JSON de imágenes procesadas
-        correo_usuario,       // Inyectado por tu JS del cliente antes de enviar
+        descripcion_adopcion,
+        ubicacion_adopcion,
+        fotos_animal,
+        correo_usuario,
         correo_contacto,
         telefono_contacto
     } = req.body;
 
-    // Separamos la ubicación "Ciudad, Barrio" de forma limpia
     let ciudad = "Medellín";
     let barrio = "Desconocido";
     if (ubicacion_adopcion && ubicacion_adopcion.includes(',')) {
@@ -1266,14 +1244,13 @@ app.post('/api/crear-adopcion', (req, res) => {
         
         const correoFinal = (correo_contacto && correo_contacto.trim() !== "") ? correo_contacto : correoRegistrado;
         const telefonoFinal = (telefono_contacto && telefono_contacto.trim() !== "") ? telefono_contacto : telefonoRegistrado;
-        const id_estado = 2; // 2 = En adopción
+        const id_estado = 2;
 
         db.beginTransaction(errTrans => {
             if (errTrans) {
                 return res.status(500).json({ error: "Error al iniciar la transacción." });
             }
 
-            // Insertamos usando los nombres reales y guardando edad_aprox como texto
             const queryAnimal = `
                 INSERT INTO animal 
                 (nombre_animal, id_especie, otro_especie, id_estado, sexo_animal, fecha_nacimiento_animal_aprox, id_raza, otro_raza, id_tamaño, descripcion_animal, ciudad, barrio, fotos_animal, id_usuarios) 
@@ -1286,11 +1263,11 @@ app.post('/api/crear-adopcion', (req, res) => {
                 otro_especie || null, 
                 id_estado, 
                 sexo_animal, 
-                edad_aprox,           // Se guarda el formato "mes/año" directo (ej. "06/2026")
+                edad_aprox,
                 id_raza, 
                 otro_raza || null, 
                 id_tamaño, 
-                descripcion_adopcion, // Mapeado correctamente desde el HTML
+                descripcion_adopcion, 
                 ciudad, 
                 barrio, 
                 fotos_animal || '', 
@@ -1303,7 +1280,6 @@ app.post('/api/crear-adopcion', (req, res) => {
                 }
                 
                 const idAnimalGenerado = resultadoAnimal.insertId;
-
                 const queryAdopcion = "INSERT INTO publicaciones_adopcion (id_animal, id_usuarios, telefono_contacto, correo_contacto) VALUES (?, ?, ?, ?)";
                 
                 db.query(queryAdopcion, [idAnimalGenerado, id_usuarios, telefonoFinal, correoFinal], (errAdop, resultadoAdopcion) => {
@@ -1314,7 +1290,6 @@ app.post('/api/crear-adopcion', (req, res) => {
                     }
 
                     const idAdopcionGenerado = resultadoAdopcion.insertId;
-
                     const queryPublicacion = "INSERT INTO publicaciones (id_animal, id_publicaciones_adopcion) VALUES (?, ?)";
                     
                     db.query(queryPublicacion, [idAnimalGenerado, idAdopcionGenerado], (errPub) => {
@@ -1338,9 +1313,7 @@ app.post('/api/crear-adopcion', (req, res) => {
         });
     });
 });
-// ==========================================
-// GET: Mis Publicaciones (Reportes + Adopciones unificadas)
-// ==========================================
+
 app.get('/api/mis-reportes', (req, res) => {
     const correoUsuario = req.query.correo;
 
@@ -1398,9 +1371,7 @@ app.get('/api/mis-reportes', (req, res) => {
         res.json(rows);
     });
 });
-// ==========================================
-// GET: Obtener datos de una adopción para editar
-// ==========================================
+
 app.get('/api/adopciones/:id', (req, res) => {
     const idAdopcion = req.params.id;
 
@@ -1411,7 +1382,7 @@ app.get('/api/adopciones/:id', (req, res) => {
             pa.correo_contacto,
             a.*,
             u.nombre_usuario AS nombre_usuario,
-            u.tipo_usuario AS tipo_usuario, -- <--- ¡Esta línea es la clave para el chulito de verificación!
+            u.tipo_usuario AS tipo_usuario,
             u.correo_usuario AS correo_usuario
         FROM publicaciones_adopcion pa
         INNER JOIN animal a ON pa.id_animal = a.id_animal
@@ -1432,9 +1403,7 @@ app.get('/api/adopciones/:id', (req, res) => {
         res.json(results[0]);
     });
 });
-// ==========================================
-// MÓDULO ACTUALIZACIÓN DE ADOPCIONES
-// ==========================================
+
 app.put('/api/actualizar-adopcion/:id', (req, res) => {
     const idAdopcion = req.params.id;
     const {
@@ -1467,7 +1436,6 @@ app.put('/api/actualizar-adopcion/:id', (req, res) => {
         barrio = ubicacion_adopcion.trim();
     }
 
-    // Buscamos el id_animal asociado a esta adopción
     db.query("SELECT id_animal FROM publicaciones_adopcion WHERE id_publicaciones_adopcion = ?", [idAdopcion], (err, rows) => {
         if (err || rows.length === 0) {
             return res.status(404).json({ error: "No se encontró la adopción a actualizar." });
@@ -1478,7 +1446,6 @@ app.put('/api/actualizar-adopcion/:id', (req, res) => {
         db.beginTransaction(errTrans => {
             if (errTrans) return res.status(500).json({ error: "Error en la transacción." });
 
-            // 1. Actualizar tabla animal
             const queryUpdateAnimal = `
                 UPDATE animal 
                 SET nombre_animal = ?, id_especie = ?, otro_especie = ?, sexo_animal = ?, 
@@ -1496,7 +1463,6 @@ app.put('/api/actualizar-adopcion/:id', (req, res) => {
                     return db.rollback(() => res.status(500).json({ error: "Error al actualizar el animal: " + errAnim.message }));
                 }
 
-                // 2. Actualizar tabla publicaciones_adopcion
                 const queryUpdatePub = `
                     UPDATE publicaciones_adopcion 
                     SET telefono_contacto = ?, correo_contacto = ?
@@ -1520,7 +1486,6 @@ app.put('/api/actualizar-adopcion/:id', (req, res) => {
     });
 });
 
-// GET: Obtener datos del perfil público de un usuario de forma flexible
 app.get('/api/perfil-publico/:parametro', (req, res) => {
     const parametro = decodeURIComponent(req.params.parametro).trim();
     const correoVisitante = req.query.correo_visitante; 
@@ -1543,7 +1508,6 @@ app.get('/api/perfil-publico/:parametro', (req, res) => {
             return res.json({ ...usuario, siguiendo: false, estado_solicitud: 'ninguna' });
         }
 
-        // Verificamos si hay bloqueo en cualquiera de las dos direcciones
         const sqlBloqueo = `
             SELECT COUNT(*) AS bloqueado FROM usuarios_bloqueados ub
             JOIN usuarios u1 ON ub.id_usuario_bloqueador = u1.id_usuarios
@@ -1574,7 +1538,7 @@ app.get('/api/perfil-publico/:parametro', (req, res) => {
         });
     });
 });
-// POST: Seguir / Dejar de seguir usuario
+
 app.post('/api/alternar-seguimiento', (req, res) => {
     const { correo_seguidor, id_seguido } = req.body;
 
@@ -1584,12 +1548,10 @@ app.post('/api/alternar-seguimiento', (req, res) => {
 
         db.query("SELECT id_seguidor FROM seguidores WHERE id_usuario_seguidor = ? AND id_usuario_seguido = ?", [idSeguidor, id_seguido], (errExist, exist) => {
             if (exist.length > 0) {
-                // Si ya lo sigue -> Dejar de seguir
                 db.query("DELETE FROM seguidores WHERE id_seguidor = ?", [exist[0].id_seguidor], () => {
                     res.json({ siguiendo: false, mensaje: "Has dejado de seguir a este usuario." });
                 });
             } else {
-                // Si no lo sigue -> Seguir y Notificar
                 db.query("INSERT INTO seguidores (id_usuario_seguidor, id_usuario_seguido) VALUES (?, ?)", [idSeguidor, id_seguido], () => {
                     db.query("INSERT INTO notificaciones (id_usuario_destino, id_usuario_origen, tipo, mensaje) VALUES (?, ?, 'nuevo_seguidor', 'comenzó a seguirte.')", [id_seguido, idSeguidor]);
                     res.json({ siguiendo: true, mensaje: "Ahora sigues a este usuario" });
@@ -1599,7 +1561,6 @@ app.post('/api/alternar-seguimiento', (req, res) => {
     });
 });
 
-// POST: Solicitar ver perfil de adoptante (EVITA DUPLICADOS Y BLOQUEA REENVÍO)
 app.post('/api/solicitar-ver-adoptante', (req, res) => {
     const { correo_solicitante, id_propietario } = req.body;
 
@@ -1613,7 +1574,6 @@ app.post('/api/solicitar-ver-adoptante', (req, res) => {
             return res.status(400).json({ error: "No puedes solicitar ver tu propio perfil." });
         }
 
-        // Verificamos si ya existe una solicitud activa
         db.query("SELECT estado FROM solicitudes_adoptante WHERE id_solicitante = ? AND id_propietario = ?", [idSolicitante, id_propietario], (errExist, exist) => {
             if (exist && exist.length > 0) {
                 const est = exist[0].estado;
@@ -1623,8 +1583,6 @@ app.post('/api/solicitar-ver-adoptante', (req, res) => {
 
             const sql = "INSERT INTO solicitudes_adoptante (id_solicitante, id_propietario, estado) VALUES (?, ?, 'pendiente') ON DUPLICATE KEY UPDATE estado='pendiente'";
             db.query(sql, [idSolicitante, id_propietario], () => {
-                
-                // Notificación al dueño del perfil (evitando duplicados activos)
                 const msg = `@${nombreSolicitante} quiere ver tu perfil de adoptante.`;
                 const checkNotif = "SELECT id_notificacion FROM notificaciones WHERE id_usuario_destino = ? AND id_usuario_origen = ? AND tipo = 'solicitud_adoptante' AND leida = 0";
                 
@@ -1639,7 +1597,6 @@ app.post('/api/solicitar-ver-adoptante', (req, res) => {
     });
 });
 
-// GET: Obtener notificaciones reales del usuario logueado
 app.get('/api/notificaciones/:correo', (req, res) => {
     const { correo } = req.params;
 
@@ -1664,9 +1621,8 @@ app.get('/api/notificaciones/:correo', (req, res) => {
     });
 });
 
-// POST: Responder solicitud de adoptante (Aceptar / Rechazar)
 app.post('/api/responder-solicitud-adoptante', (req, res) => {
-    const { id_solicitud, accion, correo_propietario } = req.body; // accion: 'aceptar' o 'rechazar'
+    const { id_solicitud, accion, correo_propietario } = req.body;
     const nuevoEstado = accion === 'aceptar' ? 'aceptada' : 'rechazada';
 
     const sqlUpdate = "UPDATE solicitudes_adoptante SET estado = ? WHERE id_solicitud = ?";
@@ -1674,7 +1630,6 @@ app.post('/api/responder-solicitud-adoptante', (req, res) => {
         if (err) return res.status(500).json({ error: "Error al actualizar solicitud" });
 
         if (nuevoEstado === 'aceptada') {
-            // Notificar al solicitante que le aceptaron la solicitud (sin duplicar si ya existe)
             const sqlNotif = `
                 INSERT INTO notificaciones (id_usuario_destino, id_usuario_origen, tipo, mensaje)
                 SELECT s.id_solicitante, s.id_propietario, 'solicitud_aceptada', 'aceptó tu solicitud para ver su perfil de adoptante.'
@@ -1694,7 +1649,6 @@ app.post('/api/responder-solicitud-adoptante', (req, res) => {
     });
 });
 
-// DELETE: Borrar una notificación de MySQL
 app.delete('/api/notificaciones/:id', (req, res) => {
     const { id } = req.params;
     db.query("DELETE FROM notificaciones WHERE id_notificacion = ?", [id], (err) => {
@@ -1703,19 +1657,16 @@ app.delete('/api/notificaciones/:id', (req, res) => {
     });
 });
 
-// GET: Obtener la Ficha de Adoptante para terceros (Solo si la solicitud fue aceptada)
 app.get('/api/ficha-adoptante-publica/:username', (req, res) => {
     const { username } = req.params;
     const correoSolicitante = req.query.correo_solicitante;
 
-    // 1. Buscamos al usuario por su username
     const sqlUsuario = "SELECT id_usuarios, nombre_usuario, correo_usuario, Telefono_usuario FROM usuarios WHERE LOWER(TRIM(nombre_usuario)) = LOWER(TRIM(?))";
     db.query(sqlUsuario, [username], (err, resUser) => {
         if (err || resUser.length === 0) return res.status(404).json({ error: "Usuario no encontrado" });
 
         const usuarioTarget = resUser[0];
 
-        // 2. Verificamos si la solicitud entre el visitante y el dueño está 'aceptada'
         const sqlVerificarPermiso = `
             SELECT estado FROM solicitudes_adoptante 
             WHERE id_solicitante = (SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))) 
@@ -1727,7 +1678,6 @@ app.get('/api/ficha-adoptante-publica/:username', (req, res) => {
                 return res.status(403).json({ error: "No tienes permiso para ver esta ficha de adoptante." });
             }
 
-            // 3. Traemos la información detallada de su ficha de adoptante
             const sqlFicha = "SELECT * FROM adoptante WHERE id_usuarios = ?";
             db.query(sqlFicha, [usuarioTarget.id_usuarios], (errFicha, resFicha) => {
                 if (errFicha || resFicha.length === 0) {
@@ -1742,8 +1692,9 @@ app.get('/api/ficha-adoptante-publica/:username', (req, res) => {
         });
     });
 });
+
 // ==========================================
-// MÓDULO DE REGISTRO DE FUNDACIONES (PDFs + MySQL)
+// MÓDULO DE REGISTRO DE FUNDACIONES
 // ==========================================
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -1775,7 +1726,6 @@ app.post('/api/registrar-fundacion', express.json({ limit: '20mb' }), async (req
     const financieroBuffer = parseBase64ToBuffer(estado_financiero);
 
     try {
-        // 1. Crear la cuenta en Firebase Auth usando Firebase Admin
         let firebaseUser;
         try {
             firebaseUser = await getAuth().createUser({
@@ -1790,7 +1740,6 @@ app.post('/api/registrar-fundacion', express.json({ limit: '20mb' }), async (req
             throw firebaseErr;
         }
 
-        // 2. Guardar los documentos en la tabla 'documentacion'
         const queryDocumentacion = `
             INSERT INTO documentacion (certificado_existencia, estatuto, estado_financiero, registro_oficial) 
             VALUES (?, ?, ?, ?)
@@ -1800,14 +1749,12 @@ app.post('/api/registrar-fundacion', express.json({ limit: '20mb' }), async (req
             if (errDoc) {
                 console.error("❌ Error al guardar documentación:", errDoc.sqlMessage || errDoc);
                 getAuth().deleteUser(firebaseUser.uid).catch(() => {});
-                return res.status(500).json({ exito: false, mensaje: "Error al guardar los documentos legales: " + (errDoc.sqlMessage || errDoc.message) });
+                return res.status(500).json({ exito: false, mensaje: "Error al guardar los documentos legales." });
             }
 
             const idDocumentacionGenerado = resultadoDoc.insertId;
-
-            // 3. Generar un nombre de usuario único automáticamente para evitar duplicados
-           let nombreBase = (nombre_comercial || nombre_legal || 'Fundacion').substring(0, 40);
-           const nombreUsuarioFinal = `${nombreBase}_${Math.floor(1000 + Math.random() * 9000)}`;
+            let nombreBase = (nombre_comercial || nombre_legal || 'Fundacion').substring(0, 40);
+            const nombreUsuarioFinal = `${nombreBase}_${Math.floor(1000 + Math.random() * 9000)}`;
 
             const queryUsuarios = `
                 INSERT INTO usuarios (tipo_usuario, estado_aprobacion, correo_usuario, nombre_usuario) 
@@ -1818,28 +1765,14 @@ app.post('/api/registrar-fundacion', express.json({ limit: '20mb' }), async (req
                 if (errUsr) {
                     console.error("❌ Error al registrar en usuarios:", errUsr.sqlMessage || errUsr);
                     getAuth().deleteUser(firebaseUser.uid).catch(() => {});
-                    return res.status(500).json({ exito: false, mensaje: "Error al registrar en usuarios: " + (errUsr.sqlMessage || errUsr.message) });
+                    return res.status(500).json({ exito: false, mensaje: "Error al registrar en usuarios." });
                 }
 
-                // 4. Registrar los datos específicos en la tabla 'fundacion' incluyendo el correo
                 const queryFundacion = `
                     INSERT INTO fundacion (
-                        id_documentacion, 
-                        Nombre_Legal, 
-                        Nombre_Comercial, 
-                        Nit_Rut, 
-                        Pais, 
-                        Ciudad, 
-                        Direccion, 
-                        Telefono_fundacion, 
-                        Pagina_web, 
-                        Descripcion_mision, 
-                        Descripcion_vision, 
-                        PFP_Fundacion, 
-                        Foto_Portada, 
-                        Programas_Proyectos_Actuales, 
-                        enfoque_otro,
-                        Correo_fundacion
+                        id_documentacion, Nombre_Legal, Nombre_Comercial, Nit_Rut, Pais, Ciudad, Direccion, 
+                        Telefono_fundacion, Pagina_web, Descripcion_mision, Descripcion_vision, 
+                        PFP_Fundacion, Foto_Portada, Programas_Proyectos_Actuales, enfoque_otro, Correo_fundacion
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 `;
 
@@ -1859,40 +1792,24 @@ app.post('/api/registrar-fundacion', express.json({ limit: '20mb' }), async (req
                     foto_portada || '',
                     programas_proyectos || '',
                     enfoque_otro || '',
-                    correo_fundacion // <-- ¡Aquí pasamos el correo para cumplir con el campo obligatorio!
+                    correo_fundacion
                 ];
 
                 db.query(queryFundacion, valoresFundacion, (errFund, resultadoFundacion) => {
                     if (errFund) {
                         console.error("❌ Error al registrar en la tabla fundacion:", errFund.sqlMessage || errFund);
                         getAuth().deleteUser(firebaseUser.uid).catch(() => {});
-                        return res.status(500).json({ exito: false, mensaje: "Error al registrar la fundación: " + (errFund.sqlMessage || errFund.message) });
+                        return res.status(500).json({ exito: false, mensaje: "Error al registrar la fundación." });
                     }
 
                     const idFundacionGenerado = resultadoFundacion.insertId;
-
-                    // 5. Guardar el representante legal en su tabla utilizando el id_fundacion recién creado
                     const queryRepresentante = `
                         INSERT INTO representante (nombre_completo, documento, telefono, correo, id_fundacion) 
                         VALUES (?, ?, ?, ?, ?)
                     `;
                     
-                    db.query(queryRepresentante, [
-                        rep_nombre || '', 
-                        rep_documento || '', 
-                        rep_telefono || '', 
-                        rep_correo || '', 
-                        idFundacionGenerado
-                    ], (errRep) => {
-                        if (errRep) {
-                            console.error("❌ Error al guardar representante:", errRep.sqlMessage || errRep);
-                            // Opcional: podrías limpiar aquí si deseas estricta atomicidad
-                        }
-
-                        res.json({ 
-                            exito: true, 
-                            mensaje: "¡Fundación registrada con éxito! Quedó en estado pendiente de aprobación." 
-                        });
+                    db.query(queryRepresentante, [rep_nombre || '', rep_documento || '', rep_telefono || '', rep_correo || '', idFundacionGenerado], () => {
+                        res.json({ exito: true, mensaje: "¡Fundación registrada con éxito!" });
                     });
                 });
             });
@@ -1903,7 +1820,7 @@ app.post('/api/registrar-fundacion', express.json({ limit: '20mb' }), async (req
         res.status(500).json({ exito: false, mensaje: "Error interno del servidor: " + error.message });
     }
 });
-// Ruta para bloquear a un usuario
+
 app.post('/api/bloquear-usuario', (req, res) => {
     const { correo_bloqueador, id_usuario_bloqueado } = req.body;
 
@@ -1911,39 +1828,26 @@ app.post('/api/bloquear-usuario', (req, res) => {
         return res.status(400).json({ error: "Faltan datos requeridos para bloquear." });
     }
 
-    // 1. Buscar el ID del usuario bloqueador a partir de su correo
-    db.query(
-        'SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))', 
-        [correo_bloqueador], 
-        (err, usuarioBloqueador) => {
-            if (err || usuarioBloqueador.length === 0) {
-                return res.status(404).json({ error: "Usuario bloqueador no encontrado" });
-            }
-
-            const idBloqueador = usuarioBloqueador[0].id_usuarios;
-
-            // Evitar que se bloquee a sí mismo
-            if (Number(idBloqueador) === Number(id_usuario_bloqueado)) {
-                return res.status(400).json({ error: "No puedes bloquearte a ti mismo" });
-            }
-
-            // 2. Insertar el registro en la tabla de bloqueados
-            db.query(
-                'INSERT IGNORE INTO usuarios_bloqueados (id_usuario_bloqueador, id_usuario_bloqueado) VALUES (?, ?)',
-                [idBloqueador, id_usuario_bloqueado],
-                (errInsert) => {
-                    if (errInsert) {
-                        console.error("❌ Error al registrar el bloqueo:", errInsert.message);
-                        return res.status(500).json({ error: "Error en el servidor al bloquear usuario" });
-                    }
-
-                    res.json({ mensaje: "Usuario bloqueado exitosamente" });
-                }
-            );
+    db.query('SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))', [correo_bloqueador], (err, usuarioBloqueador) => {
+        if (err || usuarioBloqueador.length === 0) {
+            return res.status(404).json({ error: "Usuario bloqueador no encontrado" });
         }
-    );
+
+        const idBloqueador = usuarioBloqueador[0].id_usuarios;
+
+        if (Number(idBloqueador) === Number(id_usuario_bloqueado)) {
+            return res.status(400).json({ error: "No puedes bloquearte a ti mismo" });
+        }
+
+        db.query('INSERT IGNORE INTO usuarios_bloqueados (id_usuario_bloqueador, id_usuario_bloqueado) VALUES (?, ?)', [idBloqueador, id_usuario_bloqueado], (errInsert) => {
+            if (errInsert) {
+                return res.status(500).json({ error: "Error en el servidor al bloquear usuario" });
+            }
+            res.json({ mensaje: "Usuario bloqueado exitosamente" });
+        });
+    });
 });
-// GET: Obtener la lista de usuarios bloqueados por el usuario logueado
+
 app.get('/api/usuarios-bloqueados/:correo', (req, res) => {
     const correoBloqueador = req.params.correo;
 
@@ -1956,97 +1860,28 @@ app.get('/api/usuarios-bloqueados/:correo', (req, res) => {
     `;
 
     db.query(sql, [correoBloqueador], (err, results) => {
-        if (err) {
-            console.error("❌ Error al obtener usuarios bloqueados:", err.message);
-            return res.status(500).json({ error: "Error en el servidor al obtener bloqueados" });
-        }
+        if (err) return res.status(500).json({ error: "Error al obtener bloqueados" });
         res.json(results);
     });
 });
 
-// POST: Desbloquear a un usuario
 app.post('/api/desbloquear-usuario', (req, res) => {
     const { correo_bloqueador, id_usuario_bloqueado } = req.body;
 
     if (!correo_bloqueador || !id_usuario_bloqueado) {
-        return res.status(400).json({ error: "Faltan datos requeridos para desbloquear." });
+        return res.status(400).json({ error: "Faltan datos requeridos." });
     }
 
-    const sqlBusqueda = 'SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))';
-    db.query(sqlBusqueda, [correo_bloqueador], (err, usuario) => {
-        if (err || usuario.length === 0) {
-            return res.status(404).json({ error: "Usuario bloqueador no encontrado" });
-        }
+    db.query('SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))', [correo_bloqueador], (err, usuario) => {
+        if (err || usuario.length === 0) return res.status(404).json({ error: "Usuario no encontrado" });
 
         const idBloqueador = usuario[0].id_usuarios;
-
-        const sqlDelete = 'DELETE FROM usuarios_bloqueados WHERE id_usuario_bloqueador = ? AND id_usuario_bloqueado = ?';
-        db.query(sqlDelete, [idBloqueador, id_usuario_bloqueado], (errDel, result) => {
-            if (errDel) {
-                console.error("❌ Error al desbloquear usuario:", errDel.message);
-                return res.status(500).json({ error: "Error en el servidor al desbloquear" });
-            }
-
+        db.query('DELETE FROM usuarios_bloqueados WHERE id_usuario_bloqueador = ? AND id_usuario_bloqueado = ?', [idBloqueador, id_usuario_bloqueado], () => {
             res.json({ mensaje: "Usuario desbloqueado exitosamente" });
         });
     });
 });
-async function aprobarFundacion(req, res) {
-    const { id_fundacion } = req.body; // O el correo de la fundación
 
-    try {
-        // 1. Actualizar el estado en la tabla usuarios o fundacion a 'aprobado'
-        const queryUpdate = `
-            UPDATE usuarios u 
-            JOIN fundacion f ON u.correo_usuario = f.Correo_fundacion 
-            SET u.estado_aprobacion = 'aprobado' 
-            WHERE f.id_fundacion = ?
-        `;
-        
-        db.query(queryUpdate, [id_fundacion], async (err, resultado) => {
-            if (err) {
-                return res.status(500).json({ exito: false, mensaje: "Error al actualizar estado en BD" });
-            }
-
-            // 2. Consultar el correo de la fundación para enviarle la notificación
-            const queryCorreo = `SELECT Correo_fundacion, Nombre_Comercial FROM fundacion WHERE id_fundacion = ?`;
-            db.query(queryCorreo, [id_fundacion], async (errC, resultsC) => {
-                if (errC || resultsC.length === 0) {
-                    return res.status(500).json({ exito: false, mensaje: "Fundación no encontrada" });
-                }
-
-                const correoFundacion = resultsC[0].Correo_fundacion;
-                const nombreFundacion = resultsC[0].Nombre_Comercial || 'Fundación';
-
-                // 3. Enviar el correo electrónico informando la aprobación
-                const mailOptions = {
-                    from: '"ARCA - Plataforma de Adopciones" <tu_correo@gmail.com>',
-                    to: correoFundacion,
-                    subject: '🎉 ¡Tu cuenta en ARCA ha sido aprobada!',
-                    html: `
-                        <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
-                            <h2 style="color: #e57373;">¡Hola, ${nombreFundacion}!</h2>
-                            <p>Nos alegra informarte que tu solicitud ha sido revisada y <strong>aprobada</strong> con éxito por el equipo de administración de ARCA.</p>
-                            <p>Ya puedes iniciar sesión en la plataforma con el correo y la contraseña que registraste para comenzar a publicar animales y gestionar tu fundación.</p>
-                            <br>
-                            <a href="https://arca-backend-cgzt.onrender.com/home.html" style="background-color: #fbc2c4; color: #2b2b2b; padding: 10px 20px; text-decoration: none; border-radius: 20px; font-weight: bold;">Iniciar Sesión en ARCA</a>
-                            <br><br>
-                            <p>¡Bienvenido a la comunidad!</p>
-                        </div>
-                    `
-                };
-
-                await transporter.sendMail(mailOptions);
-
-                res.json({ exito: true, mensaje: "Fundación aprobada y correo de notificación enviado exitosamente." });
-            });
-        });
-
-    } catch (error) {
-        res.status(500).json({ exito: false, mensaje: error.message });
-    }
-}
-// 1. Obtener fundaciones pendientes con sus datos y documentos
 app.get('/api/admin/fundaciones-pendientes', (req, res) => {
     const query = `
         SELECT f.*, u.estado_aprobacion, d.certificado_existencia, d.estatuto, d.registro_oficial, d.estado_financiero
@@ -2056,14 +1891,11 @@ app.get('/api/admin/fundaciones-pendientes', (req, res) => {
         WHERE u.estado_aprobacion = 'pendiente'
     `;
     db.query(query, (err, resultados) => {
-        if (err) {
-            return res.status(500).json({ exito: false, mensaje: "Error al obtener solicitudes" });
-        }
+        if (err) return res.status(500).json({ exito: false, mensaje: "Error al obtener solicitudes" });
         res.json({ exito: true, fundaciones: resultados });
     });
 });
 
-// 2. Aprobar fundación y disparar correo
 app.post('/api/admin/aprobar-fundacion', async (req, res) => {
     const { id_fundacion, correo_fundacion, nombre_comercial } = req.body;
 
@@ -2074,15 +1906,12 @@ app.post('/api/admin/aprobar-fundacion', async (req, res) => {
         WHERE f.id_fundacion = ?
     `;
 
-    db.query(queryUpdate, [id_fundacion], async (err, resultado) => {
-        if (err) {
-            return res.status(500).json({ exito: false, mensaje: "Error al actualizar en la base de datos" });
-        }
+    db.query(queryUpdate, [id_fundacion], async (err) => {
+        if (err) return res.status(500).json({ exito: false, mensaje: "Error en base de datos" });
 
-        // Aquí envías el correo con Nodemailer (como vimos en el paso anterior)
         try {
             const mailOptions = {
-                from: '"ARCA - Administración" <tu_correo@gmail.com>',
+                from: '"ARCA - Administración" <arcaoficial0@gmail.com>',
                 to: correo_fundacion,
                 subject: '🎉 ¡Tu cuenta en ARCA ha sido aprobada!',
                 html: `
@@ -2090,19 +1919,17 @@ app.post('/api/admin/aprobar-fundacion', async (req, res) => {
                         <h2 style="color: #e57373;">¡Hola, ${nombre_comercial || 'Fundación'}!</h2>
                         <p>Tu solicitud ha sido revisada y <strong>aprobada</strong> por la administración de ARCA.</p>
                         <p>Ya puedes iniciar sesión en la plataforma.</p>
-                        <br>
-                        <a href="https://arca-backend-cgzt.onrender.com/home.html" style="background-color: #fbc2c4; color: #2b2b2b; padding: 10px 20px; text-decoration: none; border-radius: 20px; font-weight: bold;">Iniciar Sesión</a>
                     </div>
                 `
             };
             await transporter.sendMail(mailOptions);
-            res.json({ exito: true, mensaje: "Fundación aprobada y correo enviado correctamente." });
+            res.json({ exito: true, mensaje: "Fundación aprobada y correo enviado." });
         } catch (mailError) {
-            res.json({ exito: true, mensaje: "Fundación aprobada, pero falló el envío del correo: " + mailError.message });
+            res.json({ exito: true, mensaje: "Fundación aprobada, pero falló el correo." });
         }
     });
 });
-// Ruta para obtener los datos públicos de la fundación (Nombre comercial y foto) para el header
+
 app.get('/api/obtener-fundacion-header', (req, res) => {
     const { correo } = req.query;
     if (!correo) return res.status(400).json({ error: "Correo requerido" });
@@ -2119,31 +1946,22 @@ app.get('/api/obtener-fundacion-header', (req, res) => {
         res.json(results[0]);
     });
 });
-// Endpoint para actualizar el estado del reporte desde la fundación (corregido con callback de mysql2)
+
 app.put('/api/reportes/:id/estado', (req, res) => {
     const { id } = req.params;
     const { estado } = req.body;
 
-    if (!estado) {
-        return res.status(400).json({ error: 'El estado es requerido' });
-    }
+    if (!estado) return res.status(400).json({ error: 'El estado es requerido' });
 
     const query = 'UPDATE reportes SET estado = ? WHERE id_reporte = ?';
-    
     db.query(query, [estado, id], (err, result) => {
-        if (err) {
-            console.error("❌ Error en base de datos al actualizar estado:", err.message);
-            return res.status(500).json({ error: 'Error al actualizar el estado: ' + err.message });
+        if (err || result.affectedRows === 0) {
+            return res.status(500).json({ error: 'Error al actualizar el estado' });
         }
-
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ error: 'Reporte no encontrado' });
-        }
-
         res.json({ success: true, message: 'Estado actualizado correctamente' });
     });
 });
-// GET: Obtener listado de fundaciones para derivar casos
+
 app.get('/api/fundaciones-lista', (req, res) => {
     const query = `
         SELECT f.id_fundacion, f.Nombre_Comercial, f.Nombre_Legal, f.Correo_fundacion
@@ -2152,18 +1970,14 @@ app.get('/api/fundaciones-lista', (req, res) => {
         WHERE u.estado_aprobacion = 'aprobado' OR u.estado_aprobacion = 'pendiente'
     `;
     db.query(query, (err, resultados) => {
-        if (err) {
-            console.error("❌ Error al obtener fundaciones:", err.message);
-            return res.status(500).json({ error: "Error en el servidor al obtener fundaciones" });
-        }
+        if (err) return res.status(500).json({ error: "Error en el servidor" });
         res.json(resultados);
     });
 });
+
 // ==========================================
 // MÓDULO PERFIL Y EDICIÓN DE FUNDACIÓN
 // ==========================================
-
-// GET: Obtener datos completos de la fundación por su correo
 app.get('/api/obtener-fundacion', (req, res) => {
     const { correo } = req.query;
 
@@ -2171,7 +1985,6 @@ app.get('/api/obtener-fundacion', (req, res) => {
         return res.status(400).json({ error: "Se requiere el correo de la fundación." });
     }
 
-    // Buscamos directamente en la tabla fundacion usando el correo
     const query = `
         SELECT f.*, u.nombre_usuario 
         FROM fundacion f
@@ -2189,10 +2002,10 @@ app.get('/api/obtener-fundacion', (req, res) => {
             return res.status(404).json({ error: "No se encontró un perfil de fundación asociado a este correo." });
         }
 
-        // Enviamos el objeto asegurándonos de mapear las propiedades tal cual las guardaste
         res.json(results[0]);
     });
 });
+
 app.put('/api/actualizar-fundacion', express.json({ limit: '20mb' }), (req, res) => {
     const {
         correo_fundacion,
@@ -2253,14 +2066,15 @@ app.put('/api/actualizar-fundacion', express.json({ limit: '20mb' }), (req, res)
 
     db.query(query, valores, (err, resultado) => {
         if (err) {
-            console.error("❌ Error al actualizar redes:", err.message);
+            console.error("❌ Error al actualizar fundación:", err.message);
             return res.status(500).json({ exito: false, mensaje: "Error al actualizar en la base de datos." });
         }
         res.json({ exito: true, mensaje: "¡Actualizado con éxito!" });
     });
 });
+
 // ==========================================
-// INICIALIZACIÓN DEL SERVIDOR (Siempre al final)
+// INICIALIZACIÓN DEL SERVIDOR
 // ==========================================
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
