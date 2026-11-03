@@ -230,6 +230,54 @@
         }
     });
 </script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    const contenedor = document.getElementById('contenedor-novedades');
+    if (!contenedor) return;
+
+    try {
+        const res = await fetch('/api/eventos');
+        const eventos = await res.json();
+
+        contenedor.innerHTML = '';
+
+        if (!eventos || eventos.length === 0) {
+            contenedor.innerHTML = `
+                <article class="tarjeta-prototipo-estilo" style="text-align: center;">
+                    <h3 style="color: #4a3832; margin: 0;">No hay eventos próximos registrados.</h3>
+                </article>
+            `;
+            return;
+        }
+
+        eventos.forEach(evento => {
+            const tarjeta = document.createElement('article');
+            tarjeta.className = 'tarjeta-prototipo-estilo';
+            tarjeta.innerHTML = `
+                <div class="proto-card-top">
+                    <span class="proto-titulo-pill" style="background-color: #e0f2fe; color: #2b5b84;">Evento</span>
+                    <span class="proto-fecha">${evento.fecha_hora || '--/--/----'}</span>
+                </div>
+                <div class="proto-card-body">
+                    <div class="proto-content-right" style="width: 100%;">
+                        <h3 style="margin: 0 0 8px 0; font-size: 1.3rem; color: #4a3832;">${evento.nombre_evento}</h3>
+                        <div class="proto-info-extra">
+                            <p class="proto-ubicacion"><strong>Lugar:</strong> ${evento.lugar} (${evento.ubicacion || 'Medellín'})</p>
+                            <p class="proto-autor">Organiza: <strong>${evento.entidad_organizadora || 'Fundación'}</strong></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="proto-footer-row">
+                    <button class="proto-btn-detalles" onclick="window.location.href='detalle_evento.html?id=${evento.id_evento}'">Ver detalles</button>
+                </div>
+            `;
+            contenedor.appendChild(tarjeta);
+        });
+    } catch (e) {
+        console.error("Error al cargar eventos:", e);
+    }
+});
+</script>
 <style>
     .goog-te-banner-frame { display: none !important; }
     body { top: 0 !important; }

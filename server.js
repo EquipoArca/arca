@@ -2197,6 +2197,124 @@ app.get('/api/eventos', (req, res) => {
     });
 });
 // ==========================================
+// ENDPOINT PARA EDITAR UN EVENTO EXISTENTE
+// ==========================================
+app.put('/api/eventos/:id', (req, res) => {
+    const idEvento = req.params.id;
+    const {
+        nombre_evento,
+        lugar,
+        ubicacion,
+        fecha_hora,
+        detalles_adicionales,
+        correo_fundacion
+    } = req.body;
+
+    if (!nombre_evento || !lugar || !fecha_hora) {
+        return res.status(400).json({ error: "Faltan campos obligatorios para actualizar el evento." });
+    }
+
+    // Verificamos que la fundación pertenezca al usuario que edita
+    db.query("SELECT id_fundacion FROM fundacion WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(?))", [correo_fundacion], (errF, resFund) => {
+        if (errF || resFund.length === 0) {
+            return res.status(404).json({ error: "No se encontró la fundación asociada." });
+        }
+
+        const id_fundacion = resFund[0].id_fundacion;
+
+        const queryUpdate = `
+            UPDATE eventos 
+            SET nombre_evento = ?, lugar = ?, ubicacion = ?, fecha_hora = ?, detalles_adicionales = ?
+            WHERE id_evento = ? AND id_fundacion = ?
+        `;
+
+        db.query(queryUpdate, [
+            nombre_evento,
+            lugar,
+            ubicacion || 'Medellín',
+            fecha_hora,
+            detalles_adicionales || '',
+            idEvento,
+            id_fundacion
+        ], (err, resultado) => {
+            if (err) {
+                console.error("❌ Error al actualizar el evento en MySQL:", err.message);
+                return res.status(500).json({ error: "Error en el servidor al actualizar el evento." });
+            }
+
+            if (resultado.affectedRows === 0) {
+                return res.status(404).json({ error: "No se encontró el evento o no tienes permisos para editarlo." });
+            }
+
+            res.json({ mensaje: "¡Evento actualizado con éxito!" });
+        });
+    });
+});
+// ==========================================
+// ENDPOINT GLOBAL DE NOVEDADES (FEED GENERAL)
+// ==========================================
+app.get('/api/novedades', (req, res) => {
+    const query = `
+        SELECT 
+            p.id_publicacion,
+            'reporte' AS tipo_publicacion,
+            r.id_reporte AS id_origen,
+            r.Descripcion AS descripcion,
+            r.Ubicacion AS ubicacion,
+            r.img_reporte AS imagen,
+            r.Fecha_reporte AS fecha,
+            tr.Nombre_tipo_reporte AS subtitulo,
+            u.nombre_usuario AS autor
+        FROM publicaciones p
+        INNER JOIN reportes r ON p.id_reporte = r.id_reporte
+        INNER JOIN usuarios u ON r.id_usuarios = u.id_usuarios
+        LEFT JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
+        
+        UNION ALL
+        
+        SELECT 
+            p.id_publicacion,
+            'adopcion' AS tipo_publicacion,
+            pa.id_publicaciones_adopcion AS id_origen,
+            a.descripcion_animal AS descripcion,
+            CONCAT(a.ciudad, ', ', a.barrio) AS ubicacion,
+            a.fotos_animal AS imagen,
+            NOW() AS fecha,
+            CONCAT('Adopción: ', a.nombre_animal) AS subtitulo,
+            u.nombre_usuario AS autor
+        FROM publicaciones p
+        INNER JOIN publicaciones_adopcion pa ON p.id_publicaciones_adopcion = pa.id_publicaciones_adopcion
+        INNER JOIN animal a ON pa.id_animal = a.id_animal
+        INNER JOIN usuarios u ON pa.id_usuarios = u.id_usuarios
+
+        UNION ALL
+
+        SELECT 
+            p.id_publicacion,
+            'evento' AS tipo_publicacion,
+            e.id_evento AS id_origen,
+            e.detalles_adicionales AS descripcion,
+            e.ubicacion AS ubicacion,
+            NULL AS imagen,
+            e.fecha_hora AS fecha,
+            CONCAT('Evento: ', e.nombre_evento) AS subtitulo,
+            f.Nombre_Comercial AS autor
+        FROM publicaciones p
+        INNER JOIN eventos e ON p.id_evento = e.id_evento
+        INNER JOIN fundacion f ON e.id_fundacion = f.id_fundacion
+
+        ORDER BY id_publicacion DESC
+    `;
+
+    db.query(query, (err, rows) => {
+        if (err) {
+            console.error("❌ Error al obtener las novedades globales:", err.message);
+            return res.status(500).json({ error: "Error en el servidor al cargar novedades" });
+        }
+        res.json(rows);
+    });
+});
+// ==========================================
 // INICIALIZACIÓN DEL SERVIDOR
 // ==========================================
 const PORT = process.env.PORT || 3000;
