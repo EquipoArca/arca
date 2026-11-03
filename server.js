@@ -2193,7 +2193,6 @@ app.get('/api/obtener-fundacion', (req, res) => {
         res.json(results[0]);
     });
 });
-// PUT: Actualizar datos de la fundación
 app.put('/api/actualizar-fundacion', express.json({ limit: '20mb' }), (req, res) => {
     const {
         correo_fundacion,
@@ -2202,16 +2201,18 @@ app.put('/api/actualizar-fundacion', express.json({ limit: '20mb' }), (req, res)
         descripcion_vision,
         programas_proyectos,
         telefono_fundacion,
+        instagram,
+        facebook,
+        tiktok,
         pagina_web,
         foto_portada,
         pfp_fundacion
     } = req.body;
 
     if (!correo_fundacion) {
-        return res.status(400).json({ exito: false, mensaje: "El correo es obligatorio para actualizar." });
+        return res.status(400).json({ exito: false, mensaje: "El correo es obligatorio." });
     }
 
-    // Construimos dinámicamente la consulta para actualizar solo los campos enviados o modificados
     let query = `
         UPDATE fundacion 
         SET Nombre_Comercial = ?, 
@@ -2219,6 +2220,9 @@ app.put('/api/actualizar-fundacion', express.json({ limit: '20mb' }), (req, res)
             Descripcion_vision = ?, 
             Programas_Proyectos_Actuales = ?, 
             Telefono_fundacion = ?, 
+            Instagram = ?,
+            Facebook = ?,
+            TikTok = ?,
             Pagina_web = ?
     `;
     
@@ -2228,16 +2232,17 @@ app.put('/api/actualizar-fundacion', express.json({ limit: '20mb' }), (req, res)
         descripcion_vision || '',
         programas_proyectos || '',
         telefono_fundacion || '',
+        instagram || '',
+        facebook || '',
+        tiktok || '',
         pagina_web || ''
     ];
 
-    // Si mandó una nueva portada en Base64, la actualizamos
     if (foto_portada && foto_portada.startsWith('data:')) {
         query += `, Foto_Portada = ?`;
         valores.push(foto_portada);
     }
 
-    // Si mandó un nuevo logo/foto oficial en Base64, lo actualizamos
     if (pfp_fundacion && pfp_fundacion.startsWith('data:')) {
         query += `, PFP_Fundacion = ?`;
         valores.push(pfp_fundacion);
@@ -2248,18 +2253,12 @@ app.put('/api/actualizar-fundacion', express.json({ limit: '20mb' }), (req, res)
 
     db.query(query, valores, (err, resultado) => {
         if (err) {
-            console.error("❌ Error al actualizar la fundación:", err.message);
-            return res.status(500).json({ exito: false, mensaje: "Error en el servidor al actualizar la base de datos." });
+            console.error("❌ Error al actualizar redes:", err.message);
+            return res.status(500).json({ exito: false, mensaje: "Error al actualizar en la base de datos." });
         }
-
-        if (resultado.affectedRows === 0) {
-            return res.status(404).json({ exito: false, mensaje: "Fundación no encontrada en el sistema." });
-        }
-
-        res.json({ exito: true, mensaje: "¡Perfil de fundación actualizado con éxito!" });
+        res.json({ exito: true, mensaje: "¡Actualizado con éxito!" });
     });
 });
-
 // ==========================================
 // INICIALIZACIÓN DEL SERVIDOR (Siempre al final)
 // ==========================================
