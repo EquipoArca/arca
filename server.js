@@ -8,21 +8,21 @@ const multer = require('multer');
 const { initializeApp, cert } = require('firebase-admin/app');
 const { getAuth } = require('firebase-admin/auth');
 
+
+
 // ==========================================
-// INICIALIZACIÓN DE FIREBASE CON ARCHIVO LOCAL
+// INICIALIZACIÓN DE FIREBASE CON JSON ÚNICO
 // ==========================================
 let credentialCert;
 
-if (process.env.FIREBASE_PRIVATE_KEY) {
-    // Reemplazamos los "\n" literales por saltos de línea reales (\n) de forma estricta
-    let rawKey = process.env.FIREBASE_PRIVATE_KEY;
-    let formattedKey = rawKey.includes('\\n') ? rawKey.replace(/\\n/g, '\n') : rawKey;
-
-    credentialCert = cert({
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey: formattedKey
-    });
+if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    try {
+        // Parseamos el JSON que viene de la variable de entorno de Render
+        const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+        credentialCert = cert(serviceAccount);
+    } catch (e) {
+        console.error("❌ ERROR: El JSON de FIREBASE_SERVICE_ACCOUNT no tiene un formato válido.");
+    }
 } else {
     try {
         const serviceAccount = require('./clave-firebase.json');
@@ -35,11 +35,6 @@ if (process.env.FIREBASE_PRIVATE_KEY) {
 initializeApp({
     credential: credentialCert
 });
-const app = express();
-
-app.use(express.json({ limit: '10mb' })); 
-app.use(express.urlencoded({ limit: '10mb', extended: true }));
-app.use(cors());
 
 // ==========================================
 // ARCHIVOS ESTÁTICOS
