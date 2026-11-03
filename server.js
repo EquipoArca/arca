@@ -1360,12 +1360,31 @@ app.get('/api/mis-reportes', (req, res) => {
         INNER JOIN usuarios u ON pa.id_usuarios = u.id_usuarios
         WHERE LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(?))
 
+        UNION ALL
+
+        SELECT 
+            p.id_publicacion,
+            'evento' AS tipo_publicacion,
+            e.id_evento AS id_origen,
+            e.detalles_adicionales AS Descripcion,
+            e.ubicacion AS Ubicacion,
+            NULL AS img_reporte,
+            NOW() AS Fecha_reporte,
+            CONCAT('Evento: ', e.nombre_evento) AS nombre_tipo_reporte,
+            NULL AS telefono_contacto,
+            f.Correo_fundacion AS correo_contacto,
+            NULL AS nombre_animal
+        FROM publicaciones p
+        INNER JOIN eventos e ON p.id_evento = e.id_evento
+        INNER JOIN fundacion f ON e.id_fundacion = f.id_fundacion
+        WHERE LOWER(TRIM(f.Correo_fundacion)) = LOWER(TRIM(?))
+
         ORDER BY id_publicacion DESC
     `;
 
-    db.query(sql, [correoUsuario, correoUsuario], (err, rows) => {
+    db.query(sql, [correoUsuario, correoUsuario, correoUsuario], (err, rows) => {
         if (err) {
-            console.error("❌ ERROR REAL EN ADOPCIONES/REPORTES:", err.message);
+            console.error("❌ ERROR AL OBTENER PUBLICACIONES Y EVENTOS:", err.message);
             return res.status(500).json({ error: 'Hubo un error al obtener las publicaciones', detalle: err.message });
         }
         res.json(rows);

@@ -349,7 +349,7 @@
                     const resultado = await respuesta.json();
                     if (respuesta.ok) {
                         alert("¡Evento publicado con éxito!");
-                        window.location.href = "novedades-eventos.html";
+                        window.location.href = "mis_publicaciones.html";
                     } else {
                         throw new Error(resultado.error || "No se pudo registrar el evento.");
                     }
