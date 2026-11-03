@@ -906,10 +906,31 @@ app.get('/api/guardar-publicacion/:correo', (req, res) => {
               WHERE LOWER(TRIM(u_bloq.correo_usuario)) = LOWER(TRIM(?))
           )
 
+        UNION ALL
+
+        SELECT 
+            p.id_publicacion,
+            'evento' AS tipo_publicacion,
+            e.id_evento AS id_origen,
+            e.detalles_adicionales AS Descripcion,
+            e.ubicacion AS Ubicacion,
+            NULL AS img_reporte,
+            e.fecha_hora AS Fecha_reporte,
+            CONCAT('Evento: ', e.nombre_evento) AS nombre_tipo_reporte,
+            NULL AS telefono_contacto,
+            f.Correo_fundacion AS correo_contacto,
+            NULL AS nombre_animal
+        FROM guardados g
+        INNER JOIN usuarios u ON g.id_usuarios = u.id_usuarios
+        INNER JOIN publicaciones p ON g.id_publicacion = p.id_publicacion
+        INNER JOIN eventos e ON p.id_evento = e.id_evento
+        INNER JOIN fundacion f ON e.id_fundacion = f.id_fundacion
+        WHERE LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(?))
+
         ORDER BY id_publicacion DESC
     `;
 
-    db.query(query, [correo, correo, correo, correo], (err, results) => {
+    db.query(query, [correo, correo, correo, correo, correo], (err, results) => {
         if (err) {
             console.error("❌ ERROR AL OBTENER GUARDADOS:", err.message);
             return res.status(500).json({ error: "Error al obtener las publicaciones guardadas" });
@@ -918,7 +939,39 @@ app.get('/api/guardar-publicacion/:correo', (req, res) => {
         res.json(results);
     });
 });
+// ==========================================
+// ENDPOINT PARA CREAR RECORDATORIOS / NOTIFICACIONES
+// ==========================================
+app.post('/api/crear-notificacion-recordatorio', (req, res) => {
+    const { correo, mensaje } = req.body;
 
+    if (!correo || !mensaje) {
+        return res.status(400).json({ error: "Faltan datos requeridos (correo o mensaje)." });
+    }
+
+    // Buscamos el id_usuarios destino usando el correo
+    db.query("SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))", [correo], (err, results) => {
+        if (err || results.length === 0) {
+            return res.status(404).json({ error: "Usuario no encontrado en la base de datos." });
+        }
+
+        const idUsuarioDestino = results[0].id_usuarios;
+
+        const queryNotif = `
+            INSERT INTO notificaciones (id_usuario_destino, id_usuario_origen, tipo, mensaje) 
+            VALUES (?, NULL, 'recordatorio_evento', ?)
+        `;
+
+        db.query(queryNotif, [idUsuarioDestino, mensaje], (errNotif) => {
+            if (errNotif) {
+                console.error("❌ Error al guardar la notificación de recordatorio:", errNotif.message);
+                return res.status(500).json({ error: "Error al guardar el recordatorio en el servidor." });
+            }
+
+            res.status(201).json({ exito: true, mensaje: "¡Recordatorio registrado en las notificaciones con éxito!" });
+        });
+    });
+});
 app.post('/api/quitar-guardado', (req, res) => {
     const { correo, id_publicacion } = req.body;
 

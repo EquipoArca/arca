@@ -8,6 +8,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="dark-mode.css">
     <script>
@@ -19,18 +21,18 @@
         html, body {
             margin: 0;
             padding: 0;
-            height: 100vh;
-            overflow: hidden;
+            min-height: 100vh;
+            overflow-y: auto;
             font-family: 'Itim', cursive, sans-serif;
             background-color: #fce8e6;
         }
 
         .main-content {
-            height: calc(100vh - 65px);
-            padding: 15px 25px;
+            min-height: calc(100vh - 65px);
+            padding: 20px 25px 40px 25px;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             box-sizing: border-box;
         }
 
@@ -47,7 +49,6 @@
             box-sizing: border-box;
         }
 
-        /* TÍTULO CON DETALLE AZUL PASTEL PARA EVENTOS */
         .evento-header-titulo {
             display: flex;
             align-items: center;
@@ -82,7 +83,6 @@
             grid-column: span 3;
         }
 
-        /* CÁPSULAS DE COLORES VARIADOS (AZUL, MELOCOTÓN, ROSA) */
         .evento-label {
             font-size: 0.9rem;
             color: #5c4033;
@@ -113,7 +113,6 @@
             border-color: #f8bbd0;
         }
 
-        /* INPUTS LIMPIOS Y COMPACTOS */
         .evento-input, .evento-textarea {
             width: 100%;
             background: #ffffff;
@@ -164,7 +163,6 @@
             cursor: pointer;
         }
 
-        /* BOTÓN PLANO MELOCOTÓN/AZUL AL PASAR EL MOUSE */
         .evento-contenedor-boton {
             grid-column: span 3;
             display: flex;
@@ -239,18 +237,29 @@
                 </div>
 
                 <div class="evento-grupo-campo">
-                    <span class="evento-label melocoton">Lugar exacto</span>
+                    <span class="evento-label melocoton">Lugar / Sitio</span>
                     <input type="text" id="input-lugar" class="evento-input" placeholder="Ej. Parque Principal de Robledo" required>
                 </div>
 
-               <div class="evento-grupo-campo">
-                    <span class="evento-label rosa">Fecha y hora</span>
-                    <input type="text" id="input-fecha" class="evento-input" placeholder="Ej. 10 de Junio - 8:00 am" required>
-               </div>
-
                 <div class="evento-grupo-campo">
-                    <span class="evento-label melocoton">Ciudad / Zona</span>
-                    <input type="text" id="input-ubicacion" class="evento-input" value="Medellín" placeholder="Ej. Medellín">
+                    <span class="evento-label rosa">Fecha y hora</span>
+                    <input type="datetime-local" id="input-fecha" class="evento-input" required>
+                </div>
+
+                <div class="evento-grupo-campo ancho-completo">
+                    <span class="evento-label melocoton">Selecciona la ubicación exacta en el mapa:</span>
+                    <div style="font-size: 12.5px; color: #775a4c; margin-bottom: 6px;">Escribe el lugar en el buscador o arrastra el pin sobre el mapa en Medellín.</div>
+                    
+                    <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                        <input type="text" id="buscador-mini-mapa" class="evento-input" placeholder="Ej. Parque de Robledo, Medellín" style="flex: 1;">
+                        <button type="button" id="btn-buscar-mini-mapa" class="btn-publicar-evento" style="padding: 6px 16px; font-size: 0.9rem;">Buscar</button>
+                    </div>
+
+                    <!-- Mini Mapa Selector corregido (sin espacios en el ID) -->
+                    <div id="mini-mapa-selector" style="width: 100%; height: 220px; border-radius: 16px; border: 1.5px solid rgba(255,255,255,0.9);"></div>
+                    
+                    <!-- Input oculto donde se guardan las coordenadas obtenidas del mini mapa -->
+                    <input type="hidden" id="input-ubicacion-coords" name="ubicacion">
                 </div>
 
                 <div class="evento-grupo-campo">
@@ -299,6 +308,57 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="script.js"></script>
     <script>
+    let miniMap, miniMarker;
+
+    function inicializarMiniMapa() {
+        const latDefault = 6.25184;
+        const lngDefault = -75.56359;
+
+        miniMap = L.map('mini-mapa-selector').setView([latDefault, lngDefault], 14);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(miniMap);
+
+        miniMarker = L.marker([latDefault, lngDefault], { draggable: true }).addTo(miniMap);
+
+        miniMarker.on('dragend', function (e) {
+            const position = miniMarker.getLatLng();
+            document.getElementById('input-ubicacion-coords').value = `${position.lat.toFixed(5)}, ${position.lng.toFixed(5)}`;
+        });
+
+        miniMap.on('click', function (e) {
+            miniMarker.setLatLng(e.latlng);
+            document.getElementById('input-ubicacion-coords').value = `${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)}`;
+        });
+
+        document.getElementById('input-ubicacion-coords').value = `${latDefault}, ${lngDefault}`;
+    }
+
+    document.getElementById('btn-buscar-mini-mapa').addEventListener('click', async () => {
+        const query = document.getElementById('buscador-mini-mapa').value.trim();
+        if (!query) return;
+
+        try {
+            const respuesta = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ", Medellín, Colombia")}`);
+            const resultados = await respuesta.json();
+
+            if (resultados && resultados.length > 0) {
+                const lat = parseFloat(resultados[0].lat);
+                const lon = parseFloat(resultados[0].lon);
+                
+                miniMap.setView([lat, lon], 16);
+                miniMarker.setLatLng([lat, lon]);
+                document.getElementById('input-ubicacion-coords').value = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+            } else {
+                alert("No encontramos ese lugar exacto en Medellín. Intenta ser más específico.");
+            }
+        } catch (error) {
+            console.error("Error buscando ubicación:", error);
+        }
+    });
+
     document.addEventListener('DOMContentLoaded', async () => {
         const btnToggleMenu = document.getElementById('btn-toggle-menu');
         const sidebar = document.getElementById('sidebar');
@@ -308,7 +368,8 @@
             });
         }
 
-        // --- DETECTAR SI VENIMOS A EDITAR UN EVENTO ---
+        setTimeout(inicializarMiniMapa, 300);
+
         const urlParams = new URLSearchParams(window.location.search);
         const idEventoEditar = urlParams.get('editar');
         const btnPublicar = document.getElementById('btn-publicar-evento');
@@ -325,8 +386,8 @@
                     if (eventoActual) {
                         document.getElementById('input-nombre-evento').value = eventoActual.nombre_evento || '';
                         document.getElementById('input-lugar').value = eventoActual.lugar || '';
-                        document.getElementById('input-fecha').value = eventoActual.fecha_hora || '';
-                        document.getElementById('input-ubicacion').value = eventoActual.ubicacion || 'Medellín';
+                        document.getElementById('input-fecha').value = eventoActual.fecha_hora ? eventoActual.fecha_hora.replace(' ', 'T').slice(0, 16) : '';
+                        document.getElementById('input-ubicacion-coords').value = eventoActual.ubicacion || '6.25184, -75.56359';
                         document.getElementById('input-detalles').value = eventoActual.detalles_adicionales || '';
                     }
                 }
@@ -335,7 +396,6 @@
             }
         }
 
-        // --- MANEJO DE ENVÍO (CREAR O EDITAR) ---
         const formEvento = document.getElementById('form-evento');
         if (formEvento) {
             formEvento.addEventListener('submit', async (e) => {
@@ -350,7 +410,7 @@
                 const nombre_evento = document.getElementById('input-nombre-evento').value;
                 const lugar = document.getElementById('input-lugar').value;
                 const fecha_hora = document.getElementById('input-fecha').value;
-                const ubicacion = document.getElementById('input-ubicacion').value;
+                const ubicacion = document.getElementById('input-ubicacion-coords').value || '6.25184, -75.56359';
                 const detalles_adicionales = document.getElementById('input-detalles').value;
 
                 if (!nombre_evento || !lugar || !fecha_hora) {

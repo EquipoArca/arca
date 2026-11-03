@@ -102,7 +102,6 @@
             color: #666;
         }
 
-        /* Titular del Evento como en el prototipo */
         .evento-titulo-principal {
             text-align: center;
             margin-bottom: 25px;
@@ -121,7 +120,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* Estructura en Grid Estilo Prototipo */
         .evento-grid-contenido {
             display: grid;
             grid-template-columns: 1fr 1.2fr;
@@ -160,7 +158,6 @@
             font-size: 14px;
         }
 
-        /* Sección de Instrucciones y Botones a la derecha */
         .evento-columna-derecha {
             display: flex;
             flex-direction: column;
@@ -200,7 +197,6 @@
             margin-bottom: 8px;
         }
 
-        /* Botones de Acción del Prototipo */
         .btn-accion-prototipo {
             background: rgba(255, 255, 255, 0.9);
             color: #2b2b2b;
@@ -239,7 +235,6 @@
             color: #d9534f !important;
         }
 
-        /* Contacto en tarjeta izquierda */
         .contacto-titulo-mini {
             font-size: 15px;
             font-weight: bold;
@@ -293,7 +288,6 @@
         }
         .btn-copiar-mini:hover { background: #ffe5dd; }
 
-        /* Modal Estilo ARCA */
         .modal-arca-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -404,7 +398,7 @@
               <div style="font-size: 14.5px; color: #666; margin-top: 4px;">Organiza: <strong id="lbl-organizador">Fundación</strong></div>
           </div>
 
-          <!-- Grid de Contenido (Izquierda: Datos y Contacto | Derecha: Instrucciones y Botones) -->
+          <!-- Grid de Contenido -->
           <div class="evento-grid-contenido">
               
               <!-- Columna Izquierda -->
@@ -433,7 +427,7 @@
                       Cargando detalles adicionales...
                   </div>
 
-                  <!-- Botones de Acción Funcionales -->
+                  <!-- Botones de Acción -->
                   <a href="#" id="btn-ver-mapa" class="btn-accion-prototipo">
                       <i class="fa-solid fa-map-location-dot"></i> Ver ubicación en el mapa
                   </a>
@@ -574,15 +568,27 @@
               document.getElementById('lbl-organizador').textContent = evento.entidad_organizadora || 'Fundación ARCA';
               
               if (evento.fecha_hora) {
-                  const fechaPartes = evento.fecha_hora.split('T')[0];
-                  document.getElementById('lbl-fecha').textContent = `Publicado el ${fechaPartes}`;
-                  document.getElementById('lbl-fecha-evento').textContent = fechaPartes;
-                  document.getElementById('lbl-hora-evento').textContent = evento.fecha_hora.includes('T') ? evento.fecha_hora.split('T')[1].substring(0, 5) : 'Todo el día';
+                  // Corrección robusta para extraer la fecha y hora exacta sin ceros
+                  const fechaObj = new Date(evento.fecha_hora);
+                  const anio = fechaObj.getFullYear();
+                  const mes = String(fechaObj.getMonth() + 1).padStart(2, '0');
+                  const dia = String(fechaObj.getDate()).padStart(2, '0');
+                  const fechaFormateada = `${anio}-${mes}-${dia}`;
+
+                  let horas = fechaObj.getHours();
+                  const minutos = String(fechaObj.getMinutes()).padStart(2, '0');
+                  const ampm = horas >= 12 ? 'pm' : 'am';
+                  horas = horas % 12;
+                  horas = horas ? horas : 12; // la hora '0' debe ser '12'
+                  const horaFormateada = `${String(horas).padStart(2, '0')}:${minutos} ${ampm}`;
+
+                  document.getElementById('lbl-fecha').textContent = `Publicado el ${fechaFormateada}`;
+                  document.getElementById('lbl-fecha-evento').textContent = fechaFormateada;
+                  document.getElementById('lbl-hora-evento').textContent = horaFormateada;
               }
 
               document.getElementById('lbl-lugar-evento').textContent = evento.lugar || 'Por definir';
               
-              // Instrucciones / Detalles adicionales formateados en lista o viñetas
               const detallesTexto = evento.detalles_adicionales || 'Sin instrucciones adicionales.';
               const lineasDetalle = detallesTexto.split('.').filter(l => l.trim().length > 0);
               let htmlDetalles = "<ul>";
@@ -592,7 +598,6 @@
               htmlDetalles += "</ul>";
               document.getElementById('lbl-detalles').innerHTML = htmlDetalles;
 
-              // Enlace al mapa
               const btnMapa = document.getElementById('btn-ver-mapa');
               if (evento.ubicacion) {
                   btnMapa.href = `mapa.html?ubicacion=${encodeURIComponent(evento.ubicacion)}`;
@@ -600,28 +605,36 @@
                   btnMapa.href = `mapa.html`;
               }
 
-              // Contacto de la fundación organizadora
-              const tel = evento.telefono_fundacion || '3********';
-              const correo = evento.correo_fundacion || 'contacto@arca.com';
-              const urlWhatsapp = `https://wa.me/${tel.replace(/\D/g,'')}`;
+              // Datos reales de contacto de la fundación organizadora
+              const tel = evento.telefono_fundacion || evento.Telefono_fundacion || 'No disponible';
+              const correo = evento.correo_fundacion || evento.Correo_fundacion || 'contacto@arca.com';
+              const urlWhatsapp = tel !== 'No disponible' ? `https://wa.me/${tel.replace(/\D/g,'')}` : '#';
               const urlGmail = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(correo)}&su=${encodeURIComponent("Consulta sobre el evento: " + evento.nombre_evento)}`;
 
-              document.getElementById('lbl-contacto').innerHTML = `
-                  <div class="contacto-fila-item">
-                      <a href="javascript:void(0)" onclick="abrirModalEnlace('Abrir WhatsApp', '¿Deseas abrir WhatsApp para escribir al número ${tel}?', '${urlWhatsapp}')" class="btn-contacto-link whatsapp">
-                          <i class="fa-brands fa-whatsapp"></i> ${tel}
-                      </a>
-                      <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${tel}')"><i class="fa-solid fa-copy"></i> Copiar</button>
-                  </div>
-                  <div class="contacto-fila-item">
-                      <a href="javascript:void(0)" onclick="abrirModalEnlace('Abrir Gmail', '¿Deseas redactar un correo a ${correo}?', '${urlGmail}')" class="btn-contacto-link correo">
-                          <i class="fa-solid fa-envelope"></i> ${correo}
-                      </a>
-                      <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${correo}')"><i class="fa-solid fa-copy"></i> Copiar</button>
-                  </div>
-              `;
+              let contactoHTML = "";
+              if (tel && tel !== 'No disponible') {
+                  contactoHTML += `
+                      <div class="contacto-fila-item">
+                          <a href="javascript:void(0)" onclick="abrirModalEnlace('Abrir WhatsApp', '¿Deseas abrir WhatsApp para escribir al número ${tel}?', '${urlWhatsapp}')" class="btn-contacto-link whatsapp">
+                              <i class="fa-brands fa-whatsapp"></i> ${tel}
+                          </a>
+                          <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${tel}')"><i class="fa-solid fa-copy"></i> Copiar</button>
+                      </div>
+                  `;
+              }
+              if (correo) {
+                  contactoHTML += `
+                      <div class="contacto-fila-item">
+                          <a href="javascript:void(0)" onclick="abrirModalEnlace('Abrir Gmail', '¿Deseas redactar un correo a ${correo}?', '${urlGmail}')" class="btn-contacto-link correo">
+                              <i class="fa-solid fa-envelope"></i> ${correo}
+                          </a>
+                          <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${correo}')"><i class="fa-solid fa-copy"></i> Copiar</button>
+                      </div>
+                  `;
+              }
+              document.getElementById('lbl-contacto').innerHTML = contactoHTML || '<span>Sin medios de contacto registrados.</span>';
 
-              // Gestionar Estado del Recordatorio si ya fue activado previamente
+              // Estado de Recordatorio
               const recordatoriosGuardados = JSON.parse(localStorage.getItem('arca_recordatorios') || '[]');
               if (recordatoriosGuardados.includes(Number(eventoId))) {
                   const btnRec = document.getElementById('btn-activar-recordatorio');
@@ -629,7 +642,7 @@
                   btnRec.classList.add('btn-recordatorio-activo');
               }
 
-              // Gestión de Guardados de la Publicación
+              // Gestión de Guardados de Publicación
               firebase.auth().onAuthStateChanged(async (user) => {
                   const correoLogueado = user ? user.email : (localStorage.getItem('correo_usuario') || localStorage.getItem('correo'));
                   const btnGuardar = document.getElementById('btn-accion-guardar');
@@ -643,7 +656,6 @@
                       const resG = await fetch(`/api/guardados/ids/${encodeURIComponent(correoLogueado)}`);
                       const idsGuards = await resG.json();
                       
-                      // Buscamos si el evento está asociado en publicaciones generales
                       const resPub = await fetch('/api/publicaciones-globales');
                       const pubList = await resPub.json();
                       const pubEvento = pubList.find(p => p.tipo_publicacion === 'evento' && Number(p.id_origen) === Number(eventoId));
@@ -688,7 +700,7 @@
           }
       }
 
-      // Lógica para Activar Recordatorio (1 día antes)
+      // Lógica Funcional para Programar y Activar Recordatorio (1 día antes)
       function activarRecordatorioEvento() {
           const params = new URLSearchParams(window.location.search);
           const eventoId = Number(params.get('id'));
@@ -701,6 +713,24 @@
 
           recordatorios.push(eventoId);
           localStorage.setItem('arca_recordatorios', JSON.stringify(recordatorios));
+
+          // Guardar metadatos del evento para el sistema de notificaciones local o push del navegador
+          if (fechaEventoGlobal) {
+              const fechaEv = new Date(fechaEventoGlobal);
+              const unDiaAntes = new Date(fechaEv.getTime() - (24 * 60 * 60 * 1000));
+              
+              let eventosNotif = JSON.parse(localStorage.getItem('arca_programacion_notificaciones') || '{}');
+              eventosNotif[eventoId] = {
+                  nombre: nombreEventoGlobal,
+                  fechaDisparo: unDiaAntes.getTime()
+              };
+              localStorage.setItem('arca_programacion_notificaciones', JSON.stringify(eventosNotif));
+          }
+
+          // Solicitar permiso de notificaciones nativas si es soportado
+          if ("Notification" in window && Notification.permission !== "granted") {
+              Notification.requestPermission();
+          }
 
           const btnRec = document.getElementById('btn-activar-recordatorio');
           btnRec.innerHTML = `<i class="fa-solid fa-bell"></i> RECORDATORIO ACTIVADO`;
