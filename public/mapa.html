@@ -694,12 +694,13 @@
 
           function actualizarListaCercanas() {
               const contenedorLista = document.getElementById('lista-cercanas');
-              const tituloPanel = document.getElementById('titulo-panel-cercanas');
               const centroMapa = map.getCenter();
+              if (!centroMapa) return;
               
-              const filtroActivo = document.querySelector('.filtro-btn.active').getAttribute('data-filtro');
+              const filtroActivo = document.querySelector('.filtro-btn.active')?.getAttribute('data-filtro') || 'todos';
 
               const elementosFiltrados = todosLosElementos.filter(item => {
+                  if (!item || typeof item.lat !== 'number' || typeof item.lng !== 'number') return false;
                   const t = (item.tipo || '').toLowerCase();
                   if (filtroActivo === 'todos') return true;
                   if (filtroActivo === 'reporte') return t.includes('report') || t.includes('emergencia');
@@ -750,6 +751,7 @@
               markersLayer.clearLayers();
 
               todosLosElementos.forEach(item => {
+                  if (!item || typeof item.lat !== 'number' || typeof item.lng !== 'number') return;
                   const tipo = (item.tipo || '').toLowerCase();
 
                   if (filtro !== 'todos') {
@@ -770,8 +772,8 @@
                       colorPin = '#e985a0'; 
                       iconoClase = 'fa-heart';
                   } else if (tipo.includes('evento')) {
-                      colorPin = '#6bbbe7'; // Azulito para eventos tal como pediste
-                      iconoClase = 'fa-calendar-days'; // Icono original sin emojis
+                      colorPin = '#6bbbe7';
+                      iconoClase = 'fa-calendar-days';
                   } else if (tipo.includes('veterinaria') || tipo.includes('clinica')) {
                       colorPin = '#62c385'; 
                       iconoClase = 'fa-hospital';
@@ -798,7 +800,6 @@
                       const urlMapsReporte = `https://www.google.com/maps/search/?api=1&query=${item.lat},${item.lng}`;
                       const idReal = item.id_origen || item.id_publicacion || '';
                       
-                      // Adaptación correcta del enlace de detalle según sea reporte, adopción o evento
                       let paginaDetalle = `detalle_reporte.html?id=${idReal}`;
                       if (item.tipo_publicacion === 'adopcion') {
                           paginaDetalle = `detalle_adopcion.html?id=${idReal}`;
@@ -839,6 +840,7 @@
 
           async function cargarVeterinariasDeLaZona() {
               const bounds = map.getBounds();
+              if (!bounds) return;
               const southWest = bounds.getSouthWest();
               const northEast = bounds.getNorthEast();
 
@@ -875,15 +877,16 @@
                                       lng: lon,
                                       direccion: "Medellín"
                                   };
-                                  const existe = todosLosElementos.some(e => Math.abs(e.lat - lat) < 0.00005 && Math.abs(e.lng - lon) < 0.00005);
+                                  const existe = todosLosElementos.some(e => e && Math.abs(e.lat - lat) < 0.00005 && Math.abs(e.lng - lon) < 0.00005);
                                   if (!existe) todosLosElementos.push(nuevaVetObj);
                               }
                           });
-                          renderizarMarcadores(document.querySelector('.filtro-btn.active').getAttribute('data-filtro'));
+                          const filtroActual = document.querySelector('.filtro-btn.active')?.getAttribute('data-filtro') || 'todos';
+                          renderizarMarcadores(filtroActual);
                       }
                   }
               } catch (e) {
-                  console.warn("Error cargando veterinarias OSM.");
+                  console.warn("Aviso: La API de OpenStreetMap (Overpass) no respondió o está saturada (502). El mapa principal de reportes seguirá funcionando con normalidad.");
               }
           }
 
@@ -907,8 +910,7 @@
                           let lat = matches ? parseFloat(matches[1]) : null;
                           let lng = matches ? parseFloat(matches[2]) : null;
 
-                          // Si el evento u otra publicación no trae coordenadas directas en el texto, asignamos una geolocalización por defecto en Medellín para que no se pierdan en el mapa
-                          if (isNaN(lat) || isNaN(lng)) {
+                          if (isNaN(lat) || isNaN(lng) || lat === null || lng === null) {
                               lat = 6.25184 + (Math.random() - 0.5) * 0.05;
                               lng = -75.56359 + (Math.random() - 0.5) * 0.05;
                           }
