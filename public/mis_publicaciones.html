@@ -283,8 +283,8 @@
                 Mis Publicaciones
             </h2>
             
-            <div id="grid-mis-publicaciones" class="posts-grid" style="display: grid !important; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)) !important; gap: 25px;">
-                
+           <div id="grid-mis-publicaciones" class="posts-grid" style="display: grid !important; grid-template-columns: repeat(auto-fit, minmax(320px, 420px)) !important; justify-content: center !important; gap: 25px;"></div>
+
                 <div id="estado-vacio-mis-pubs" style="grid-column: 1 / -1; background: rgba(232, 168, 124, 0.28); border: 2px solid rgba(255, 255, 255, 0.85); border-radius: 38px; padding: 50px 30px; text-align: center; box-shadow: 0 12px 30px rgba(92, 64, 51, 0.06); display: flex; flex-direction: column; align-items: center; gap: 15px; backdrop-filter: blur(10px);">
                     <i class="fa-solid fa-folder-open" style="font-size: 52px; color: #ffffff; filter: drop-shadow(0 4px 8px rgba(92, 64, 51, 0.15));"></i>
                     <h3 style="font-family: 'Itim', cursive, sans-serif; color: #5c4033; font-size: 24px; margin: 0; font-weight: 400;">Aún no tienes publicaciones</h3>
@@ -557,10 +557,31 @@
     let misReportesCache = [];
 
     firebase.auth().onAuthStateChanged(async (user) => {
-        if (user) {
-            await cargarMisPublicaciones(user.email);
+    if (user) {
+        await cargarMisPublicaciones(user.email);
+
+        // Consultamos si el usuario logueado es una fundación
+        try {
+            const res = await fetch(`/api/obtener-fundacion?correo=${encodeURIComponent(user.email)}`);
+            if (res.ok) {
+                // Es una fundación: transformamos el contenido del modal flotante (+)
+                const contenedorOpcionesModal = document.querySelector('#modal-nueva-publicacion .modal-contenido-arca div[style*="display: flex"]');
+                if (contenedorOpcionesModal) {
+                    contenedorOpcionesModal.innerHTML = `
+                        <a href="formulario_adopcion.html" class="btn-opcion-modal-tipo" style="background-color: rgba(252, 228, 236, 0.9);">
+                            Poner animal en adopción
+                        </a>
+                        <a href="formulario_evento.html" class="btn-opcion-modal-tipo" style="background-color: rgba(224, 242, 254, 0.9);">
+                            Publicar evento
+                        </a>
+                    `;
+                }
+            }
+        } catch (e) {
+            // Si da error es un usuario normal y el modal se queda con sus opciones de siempre
         }
-    });
+    }
+});
 
     async function cargarMisPublicaciones(correo) {
         const grid = document.getElementById('grid-mis-publicaciones');
@@ -610,10 +631,21 @@
                         }
                     }
                     
-                    const esAdopcion = reporte.tipo_publicacion === 'adopcion';
-                    const textoBadge = esAdopcion ? 'En Adopción' : 'Mi Reporte';
-                    const colorFondoBadge = esAdopcion ? 'rgba(252, 228, 236, 0.9)' : 'rgba(250, 237, 205, 0.9)';
-                    const colorTextoBadge = esAdopcion ? '#ad526a' : '#8c6d3f';
+                  const esAdopcion = reporte.tipo_publicacion === 'adopcion';
+                  const esEvento = reporte.tipo_publicacion === 'evento';
+                  let textoBadge = 'Mi Reporte';
+                  let colorFondoBadge = 'rgba(250, 237, 205, 0.9)';
+                  let colorTextoBadge = '#8c6d3f';
+
+                        if (esAdopcion) {
+                            textoBadge = 'En Adopción';
+                            colorFondoBadge = 'rgba(252, 228, 236, 0.9)';
+                            colorTextoBadge = '#ad526a';
+                        } else if (esEvento) {
+                            textoBadge = 'Evento';
+                            colorFondoBadge = 'rgba(224, 242, 254, 0.9)'; // Azul pastel muy suave
+                            colorTextoBadge = '#2b5b84';                    // Azul oscuro elegante
+                        }
 
                     let imagenSrc = reporte.img_reporte || '';
                     if (esAdopcion && imagenSrc.startsWith('[')) {
@@ -828,22 +860,25 @@
     }
 
     function abrirEditarPub(id, tipo) {
-        const mensajeTexto = tipo === 'adopcion' 
-            ? "¡Vamos a cargar los datos de tu adopción para que puedas editarlos!" 
-            : "¡Vamos a cargar los datos de tu reporte para que puedas editarlos!";
+    let mensajeTexto = "¡Vamos a cargar los datos de tu reporte para que puedas editarlos!";
+    let urlDestino = `formularior.html?editar=${id}`;
 
-        mostrarAlertaArca("Editar publicación", mensajeTexto, {
-            tipo: "aviso",
-            textoBoton: "Continuar",
-            alCerrar: () => {
-                if (tipo === 'adopcion') {
-                    window.location.href = `formulario_adopcion.html?editar=${id}`;
-                } else {
-                    window.location.href = `formularior.html?editar=${id}`;
-                }
-            }
-        });
+    if (tipo === 'adopcion') {
+        mensajeTexto = "¡Vamos a cargar los datos de tu adopción para que puedas editarlos!";
+        urlDestino = `formulario_adopcion.html?editar=${id}`;
+    } else if (tipo === 'evento') {
+        mensajeTexto = "¡Vamos a cargar los datos de tu evento para que puedas editarlos!";
+        urlDestino = `formulario_evento.html?editar=${id}`;
     }
+
+    mostrarAlertaArca("Editar publicación", mensajeTexto, {
+        tipo: "aviso",
+        textoBoton: "Continuar",
+        alCerrar: () => {
+            window.location.href = urlDestino;
+        }
+    });
+}
 
     async function toggleGuardarPublicacion(idPublicacion) {
         const user = firebase.auth().currentUser;

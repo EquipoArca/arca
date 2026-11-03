@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle del Evento - ARCA</title>
+    <link rel="stylesheet" href="style_home.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="dark-mode.css">
+    <script>
+    if (localStorage.getItem("modo_oscuro") === "true") {
+        document.body.classList.add("dark-mode");
+    }
+    </script>
+    <style>
+        html, body {
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Itim', cursive, sans-serif;
+            font-weight: 400;
+            background-color: #fce8e6;
+        }
+
+        .main-content {
+            padding: 40px 20px;
+            min-height: calc(100vh - 70px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            animation: fadeInArca 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        @keyframes fadeInArca {
+            from { opacity: 0; transform: translateY(12px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .detalle-container-principal {
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 35px;
+            padding: 28px 35px;
+            width: 100%;
+            max-width: 1100px;
+            box-shadow: 0 15px 40px rgba(220, 150, 140, 0.15);
+            border: 2.5px solid rgba(255, 255, 255, 0.85);
+            box-sizing: border-box;
+        }
+
+        .detalle-header-card {
+            background: rgba(253, 203, 208, 0.6);
+            backdrop-filter: blur(12px);
+            padding: 12px 24px;
+            border-radius: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 6px 20px rgba(230, 160, 140, 0.08);
+        }
+
+        .detalle-header-card h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 400;
+            color: #2b2b2b;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .detalle-btn-volver {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1.5px solid #f4c2c4;
+            padding: 8px 18px;
+            border-radius: 50px;
+            color: #d9534f;
+            font-size: 13.5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+            font-family: 'Itim', cursive, sans-serif;
+            box-shadow: 0 4px 12px rgba(217, 83, 79, 0.06);
+        }
+
+        .detalle-btn-volver:hover {
+            background: #fff;
+            transform: translateY(-2px) scale(1.02);
+        }
+
+        .detalle-fecha-texto {
+            font-size: 13.5px;
+            color: #666;
+        }
+
+        /* Titular del Evento como en el prototipo */
+        .evento-titulo-principal {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .evento-titulo-principal h2 {
+            font-size: 36px;
+            color: #2b2b2b;
+            background: rgba(253, 203, 208, 0.5);
+            display: inline-block;
+            padding: 10px 35px;
+            border-radius: 50px;
+            border: 2px solid #f9d5d3;
+            margin: 0 0 5px 0;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.03);
+            letter-spacing: 0.5px;
+        }
+
+        /* Estructura en Grid Estilo Prototipo */
+        .evento-grid-contenido {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 28px;
+            align-items: start;
+        }
+
+        .evento-caja-info {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            border-radius: 24px;
+            padding: 22px;
+            border: 1.5px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 8px 25px rgba(230, 150, 130, 0.07);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .evento-campo-fila {
+            background: rgba(255, 255, 255, 0.85);
+            padding: 10px 16px;
+            border-radius: 50px;
+            border: 1.5px solid #f9cab5;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14.5px;
+            color: #444;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.02);
+        }
+
+        .evento-campo-fila strong {
+            color: #d9534f;
+            min-width: 75px;
+            font-size: 14px;
+        }
+
+        /* Sección de Instrucciones y Botones a la derecha */
+        .evento-columna-derecha {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .instrucciones-capsula-titulo {
+            background: rgba(253, 203, 208, 0.8);
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #704653;
+            display: inline-block;
+            border: 1px solid #f4c2c4;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.03);
+        }
+
+        .instrucciones-caja-texto {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            border-radius: 24px;
+            padding: 22px;
+            border: 1.5px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 8px 25px rgba(230, 150, 130, 0.07);
+            font-size: 15.5px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .instrucciones-caja-texto ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .instrucciones-caja-texto li {
+            margin-bottom: 8px;
+        }
+
+        /* Botones de Acción del Prototipo */
+        .btn-accion-prototipo {
+            background: rgba(255, 255, 255, 0.9);
+            color: #2b2b2b;
+            border: 1.5px solid #f4c2c4;
+            padding: 13px 24px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 15px;
+            font-family: 'Itim', cursive, sans-serif;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(230, 150, 130, 0.1);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-align: center;
+        }
+
+        .btn-accion-prototipo:hover {
+            background: #ffe5dd;
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 6px 20px rgba(230, 150, 130, 0.18);
+        }
+
+        .btn-recordatorio-activo {
+            background: #eaf5ea !important;
+            border-color: #c4e8c4 !important;
+            color: #274727 !important;
+        }
+
+        .btn-guardado-activo {
+            background: #ffe5dd !important;
+            border-color: #f4c2c4 !important;
+            color: #d9534f !important;
+        }
+
+        /* Contacto en tarjeta izquierda */
+        .contacto-titulo-mini {
+            font-size: 15px;
+            font-weight: bold;
+            color: #555;
+            margin-top: 5px;
+            margin-bottom: -5px;
+        }
+
+        .contacto-items {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .contacto-fila-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 8px 14px;
+            border-radius: 50px;
+            border: 1.5px solid #f9cab5;
+            gap: 10px;
+        }
+
+        .btn-contacto-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: #333;
+            font-size: 14px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .btn-contacto-link.whatsapp { color: #25d366; }
+        .btn-contacto-link.correo { color: #007bff; }
+        .btn-contacto-link:hover { text-decoration: underline; }
+
+        .btn-copiar-mini {
+            background: #fff;
+            border: 1.5px solid #f4c2c4;
+            cursor: pointer;
+            color: #d9534f;
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 50px;
+            font-family: 'Itim', cursive, sans-serif;
+            transition: all 0.2s;
+        }
+        .btn-copiar-mini:hover { background: #ffe5dd; }
+
+        /* Modal Estilo ARCA */
+        .modal-arca-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(6px);
+            display: none; align-items: center; justify-content: center; z-index: 1000;
+        }
+
+        .modal-arca-box {
+            background: #fffaf8;
+            border-radius: 26px;
+            padding: 26px 30px;
+            width: 85%;
+            max-width: 350px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(220, 150, 140, 0.25);
+            border: 2px solid #fce8e6;
+            font-family: 'Itim', cursive, sans-serif;
+        }
+
+        .modal-huella-icono {
+            font-size: 32px;
+            color: #fca38d;
+            margin-bottom: 12px;
+            display: flex; justify-content: center; gap: 6px;
+        }
+
+        .modal-arca-box h3 { margin: 0 0 8px 0; color: #2b2b2b; font-size: 19px; }
+        .modal-arca-box p { color: #555; font-size: 14.5px; line-height: 1.4; margin-bottom: 16px; }
+        
+        .modal-btn-aceptar {
+            background: #fca38d; color: #fff; border: none; padding: 9px 24px;
+            border-radius: 50px; font-size: 14.5px; cursor: pointer;
+            font-family: 'Itim', cursive, sans-serif; box-shadow: 0 5px 15px rgba(252, 163, 141, 0.35);
+        }
+        .modal-btn-cancelar {
+            background: #f1f1f1; color: #555; border: none; padding: 9px 20px;
+            border-radius: 50px; font-size: 14.5px; cursor: pointer;
+            font-family: 'Itim', cursive, sans-serif; margin-left: 8px;
+        }
+    </style>
+</head>
+<body>
+
+  <!-- Barra de Navegación Superior -->
+  <nav class="top-nav">
+    <div class="top-left">
+        <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu"></i>
+        <div class="mini-logo-circle"><img src="logo.png" alt="Logo"></div>
+        <span class="page-title" id="titulo-pagina">Publicación</span>
+    </div>
+
+    <div class="search-bar">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="input-busqueda-nav" placeholder="Busca algo">
+        <i class="fa-solid fa-microphone"></i>
+    </div>
+
+    <div class="top-right">
+        <div class="user-header-info">
+            <div class="user-profile-menu" id="user-profile-menu">
+                <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
+                    <img src="logo.png" id="user-avatar-img" alt="Perfil">
+                </div>
+                <div class="mini-menu-card" id="mini-menu-card">
+                    <div class="mini-menu-header"><span id="mini-menu-username">Usuario</span></div>
+                    <hr class="mini-menu-divider">
+                    <a href="javascript:void(0)" onclick="mostrarSeccion('configuracion')" class="mini-menu-item btn-ajustes">
+                        <i class="fa-solid fa-gear"></i><span>Ajustes</span>
+                    </a>
+                    <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini">
+                        <i class="fa-solid fa-right-from-bracket"></i><span>Cerrar sesión</span>
+                    </a>
+                </div>
+            </div>
+            <div class="notif-circle">
+                <a href="notificaciones.html"><i class="fa-solid fa-bell"></i></a>
+            </div>
+        </div>
+    </div>
+  </nav>
+
+  <!-- Barra Lateral -->
+  <aside class="sidebar" id="sidebar">
+      <div class="side-icons">
+          <a href="home.html" class="menu-fila"><i class="fa-solid fa-house"></i><span class="menu-text">Inicio</span></a>
+          <a href="perfil_usuario.html" class="menu-fila"><i class="fa-solid fa-circle-user"></i><span class="menu-text">Perfil</span></a>
+          <a href="guardados_usuario.html" class="menu-fila"><i class="fa-solid fa-bookmark"></i><span class="menu-text">Guardado</span></a>
+          <a href="mapa.html" class="menu-fila"><i class="fa-solid fa-location-dot"></i><span class="menu-text">Mapa</span></a>
+          <a href="configuracion.html" class="menu-fila"><i class="fa-solid fa-gear"></i><span class="menu-text">Ajustes</span></a>
+      </div>
+  </aside>
+
+  <!-- Contenido Principal -->
+  <main class="main-content">
+      <div class="detalle-container-principal">
+          <div class="detalle-header-card">
+              <h1>Evento <img src="logo.png" style="width:28px; height:28px; object-fit:contain; border-radius:50%;" alt="Logo"></h1>
+              <div class="header-acciones-derecha" style="display: flex; align-items: center; gap: 15px;">
+                  <a href="novedades-eventos.html" id="btn-volver-dinamico" class="detalle-btn-volver"><i class="fa-solid fa-arrow-left"></i> Volver a eventos</a>
+                  <span class="detalle-fecha-texto" id="lbl-fecha">Publicado el --/--/----</span>
+              </div>
+          </div>
+
+          <!-- Título del Evento Centrado -->
+          <div class="evento-titulo-principal">
+              <h2 id="lbl-nombre-evento">Cargando evento...</h2>
+              <div style="font-size: 14.5px; color: #666; margin-top: 4px;">Organiza: <strong id="lbl-organizador">Fundación</strong></div>
+          </div>
+
+          <!-- Grid de Contenido (Izquierda: Datos y Contacto | Derecha: Instrucciones y Botones) -->
+          <div class="evento-grid-contenido">
+              
+              <!-- Columna Izquierda -->
+              <div class="evento-caja-info">
+                  <div class="evento-campo-fila">
+                      <strong>FECHA:</strong> <span id="lbl-fecha-evento">-- / -- / ----</span>
+                  </div>
+                  <div class="evento-campo-fila">
+                      <strong>HORA:</strong> <span id="lbl-hora-evento">--:-- am / pm</span>
+                  </div>
+                  <div class="evento-campo-fila">
+                      <strong>LUGAR:</strong> <span id="lbl-lugar-evento">Cargando lugar...</span>
+                  </div>
+
+                  <div class="contacto-titulo-mini">Contactar:</div>
+                  <div class="contacto-items" id="lbl-contacto">
+                      <div>Cargando datos de contacto...</div>
+                  </div>
+              </div>
+
+              <!-- Columna Derecha -->
+              <div class="evento-columna-derecha">
+                  <div class="instrucciones-capsula-titulo">INSTRUCCIONES Y DETALLES:</div>
+                  
+                  <div class="instrucciones-caja-texto" id="lbl-detalles">
+                      Cargando detalles adicionales...
+                  </div>
+
+                  <!-- Botones de Acción Funcionales -->
+                  <a href="#" id="btn-ver-mapa" class="btn-accion-prototipo">
+                      <i class="fa-solid fa-map-location-dot"></i> Ver ubicación en el mapa
+                  </a>
+
+                  <button id="btn-activar-recordatorio" class="btn-accion-prototipo" onclick="activarRecordatorioEvento()">
+                      <i class="fa-regular fa-bell"></i> ACTIVAR RECORDATORIO
+                  </button>
+
+                  <button id="btn-accion-guardar" class="btn-accion-prototipo">
+                      <i class="fa-regular fa-bookmark"></i> Guardar publicación
+                  </button>
+              </div>
+
+          </div>
+      </div>
+  </main>
+
+  <!-- Modal Estilo ARCA -->
+  <div id="modalConfirmacion" class="modal-arca-overlay">
+      <div class="modal-arca-box">
+          <div class="modal-huella-icono">
+              <i class="fa-solid fa-paw"></i>
+              <i class="fa-solid fa-paw" style="font-size: 22px; margin-top: 6px;"></i>
+          </div>
+          <h3 id="modalTitulo">Mensaje</h3>
+          <p id="modalMensaje">Contenido de la alerta...</p>
+          <div style="margin-top: 15px;">
+              <button id="modalBtnAceptar" class="modal-btn-aceptar">Aceptar</button>
+              <button id="modalBtnCancelar" onclick="cerrarModalArca()" class="modal-btn-cancelar" style="display: none;">Cancelar</button>
+          </div>
+      </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="script.js"></script>
+  <script>
+      function mostrarAlertaArca(mensaje, titulo = "Aviso ARCA", callbackAceptar = null) {
+          document.getElementById('modalTitulo').textContent = titulo;
+          document.getElementById('modalMensaje').textContent = mensaje;
+          document.getElementById('modalBtnCancelar').style.display = 'none';
+          
+          const btnAceptar = document.getElementById('modalBtnAceptar');
+          btnAceptar.textContent = "Aceptar";
+          btnAceptar.onclick = () => {
+              cerrarModalArca();
+              if (callbackAceptar) callbackAceptar();
+          };
+
+          document.getElementById('modalConfirmacion').style.display = 'flex';
+      }
+
+      function mostrarConfirmacionArca(mensaje, titulo = "¿Estás seguro?", callbackAceptar) {
+          document.getElementById('modalTitulo').textContent = titulo;
+          document.getElementById('modalMensaje').textContent = mensaje;
+          document.getElementById('modalBtnCancelar').style.display = 'inline-block';
+          
+          const btnAceptar = document.getElementById('modalBtnAceptar');
+          btnAceptar.textContent = "Aceptar";
+          btnAceptar.onclick = () => {
+              cerrarModalArca();
+              if (callbackAceptar) callbackAceptar();
+          };
+
+          document.getElementById('modalConfirmacion').style.display = 'flex';
+      }
+
+      function cerrarModalArca() {
+          document.getElementById('modalConfirmacion').style.display = 'none';
+      }
+
+      function copiarAlPortapapeles(texto) {
+          navigator.clipboard.writeText(texto).then(() => {
+              mostrarAlertaArca(`¡Copiado con éxito: ${texto}!`, "Copiado");
+          }).catch(err => {
+              console.error('Error al copiar: ', err);
+          });
+      }
+
+      let urlDestinoGlobal = "";
+      function abrirModalEnlace(titulo, mensaje, url) {
+          document.getElementById('modalTitulo').textContent = titulo;
+          document.getElementById('modalMensaje').textContent = mensaje;
+          document.getElementById('modalBtnCancelar').style.display = 'inline-block';
+          urlDestinoGlobal = url;
+          
+          const btnAceptar = document.getElementById('modalBtnAceptar');
+          btnAceptar.onclick = () => {
+              if (urlDestinoGlobal) window.open(urlDestinoGlobal, '_blank');
+              cerrarModalArca();
+          };
+
+          document.getElementById('modalConfirmacion').style.display = 'flex';
+      }
+
+      let fechaEventoGlobal = null;
+      let nombreEventoGlobal = "";
+
+      document.addEventListener('DOMContentLoaded', () => {
+          const btnToggleMenu = document.getElementById('btn-toggle-menu');
+          const sidebar = document.getElementById('sidebar');
+
+          if (btnToggleMenu && sidebar) {
+              btnToggleMenu.addEventListener('click', (e) => {
+                  e.stopPropagation();
+                  sidebar.classList.toggle('sidebar-abierta');
+              });
+          }
+
+          cargarDetalleEvento();
+      });
+
+      async function cargarDetalleEvento() {
+          const params = new URLSearchParams(window.location.search);
+          const eventoId = params.get('id');
+
+          if (!eventoId) {
+              mostrarAlertaArca("No se especificó ningún evento.", "Aviso", () => {
+                  window.location.href = 'novedades-eventos.html';
+              });
+              return;
+          }
+
+          try {
+              const res = await fetch('/api/eventos');
+              if (!res.ok) throw new Error("Error al obtener eventos");
+              const eventos = await res.json();
+
+              const evento = eventos.find(e => Number(e.id_evento) === Number(eventoId));
+              if (!evento) throw new Error("Evento no encontrado.");
+
+              nombreEventoGlobal = evento.nombre_evento;
+              fechaEventoGlobal = evento.fecha_hora;
+
+              document.getElementById('lbl-nombre-evento').textContent = evento.nombre_evento;
+              document.getElementById('lbl-organizador').textContent = evento.entidad_organizadora || 'Fundación ARCA';
+              
+              if (evento.fecha_hora) {
+                  const fechaPartes = evento.fecha_hora.split('T')[0];
+                  document.getElementById('lbl-fecha').textContent = `Publicado el ${fechaPartes}`;
+                  document.getElementById('lbl-fecha-evento').textContent = fechaPartes;
+                  document.getElementById('lbl-hora-evento').textContent = evento.fecha_hora.includes('T') ? evento.fecha_hora.split('T')[1].substring(0, 5) : 'Todo el día';
+              }
+
+              document.getElementById('lbl-lugar-evento').textContent = evento.lugar || 'Por definir';
+              
+              // Instrucciones / Detalles adicionales formateados en lista o viñetas
+              const detallesTexto = evento.detalles_adicionales || 'Sin instrucciones adicionales.';
+              const lineasDetalle = detallesTexto.split('.').filter(l => l.trim().length > 0);
+              let htmlDetalles = "<ul>";
+              lineasDetalle.forEach(linea => {
+                  htmlDetalles += `<li>~${linea.trim()}.</li>`;
+              });
+              htmlDetalles += "</ul>";
+              document.getElementById('lbl-detalles').innerHTML = htmlDetalles;
+
+              // Enlace al mapa
+              const btnMapa = document.getElementById('btn-ver-mapa');
+              if (evento.ubicacion) {
+                  btnMapa.href = `mapa.html?ubicacion=${encodeURIComponent(evento.ubicacion)}`;
+              } else {
+                  btnMapa.href = `mapa.html`;
+              }
+
+              // Contacto de la fundación organizadora
+              const tel = evento.telefono_fundacion || '3********';
+              const correo = evento.correo_fundacion || 'contacto@arca.com';
+              const urlWhatsapp = `https://wa.me/${tel.replace(/\D/g,'')}`;
+              const urlGmail = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(correo)}&su=${encodeURIComponent("Consulta sobre el evento: " + evento.nombre_evento)}`;
+
+              document.getElementById('lbl-contacto').innerHTML = `
+                  <div class="contacto-fila-item">
+                      <a href="javascript:void(0)" onclick="abrirModalEnlace('Abrir WhatsApp', '¿Deseas abrir WhatsApp para escribir al número ${tel}?', '${urlWhatsapp}')" class="btn-contacto-link whatsapp">
+                          <i class="fa-brands fa-whatsapp"></i> ${tel}
+                      </a>
+                      <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${tel}')"><i class="fa-solid fa-copy"></i> Copiar</button>
+                  </div>
+                  <div class="contacto-fila-item">
+                      <a href="javascript:void(0)" onclick="abrirModalEnlace('Abrir Gmail', '¿Deseas redactar un correo a ${correo}?', '${urlGmail}')" class="btn-contacto-link correo">
+                          <i class="fa-solid fa-envelope"></i> ${correo}
+                      </a>
+                      <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${correo}')"><i class="fa-solid fa-copy"></i> Copiar</button>
+                  </div>
+              `;
+
+              // Gestionar Estado del Recordatorio si ya fue activado previamente
+              const recordatoriosGuardados = JSON.parse(localStorage.getItem('arca_recordatorios') || '[]');
+              if (recordatoriosGuardados.includes(Number(eventoId))) {
+                  const btnRec = document.getElementById('btn-activar-recordatorio');
+                  btnRec.innerHTML = `<i class="fa-solid fa-bell"></i> RECORDATORIO ACTIVADO`;
+                  btnRec.classList.add('btn-recordatorio-activo');
+              }
+
+              // Gestión de Guardados de la Publicación
+              firebase.auth().onAuthStateChanged(async (user) => {
+                  const correoLogueado = user ? user.email : (localStorage.getItem('correo_usuario') || localStorage.getItem('correo'));
+                  const btnGuardar = document.getElementById('btn-accion-guardar');
+
+                  if (!correoLogueado) {
+                      btnGuardar.onclick = () => { window.location.href = 'login.html'; };
+                      return;
+                  }
+
+                  try {
+                      const resG = await fetch(`/api/guardados/ids/${encodeURIComponent(correoLogueado)}`);
+                      const idsGuards = await resG.json();
+                      
+                      // Buscamos si el evento está asociado en publicaciones generales
+                      const resPub = await fetch('/api/publicaciones-globales');
+                      const pubList = await resPub.json();
+                      const pubEvento = pubList.find(p => p.tipo_publicacion === 'evento' && Number(p.id_origen) === Number(eventoId));
+                      const idPubReal = pubEvento ? pubEvento.id_publicacion : eventoId;
+
+                      const estaGuardada = idsGuards.map(Number).includes(Number(idPubReal));
+
+                      if (estaGuardada) {
+                          btnGuardar.innerHTML = `<i class="fa-solid fa-bookmark"></i> Publicación guardada`;
+                          btnGuardar.classList.add('btn-guardado-activo');
+                          btnGuardar.onclick = async () => {
+                              mostrarConfirmacionArca("¿Deseas quitar este evento de tus guardados?", "Quitar guardado", async () => {
+                                  await fetch('/api/quitar-guardado', {
+                                      method: 'POST',
+                                      headers: { 'Content-Type': 'application/json' },
+                                      body: JSON.stringify({ correo: correoLogueado, id_publicacion: Number(idPubReal) })
+                                  });
+                                  location.reload();
+                              });
+                          };
+                      } else {
+                          btnGuardar.innerHTML = `<i class="fa-regular fa-bookmark"></i> Guardar publicación`;
+                          btnGuardar.onclick = async () => {
+                              await fetch('/api/guardar-publicacion', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ correo: correoLogueado, id_publicacion: Number(idPubReal) })
+                              });
+                              mostrarAlertaArca("¡Evento guardado con éxito en tus favoritos!", "Guardado", () => {
+                                  location.reload();
+                              });
+                          };
+                      }
+                  } catch (e) {
+                      console.error("Error al gestionar guardados:", e);
+                  }
+              });
+
+          } catch (e) {
+              console.error(e);
+              mostrarAlertaArca("No se pudo cargar la información completa del evento.", "Aviso");
+          }
+      }
+
+      // Lógica para Activar Recordatorio (1 día antes)
+      function activarRecordatorioEvento() {
+          const params = new URLSearchParams(window.location.search);
+          const eventoId = Number(params.get('id'));
+          let recordatorios = JSON.parse(localStorage.getItem('arca_recordatorios') || '[]');
+
+          if (recordatorios.includes(eventoId)) {
+              mostrarAlertaArca("Ya tienes un recordatorio activo para este evento. Te avisaremos un día antes. 🌸", "Recordatorio");
+              return;
+          }
+
+          recordatorios.push(eventoId);
+          localStorage.setItem('arca_recordatorios', JSON.stringify(recordatorios));
+
+          const btnRec = document.getElementById('btn-activar-recordatorio');
+          btnRec.innerHTML = `<i class="fa-solid fa-bell"></i> RECORDATORIO ACTIVADO`;
+          btnRec.classList.add('btn-recordatorio-activo');
+
+          mostrarAlertaArca(`¡Recordatorio activado con éxito! Te enviaremos una notificación un día antes de "${nombreEventoGlobal}" para que no lo olvides. 🐾✨`, "¡Listo!");
+      }
+  </script>
+</body>
+</html>

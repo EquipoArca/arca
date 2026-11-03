@@ -953,6 +953,9 @@ document.addEventListener('DOMContentLoaded', () => {
 let peticionNovedadesEnCurso = false;
 
 async function cargarNovedadesSeguras() {
+    // Si estamos en la página de eventos exclusiva, evitamos que este script interfiera
+    if (window.location.pathname.includes('novedades-eventos')) return;
+
     const contenedor = document.getElementById('contenedor-novedades');
     if (!contenedor || peticionNovedadesEnCurso) return;
     
@@ -963,6 +966,7 @@ async function cargarNovedadesSeguras() {
     const path = window.location.pathname;
     if (path.includes('reportes')) tipoFiltro = 'reporte';
     if (path.includes('adopciones')) tipoFiltro = 'adopcion';
+    if (path.includes('eventos')) tipoFiltro = 'evento';
 
     try {
         const user = typeof firebase !== 'undefined' && firebase.auth().currentUser ? firebase.auth().currentUser : null;
@@ -978,6 +982,8 @@ async function cargarNovedadesSeguras() {
             publicaciones = publicaciones.filter(pub => pub.tipo_publicacion === 'reporte');
         } else if (tipoFiltro === 'adopcion') {
             publicaciones = publicaciones.filter(pub => pub.tipo_publicacion === 'adopcion');
+        } else if (tipoFiltro === 'evento') {
+            publicaciones = publicaciones.filter(pub => pub.tipo_publicacion === 'evento');
         }
 
         contenedor.innerHTML = ''; // Limpiar estado de carga
@@ -1005,29 +1011,37 @@ async function cargarNovedadesSeguras() {
                     : ubicacionTextoBruta;
 
                 const esAdopcion = pub.tipo_publicacion === 'adopcion';
-                const tipoTitulo = esAdopcion ? 'Publicación de Adopción' : 'Nuevo Reporte';
-                const tipoSubPill = pub.nombre_tipo_reporte || (esAdopcion ? 'Adopción' : 'Animal en situación de calle');
-                const idDestino = esAdopcion ? pub.id_origen : (pub.id_origen || pub.id_reporte);
+                const esEvento = pub.tipo_publicacion === 'evento';
+                
+                let tipoTitulo = 'Nuevo Reporte';
+                if (esAdopcion) tipoTitulo = 'Publicación de Adopción';
+                if (esEvento) tipoTitulo = 'Evento';
+
+                let tipoSubPill = pub.nombre_tipo_reporte || (esAdopcion ? 'Adopción' : (esEvento ? 'Evento de Fundación' : 'Animal en situación de calle'));
+                let idDestino = esAdopcion ? pub.id_origen : (pub.id_origen || pub.id_reporte);
 
                 const tarjeta = document.createElement('article');
                 tarjeta.className = 'tarjeta-prototipo-estilo';
                 
                 tarjeta.innerHTML = `
                     <div class="proto-card-top">
-                        <div class="proto-titulo-pill">${tipoTitulo}</div>
+                        <div class="proto-titulo-pill" ${esEvento ? 'style="background-color: #e0f2fe; color: #2b5b84;"' : ''}>${tipoTitulo}</div>
                         <span class="proto-fecha">${fechaFormateada}</span>
                     </div>
 
                     <div class="proto-card-body">
+                        ${!esEvento ? `
                         <div class="proto-img-wrapper">
                             <img src="${imagenSrc}" alt="Publicación" style="width:100%; height:100%; object-fit:cover;">
                         </div>
+                        ` : ''}
 
-                        <div class="proto-content-right">
+                        <div class="proto-content-right" ${esEvento ? 'style="width: 100%;"' : ''}>
                             <div class="proto-pill-tipo">${tipoSubPill}</div>
                             <div class="proto-info-extra">
                                 <span class="proto-autor">Publicado por: <a href="perfil_publico.html?user=${pub.nombre_usuario}">@${pub.nombre_usuario || 'Usuario'}</a></span>
                                 <p class="proto-ubicacion"><i class="fa-solid fa-location-dot"></i> ${ubicacionBonita}</p>
+                                ${esEvento ? `<p class="proto-autor" style="margin-top: 5px; color: #555;">${pub.Descripcion || ''}</p>` : ''}
                             </div>
                             <div class="proto-footer-row">
                                 <button class="proto-btn-detalles btn-accion-ir" data-tipo="${pub.tipo_publicacion}" data-id="${idDestino}">Ver detalles</button>
@@ -1068,6 +1082,8 @@ document.addEventListener('click', (event) => {
         if (idItem) {
             if (tipoItem === 'adopcion' || window.location.pathname.includes('adopciones')) {
                 window.location.href = `detalle_adopcion.html?id=${idItem}`;
+            } else if (tipoItem === 'evento') {
+                window.location.href = `detalle_evento.html?id=${idItem}`;
             } else {
                 window.location.href = `detalle_reporte.html?id=${idItem}`;
             }
