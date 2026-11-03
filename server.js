@@ -2006,7 +2006,8 @@ app.get('/api/obtener-fundacion', (req, res) => {
     });
 });
 
-app.put('/api/actualizar-fundacion', express.json({ limit: '20mb' }), (req, res) => {
+// PUT: Actualizar datos de la fundación (con Redes Sociales e Imágenes en Base64)
+app.put('/api/actualizar-fundacion', express.json({ limit: '50mb' }), express.urlencoded({ limit: '50mb', extended: true }), (req, res) => {
     const {
         correo_fundacion,
         nombre_comercial,
@@ -2026,19 +2027,19 @@ app.put('/api/actualizar-fundacion', express.json({ limit: '20mb' }), (req, res)
         return res.status(400).json({ exito: false, mensaje: "El correo es obligatorio." });
     }
 
-    let query = `
-        UPDATE fundacion 
-        SET Nombre_Comercial = ?, 
-            Descripcion_mision = ?, 
-            Descripcion_vision = ?, 
-            Programas_Proyectos_Actuales = ?, 
-            Telefono_fundacion = ?, 
-            Instagram = ?,
-            Facebook = ?,
-            TikTok = ?,
-            Pagina_web = ?
-    `;
-    
+    // 1. Construimos la consulta base con los campos de texto
+    let campos = [
+        "Nombre_Comercial = ?", 
+        "Descripcion_mision = ?", 
+        "Descripcion_vision = ?", 
+        "Programas_Proyectos_Actuales = ?", 
+        "Telefono_fundacion = ?", 
+        "Instagram = ?",
+        "Facebook = ?",
+        "TikTok = ?",
+        "Pagina_web = ?"
+    ];
+
     let valores = [
         nombre_comercial || '',
         descripcion_mision || '',
@@ -2051,28 +2052,35 @@ app.put('/api/actualizar-fundacion', express.json({ limit: '20mb' }), (req, res)
         pagina_web || ''
     ];
 
-    if (foto_portada && foto_portada.startsWith('data:')) {
-        query += `, Foto_Portada = ?`;
+    // 2. Solo agregamos Foto_Portada si viene una imagen nueva
+    if (foto_portada && foto_portada.startsWith('data:image')) {
+        campos.push("Foto_Portada = ?");
         valores.push(foto_portada);
     }
 
-    if (pfp_fundacion && pfp_fundacion.startsWith('data:')) {
-        query += `, PFP_Fundacion = ?`;
+    // 3. Solo agregamos PFP_Fundacion si viene un logo nuevo
+    if (pfp_fundacion && pfp_fundacion.startsWith('data:image')) {
+        campos.push("PFP_Fundacion = ?");
         valores.push(pfp_fundacion);
     }
 
-    query += ` WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(?))`;
+    // 4. Cláusula WHERE
+    const query = `UPDATE fundacion SET ${campos.join(', ')} WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(?))`;
     valores.push(correo_fundacion);
 
     db.query(query, valores, (err, resultado) => {
         if (err) {
-            console.error("❌ Error al actualizar fundación:", err.message);
-            return res.status(500).json({ exito: false, mensaje: "Error al actualizar en la base de datos." });
+            console.error("❌ Error exacto en MySQL al actualizar la fundación:", err.sqlMessage || err.message);
+            return res.status(500).json({ exito: false, mensaje: "Error en el servidor al actualizar la base de datos: " + (err.sqlMessage || err.message) });
         }
-        res.json({ exito: true, mensaje: "¡Actualizado con éxito!" });
+
+        if (resultado.affectedRows === 0) {
+            return res.status(404).json({ exito: false, mensaje: "No se encontró ninguna fundación registrada con el correo: " + correo_fundacion });
+        }
+
+        res.json({ exito: true, mensaje: "Perfil actualizado con éxito" });
     });
 });
-
 // ==========================================
 // INICIALIZACIÓN DEL SERVIDOR
 // ==========================================
