@@ -24,6 +24,7 @@ async function esCuentaFundacion(email) {
 }
 
 // Manejador para el botón "Ver animales en adopción"
+// Manejador para el botón "Ver animales en adopción"
 async function alHacerClicVerAnimales() {
     const user = usuarioActual || firebase.auth().currentUser;
 
@@ -31,10 +32,12 @@ async function alHacerClicVerAnimales() {
         if (typeof abrirBloqueo === "function") {
             abrirBloqueo();
         } else {
+            // ✅ CORREGIDO: Paréntesis y comas bien posicionados
             mostrarAlertaArca(
-                "Acceso requerido."),
+                "Acceso requerido",
                 "Por favor inicia sesión para continuar. 🌸",
-                {tipo: "conexion"};
+                { tipo: "conexion" }
+            );
         }
         return;
     }
@@ -54,16 +57,12 @@ async function alHacerClicVerAnimales() {
         const data = await respuesta.json();
 
         if (data.tienePerfil) {
-            // ¡Tiene perfil! Guardamos su ubicación en localStorage para calcular cercanía
             localStorage.setItem('ubicacion_adoptante', data.ubicacion || data.ciudad || '');
-            
-            // Abre el catálogo de animales y carga las mascotas ordenadas por cercanía
             mostrarSeccionAdopcion('seccion-catalogo-animales');
             if (typeof cargarMascotasAdopcionOrdenadas === 'function') {
                 cargarMascotasAdopcionOrdenadas();
             }
         } else {
-            // No tiene perfil -> Muestra el modal personalizado
             abrirModalAviso();
         }
 
@@ -75,6 +74,62 @@ async function alHacerClicVerAnimales() {
             { tipo: "error" }
         );
         return null;
+    }
+}
+
+// Manejador para el botón "Poner animal en adopción"
+async function alHacerClicPonerEnAdopcion() {
+    const user = usuarioActual || firebase.auth().currentUser;
+
+    if (!user) {
+        if (typeof abrirBloqueo === "function") {
+            abrirBloqueo();
+        } else {
+            // ✅ CORREGIDO: Paréntesis y comas bien posicionados
+            mostrarAlertaArca(
+                "Acceso requerido",
+                "Por favor inicia sesión para continuar. 🌸",
+                { tipo: "conexion" }
+            );
+        }
+        return;
+    }
+
+    const fundacionTrue = await esCuentaFundacion(user.email);
+    if (fundacionTrue) {
+        window.location.href = "formulario_adopcion.html";
+        return;
+    }
+
+    try {
+        const respuesta = await fetch(`/api/verificar-adoptante?correo=${encodeURIComponent(user.email)}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!respuesta.ok) {
+            throw new Error(`Error HTTP: ${respuesta.status}`);
+        }
+
+        const data = await respuesta.json();
+
+        if (data.tienePerfil) {
+            localStorage.setItem('ubicacion_adoptante', data.ubicacion || data.ciudad || '');
+            window.location.href = "formulario_adopcion.html";
+        } else {
+            abrirModalAviso();
+        }
+
+    } catch (error) {
+        console.error("❌ Error al verificar adoptante:", error);
+        mostrarAlertaArca(
+            "Ocurrió un error al consultar tu perfil.",
+            "Revisa que el servidor esté corriendo. ♡",
+            { tipo: "error" }
+        );
+        return null; 
     }
 }
 // Manejador para el botón "Poner animal en adopción"
