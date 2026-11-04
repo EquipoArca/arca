@@ -459,7 +459,7 @@ function mostrarSeccion(seccion) {
 }
 
 // ==========================================
-// 4. ARRASTRE Y SUBIDA DE ARCHIVOS (VERSIÓN DEFINITIVA)
+// 4. ARRASTRE Y SUBIDA DE ARCHIVOS (MÁXIMO 3 FOTOS)
 // ==========================================
 const zonaArrastre = document.getElementById('zona-arrastre');
 const inputOculto = document.getElementById('input-archivo-oculto');
@@ -516,7 +516,7 @@ if (zonaArrastre && inputOculto && btnSubir) {
                 mostrarAlertaArca(
                     "¡Formato incorrecto! 🌸",
                     "Por favor, arrastra archivos que sean únicamente imágenes.",
-                    {Tipo: "aviso"}
+                    { tipo: "aviso" }
                 );
             }
         }
@@ -525,7 +525,17 @@ if (zonaArrastre && inputOculto && btnSubir) {
 
 function procesarNuevosArchivos(nuevosArchivos) {
     Array.from(nuevosArchivos).forEach(nuevoArchivo => {
-        // Validación más estricta para evitar duplicados exactos
+        // Validar si ya se alcanzó el límite máximo de 3 fotos
+        if (archivosSeleccionados.length >= 3) {
+            mostrarAlertaArca(
+                "¡Límite alcanzado! 🌸",
+                "Solo puedes adjuntar un máximo de 3 fotos por reporte.",
+                { tipo: "aviso" }
+            );
+            return;
+        }
+
+        // Evitar duplicados exactos
         const yaExiste = archivosSeleccionados.some(
             arc => arc.name === nuevoArchivo.name && 
                    arc.size === nuevoArchivo.size && 
@@ -553,15 +563,12 @@ function renderizarMiniaturas() {
     }
 
     if (!contenedorPreview) return;
-    
-    // Limpieza profunda asegurada del DOM
     contenedorPreview.innerHTML = '';
 
     archivosSeleccionados.forEach((archivo, index) => {
         const reader = new FileReader();
 
         reader.onload = function(e) {
-            // Verificamos de nuevo que el contenedor siga existiendo
             if (!contenedorPreview) return;
 
             const divCard = document.createElement('div');
@@ -596,7 +603,7 @@ function renderizarMiniaturas() {
 
             btnEliminar.onclick = () => {
                 archivosSeleccionados.splice(index, 1);
-                renderizarMiniaturas(); // Volver a renderizar de forma limpia tras eliminar
+                renderizarMiniaturas();
             };
 
             divCard.appendChild(img);
@@ -607,124 +614,45 @@ function renderizarMiniaturas() {
         reader.readAsDataURL(archivo);
     });
 }
+
 // ==========================================
-// . INTERCEPTAR ENVÍO DEL FORMULARIO
+// 5. INTERCEPTAR ENVÍO DEL FORMULARIO DE REPORTES
 // ==========================================
 if (formReporte) {
-    formReporte.addEventListener('submit', (e) => {
-        // Si manejas el envío del formulario mediante fetch, puedes capturarlo aquí o asegurarte 
-        // de que al enviar el FormData metas tus archivos del arreglo `archivosSeleccionados`.
-        // Ejemplo:
-        // const formData = new FormData(formReporte);
-        // formData.delete('fotos_reporte[]');
-        // archivosSeleccionados.forEach(file => formData.append('fotos_reporte[]', file));
+    formReporte.addEventListener('submit', async (e) => {
+        e.preventDefault(); // Evita el envío tradicional por defecto
+
+        const formData = new FormData(formReporte);
+        
+        // Limpiamos cualquier archivo por defecto e insertamos los del arreglo validado (hasta 3)
+        formData.delete('fotos_reporte[]');
+        archivosSeleccionados.forEach(file => {
+            formData.append('fotos_reporte[]', file);
+        });
+
+        try {
+            const respuesta = await fetch('/api/crear-reporte', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (respuesta.ok) {
+                mostrarAlertaArca(
+                    "¡Reporte enviado! 🌸",
+                    "Tu reporte se ha publicado con éxito.",
+                    {
+                        tipo: "aviso",
+                        alCerrar: () => { window.location.href = "home.html"; }
+                    }
+                );
+            } else {
+                throw new Error("Error al enviar el reporte");
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            mostrarAlertaArca("¡Error!", "No se pudo enviar el reporte. Inténtalo de nuevo.");
+        }
     });
-}
-// ==========================================
-// 5. CARGA DE REPORTES Y GRÁFICAS
-// ==========================================
-document.addEventListener('DOMContentLoaded', () => {
-    const parametrosURL = new URLSearchParams(window.location.search);
-    const seccionSolicitada = parametrosURL.get('seccion');
-
-    if (typeof mostrarSeccion === 'function') {
-        mostrarSeccion(seccionSolicitada);
-    }
-
-    const mainContent = document.querySelector('.main-content');
-    if (mainContent) {
-        mainContent.style.opacity = '1';
-        mainContent.style.visibility = 'visible';
-    }
-
-    if (document.getElementById('tabla-usuarios')) cargarReporteEdad();
-    if (document.getElementById('tabla-emergencias')) cargarReporteEmergencias();
-});
-
-async function cargarReporteEdad() {
-    try {
-        const res = await fetch('/api/reportes/usuarios-edad');
-        const data = await res.json();
-
-        const tbody = document.getElementById('tabla-usuarios');
-        if (!tbody) return;
-
-        tbody.innerHTML = '';
-        const labels = [];
-        const valores = [];
-
-        data.forEach(row => {
-            labels.push(row.rango_edad);
-            valores.push(row.total_usuarios);
-
-            tbody.innerHTML += `
-                <tr>
-                    <td><strong>${row.rango_edad}</strong></td>
-                    <td>${row.total_usuarios} usuario(s)</td>
-                </tr>
-            `;
-        });
-
-        const canvas = document.getElementById('graficoUsuarios');
-        if (canvas) {
-            new Chart(canvas.getContext('2d'), {
-                type: 'pie',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: valores,
-                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6']
-                    }]
-                },
-                options: { responsive: true }
-            });
-        }
-    } catch (err) {
-        console.error("❌ Error al cargar reporte de usuarios:", err);
-    }
-}
-
-async function cargarReporteEmergencias() {
-    try {
-        const res = await fetch('/api/reportes/emergencias');
-        const data = await res.json();
-
-        const tbody = document.getElementById('tabla-emergencias');
-        if (!tbody) return;
-
-        tbody.innerHTML = '';
-        const labels = [];
-        const valores = [];
-
-        data.forEach(row => {
-            labels.push(row.tipo_emergencia);
-            valores.push(row.total_casos);
-
-            tbody.innerHTML += `
-                <tr>
-                    <td><strong>${row.tipo_emergencia}</strong></td>
-                    <td>${row.total_casos} caso(s)</td>
-                </tr>
-            `;
-        });
-
-        const canvas = document.getElementById('graficoEmergencias');
-        if (canvas) {
-            new Chart(canvas.getContext('2d'), {
-                type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: valores,
-                        backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6', '#10b981']
-                    }]
-                },
-                options: { responsive: true }
-            });
-        }
-    } catch (err) {
-        console.error("❌ Error al cargar reporte de emergencias:", err);
-    }
 }
 
 // ==========================================
