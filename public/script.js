@@ -459,17 +459,16 @@ function mostrarSeccion(seccion) {
 }
 
 // ==========================================
-// 4. ARRASTRE Y SUBIDA DE ARCHIVOS
+// 4. ARRASTRE Y SUBIDA DE ARCHIVOS (VERSIÓN DEFINITIVA)
 // ==========================================
 const zonaArrastre = document.getElementById('zona-arrastre');
 const inputOculto = document.getElementById('input-archivo-oculto');
 const btnSubir = document.getElementById('btn-subir-archivo');
 const btnCirculo = document.getElementById('btn-circulo');
 const contenedorPreview = document.getElementById('contenedor-previsualizacion');
+const formReporte = document.getElementById('formReporteArca');
 
 let archivosSeleccionados = [];
-let versionRenderizado = 0;
-let actualizandoInput = false; // <-- El interruptor mágico para evitar el bucle
 
 function activarSelector() {
     if (inputOculto) inputOculto.click(); 
@@ -479,13 +478,12 @@ if (zonaArrastre && inputOculto && btnSubir) {
     btnSubir.addEventListener('click', activarSelector);
     if (btnCirculo) btnCirculo.addEventListener('click', activarSelector);
 
+    // Cuando el usuario elige archivos con el explorador
     inputOculto.addEventListener('change', (evento) => {
-        // Si la actualización viene de nuestro propio código, la ignoramos para que no se duplique
-        if (actualizandoInput) return;
-
         const archivos = evento.target.files;
         if (archivos.length > 0) {
             procesarNuevosArchivos(archivos);
+            inputOculto.value = ''; // Limpiamos el input para permitir elegir la misma foto si se desea
         }
     });
 
@@ -507,10 +505,9 @@ if (zonaArrastre && inputOculto && btnSubir) {
         });
     });
 
+    // Cuando el usuario arrastra y suelta imágenes
     zonaArrastre.addEventListener('drop', (evento) => {
-        const datosTransferidos = evento.dataTransfer;
-        const archivos = datosTransferidos.files;
-
+        const archivos = evento.dataTransfer.files;
         if (archivos.length > 0) {
             const soloImagenes = Array.from(archivos).filter(arc => arc.type.startsWith('image/'));
             if (soloImagenes.length > 0) {
@@ -518,7 +515,7 @@ if (zonaArrastre && inputOculto && btnSubir) {
             } else {
                 mostrarAlertaArca(
                     "¡Formato incorrecto! 🌸",
-                    "Por favor, arrastra archivos que sean únicamente imagenes.",
+                    "Por favor, arrastra archivos que sean únicamente imágenes.",
                     {Tipo: "aviso"}
                 );
             }
@@ -528,8 +525,11 @@ if (zonaArrastre && inputOculto && btnSubir) {
 
 function procesarNuevosArchivos(nuevosArchivos) {
     Array.from(nuevosArchivos).forEach(nuevoArchivo => {
+        // Validación más estricta para evitar duplicados exactos
         const yaExiste = archivosSeleccionados.some(
-            arc => arc.name === nuevoArchivo.name && arc.size === nuevoArchivo.size && arc.lastModified === nuevoArchivo.lastModified
+            arc => arc.name === nuevoArchivo.name && 
+                   arc.size === nuevoArchivo.size && 
+                   arc.lastModified === nuevoArchivo.lastModified
         );
         
         if (!yaExiste) {
@@ -537,22 +537,11 @@ function procesarNuevosArchivos(nuevosArchivos) {
         }
     });
 
-    sincronizarYRenderizar();
+    renderizarMiniaturas();
 }
 
-function sincronizarYRenderizar() {
-    const versionActual = ++versionRenderizado;
-
-    // 1. Activamos el interruptor antes de modificar los files del input
-    actualizandoInput = true;
-    const dataTransfer = new DataTransfer();
-    archivosSeleccionados.forEach(file => dataTransfer.items.add(file));
-    inputOculto.files = dataTransfer.files;
-    actualizandoInput = false; // Desactivamos el interruptor
-
-    // 2. Actualizar el texto descriptivo
+function renderizarMiniaturas() {
     const textoEstadoReal = document.querySelector('.texto-arrastra') || document.getElementById('texto-arrastra');
-
     if (textoEstadoReal) {
         if (archivosSeleccionados.length > 0) {
             textoEstadoReal.innerText = `${archivosSeleccionados.length} foto(s) seleccionada(s)`;
@@ -563,16 +552,17 @@ function sincronizarYRenderizar() {
         }
     }
 
-    // 3. Limpiar las previsualizaciones anteriores
     if (!contenedorPreview) return;
+    
+    // Limpieza profunda asegurada del DOM
     contenedorPreview.innerHTML = '';
 
-    // 4. Crear las nuevas previsualizaciones
     archivosSeleccionados.forEach((archivo, index) => {
         const reader = new FileReader();
 
         reader.onload = function(e) {
-            if (versionActual !== versionRenderizado) return;
+            // Verificamos de nuevo que el contenedor siga existiendo
+            if (!contenedorPreview) return;
 
             const divCard = document.createElement('div');
             divCard.style.position = 'relative';
@@ -586,7 +576,6 @@ function sincronizarYRenderizar() {
             img.style.borderRadius = '8px';
             img.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
 
-            // Botón para eliminar la imagen
             const btnEliminar = document.createElement('button');
             btnEliminar.type = 'button';
             btnEliminar.innerHTML = '&times;';
@@ -607,7 +596,7 @@ function sincronizarYRenderizar() {
 
             btnEliminar.onclick = () => {
                 archivosSeleccionados.splice(index, 1);
-                sincronizarYRenderizar();
+                renderizarMiniaturas(); // Volver a renderizar de forma limpia tras eliminar
             };
 
             divCard.appendChild(img);
@@ -616,6 +605,19 @@ function sincronizarYRenderizar() {
         };
 
         reader.readAsDataURL(archivo);
+    });
+}
+// ==========================================
+// . INTERCEPTAR ENVÍO DEL FORMULARIO
+// ==========================================
+if (formReporte) {
+    formReporte.addEventListener('submit', (e) => {
+        // Si manejas el envío del formulario mediante fetch, puedes capturarlo aquí o asegurarte 
+        // de que al enviar el FormData metas tus archivos del arreglo `archivosSeleccionados`.
+        // Ejemplo:
+        // const formData = new FormData(formReporte);
+        // formData.delete('fotos_reporte[]');
+        // archivosSeleccionados.forEach(file => formData.append('fotos_reporte[]', file));
     });
 }
 // ==========================================
