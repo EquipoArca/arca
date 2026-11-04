@@ -465,8 +465,11 @@ const zonaArrastre = document.getElementById('zona-arrastre');
 const inputOculto = document.getElementById('input-archivo-oculto');
 const btnSubir = document.getElementById('btn-subir-archivo');
 const btnCirculo = document.getElementById('btn-circulo');
+const contenedorPreview = document.getElementById('contenedor-previsualizacion');
 
 let archivosSeleccionados = [];
+let versionRenderizado = 0;
+let actualizandoInput = false; // <-- El interruptor mágico para evitar el bucle
 
 function activarSelector() {
     if (inputOculto) inputOculto.click(); 
@@ -477,9 +480,12 @@ if (zonaArrastre && inputOculto && btnSubir) {
     if (btnCirculo) btnCirculo.addEventListener('click', activarSelector);
 
     inputOculto.addEventListener('change', (evento) => {
+        // Si la actualización viene de nuestro propio código, la ignoramos para que no se duplique
+        if (actualizandoInput) return;
+
         const archivos = evento.target.files;
         if (archivos.length > 0) {
-            procesarArchivosMultiples(archivos);
+            procesarNuevosArchivos(archivos);
         }
     });
 
@@ -508,30 +514,110 @@ if (zonaArrastre && inputOculto && btnSubir) {
         if (archivos.length > 0) {
             const soloImagenes = Array.from(archivos).filter(arc => arc.type.startsWith('image/'));
             if (soloImagenes.length > 0) {
-                procesarArchivosMultiples(soloImagenes);
+                procesarNuevosArchivos(soloImagenes);
             } else {
                 mostrarAlertaArca(
-                "¡Formato incorrecto! 🌸",
-            "Por favor, arrasta archivos que sean únicamente imagenes.",
-            {Tipo: "aviso"});
+                    "¡Formato incorrecto! 🌸",
+                    "Por favor, arrastra archivos que sean únicamente imagenes.",
+                    {Tipo: "aviso"}
+                );
             }
         }
     });
 }
 
-function procesarArchivosMultiples(nuevosArchivos) {
-    Array.from(nuevosArchivos).forEach(archivo => {
-        archivosSeleccionados.push(archivo);
+function procesarNuevosArchivos(nuevosArchivos) {
+    Array.from(nuevosArchivos).forEach(nuevoArchivo => {
+        const yaExiste = archivosSeleccionados.some(
+            arc => arc.name === nuevoArchivo.name && arc.size === nuevoArchivo.size && arc.lastModified === nuevoArchivo.lastModified
+        );
+        
+        if (!yaExiste) {
+            archivosSeleccionados.push(nuevoArchivo);
+        }
     });
 
-    const textoEstadoReal = document.querySelector('.texto-arrastra') || document.getElementById('texto-arrastra');
-    
-    if (textoEstadoReal) {
-        textoEstadoReal.innerText = `${archivosSeleccionados.length} imágenes listas para subir`;
-        textoEstadoReal.style.color = "#4caf50";
-    }
+    sincronizarYRenderizar();
 }
 
+function sincronizarYRenderizar() {
+    const versionActual = ++versionRenderizado;
+
+    // 1. Activamos el interruptor antes de modificar los files del input
+    actualizandoInput = true;
+    const dataTransfer = new DataTransfer();
+    archivosSeleccionados.forEach(file => dataTransfer.items.add(file));
+    inputOculto.files = dataTransfer.files;
+    actualizandoInput = false; // Desactivamos el interruptor
+
+    // 2. Actualizar el texto descriptivo
+    const textoEstadoReal = document.querySelector('.texto-arrastra') || document.getElementById('texto-arrastra');
+
+    if (textoEstadoReal) {
+        if (archivosSeleccionados.length > 0) {
+            textoEstadoReal.innerText = `${archivosSeleccionados.length} foto(s) seleccionada(s)`;
+            textoEstadoReal.style.color = "#4caf50";
+        } else {
+            textoEstadoReal.innerText = "o arrastra una imagen aquí";
+            textoEstadoReal.style.color = "";
+        }
+    }
+
+    // 3. Limpiar las previsualizaciones anteriores
+    if (!contenedorPreview) return;
+    contenedorPreview.innerHTML = '';
+
+    // 4. Crear las nuevas previsualizaciones
+    archivosSeleccionados.forEach((archivo, index) => {
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            if (versionActual !== versionRenderizado) return;
+
+            const divCard = document.createElement('div');
+            divCard.style.position = 'relative';
+            divCard.style.display = 'inline-block';
+
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.style.width = '70px';
+            img.style.height = '70px';
+            img.style.objectFit = 'cover';
+            img.style.borderRadius = '8px';
+            img.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
+
+            // Botón para eliminar la imagen
+            const btnEliminar = document.createElement('button');
+            btnEliminar.type = 'button';
+            btnEliminar.innerHTML = '&times;';
+            btnEliminar.style.position = 'absolute';
+            btnEliminar.style.top = '-5px';
+            btnEliminar.style.right = '-5px';
+            btnEliminar.style.background = '#d16161';
+            btnEliminar.style.color = 'white';
+            btnEliminar.style.border = 'none';
+            btnEliminar.style.borderRadius = '50%';
+            btnEliminar.style.width = '20px';
+            btnEliminar.style.height = '20px';
+            btnEliminar.style.cursor = 'pointer';
+            btnEliminar.style.fontSize = '12px';
+            btnEliminar.style.display = 'flex';
+            btnEliminar.style.alignItems = 'center';
+            btnEliminar.style.justifyContent = 'center';
+
+            btnEliminar.onclick = () => {
+                archivosSeleccionados.splice(index, 1);
+                sincronizarYRenderizar();
+            };
+
+            divCard.appendChild(img);
+            divCard.appendChild(btnEliminar);
+            contenedorPreview.appendChild(divCard);
+        };
+
+        reader.readAsDataURL(archivo);
+    });
+}
 // ==========================================
 // 5. CARGA DE REPORTES Y GRÁFICAS
 // ==========================================
@@ -1641,3 +1727,4 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
