@@ -459,7 +459,7 @@ function mostrarSeccion(seccion) {
 }
 
 // ==========================================
-// 4. ARRASTRE Y SUBIDA DE ARCHIVOS (MÁXIMO 3 FOTOS)
+// 4. ARRASTRE Y SUBIDA DE ARCHIVOS (MÁXIMO 3 FOTOS, SIN DUPLICADOS)
 // ==========================================
 const zonaArrastre = document.getElementById('zona-arrastre');
 const inputOculto = document.getElementById('input-archivo-oculto');
@@ -468,6 +468,7 @@ const btnCirculo = document.getElementById('btn-circulo');
 const contenedorPreview = document.getElementById('contenedor-previsualizacion');
 const formReporte = document.getElementById('formReporteArca');
 
+const MAXIMO_FOTOS = 3;
 let archivosSeleccionados = [];
 
 function activarSelector() {
@@ -478,12 +479,11 @@ if (zonaArrastre && inputOculto && btnSubir) {
     btnSubir.addEventListener('click', activarSelector);
     if (btnCirculo) btnCirculo.addEventListener('click', activarSelector);
 
-    // Cuando el usuario elige archivos con el explorador
     inputOculto.addEventListener('change', (evento) => {
         const archivos = evento.target.files;
         if (archivos.length > 0) {
             procesarNuevosArchivos(archivos);
-            inputOculto.value = ''; // Limpiamos el input para permitir elegir la misma foto si se desea
+            inputOculto.value = ''; 
         }
     });
 
@@ -505,56 +505,65 @@ if (zonaArrastre && inputOculto && btnSubir) {
         });
     });
 
-    // Cuando el usuario arrastra y suelta imágenes
     zonaArrastre.addEventListener('drop', (evento) => {
         const archivos = evento.dataTransfer.files;
         if (archivos.length > 0) {
-            const soloImagenes = Array.from(archivos).filter(arc => arc.type.startsWith('image/'));
-            if (soloImagenes.length > 0) {
-                procesarNuevosArchivos(soloImagenes);
-            } else {
-                mostrarAlertaArca(
-                    "¡Formato incorrecto! 🌸",
-                    "Por favor, arrastra archivos que sean únicamente imágenes.",
-                    { tipo: "aviso" }
-                );
-            }
+            procesarNuevosArchivos(archivos);
         }
     });
 }
 
 function procesarNuevosArchivos(nuevosArchivos) {
-    Array.from(nuevosArchivos).forEach(nuevoArchivo => {
-        // Validar si ya se alcanzó el límite máximo de 3 fotos
-        if (archivosSeleccionados.length >= 3) {
-            mostrarAlertaArca(
-                "¡Límite alcanzado! 🌸",
-                "Solo puedes adjuntar un máximo de 3 fotos por reporte.",
-                { tipo: "aviso" }
-            );
-            return;
-        }
+    let excedioLimite = false;
+    let duplicadosIgnorados = false;
 
-        // Evitar duplicados exactos
+    Array.from(nuevosArchivos).forEach(nuevoArchivo => {
+        if (!nuevoArchivo.type.startsWith('image/')) return;
+
+        // Validar si ya existe exactamente la misma foto para evitar duplicados
         const yaExiste = archivosSeleccionados.some(
             arc => arc.name === nuevoArchivo.name && 
                    arc.size === nuevoArchivo.size && 
                    arc.lastModified === nuevoArchivo.lastModified
         );
         
-        if (!yaExiste) {
-            archivosSeleccionados.push(nuevoArchivo);
+        if (yaExiste) {
+            duplicadosIgnorados = true;
+            return;
         }
+
+        // Validar si ya alcanzó el límite estricto de 3 fotos
+        if (archivosSeleccionados.length >= MAXIMO_FOTOS) {
+            excedioLimite = true;
+            return;
+        }
+
+        archivosSeleccionados.push(nuevoArchivo);
     });
 
     renderizarMiniaturas();
+
+    // Mostrar tu tarjeta de alerta personalizada de ARCA si intenta pasar de 3 fotos
+    if (excedioLimite) {
+        mostrarAlertaArca(
+            "¡Ey, no puedes hacer eso! 🌸",
+            "No puedes cargar más de tres imágenes. El máximo de imágenes que puedes adjuntar son tres.",
+            { tipo: "aviso" }
+        );
+    } else if (duplicadosIgnorados) {
+        mostrarAlertaArca(
+            "¡Fotografía repetida! 🌸",
+            "Ya habías seleccionado esta imagen antes.",
+            { tipo: "aviso" }
+        );
+    }
 }
 
 function renderizarMiniaturas() {
     const textoEstadoReal = document.querySelector('.texto-arrastra') || document.getElementById('texto-arrastra');
     if (textoEstadoReal) {
         if (archivosSeleccionados.length > 0) {
-            textoEstadoReal.innerText = `${archivosSeleccionados.length} foto(s) seleccionada(s)`;
+            textoEstadoReal.innerText = `${archivosSeleccionados.length} de 3 fotos seleccionadas`;
             textoEstadoReal.style.color = "#4caf50";
         } else {
             textoEstadoReal.innerText = "o arrastra una imagen aquí";
@@ -563,6 +572,7 @@ function renderizarMiniaturas() {
     }
 
     if (!contenedorPreview) return;
+    
     contenedorPreview.innerHTML = '';
 
     archivosSeleccionados.forEach((archivo, index) => {
@@ -574,6 +584,7 @@ function renderizarMiniaturas() {
             const divCard = document.createElement('div');
             divCard.style.position = 'relative';
             divCard.style.display = 'inline-block';
+            divCard.style.margin = '8px';
 
             const img = document.createElement('img');
             img.src = e.target.result;
@@ -596,7 +607,7 @@ function renderizarMiniaturas() {
             btnEliminar.style.width = '20px';
             btnEliminar.style.height = '20px';
             btnEliminar.style.cursor = 'pointer';
-            btnEliminar.style.fontSize = '12px';
+            btnEliminar.style.fontSize = '14px';
             btnEliminar.style.display = 'flex';
             btnEliminar.style.alignItems = 'center';
             btnEliminar.style.justifyContent = 'center';
@@ -615,17 +626,23 @@ function renderizarMiniaturas() {
     });
 }
 
-// ==========================================
-// 5. INTERCEPTAR ENVÍO DEL FORMULARIO DE REPORTES
-// ==========================================
+// Interceptar envío del formulario para incluir las fotos validadas
 if (formReporte) {
     formReporte.addEventListener('submit', async (e) => {
-        e.preventDefault(); // Evita el envío tradicional por defecto
+        e.preventDefault();
+
+        if (archivosSeleccionados.length > MAXIMO_FOTOS) {
+            mostrarAlertaArca(
+                "¡Ey, no puedes hacer eso! 🌸",
+                "No puedes cargar más de tres imágenes. El máximo de imágenes que puedes adjuntar son tres.",
+                { tipo: "aviso" }
+            );
+            return;
+        }
 
         const formData = new FormData(formReporte);
-        
-        // Limpiamos cualquier archivo por defecto e insertamos los del arreglo validado (hasta 3)
         formData.delete('fotos_reporte[]');
+
         archivosSeleccionados.forEach(file => {
             formData.append('fotos_reporte[]', file);
         });
@@ -636,23 +653,127 @@ if (formReporte) {
                 body: formData
             });
 
-            if (respuesta.ok) {
-                mostrarAlertaArca(
-                    "¡Reporte enviado! 🌸",
-                    "Tu reporte se ha publicado con éxito.",
-                    {
-                        tipo: "aviso",
-                        alCerrar: () => { window.location.href = "home.html"; }
-                    }
-                );
-            } else {
-                throw new Error("Error al enviar el reporte");
-            }
+            if (!respuesta.ok) throw new Error("Error al enviar el reporte");
+
+            mostrarAlertaArca(
+                "¡Reporte enviado! 🌸",
+                "Tu reporte se ha publicado con éxito.",
+                {
+                    tipo: "aviso",
+                    alCerrar: () => { window.location.href = "home.html"; }
+                }
+            );
         } catch (error) {
-            console.error("Error:", error);
+            console.error("Error al crear el reporte:", error);
             mostrarAlertaArca("¡Error!", "No se pudo enviar el reporte. Inténtalo de nuevo.");
         }
     });
+}
+// ==========================================
+// 5. CARGA DE REPORTES Y GRÁFICAS
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+    const parametrosURL = new URLSearchParams(window.location.search);
+    const seccionSolicitada = parametrosURL.get('seccion');
+
+    if (typeof mostrarSeccion === 'function') {
+        mostrarSeccion(seccionSolicitada);
+    }
+
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent) {
+        mainContent.style.opacity = '1';
+        mainContent.style.visibility = 'visible';
+    }
+
+    if (document.getElementById('tabla-usuarios')) cargarReporteEdad();
+    if (document.getElementById('tabla-emergencias')) cargarReporteEmergencias();
+});
+
+async function cargarReporteEdad() {
+    try {
+        const res = await fetch('/api/reportes/usuarios-edad');
+        const data = await res.json();
+
+        const tbody = document.getElementById('tabla-usuarios');
+        if (!tbody) return;
+
+        tbody.innerHTML = '';
+        const labels = [];
+        const valores = [];
+
+        data.forEach(row => {
+            labels.push(row.rango_edad);
+            valores.push(row.total_usuarios);
+
+            tbody.innerHTML += `
+                <tr>
+                    <td><strong>${row.rango_edad}</strong></td>
+                    <td>${row.total_usuarios} usuario(s)</td>
+                </tr>
+            `;
+        });
+
+        const canvas = document.getElementById('graficoUsuarios');
+        if (canvas) {
+            new Chart(canvas.getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: valores,
+                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6']
+                    }]
+                },
+                options: { responsive: true }
+            });
+        }
+    } catch (err) {
+        console.error("❌ Error al cargar reporte de usuarios:", err);
+    }
+}
+
+async function cargarReporteEmergencias() {
+    try {
+        const res = await fetch('/api/reportes/emergencias');
+        const data = await res.json();
+
+        const tbody = document.getElementById('tabla-emergencias');
+        if (!tbody) return;
+
+        tbody.innerHTML = '';
+        const labels = [];
+        const valores = [];
+
+        data.forEach(row => {
+            labels.push(row.tipo_emergencia);
+            valores.push(row.total_casos);
+
+            tbody.innerHTML += `
+                <tr>
+                    <td><strong>${row.tipo_emergencia}</strong></td>
+                    <td>${row.total_casos} caso(s)</td>
+                </tr>
+            `;
+        });
+
+        const canvas = document.getElementById('graficoEmergencias');
+        if (canvas) {
+            new Chart(canvas.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: valores,
+                        backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6', '#10b981']
+                    }]
+                },
+                options: { responsive: true }
+            });
+        }
+    } catch (err) {
+        console.error("❌ Error al cargar reporte de emergencias:", err);
+    }
 }
 
 // ==========================================
