@@ -529,8 +529,8 @@ app.delete('/api/eliminar-adoptante/:id_usuarios', (req, res) => {
 // ==========================================
 // REPORTES Y ESTADÍSTICAS
 // ==========================================
-app.post('/crear-reporte', (req, res) => {
-    const {
+app.post('/api/crear-reporte', (req, res) => {
+        const {
         id_tipo_reporte,
         Descripcion,
         Ubicacion,

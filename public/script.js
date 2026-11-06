@@ -648,7 +648,7 @@ if (formReporte) {
         });
 
         try {
-            const respuesta = await fetch('/api/crear-reporte', {
+        const respuesta = await fetch('/crear-reporte', {
                 method: 'POST',
                 body: formData
             });
