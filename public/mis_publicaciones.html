@@ -647,7 +647,7 @@
                         colorTextoBadge = '#2b5b84';
                     }
 
-                    // --- PROCESAR LAS FOTOS (SOPORTA HASTA 3 FOTOS EN ARRAY O STRING) ---
+                   // --- PROCESAR LAS FOTOS (SOPORTA HASTA 3 FOTOS) ---
                     let imagenSrc = reporte.img_reporte || '';
                     let arrayFotos = [];
                     if (imagenSrc) {
@@ -662,7 +662,6 @@
                             arrayFotos = [imagenSrc];
                         }
                     }
-
                     const tipoReporte = reporte.nombre_tipo_reporte || reporte.NOMBRE_TIPO_REPORTE || reporte.tipo_emergencia || (esAdopcion ? 'Adopción de Mascota' : 'Reporte General');
                     
                     const idUnico = reporte.id_publicacion || reporte.id_origen;
@@ -686,7 +685,7 @@
                             </span>
                         </div>
 
-                        ${arrayFotos.length > 0 ? `
+                       ${arrayFotos.length > 0 ? `
                             <div style="display: grid; grid-template-columns: repeat(${Math.min(arrayFotos.length, 3)}, 1fr); gap: 8px; width: 100%; height: 160px; border-radius: 22px; overflow: hidden; border: 2px solid rgba(255, 255, 255, 0.9);">
                                 ${arrayFotos.slice(0, 3).map(foto => `
                                     <div style="width: 100%; height: 100%; overflow: hidden;">
@@ -783,18 +782,19 @@
         const idReal = item.id_origen || item.id_publicacion;
 
         // --- PROCESAR LAS FOTOS PARA EL MODAL CON CARRUSEL DE FLECHITAS ---
+       // --- PROCESAR LAS FOTOS PARA EL MODAL DE DETALLES ---
         let fotosDetalle = item.img_reporte || '';
-        arrayFotosDetalleActual = [];
+        let arrayFotosDetalle = [];
         if (fotosDetalle) {
             try {
                 const parsed = JSON.parse(fotosDetalle);
                 if (Array.isArray(parsed)) {
-                    arrayFotosDetalleActual = parsed;
+                    arrayFotosDetalle = parsed;
                 } else {
-                    arrayFotosDetalleActual = [fotosDetalle];
+                    arrayFotosDetalle = [fotosDetalle];
                 }
             } catch(e) {
-                arrayFotosDetalleActual = [fotosDetalle];
+                arrayFotosDetalle = [fotosDetalle];
             }
         }
         indiceFotoActual = 0;
