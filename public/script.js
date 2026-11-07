@@ -643,17 +643,20 @@ if (formReporte) {
         const formData = new FormData(formReporte);
         formData.delete('fotos_reporte[]');
 
+        formData.delete('fotos_reporte[]');
         archivosSeleccionados.forEach(file => {
             formData.append('fotos_reporte[]', file);
         });
 
-        try {
-        const respuesta = await fetch('/crear-reporte', {
+       try {
+            const respuesta = await fetch('/crear-reporte', {
                 method: 'POST',
-                body: formData
+                body: formData 
             });
 
-            if (!respuesta.ok) throw new Error("Error al enviar el reporte");
+            const resultadoJson = await respuesta.json();
+
+        if (!respuesta.ok) throw new Error(resultadoJson.error || "Error al enviar el reporte");
 
             mostrarAlertaArca(
                 "¡Reporte enviado! 🌸",
@@ -663,9 +666,10 @@ if (formReporte) {
                     alCerrar: () => { window.location.href = "home.html"; }
                 }
             );
-        } catch (error) {
+
+       } catch (error) {
             console.error("Error al crear el reporte:", error);
-            mostrarAlertaArca("¡Error!", "No se pudo enviar el reporte. Inténtalo de nuevo.");
+            mostrarAlertaArca("¡Error!", "No se pudo enviar el reporte: " + error.message);
         }
     });
 }
