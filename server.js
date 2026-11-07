@@ -529,6 +529,11 @@ app.delete('/api/eliminar-adoptante/:id_usuarios', (req, res) => {
 // ==========================================
 // REPORTES Y ESTADÍSTICAS
 // ==========================================
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 5 * 1024 * 1024 }
+});
+
 app.post('/crear-reporte', upload.array('fotos_reporte[]', 3), (req, res) => {
     const {
         id_tipo_reporte,
@@ -1795,10 +1800,6 @@ app.get('/api/ficha-adoptante-publica/:username', (req, res) => {
 // ==========================================
 // MÓDULO DE REGISTRO DE FUNDACIONES
 // ==========================================
-const upload = multer({ 
-    storage: multer.memoryStorage(),
-    limits: { fileSize: 5 * 1024 * 1024 } // Límite de 5MB por imagen opcional
-});
 
 app.post('/api/registrar-fundacion', express.json({ limit: '20mb' }), async (req, res) => {
     const {
