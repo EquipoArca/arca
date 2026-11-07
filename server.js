@@ -529,14 +529,13 @@ app.delete('/api/eliminar-adoptante/:id_usuarios', (req, res) => {
 // ==========================================
 // REPORTES Y ESTADÍSTICAS
 // ==========================================
-app.post('/api/crear-reporte', (req, res) => {
-        const {
+app.post('/crear-reporte', upload.array('fotos_reporte[]', 3), (req, res) => {
+    const {
         id_tipo_reporte,
         Descripcion,
         Ubicacion,
         telefono_contacto,
         correo_contacto,
-        img_reporte,
         correo_usuario
     } = req.body;
 
@@ -544,13 +543,19 @@ app.post('/api/crear-reporte', (req, res) => {
         return res.status(400).json({ error: "Faltan campos obligatorios para el reporte." });
     }
 
-    db.query("SELECT id_usuarios FROM usuarios WHERE correo_usuario = ?", [correo_usuario], (err, results) => {
+let imagenesArray = [];
+    if (req.files && req.files.length > 0) {
+        imagenesArray = req.files.map(file => `data:${file.mimetype};base64,${file.buffer.toString('base64')}`);
+    };
+    const img_reporte = imagenesArray.length > 0 ? JSON.stringify(imagenesArray) : null;
+
+        db.query("SELECT id_usuarios FROM usuarios WHERE correo_usuario = ?", [correo_usuario], (err, results) => {
         if (err || results.length === 0) {
             console.error("Error al buscar ID del usuario:", err);
             return res.status(500).json({ error: "No se pudo asociar el usuario al reporte." });
         }
 
-        const id_usuarios = results[0].id_usuarios;
+       const id_usuarios = results[0].id_usuarios;
         const Fecha_reporte = new Date().toISOString().split('T')[0];
 
         const queryVerificarDuplicado = `
@@ -577,7 +582,7 @@ app.post('/api/crear-reporte', (req, res) => {
                 telefono_contacto || null,
                 correo_contacto || null,
                 Fecha_reporte,
-                img_reporte || null,
+                img_reporte, 
                 id_usuarios
             ];
 
@@ -1786,10 +1791,14 @@ app.get('/api/ficha-adoptante-publica/:username', (req, res) => {
     });
 });
 
+
 // ==========================================
 // MÓDULO DE REGISTRO DE FUNDACIONES
 // ==========================================
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({ 
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 5 * 1024 * 1024 } // Límite de 5MB por imagen opcional
+});
 
 app.post('/api/registrar-fundacion', express.json({ limit: '20mb' }), async (req, res) => {
     const {
