@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sobre Nosotros - ARCA</title>
+    <link rel="stylesheet" href="style_home.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="dark-mode.css">
+    <script>
+    if (localStorage.getItem("modo_oscuro") === "true") {
+        document.body.classList.add("dark-mode");
+    }
+    </script>
+    <style>
+        body {
+            font-family: 'Itim', cursive, sans-serif;
+            background-color: #fff0f7;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .top-nav {
+            position: fixed !important;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 999 !important;
+            background-color: #ffd6d8 !important;
+        }
+
+        /* Contenido Principal */
+        .main-content-sobre {
+            margin-top: 75px;
+            margin-left: 60px;
+            padding: 30px 40px 45px 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: calc(100vh - 75px);
+            box-sizing: border-box;
+        }
+
+        /* Tarjeta Principal Estilo ARCA */
+        .card-sobre-principal {
+            width: 100%;
+            max-width: 850px;
+            background-color: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(14px);
+            border: 2px dashed rgba(229, 115, 115, 0.5);
+            border-radius: 38px;
+            padding: 40px 45px;
+            box-shadow: 0 20px 45px rgba(92, 64, 51, 0.08);
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        /* Título Centrado */
+        .sobre-titulo-principal {
+            font-size: 2.4rem;
+            color: #442c20;
+            font-weight: 400;
+            text-align: center;
+            margin: 0 0 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .sobre-titulo-principal i {
+            color: #e57373;
+        }
+
+        /* Bloque de Texto (¿Quiénes somos?) */
+        .bloque-quienes-somos {
+            background-color: rgba(255, 238, 239, 0.5);
+            padding: 22px 26px;
+            border-radius: 26px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .texto-justificado {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #442c20;
+            margin: 0;
+            text-align: justify;
+        }
+
+        .texto-justificado + .texto-justificado {
+            margin-top: 12px;
+        }
+
+        .texto-rosa {
+            color: #d87070;
+            font-weight: 600;
+        }
+
+        /* Subtítulo de sección */
+        .subtitulo-seccion {
+            font-size: 1.4rem;
+            color: #442c20;
+            margin: 10px 0 5px 0;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        /* Lista Estilizada de características */
+        .lista-sobre-estilizada {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .item-sobre-tarjeta {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            background-color: rgba(255, 238, 239, 0.5);
+            padding: 16px 20px;
+            border-radius: 22px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+
+        .item-sobre-tarjeta:hover {
+            transform: translateY(-2px);
+            background-color: rgba(255, 226, 228, 0.75);
+        }
+
+        .icono-item-sobre {
+            width: 38px;
+            height: 38px;
+            background-color: #ffd6d8;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #e57373;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+            box-shadow: 0 4px 10px rgba(229, 115, 115, 0.2);
+            margin-top: 2px;
+        }
+
+        .texto-item-sobre {
+            font-size: 1.05rem;
+            line-height: 1.5;
+            color: #442c20;
+            margin: 0;
+            text-align: justify;
+        }
+
+        /* Contenedor Inferior para centrar el Botón Volver */
+        .sobre-footer-card {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .btn-volver-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background-color: rgba(251, 194, 196, 0.85);
+            backdrop-filter: blur(8px);
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            color: #442c20;
+            padding: 10px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(229, 115, 115, 0.15);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .btn-volver-pill:hover {
+            transform: scale(1.05) translateY(-2px);
+            background-color: rgba(251, 194, 196, 1);
+            box-shadow: 0 6px 18px rgba(229, 115, 115, 0.25);
+        }
+
+        /* Barra de contacto fija inferior */
+        .footer-contacto-bar {
+            position: fixed;
+            bottom: 0;
+            left: 60px;
+            right: 0;
+            background-color: #ffd6d8e6;
+            backdrop-filter: blur(8px);
+            border-top: 1px solid rgba(0,0,0,0.1);
+            padding: 10px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 800;
+        }
+
+        .contacto-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-size: 1rem;
+            color: #000;
+        }
+
+        .contacto-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: #000;
+            font-weight: 600;
+        }
+
+        .contacto-redes {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .titulo-contactanos {
+            font-weight: 700;
+            font-size: 1rem;
+            letter-spacing: 1px;
+            color: #000;
+            text-transform: uppercase;
+        }
+
+        .redes-iconos {
+            display: flex;
+            gap: 10px;
+        }
+
+        .redes-iconos a {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: transform 0.2s ease;
+        }
+
+        .redes-iconos a:hover {
+            transform: scale(1.15);
+        }
+
+        .bg-tiktok { background-color: #000000; }
+        .bg-facebook { background-color: #1877f2; }
+        .bg-x { background-color: #000000; }
+        .bg-instagram { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
+
+        .btn-sobre-nosotros {
+            background-color: #fbc2c4;
+            color: #000;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-size: 1rem;
+            text-decoration: none;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+
+        .btn-sobre-nosotros:hover {
+            transform: scale(1.05);
+            background-color: #f9a3a6;
+        }
+
+        @media (max-width: 768px) {
+            .main-content-sobre {
+                margin-left: 0;
+                padding: 20px 15px 100px 15px;
+            }
+            .card-sobre-principal {
+                padding: 25px 20px;
+            }
+            .sobre-titulo-principal {
+                font-size: 1.8rem;
+            }
+            .footer-contacto-bar {
+                left: 0;
+                flex-direction: column;
+                gap: 12px;
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+  <!-- Barra de Navegación Superior -->
+  <nav class="top-nav">
+    <div class="top-left">
+        <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu"></i>
+        
+        <div class="mini-logo-circle">
+            <img src="logo.png" alt="Logo">
+        </div>
+        <span class="page-title" id="titulo-pagina">Sobre Nosotros</span>
+    </div>
+
+    <div class="search-bar">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="input-busqueda-nav" name="busqueda" placeholder="Busca algo" aria-label="Buscar en la aplicación">
+        <i class="fa-solid fa-microphone"></i>
+    </div>
+
+    <div class="top-right">
+        <div class="user-header-info">
+
+            <!-- 1. PERFIL Y MINI MENÚ -->
+            <div class="user-profile-menu" id="user-profile-menu">
+                <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
+                    <img src="logo.png" id="user-avatar-img" alt="Perfil">
+                </div>
+
+                <div class="mini-menu-card" id="mini-menu-card">
+                    <div class="mini-menu-header">
+                        <span id="mini-menu-username">Usuario</span>
+                    </div>
+                    
+                    <hr class="mini-menu-divider">
+                    
+                    <a href="javascript:void(0)" onclick="mostrarSeccion('configuracion')" class="mini-menu-item btn-ajustes">
+                        <i class="fa-solid fa-gear"></i>
+                        <span>Ajustes</span>
+                    </a>
+                    
+                    <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Cerrar sesión</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 2. CAMPANA DE NOTIFICACIONES -->
+            <div class="notif-circle">
+                <a href="notificaciones.html" aria-label="Notificaciones"><i class="fa-solid fa-bell"></i></a>
+            </div>
+
+        </div>
+    </div>
+  </nav>
+
+    <!-- Barra Lateral (Sidebar) -->
+    <aside class="sidebar" id="sidebar">
+        <div class="side-icons">
+            <a href="home.html" class="menu-fila">
+                <i class="fa-solid fa-house"></i>
+                <span class="menu-text">Inicio</span>
+            </a>
+            <a href="perfil_usuario.html" class="menu-fila">
+                <i class="fa-solid fa-circle-user"></i>
+                <span class="menu-text">Perfil</span>
+            </a>
+            <a href="guardados_usuario.html" class="menu-fila">
+                <i class="fa-solid fa-bookmark"></i>
+                <span class="menu-text">Guardado</span>
+            </a>
+            <a href="mapa.html" class="menu-fila">
+                <i class="fa-solid fa-location-dot"></i>
+                <span class="menu-text">Mapa</span>
+            </a>
+            <a href="configuracion.html" class="menu-fila">
+                <i class="fa-solid fa-gear"></i>
+                <span class="menu-text">Ajustes</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Contenido Principal -->
+    <main class="main-content-sobre">
+        <div class="card-sobre-principal">
+            
+            <h1 class="sobre-titulo-principal">
+                <i class="fa-solid fa-paw"></i> ¿Quiénes somos?
+            </h1>
+
+            <div class="bloque-quienes-somos">
+                <p class="texto-justificado">
+                    Somos una comunidad motivada por el amor y el respeto hacia los animales. Nuestro propósito es conectar personas, fundaciones y aliados que comparten el sueño de darles una vida digna y llena de cariño a quienes no tienen voz.
+                </p>
+                <p class="texto-justificado" style="margin-top: 10px;">
+                    Aquí encontrarás un espacio seguro para adoptar, ayudar y transformar vidas, porque creemos que cada huellita merece un hogar y una oportunidad.
+                </p>
+            </div>
+
+            <h2 class="subtitulo-seccion">¿Qué encontrarás en nuestro sitio web?</h2>
+
+            <ul class="lista-sobre-estilizada">
+                <li class="item-sobre-tarjeta">
+                    <div class="icono-item-sobre"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                    <p class="texto-item-sobre">
+                        <span class="texto-rosa"> Podrás reportar animales perdidos, en peligro o en condición de abandono.</span>
+                    </p>
+                </li>
+
+                <li class="item-sobre-tarjeta">
+                    <div class="icono-item-sobre"><i class="fa-solid fa-bullhorn"></i></div>
+                    <p class="texto-item-sobre">
+                        <span class="texto-rosa">Publicar animales en adopción de manera fácil y rápida.</span> 
+                    </p>
+                </li>
+
+                <li class="item-sobre-tarjeta">
+                    <div class="icono-item-sobre"><i class="fa-solid fa-hand-holding-heart"></i></div>
+                    <p class="texto-item-sobre">
+                        <span class="texto-rosa">Conocer y postularte para adoptar mascotas que buscan hogar.</span> 
+                    </p>
+                </li>
+
+                <li class="item-sobre-tarjeta">
+                    <div class="icono-item-sobre"><i class="fa-solid fa-user-gear"></i></div>
+                    <p class="texto-item-sobre">
+                        <span class="texto-rosa">Crear perfiles de usuario o fundación según tu rol.</span> 
+                    </p>
+                </li>
+
+                <li class="item-sobre-tarjeta">
+                    <div class="icono-item-sobre"><i class="fa-solid fa-bell"></i></div>
+                    <p class="texto-item-sobre">
+                        <span class="texto-rosa">Recibir notificaciones sobre tus reportes y publicaciones.</span> 
+                    </p>
+                </li>
+
+                <li class="item-sobre-tarjeta">
+                    <div class="icono-item-sobre"><i class="fa-solid fa-comments"></i></div>
+                    <p class="texto-item-sobre">
+                        <span class="texto-rosa">Contactar de forma segura y directa con adoptantes o fundaciones.</span> 
+                    </p>
+                </li>
+
+                <li class="item-sobre-tarjeta">
+                    <div class="icono-item-sobre"><i class="fa-solid fa-bookmark"></i></div>
+                    <p class="texto-item-sobre">
+                        <span class="texto-rosa">Guardar a tus favoritos y dar seguimiento a tus reportes.</span> 
+                    </p>
+                </li>
+            </ul>
+
+            <!-- Botón de Volver Abajo -->
+            <div class="sobre-footer-card">
+                <a href="soporte.html" class="btn-volver-pill">
+                    <i class="fa-solid fa-arrow-left"></i> Volver
+                </a>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Firebase v8 Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+
+    <!-- Tus scripts principales -->
+    <script src="script.js"></script>
+    
+    <!-- Script unificado para la barra lateral -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btnToggleMenu = document.getElementById('btn-toggle-menu');
+            const sidebar = document.getElementById('sidebar');
+
+            if (btnToggleMenu && sidebar) {
+                btnToggleMenu.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    sidebar.classList.toggle('sidebar-abierta');
+                });
+            }
+        });
+    </script>
+
+    <!-- Motor oculto de Google Translate -->
+    <div id="google_translate_element" style="display:none;"></div>
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({ pageLanguage: 'es', autoDisplay: false }, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+    <!-- Script para aplicar el idioma guardado al cambiar de página -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('app_selected_lang');
+            if (savedLang && savedLang !== 'es') {
+                const interval = setInterval(() => {
+                    const googleCombo = document.querySelector('.goog-te-combo');
+                    if (googleCombo) {
+                        googleCombo.value = savedLang;
+                        googleCombo.dispatchEvent(new Event('change'));
+                        clearInterval(interval);
+                    }
+                }, 200);
+            }
+        });
+    </script>
+    <style>
+        .goog-te-banner-frame { display: none !important; }
+        body { top: 0 !important; }
+        .skiptranslate { display: none !important; }
+    </style>
+</body>
+</html>

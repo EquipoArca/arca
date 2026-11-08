@@ -16,139 +16,77 @@
     }
     </script>
     <style>
-        /* Estilos específicos para la pantalla de Ayuda y Soporte */
+        /* Estilos específicos para la pantalla de Ayuda y Soporte estilo Guardados (Más amplio) */
         .soporte-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             width: 100%;
-            max-width: 650px;
-            margin: 20px auto 100px auto;
-            gap: 25px;
+            max-width: 900px; 
+            margin: 10px auto;
+            gap: 30px;
         }
 
+        /* Contenedor grande principal con borde punteado (estilo Guardados) */
+        .soporte-box-grande {
+            background-color: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(5px);
+            border: 2px dashed rgba(209, 205, 189, 0.8);
+            border-radius: 40px;
+            padding: 50px 45px; /* Más espacio interno para que respire */
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+        }
+
+        /* Botones internos más amplios */
         .btn-soporte-capsula {
             display: flex;
             align-items: center;
             justify-content: flex-start;
-            gap: 20px;
+            gap: 24px;
             width: 100%;
-            background-color: #ffd6d8c5;
-            padding: 18px 30px;
-            border-radius: 40px;
+            background-color: rgba(255, 214, 216, 0.75);
+            padding: 22px 35px; /* Botones más altos y cómodos */
+            border-radius: 28px;
             text-decoration: none;
             color: #000;
             font-size: 2.2rem;
             font-family: 'Itim', cursive, sans-serif;
             font-weight: 500;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.6);
             transition: transform 0.2s ease, background-color 0.2s ease;
         }
 
         .btn-soporte-capsula:hover {
             transform: translateY(-3px);
-            background-color: #fcaea2d8;
+            background-color: rgba(252, 174, 162, 0.85);
         }
 
         .btn-soporte-capsula i {
-            font-size: 2.2rem;
+            font-size: 2.3rem;
             color: #000;
         }
 
-        /* Barra de contacto fija e inferior */
-        .footer-contacto-bar {
-            position: fixed;
-            bottom: 0;
-            left: 60px;
-            right: 0;
-            background-color: #ffd6d8e6;
-            backdrop-filter: blur(8px);
-            border-top: 1px solid rgba(0,0,0,0.1);
-            padding: 12px 40px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            z-index: 800;
-            font-family: 'Itim', cursive, sans-serif;
-        }
-
-        .contacto-info {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            font-size: 1.1rem;
-            color: #000;
-        }
-
-        .contacto-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            text-decoration: none;
-            color: #000;
-            font-weight: 600;
-        }
-
-        .contacto-item i {
-            font-size: 1.2rem;
-        }
-
-        .contacto-redes {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .titulo-contactanos {
-            font-weight: 700;
-            font-size: 1.1rem;
-            letter-spacing: 1px;
-            color: #000;
-            text-transform: uppercase;
-        }
-
-        .redes-iconos {
-            display: flex;
-            gap: 12px;
-        }
-
-        .redes-iconos a {
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            text-decoration: none;
-            font-size: 1.1rem;
-            transition: transform 0.2s ease;
-        }
-
-        .redes-iconos a:hover {
-            transform: scale(1.15);
-        }
-
-        .bg-tiktok { background-color: #000000; }
-        .bg-facebook { background-color: #1877f2; }
-        .bg-x { background-color: #000000; }
-        .bg-instagram { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
-
+        /* Botón de Sobre Nosotros centrado abajo */
         .btn-sobre-nosotros {
             background-color: #fbc2c4;
             color: #000;
             border: 1px solid rgba(255, 255, 255, 0.6);
-            padding: 10px 25px;
-            border-radius: 25px;
+            padding: 14px 45px;
+            border-radius: 28px;
             font-family: 'Itim', cursive, sans-serif;
-            font-size: 1.1rem;
+            font-size: 1.3rem;
             text-decoration: none;
             font-weight: 500;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             transition: transform 0.2s ease, background-color 0.2s ease;
+            display: inline-block;
+            text-align: center;
         }
 
         .btn-sobre-nosotros:hover {
@@ -157,19 +95,18 @@
         }
 
         @media (max-width: 768px) {
-            .footer-contacto-bar {
-                left: 0;
-                flex-direction: column;
-                gap: 15px;
-                padding: 15px;
-                position: relative;
+            .soporte-container {
+                max-width: 95%;
+            }
+            .soporte-box-grande {
+                padding: 30px 20px;
             }
             .btn-soporte-capsula {
-                font-size: 1.5rem;
-                padding: 14px 20px;
+                font-size: 1.6rem;
+                padding: 16px 20px;
             }
             .btn-soporte-capsula i {
-                font-size: 1.5rem;
+                font-size: 1.6rem;
             }
         }
     </style>
@@ -259,48 +196,28 @@
     <!-- Contenido Principal -->
     <main class="main-content">
         <div class="soporte-container">
-            <a href="preguntas_frecuentes.html" class="btn-soporte-capsula">
-                <i class="fa-regular fa-circle-question"></i>
-                <span>Preguntas Frecuentes</span>
-            </a>
+            <div class="soporte-box-grande">
 
-            <a href="guia_arca.html" class="btn-soporte-capsula">
-                <i class="fa-solid fa-book-open"></i>
-                <span>Guía rápida de Arca</span>
-            </a>
+    <a href="preguntas_frecuentes.html" class="btn-soporte-capsula" style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+        <i class="fa-regular fa-circle-question"></i>
+        <span>Preguntas Frecuentes</span>
+    </a>
 
-            <a href="reportar_error.html" class="btn-soporte-capsula">
-                <i class="fa-regular fa-circle-xmark"></i>
-                <span>Reportar un error</span>
-            </a>
+    <a href="guia_arca.html" class="btn-soporte-capsula" style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+        <i class="fa-solid fa-book-open"></i>
+        <span>Guía rápida de Arca</span>
+    </a>
+
+    <a href="reportar_error.html" class="btn-soporte-capsula" style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+        <i class="fa-regular fa-circle-xmark"></i>
+        <span>Reportar un error</span>
+    </a>
+
+            </div>
+
+            <a href="sobre_nosotros.html" class="btn-sobre-nosotros">Sobre nosotros</a>
         </div>
     </main>
-
-    <!-- Barra Inferior de Contacto -->
-    <footer class="footer-contacto-bar">
-        <div class="contacto-info">
-            <a href="mailto:equipoarca0@gmail.com" class="contacto-item">
-                <i class="fa-regular fa-envelope"></i>
-                <span>arcaoficial0@gmail.com</span>
-            </a>
-            <a href="tel:5780318" class="contacto-item">
-                <i class="fa-solid fa-phone"></i>
-                <span>3017340402</span>
-            </a>
-        </div>
-
-        <div class="contacto-redes">
-            <span class="titulo-contactanos">CONTÁCTANOS:</span>
-            <div class="redes-iconos">
-                <a href="#" class="bg-tiktok" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a>
-                <a href="#" class="bg-facebook" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
-                <a href="#" class="bg-x" aria-label="X"><i class="fa-brands fa-x-twitter"></i></a>
-                <a href="#" class="bg-instagram" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
-            </div>
-        </div>
-
-        <a href="quienes.html" class="btn-sobre-nosotros">Sobre nosotros</a>
-    </footer>
 
     <!-- Firebase v8 Scripts -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
