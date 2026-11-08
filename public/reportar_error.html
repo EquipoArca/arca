@@ -35,7 +35,7 @@
         .main-content-error {
             margin-top: 75px;
             margin-left: 60px;
-            padding: 20px 40px 120px 40px;
+            padding: 20px 40px 45px 40px;
             display: flex;
             justify-content: center;
             align-items: flex-start;
@@ -370,116 +370,6 @@
             transform: scale(1.05);
             background-color: #f9a3a6;
         }
-
-        /* Barra de contacto fija inferior */
-        .footer-contacto-bar {
-            position: fixed;
-            bottom: 0;
-            left: 60px;
-            right: 0;
-            background-color: #ffd6d8e6;
-            backdrop-filter: blur(8px);
-            border-top: 1px solid rgba(0,0,0,0.1);
-            padding: 10px 40px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            z-index: 800;
-        }
-
-        .contacto-info {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            font-size: 1rem;
-            color: #000;
-        }
-
-        .contacto-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-            color: #000;
-            font-weight: 600;
-        }
-
-        .contacto-redes {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .titulo-contactanos {
-            font-weight: 700;
-            font-size: 1rem;
-            letter-spacing: 1px;
-            color: #000;
-            text-transform: uppercase;
-        }
-
-        .redes-iconos {
-            display: flex;
-            gap: 10px;
-        }
-
-        .redes-iconos a {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            text-decoration: none;
-            font-size: 1rem;
-            transition: transform 0.2s ease;
-        }
-
-        .redes-iconos a:hover {
-            transform: scale(1.15);
-        }
-
-        .bg-tiktok { background-color: #000000; }
-        .bg-facebook { background-color: #1877f2; }
-        .bg-x { background-color: #000000; }
-        .bg-instagram { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
-
-        .btn-sobre-nosotros {
-            background-color: #fbc2c4;
-            color: #000;
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            padding: 10px 25px;
-            border-radius: 25px;
-            font-size: 1.1rem;
-            text-decoration: none;
-            font-weight: 500;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            transition: transform 0.2s ease, background-color 0.2s ease;
-        }
-
-        .btn-sobre-nosotros:hover {
-            transform: scale(1.05);
-            background-color: #f9a3a6;
-        }
-
-        @media (max-width: 850px) {
-            .form-error-grid {
-                flex-direction: column;
-                gap: 25px;
-            }
-            .main-content-error {
-                margin-left: 0;
-                padding: 15px 15px 100px 15px;
-            }
-            .footer-contacto-bar {
-                left: 0;
-                flex-direction: column;
-                gap: 12px;
-                padding: 12px;
-            }
-        }
     </style>
 </head>
 <body>
@@ -647,31 +537,7 @@
         </div>
     </div>
 
-    <!-- Barra Inferior de Contacto -->
-    <footer class="footer-contacto-bar">
-        <div class="contacto-info">
-            <a href="mailto:arcaoficial0@gmail.com" class="contacto-item">
-                <i class="fa-regular fa-envelope"></i>
-                <span>arcaoficial0@gmail.com</span>
-            </a>
-            <a href="tel:5780318" class="contacto-item">
-                <i class="fa-solid fa-phone"></i>
-                <span>578-0318</span>
-            </a>
-        </div>
-
-        <div class="contacto-redes">
-            <span class="titulo-contactanos">CONTÁCTANOS:</span>
-            <div class="redes-iconos">
-                <a href="#" class="bg-tiktok" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a>
-                <a href="#" class="bg-facebook" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
-                <a href="#" class="bg-x" aria-label="X"><i class="fa-brands fa-x-twitter"></i></a>
-                <a href="#" class="bg-instagram" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
-            </div>
-        </div>
-
-        <a href="sobre_nosotros.html" class="btn-sobre-nosotros">Sobre nosotros</a>
-    </footer>
+    
 
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
