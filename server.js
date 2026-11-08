@@ -2401,6 +2401,54 @@ app.get('/api/novedades', (req, res) => {
         res.json(rows);
     });
 });
+
+// ==========================================
+// MÓDULO DE SOPORTE TÉCNICO (REPORTE DE ERRORES)
+// ==========================================
+
+// Configuración de multer para guardar temporalmente la imagen subida en una carpeta 'uploads/'
+const uploadSoporte = multer({ dest: 'uploads/' });
+
+app.post('/api/enviar-reporte-error', uploadSoporte.single('imagen_error'), async (req, res) => {
+    try {
+        const { lugar_error, descripcion, nombre_usuario, correo_usuario } = req.body;
+        const archivoAdjunto = req.file; // Aquí llega la captura si el usuario la subió
+
+        let mailOptions = {
+            from: '"Soporte Técnico ARCA" <arcaoficial0@gmail.com>',
+            to: 'arcaoficial0@gmail.com',
+            subject: '🚨 Nuevo Reporte de Error Técnico - ARCA',
+            html: `
+                <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #fff0f7; border-radius: 12px; color: #442c20;">
+                    <h2 style="color: #e57373;">Se ha recibido un nuevo reporte de error</h2>
+                    <p><strong>Lugar del error:</strong> ${lugar_error || 'No especificado'}</p>
+                    <p><strong>Descripción:</strong> ${descripcion || 'Sin descripción'}</p>
+                    <hr style="border: 1px solid #ffd6d8;">
+                    <p><strong>Datos del usuario:</strong></p>
+                    <ul>
+                        <li>Nombre: ${nombre_usuario || 'No proporcionado'}</li>
+                        <li>Correo: ${correo_usuario || 'No proporcionado'}</li>
+                    </ul>
+                </div>
+            `,
+            attachments: archivoAdjunto ? [
+                {
+                    filename: archivoAdjunto.originalname,
+                    path: archivoAdjunto.path
+                }
+            ] : []
+        };
+
+        // Usamos el transporter que ya tienes configurado globalmente en tu server.js
+        await transporter.sendMail(mailOptions);
+
+        res.status(200).json({ exito: true, mensaje: 'Reporte enviado con éxito.' });
+    } catch (error) {
+        console.error('❌ Error al enviar el correo de reporte:', error);
+        res.status(500).json({ exito: false, error: 'No se pudo enviar el reporte.' });
+    }
+});
+
 // ==========================================
 // INICIALIZACIÓN DEL SERVIDOR
 // ==========================================
