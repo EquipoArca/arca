@@ -7,6 +7,9 @@ const path = require('path');
 const multer = require('multer');
 const { initializeApp, cert } = require('firebase-admin/app');
 const { getAuth } = require('firebase-admin/auth');
+const { Resend } = require('resend');
+const resend = new Resend(process.env.RESEND_API_KEY);
+const fs = require('fs');
 
 // ==========================================
 // INICIALIZACIÓN DE FIREBASE CON ARCHIVO LOCAL
@@ -2406,17 +2409,25 @@ app.get('/api/novedades', (req, res) => {
 // MÓDULO DE SOPORTE TÉCNICO (REPORTE DE ERRORES)
 // ==========================================
 
-// Configuración de multer para guardar temporalmente la imagen subida en una carpeta 'uploads/'
 const uploadSoporte = multer({ dest: 'uploads/' });
 
 app.post('/api/enviar-reporte-error', uploadSoporte.single('imagen_error'), async (req, res) => {
     try {
         const { lugar_error, descripcion, nombre_usuario, correo_usuario } = req.body;
-        const archivoAdjunto = req.file; // Aquí llega la captura si el usuario la subió
+        const archivoAdjunto = req.file;
 
-        let mailOptions = {
-            from: '"Soporte Técnico ARCA" <arcaoficial0@gmail.com>',
-            to: 'arcaoficial0@gmail.com',
+        // Preparar la fotografía si el usuario adjuntó una
+        const adjuntos = archivoAdjunto ? [
+            {
+                filename: archivoAdjunto.originalname,
+                content: await fs.promises.readFile(archivoAdjunto.path)
+            }
+        ] : [];
+
+        // Enviar el correo mediante Resend
+        const { data, error } = await resend.emails.send({
+            from: 'Soporte Técnico ARCA <onboarding@resend.dev>',
+            to: ['jermybearmy02@gmail.com'],
             subject: '🚨 Nuevo Reporte de Error Técnico - ARCA',
             html: `
                 <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #fff0f7; border-radius: 12px; color: #442c20;">
@@ -2431,28 +2442,36 @@ app.post('/api/enviar-reporte-error', uploadSoporte.single('imagen_error'), asyn
                     </ul>
                 </div>
             `,
-            attachments: archivoAdjunto ? [
-                {
-                    filename: archivoAdjunto.originalname,
-                    path: archivoAdjunto.path
-                }
-            ] : []
-        };
+            attachments: adjuntos
+        });
 
-        // Usamos el transporter que ya tienes configurado globalmente en tu server.js
-        await transporter.sendMail(mailOptions);
+        // Comprobar si Resend devolvió un error
+        if (error) {
+            console.error('❌ Error de Resend:', error);
+            return res.status(500).json({
+                exito: false,
+                error: 'No se pudo enviar el reporte.'
+            });
+        }
 
-        res.status(200).json({ exito: true, mensaje: 'Reporte enviado con éxito.' });
+        console.log('✅ Reporte enviado mediante Resend:', data);
+
+        res.status(200).json({
+            exito: true,
+            mensaje: 'Reporte enviado con éxito.'
+        });
+
     } catch (error) {
         console.error('❌ Error al enviar el correo de reporte:', error);
-        res.status(500).json({ exito: false, error: 'No se pudo enviar el reporte.' });
-    }
-});
 
-// ==========================================
-// INICIALIZACIÓN DEL SERVIDOR
-// ==========================================
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
+        res.status(500).json({
+            exito: false,
+            error: 'No se pudo enviar el reporte.'
+        });
+    } finally {
+        // Eliminar la fotografía temporal después de procesarla
+        if (req.file?.path) {
+            await fs.promises.unlink(req.file.path).catch(() => {});
+        }
+    }
 });
