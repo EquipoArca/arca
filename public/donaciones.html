@@ -1,11 +1,11 @@
+<!DOCTYPE html>
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Donación - ARCA</title>
     <link rel="stylesheet" href="style_home.css">
     <link rel="stylesheet" href="style_donacion.css">
-    <link rel="stylesheet" href="script.js">
-    <link rel="stylesheet" href="donaciones.js">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
@@ -15,21 +15,14 @@
     <script>
         (function () {
             const temaGuardado = localStorage.getItem('darkMode');
-
             const esOscuro = temaGuardado !== null
                 ? temaGuardado === 'true'
                 : localStorage.getItem('modo_oscuro') === 'true';
 
-            document.documentElement.classList.toggle(
-                'dark-mode',
-                esOscuro
-            );
+            document.documentElement.classList.toggle('dark-mode', esOscuro);
 
             document.addEventListener('DOMContentLoaded', function () {
-                document.body.classList.toggle(
-                    'dark-mode',
-                    esOscuro
-                );
+                document.body.classList.toggle('dark-mode', esOscuro);
             });
         })();
     </script>
@@ -80,40 +73,31 @@
         </div>
     </nav>
     
-    <!-- Barra Lateral -->
- 
-<!-- Barra Lateral Reutilizada -->
-<aside class="sidebar" id="sidebar">
-    <div class="side-icons">
-
-        <a href="home.html" class="menu-fila">
-            <i class="fa-solid fa-house"></i>
-            <span class="menu-text">Inicio</span>
-        </a>
-
-        <a href="perfil_usuario.html" class="menu-fila">
-            <i class="fa-solid fa-circle-user"></i>
-            <span class="menu-text">Perfil</span>
-        </a>
-
-        <a href="guardados_usuario.html" class="menu-fila">
-            <i class="fa-solid fa-bookmark"></i>
-            <span class="menu-text">Guardado</span>
-        </a>
-
-        <a href="mapa.html" class="menu-fila">
-            <i class="fa-solid fa-location-dot"></i>
-            <span class="menu-text">Mapa</span>
-        </a>
-
-        <a href="configuracion.html" class="menu-fila">
-            <i class="fa-solid fa-gear"></i>
-            <span class="menu-text">Ajustes</span>
-        </a>
-
-    </div>
-</aside>
-
+    <!-- Barra Lateral Reutilizada -->
+    <aside class="sidebar" id="sidebar">
+        <div class="side-icons">
+            <a href="home.html" class="menu-fila">
+                <i class="fa-solid fa-house"></i>
+                <span class="menu-text">Inicio</span>
+            </a>
+            <a href="perfil_usuario.html" class="menu-fila">
+                <i class="fa-solid fa-circle-user"></i>
+                <span class="menu-text">Perfil</span>
+            </a>
+            <a href="guardados_usuario.html" class="menu-fila">
+                <i class="fa-solid fa-bookmark"></i>
+                <span class="menu-text">Guardado</span>
+            </a>
+            <a href="mapa.html" class="menu-fila">
+                <i class="fa-solid fa-location-dot"></i>
+                <span class="menu-text">Mapa</span>
+            </a>
+            <a href="configuracion.html" class="menu-fila">
+                <i class="fa-solid fa-gear"></i>
+                <span class="menu-text">Ajustes</span>
+            </a>
+        </div>
+    </aside>
 
     <!-- Contenido Principal de Donación -->
     <main class="main-content" style="opacity: 1; visibility: visible;">
@@ -126,27 +110,27 @@
                     
                     <div class="donation-options-group">
                         <label class="donation-option-row">
-                            <input type="checkbox">
+                            <input type="checkbox" value="Dinero">
                             <div class="donation-custom-checkbox"></div>
                             <div class="donation-input-pill">Dinero</div>
                         </label>
                         <label class="donation-option-row">
-                            <input type="checkbox">
+                            <input type="checkbox" value="Juguetes">
                             <div class="donation-custom-checkbox"></div>
                             <div class="donation-input-pill">Juguetes</div>
                         </label>
                         <label class="donation-option-row">
-                            <input type="checkbox">
+                            <input type="checkbox" value="Comida">
                             <div class="donation-custom-checkbox"></div>
                             <div class="donation-input-pill">Comida</div>
                         </label>
                         <label class="donation-option-row">
-                            <input type="checkbox">
+                            <input type="checkbox" value="Ropa">
                             <div class="donation-custom-checkbox"></div>
                             <div class="donation-input-pill">Ropa</div>
                         </label>
                         <label class="donation-option-row">
-                            <input type="checkbox">
+                            <input type="checkbox" value="Otro">
                             <div class="donation-custom-checkbox"></div>
                             <div class="donation-input-pill">Otro</div>
                         </label>
@@ -162,22 +146,23 @@
                 <div class="donation-column">
                     <div class="section-pill-title">¿A qué fundación desea donar?</div>
                     
-                    <div class="foundation-sub-options">
-                        <button type="button" class="btn-select-map">Seleccione una fundación en el mapa</button>
-                        <span class="or-separator">o</span>
-                        <input type="text" class="donation-input-pill" placeholder="Ingresa el nombre de la fundación" style="flex: 1; min-width: 180px;">
+                    <div class="foundation-sub-options" style="flex-direction: column; align-items: stretch; gap: 8px;">
+                        <!-- Selector dinámico conectado a la BD -->
+                        <select id="select-fundacion-donacion" class="evento-input" style="width: 100%; border-radius: 9999px; padding: 10px 16px; border: 2px solid #e8a87c; font-family: 'Itim', cursive;">
+                            <option value="">Selecciona una fundación...</option>
+                        </select>
                     </div>
 
                     <div class="section-pill-title" style="margin-top: 10px;">Forma de entrega</div>
                     
                     <div class="donation-options-group">
                         <label class="donation-option-row">
-                            <input type="checkbox">
+                            <input type="radio" name="forma_entrega" value="personal" checked>
                             <div class="donation-custom-checkbox"></div>
                             <span class="donation-plain-text">Llevar personalmente al refugio</span>
                         </label>
                         <label class="donation-option-row">
-                            <input type="checkbox">
+                            <input type="radio" name="forma_entrega" value="recogida">
                             <div class="donation-custom-checkbox"></div>
                             <span class="donation-plain-text">Solicitar recogida a domicilio</span>
                         </label>
@@ -188,30 +173,32 @@
                     <div class="donation-options-group" style="gap: 15px;">
                         <div class="donation-contact-wrapper">
                             <i class="fa-solid fa-circle-user"></i>
-                            <input type="text" placeholder="Nombre">
+                            <input type="text" id="donante-nombre" placeholder="Nombre">
                         </div>
                         <div class="donation-contact-wrapper">
                             <i class="fa-solid fa-phone"></i>
-                            <input type="tel" placeholder="Teléfono">
+                            <input type="tel" id="donante-telefono" placeholder="Teléfono">
                         </div>
                         <div class="donation-contact-wrapper">
                             <i class="fa-solid fa-envelope"></i>
-                            <input type="email" placeholder="Correo">
+                            <input type="email" id="donante-correo" placeholder="Correo">
                         </div>
                     </div>
 
-                    <button type="button" class="btn-submit-donation">Enviar Donación</button>
+                    <button type="button" id="btn-enviar-donacion" class="btn-submit-donation" style="margin-top: 15px;">Enviar Donación</button>
                 </div>
 
             </div>
         </div>
-    
     </main>
+
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     
-    <!-- Script Global de la Aplicación -->
+    <!-- Scripts de la Aplicación -->
     <script src="script.js"></script>
+    <script src="donaciones.js"></script>
 
     <script>
         function toggleSidebar() {

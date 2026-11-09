@@ -1,87 +1,95 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const btnSelectMap = document.querySelector('.btn-select-map');
-    const inputFundacion = document.querySelector('.foundation-sub-options input[type="text"]');
-    
-    let mapaDonacion = null;
-    let contenedorMapa = null;
+document.addEventListener('DOMContentLoaded', async () => {
+    const selectFundacion = document.getElementById('select-fundacion-donacion');
 
-    if (btnSelectMap && inputFundacion) {
-        // Creamos el contenedor del mapa adaptado para ancho completo debajo de la fila
-        contenedorMapa = document.createElement('div');
-        contenedorMapa.id = 'contenedor-mapa-donacion-dinamico';
-        contenedorMapa.style.cssText = `
-            display: none;
-            width: 100%;
-            height: 280px;
-            margin-top: 15px;
-            border-radius: 20px;
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            position: relative;
-            z-index: 10;
-        `;
-        
-        const divInterno = document.createElement('div');
-        divInterno.id = 'mapa-donacion-interno';
-        divInterno.style.cssText = 'width: 100%; height: 100%; border-radius: 18px;';
-        contenedorMapa.appendChild(divInterno);
-
-        // Insertamos el contenedor justo después del bloque horizontal de fundaciones
-        const foundationGroup = btnSelectMap.closest('.foundation-sub-options');
-        if (foundationGroup) {
-            foundationGroup.parentNode.insertBefore(contenedorMapa, foundationGroup.nextSibling);
-        }
-
-        btnSelectMap.addEventListener('click', () => {
-            if (contenedorMapa.style.display === 'none' || contenedorMapa.style.display === '') {
-                contenedorMapa.style.display = 'block';
-                btnSelectMap.textContent = "🗺️ Ocultar mapa";
-
-                if (!mapaDonacion) {
-                    mapaDonacion = L.map('mapa-donacion-interno').setView([6.265, -75.615], 14);
-
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        maxZoom: 19,
-                        attribution: '© OpenStreetMap - ARCA'
-                    }).addTo(mapaDonacion);
-
-                    const fundacionesAliadas = [
-                        { nombre: "Refugio Huellitas de Amor 🐾", lat: 6.268, lng: -75.620, dir: "Vía principal San Cristóbal" },
-                        { nombre: "Fundación SOS Animal Medellín 🏡", lat: 6.260, lng: -75.610, dir: "Sector Central" }
-                    ];
-
-                    fundacionesAliadas.forEach(f => {
-                        const marker = L.marker([f.lat, f.lng]).addTo(mapaDonacion);
-                        marker.bindPopup(`
-                            <div style="font-family: 'Itim', cursive; text-align: center; color: #5c4033;">
-                                <b style="color: #d97736;">${f.nombre}</b>
-                                <p style="font-size: 12px; margin: 4px 0;">${f.dir}</p>
-                                <button type="button" class="btn-elegir-refugio" data-nombre="${f.nombre}" style="background: #E985A0; color: white; border: none; padding: 5px 12px; border-radius: 9999px; cursor: pointer; font-family: 'Itim', cursive;">
-                                    Elegir fundación ♡
-                                </button>
-                            </div>
-                        `);
-                    });
-
-                    document.addEventListener('click', (e) => {
-                        if (e.target.classList.contains('btn-elegir-refugio')) {
-                            const nombreElegido = e.target.getAttribute('data-nombre');
-                            inputFundacion.value = nombreElegido;
-                            contenedorMapa.style.display = 'none';
-                            btnSelectMap.textContent = "Seleccione una fundación en el mapa";
-                            
-                            mostrarAlertaArca(
-                                "¡Fundación seleccionada! 🌸",
-                                `Has elegido a: ${nombreElegido}`,
-                                { tipo: "aviso" }
-                            );
-                        }
-                    });
-                } else {
-                    setTimeout(() => { mapaDonacion.invalidateSize(); }, 200);
-                }
+    // 1. Cargar las fundaciones aprobadas/registradas en el sistema
+    try {
+        const res = await fetch('/api/fundaciones-lista');
+        if (res.ok) {
+            const fundaciones = await res.json();
+            if (fundaciones && fundaciones.length > 0) {
+                fundaciones.forEach(f => {
+                    const option = document.createElement('option');
+                    option.value = f.id_fundacion;
+                    option.textContent = f.Nombre_Comercial || f.Nombre_Legal || f.Correo_fundacion;
+                    selectFundacion.appendChild(option);
+                });
             } else {
-                contenedorMapa.style.display = 'none';
-                btnSelectMap.textContent = "Seleccione una fundación en el mapa";
+                selectFundacion.innerHTML = '<option value="">No hay fundaciones disponibles</option>';
+            }
+        }
+    } catch (e) {
+        console.error("Error al cargar la lista de fundaciones:", e);
+    }
+
+    // 2. Prellenar datos del usuario autenticado si ya inició sesión
+    firebase.auth().onAuthStateChanged(async (user) => {
+        if (user && user.email) {
+            document.getElementById('donante-correo').value = user.email;
+            try {
+                const resUsr = await fetch(`/api/obtener-usuario?correo=${encodeURIComponent(user.email)}`);
+                if (resUsr.ok) {
+                    const datos = await resUsr.json();
+                    if (datos.nombre_usuario) document.getElementById('donante-nombre').value = datos.nombre_usuario;
+                    if (datos.Telefono_usuario) document.getElementById('donante-telefono').value = datos.Telefono_usuario;
+                }
+            } catch (err) {
+                console.error("Error al obtener datos del usuario:", err);
+            }
+        }
+    });
+
+    // 3. Manejar el envío de la donación
+    const btnEnviar = document.getElementById('btn-enviar-donacion');
+    if (btnEnviar) {
+        btnEnviar.addEventListener('click', async () => {
+            const user = firebase.auth().currentUser;
+            if (!user) {
+                alert("Debes iniciar sesión para realizar una donación.");
+                return;
+            }
+
+            // Recoger tipos de donación seleccionados (checkboxes)
+            const checkboxes = document.querySelectorAll('.donation-column:first-child input[type="checkbox"]:checked');
+            const tiposSeleccionados = Array.from(checkboxes).map(cb => cb.closest('label').textContent.trim());
+
+            const descripcion = document.querySelector('.donation-textarea').value.trim();
+            const idFundacion = selectFundacion.value;
+            const correoDonante = document.getElementById('donante-correo').value.trim();
+
+            if (tiposSeleccionados.length === 0) {
+                alert("Por favor selecciona al menos un tipo de donación.");
+                return;
+            }
+
+            if (!idFundacion) {
+                alert("Por favor selecciona una fundación de destino.");
+                return;
+            }
+
+            const datosDonacion = {
+                correo_usuario: correoDonante || user.email,
+                id_fundacion: idFundacion,
+                tipo_donacion: tiposSeleccionados.join(', '),
+                descripcion_donacion: descripcion
+            };
+
+            try {
+                const respuesta = await fetch('/api/crear-donacion', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(datosDonacion)
+                });
+
+                const resultado = await respuesta.json();
+                if (respuesta.ok) {
+                    alert("¡Donación enviada con éxito! La fundación ha sido notificada.");
+                    window.location.href = "home.html";
+                } else {
+                    throw new Error(resultado.error || "No se pudo registrar la donación.");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Hubo un error al enviar la donación: " + error.message);
             }
         });
     }

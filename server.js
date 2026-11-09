@@ -2396,6 +2396,120 @@ app.post('/api/enviar-reporte-error', uploadSoporte.single('imagen_error'), (req
     }
 });
 // ==========================================
+// MÓDULO DE DONACIONES A FUNDACIONES
+// ==========================================
+
+// 1. Registrar una donación nueva (desde el usuario)
+app.post('/api/crear-donacion', (req, res) => {
+    const { correo_usuario, id_fundacion, tipo_donacion, descripcion_donacion } = req.body;
+
+    if (!correo_usuario || !id_fundacion || !tipo_donacion) {
+        return res.status(400).json({ error: "Faltan datos obligatorios para registrar la donación." });
+    }
+
+    db.query("SELECT id_usuarios, nombre_usuario FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))", [correo_usuario], (err, userRes) => {
+        if (err || userRes.length === 0) {
+            return res.status(404).json({ error: "Usuario no encontrado." });
+        }
+
+        const id_usuario = userRes[0].id_usuarios;
+        const nombreUsuario = userRes[0].nombre_usuario;
+
+        const queryInsert = `
+            INSERT INTO donaciones (id_usuario, id_fundacion, tipo_donacion, descripcion_donacion, estado)
+            VALUES (?, ?, ?, ?, 'pendiente')
+        `;
+
+        db.query(queryInsert, [id_usuario, id_fundacion, tipo_donacion, descripcion_donacion || ''], (errInsert, result) => {
+            if (errInsert) {
+                console.error("❌ Error al registrar donación:", errInsert.message);
+                return res.status(500).json({ error: "Error en el servidor al guardar la donación." });
+            }
+
+            // Notificar a la fundación
+            db.query("SELECT Correo_fundacion, id_fundacion FROM fundacion WHERE id_fundacion = ?", [id_fundacion], (errF, fundRes) => {
+                if (!errF && fundRes.length > 0) {
+                    const correoFundacion = fundRes[0].Correo_fundacion;
+
+                    db.query("SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))", [correoFundacion], (errUsrF, usrFRes) => {
+                        if (!errUsrF && usrFRes.length > 0) {
+                            const idDestinoFundacion = usrFRes[0].id_usuarios;
+                            const mensajeNotif = `@${nombreUsuario} ha realizado una nueva donación (${tipo_donacion}). ¡Revísala para gestionarla!`;
+
+                            db.query(
+                                "INSERT INTO notificaciones (id_usuario_destino, id_usuario_origen, tipo, mensaje) VALUES (?, ?, 'nueva_donacion', ?)",
+                                [idDestinoFundacion, id_usuario, mensajeNotif]
+                            );
+                        }
+                    });
+                }
+            });
+
+            res.status(201).json({ mensaje: "¡Donación registrada con éxito!", id_donacion: result.insertId });
+        });
+    });
+});
+
+// 2. Obtener las donaciones de una fundación (con filtros por estado)
+app.get('/api/donaciones/fundacion', (req, res) => {
+    const { correo_fundacion, estado } = req.query;
+
+    if (!correo_fundacion) {
+        return res.status(400).json({ error: "Se requiere el correo de la fundación." });
+    }
+
+    db.query("SELECT id_fundacion FROM fundacion WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(?))", [correo_fundacion], (errF, fundRes) => {
+        if (errF || fundRes.length === 0) {
+            return res.status(404).json({ error: "Fundación no encontrada." });
+        }
+
+        const id_fundacion = fundRes[0].id_fundacion;
+
+        let query = `
+            SELECT d.*, u.nombre_usuario AS nombre_donante, u.foto_perfil AS foto_donante, u.Telefono_usuario AS telefono_donante
+            FROM donaciones d
+            JOIN usuarios u ON d.id_usuario = u.id_usuarios
+            WHERE d.id_fundacion = ?
+        `;
+        let params = [id_fundacion];
+
+        if (estado && estado !== 'todas') {
+            query += ` AND d.estado = ?`;
+            params.push(estado);
+        }
+
+        query += ` ORDER BY d.fecha_donacion DESC`;
+
+        db.query(query, params, (errDon, donaciones) => {
+            if (errDon) {
+                console.error("❌ Error al obtener donaciones:", errDon.message);
+                return res.status(500).json({ error: "Error al consultar las donaciones." });
+            }
+
+            res.json(donaciones);
+        });
+    });
+});
+
+// 3. Actualizar el estado de la donación (ej: pasar de 'pendiente' a 'recogida')
+app.put('/api/donaciones/:id/estado', (req, res) => {
+    const idDonacion = req.params.id;
+    const { estado } = req.body;
+
+    if (!estado) {
+        return res.status(400).json({ error: "El estado es requerido." });
+    }
+
+    const query = "UPDATE donaciones SET estado = ? WHERE id_donacion = ?";
+    db.query(query, [estado, idDonacion], (err, result) => {
+        if (err || result.affectedRows === 0) {
+            return res.status(500).json({ error: "Error al actualizar el estado de la donación." });
+        }
+
+        res.json({ mensaje: "Estado de la donación actualizado con éxito." });
+    });
+});
+// ==========================================
 // INICIALIZACIÓN DEL SERVIDOR
 // ==========================================
 const PORT = process.env.PORT || 3000;
