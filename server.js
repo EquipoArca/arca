@@ -6,8 +6,6 @@ const path = require('path');
 const multer = require('multer');
 const { initializeApp, cert } = require('firebase-admin/app');
 const { getAuth } = require('firebase-admin/auth');
-const { Resend } = require('resend');
-const resend = new Resend(process.env.RESEND_API_KEY);
 const fs = require('fs');
 
 // ==========================================
@@ -99,27 +97,28 @@ app.post('/registrar-usuario', (req, res) => {
     });
 });
 
-app.post('/enviar-codigo-otp', async (req, res) => {
+app.post('/enviar-codigo-otp', (req, res) => {
     const { correo } = req.body;
-    if (!correo) return res.status(400).json({ error: "El correo es requerido." });
-
-    const codigo = Math.floor(1000 + Math.random() * 9000).toString();
-    codigosOTP[correo] = { codigo: codigo, expira: Date.now() + 2 * 60 * 1000 };
-
-    try {
-        const { error } = await resend.emails.send({
-            from: 'ARCA <onboarding@resend.dev>',
-            to: [correo],
-            subject: 'Código de verificación - ARCA',
-            html: `<h2>Tu código de verificación es: ${codigo}</h2>`
-        });
-        if (error) throw error;
-        res.json({ exito: true, mensaje: "Código enviado correctamente." });
-    } catch (err) {
-        console.error("Error enviando correo:", err);
-        res.status(500).json({ error: "No se pudo enviar el correo de verificación." });
+    if (!correo) {
+        return res.status(400).json({ error: "El correo es requerido." });
     }
-}); 
+
+    // Generar código aleatorio de 4 dígitos
+    const codigo = Math.floor(1000 + Math.random() * 9000).toString();
+    
+    // Guardar en memoria con 2 minutos de validez
+    codigosOTP[correo] = { 
+        codigo: codigo, 
+        expira: Date.now() + 2 * 60 * 1000 
+    };
+
+    // Responder al frontend con el código para que EmailJS lo envíe
+    res.json({ 
+        exito: true, 
+        codigo: codigo, 
+        mensaje: "Código OTP generado correctamente." 
+    });
+});
 
 app.post('/verificar-otp', (req, res) => {
     const { correo, codigo } = req.body;
@@ -2364,67 +2363,38 @@ app.get('/api/novedades', (req, res) => {
 // ==========================================
 // MÓDULO DE SOPORTE TÉCNICO (REPORTE DE ERRORES)
 // ==========================================
-const uploadSoporte = multer({ dest: 'uploads/' });
+const uploadSoporte = multer({ 
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 5 * 1024 * 1024 } // Límite de 5MB por imagen
+});
 
-app.post('/api/enviar-reporte-error', uploadSoporte.single('imagen_error'), async (req, res) => {
+app.post('/api/enviar-reporte-error', uploadSoporte.single('imagen_error'), (req, res) => {
     try {
         const { lugar_error, descripcion, nombre_usuario, correo_usuario } = req.body;
-        const archivoAdjunto = req.file;
 
-        const adjuntos = archivoAdjunto ? [
-            {
-                filename: archivoAdjunto.originalname,
-                content: await fs.promises.readFile(archivoAdjunto.path)
-            }
-        ] : [];
-
-        const { data, error } = await resend.emails.send({
-            from: 'Soporte Técnico ARCA <onboarding@resend.dev>',
-            to: ['jermybearmy02@gmail.com'],
-            subject: '🚨 Nuevo Reporte de Error Técnico - ARCA',
-            html: `
-                <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #fff0f7; border-radius: 12px; color: #442c20;">
-                    <h2 style="color: #e57373;">Se ha recibido un nuevo reporte de error</h2>
-                    <p><strong>Lugar del error:</strong> ${lugar_error || 'No especificado'}</p>
-                    <p><strong>Descripción:</strong> ${descripcion || 'Sin descripción'}</p>
-                    <hr style="border: 1px solid #ffd6d8;">
-                    <p><strong>Datos del usuario:</strong></p>
-                    <ul>
-                        <li>Nombre: ${nombre_usuario || 'No proporcionado'}</li>
-                        <li>Correo: ${correo_usuario || 'No proporcionado'}</li>
-                    </ul>
-                </div>
-            `,
-            attachments: adjuntos
-        });
-
-        if (error) {
-            console.error('❌ Error de Resend:', error);
-            return res.status(500).json({
-                exito: false,
-                error: 'No se pudo enviar el reporte.'
-            });
+        if (!descripcion) {
+            return res.status(400).json({ exito: false, error: "La descripción del error es requerida." });
         }
 
+        console.log("🚨 Nuevo reporte de error recibido en el servidor:");
+        console.log(`- Usuario: ${nombre_usuario || 'Anónimo'} (${correo_usuario || 'Sin correo'})`);
+        console.log(`- Lugar del error: ${lugar_error || 'No especificado'}`);
+        console.log(`- Descripción: ${descripcion}`);
+
+        // Respuesta exitosa al cliente
         return res.status(200).json({
             exito: true,
-            mensaje: 'Reporte enviado con éxito.'
+            mensaje: "Reporte de error recibido y registrado con éxito."
         });
 
     } catch (error) {
-        console.error('❌ Error al enviar el correo de reporte:', error);
+        console.error("❌ Error al procesar el reporte técnico:", error);
         return res.status(500).json({
             exito: false,
-            error: 'No se pudo enviar el reporte.'
+            error: "Hubo un problema al procesar el reporte de error en el servidor."
         });
-
-    } finally {
-        if (req.file?.path) {
-            await fs.promises.unlink(req.file.path).catch(() => {});
-        }
     }
 });
-
 // ==========================================
 // INICIALIZACIÓN DEL SERVIDOR
 // ==========================================
