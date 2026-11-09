@@ -2448,6 +2448,7 @@ app.post('/api/enviar-reporte-error', uploadSoporte.single('imagen_error'), asyn
         // Comprobar si Resend devolvió un error
         if (error) {
             console.error('❌ Error de Resend:', error);
+
             return res.status(500).json({
                 exito: false,
                 error: 'No se pudo enviar el reporte.'
@@ -2456,7 +2457,7 @@ app.post('/api/enviar-reporte-error', uploadSoporte.single('imagen_error'), asyn
 
         console.log('✅ Reporte enviado mediante Resend:', data);
 
-        res.status(200).json({
+        return res.status(200).json({
             exito: true,
             mensaje: 'Reporte enviado con éxito.'
         });
@@ -2464,14 +2465,24 @@ app.post('/api/enviar-reporte-error', uploadSoporte.single('imagen_error'), asyn
     } catch (error) {
         console.error('❌ Error al enviar el correo de reporte:', error);
 
-        res.status(500).json({
+        return res.status(500).json({
             exito: false,
             error: 'No se pudo enviar el reporte.'
         });
+
     } finally {
         // Eliminar la fotografía temporal después de procesarla
         if (req.file?.path) {
             await fs.promises.unlink(req.file.path).catch(() => {});
         }
     }
+});
+
+// ==========================================
+// INICIALIZACIÓN DEL SERVIDOR
+// ==========================================
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+    console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
