@@ -7,6 +7,9 @@ const path = require('path');
 const multer = require('multer');
 const { initializeApp, cert } = require('firebase-admin/app');
 const { getAuth } = require('firebase-admin/auth');
+const { Resend } = require('resend');
+const resend = new Resend(process.env.RESEND_API_KEY);
+const fs = require('fs');
 
 // ==========================================
 // INICIALIZACIÓN DE FIREBASE CON ARCHIVO LOCAL
@@ -529,14 +532,18 @@ app.delete('/api/eliminar-adoptante/:id_usuarios', (req, res) => {
 // ==========================================
 // REPORTES Y ESTADÍSTICAS
 // ==========================================
-app.post('/crear-reporte', (req, res) => {
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 5 * 1024 * 1024 }
+});
+
+app.post('/crear-reporte', upload.array('fotos_reporte[]', 3), (req, res) => {
     const {
         id_tipo_reporte,
         Descripcion,
         Ubicacion,
         telefono_contacto,
         correo_contacto,
-        img_reporte,
         correo_usuario
     } = req.body;
 
@@ -544,13 +551,19 @@ app.post('/crear-reporte', (req, res) => {
         return res.status(400).json({ error: "Faltan campos obligatorios para el reporte." });
     }
 
-    db.query("SELECT id_usuarios FROM usuarios WHERE correo_usuario = ?", [correo_usuario], (err, results) => {
+let imagenesArray = [];
+    if (req.files && req.files.length > 0) {
+        imagenesArray = req.files.map(file => `data:${file.mimetype};base64,${file.buffer.toString('base64')}`);
+    };
+    const img_reporte = imagenesArray.length > 0 ? JSON.stringify(imagenesArray) : null;
+
+        db.query("SELECT id_usuarios FROM usuarios WHERE correo_usuario = ?", [correo_usuario], (err, results) => {
         if (err || results.length === 0) {
             console.error("Error al buscar ID del usuario:", err);
             return res.status(500).json({ error: "No se pudo asociar el usuario al reporte." });
         }
 
-        const id_usuarios = results[0].id_usuarios;
+       const id_usuarios = results[0].id_usuarios;
         const Fecha_reporte = new Date().toISOString().split('T')[0];
 
         const queryVerificarDuplicado = `
@@ -577,7 +590,7 @@ app.post('/crear-reporte', (req, res) => {
                 telefono_contacto || null,
                 correo_contacto || null,
                 Fecha_reporte,
-                img_reporte || null,
+                img_reporte, 
                 id_usuarios
             ];
 
@@ -1786,10 +1799,10 @@ app.get('/api/ficha-adoptante-publica/:username', (req, res) => {
     });
 });
 
+
 // ==========================================
 // MÓDULO DE REGISTRO DE FUNDACIONES
 // ==========================================
-const upload = multer({ storage: multer.memoryStorage() });
 
 app.post('/api/registrar-fundacion', express.json({ limit: '20mb' }), async (req, res) => {
     const {
@@ -2391,10 +2404,85 @@ app.get('/api/novedades', (req, res) => {
         res.json(rows);
     });
 });
+
+// ==========================================
+// MÓDULO DE SOPORTE TÉCNICO (REPORTE DE ERRORES)
+// ==========================================
+
+const uploadSoporte = multer({ dest: 'uploads/' });
+
+app.post('/api/enviar-reporte-error', uploadSoporte.single('imagen_error'), async (req, res) => {
+    try {
+        const { lugar_error, descripcion, nombre_usuario, correo_usuario } = req.body;
+        const archivoAdjunto = req.file;
+
+        // Preparar la fotografía si el usuario adjuntó una
+        const adjuntos = archivoAdjunto ? [
+            {
+                filename: archivoAdjunto.originalname,
+                content: await fs.promises.readFile(archivoAdjunto.path)
+            }
+        ] : [];
+
+        // Enviar el correo mediante Resend
+        const { data, error } = await resend.emails.send({
+            from: 'Soporte Técnico ARCA <onboarding@resend.dev>',
+            to: ['jermybearmy02@gmail.com'],
+            subject: '🚨 Nuevo Reporte de Error Técnico - ARCA',
+            html: `
+                <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #fff0f7; border-radius: 12px; color: #442c20;">
+                    <h2 style="color: #e57373;">Se ha recibido un nuevo reporte de error</h2>
+                    <p><strong>Lugar del error:</strong> ${lugar_error || 'No especificado'}</p>
+                    <p><strong>Descripción:</strong> ${descripcion || 'Sin descripción'}</p>
+                    <hr style="border: 1px solid #ffd6d8;">
+                    <p><strong>Datos del usuario:</strong></p>
+                    <ul>
+                        <li>Nombre: ${nombre_usuario || 'No proporcionado'}</li>
+                        <li>Correo: ${correo_usuario || 'No proporcionado'}</li>
+                    </ul>
+                </div>
+            `,
+            attachments: adjuntos
+        });
+
+        // Comprobar si Resend devolvió un error
+        if (error) {
+            console.error('❌ Error de Resend:', error);
+
+            return res.status(500).json({
+                exito: false,
+                error: 'No se pudo enviar el reporte.'
+            });
+        }
+
+        console.log('✅ Reporte enviado mediante Resend:', data);
+
+        return res.status(200).json({
+            exito: true,
+            mensaje: 'Reporte enviado con éxito.'
+        });
+
+    } catch (error) {
+        console.error('❌ Error al enviar el correo de reporte:', error);
+
+        return res.status(500).json({
+            exito: false,
+            error: 'No se pudo enviar el reporte.'
+        });
+
+    } finally {
+        // Eliminar la fotografía temporal después de procesarla
+        if (req.file?.path) {
+            await fs.promises.unlink(req.file.path).catch(() => {});
+        }
+    }
+});
+
 // ==========================================
 // INICIALIZACIÓN DEL SERVIDOR
 // ==========================================
 const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => {
-    console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
+    console.log(`Servidor corriendo en el puerto ${PORT}`);
 });

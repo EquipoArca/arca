@@ -4,61 +4,82 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Perfil de Adoptante - ARCA</title>
+    <!-- Google Fonts Itim -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
     <!-- Iconos de FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f9f9f9;
+            font-family: 'Itim', cursive, sans-serif;
+            background-color: #fff0f7;
             margin: 0;
             padding: 20px;
-            color: #333;
+            color: #442c20;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
         }
         .container-perfil {
+            width: 100%;
             max-width: 700px;
             margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
-        /* Estilos de la tarjeta */
+        /* Estilos de la tarjeta de la ficha */
         .ficha-adoptante-tarjeta {
-            background: #fff;
-            border-radius: 16px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            padding: 25px;
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(14px);
+            border: 2px dashed rgba(229, 115, 115, 0.5);
+            border-radius: 38px;
+            padding: 35px;
             margin-bottom: 20px;
+            box-shadow: 0 20px 45px rgba(92, 64, 51, 0.08);
             display: none; /* Se oculta por defecto hasta cargar datos */
+            width: 100%;
+            box-sizing: border-box;
         }
         .ficha-header {
-            border-bottom: 2px solid #f1f1f1;
+            border-bottom: 2px solid rgba(229, 115, 115, 0.2);
             padding-bottom: 15px;
             margin-bottom: 20px;
         }
         .ficha-header h2 {
             color: #e57373;
             margin: 0 0 10px 0;
-            font-size: 1.5rem;
+            font-size: 1.6rem;
+            font-weight: 400;
         }
         .ficha-header h3 {
             margin: 0 0 5px 0;
-            color: #222;
+            color: #442c20;
+            font-weight: 500;
         }
         .ficha-header p {
             margin: 0;
             color: #666;
-            font-size: 0.95rem;
+            font-size: 1rem;
         }
         .ficha-seccion {
             margin-bottom: 20px;
         }
         .ficha-seccion h4 {
-            color: #444;
+            color: #442c20;
             margin-bottom: 10px;
             border-left: 4px solid #e57373;
             padding-left: 8px;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
+            font-weight: 400;
         }
         .ficha-item {
             margin-bottom: 8px;
-            font-size: 0.95rem;
+            font-size: 1rem;
             color: #555;
         }
         /* Botones de acción */
@@ -66,43 +87,96 @@
             display: flex;
             gap: 12px;
             justify-content: flex-end;
+            width: 100%;
         }
         .btn-editar, .btn-volver, .btn-crear {
-            padding: 10px 20px;
-            border-radius: 8px;
-            border: none;
-            font-weight: bold;
+            padding: 10px 25px;
+            border-radius: 25px;
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            font-family: 'Itim', cursive, sans-serif;
+            font-size: 1.1rem;
+            font-weight: 400;
             cursor: pointer;
             text-decoration: none;
-            display: inline-block;
-            text-align: center;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(229, 115, 115, 0.15);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         .btn-editar {
-            background-color: #e57373;
+            background-color: rgba(229, 115, 115, 0.85);
             color: #fff;
         }
         .btn-editar:hover {
-            background-color: #d35f5f;
+            transform: scale(1.05) translateY(-2px);
+            background-color: #e57373;
         }
         .btn-volver {
-            background-color: #ccc;
-            color: #333;
+            background-color: rgba(230, 230, 230, 0.85);
+            color: #442c20;
         }
         .btn-volver:hover {
-            background-color: #b3b3b3;
+            transform: scale(1.05) translateY(-2px);
+            background-color: #d5d5d5;
         }
         .btn-crear {
-            background-color: #fac6bd;
-            color: #000000;
+            background-color: rgba(251, 194, 196, 0.85);
+            color: #442c20;
         }
+        .btn-crear:hover {
+            transform: scale(1.05) translateY(-2px);
+            background-color: rgba(251, 194, 196, 1);
+        }
+
+        /* Diseño centrado y hegemónico para el aviso de sin perfil */
         #sin-perfil {
-            align-items: center;
-            background: #fdecec;
-            padding: 30px;
-            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(14px);
+            border: 2px dashed rgba(229, 115, 115, 0.5);
+            border-radius: 38px;
+            padding: 50px 30px;
             text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            box-shadow: 0 20px 45px rgba(92, 64, 51, 0.08);
             display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .sin-perfil-icono {
+            width: 70px;
+            height: 70px;
+            background-color: rgba(255, 214, 216, 0.85);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #e57373;
+            font-size: 2rem;
+            box-shadow: 0 6px 15px rgba(229, 115, 115, 0.2);
+            margin-bottom: 5px;
+        }
+        .sin-perfil-texto {
+            font-size: 1.4rem;
+            color: #442c20;
+            margin: 0;
+            font-weight: 400;
+        }
+        .sin-perfil-subtexto {
+            font-size: 1.05rem;
+            color: #666;
+            margin: 0 0 10px 0;
+            max-width: 450px;
+            line-height: 1.4;
+        }
+        .sin-perfil-botones {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
         }
     </style>
 </head>
@@ -144,22 +218,31 @@
 
             <div class="ficha-seccion">
                 <h4>Motivación de Adopción</h4>
-                <p class="ficha-item" id="ficha-motivacion" style="font-style: italic; background: #fff5f5; padding: 12px; border-radius: 12px;"></p>
+                <p class="ficha-item" id="ficha-motivacion" style="font-style: italic; background: rgba(255, 238, 239, 0.5); padding: 12px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.8);"></p>
             </div>
         </div>
 
-        <!-- Mensaje si no tiene perfil creado -->
+        <!-- Mensaje mejorado y perfectamente centrado si no tiene perfil creado -->
         <div id="sin-perfil">
-            <p><i class="fa-solid fa-triangle-exclamation" style="color: #f0ad4e; font-size: 24px;"></i></p>
-            <p><strong>Aún no has creado tu perfil de adoptante.</strong></p>
-            <a href="formulario_adoptante.html" class="btn-crear">Crear Perfil de Adoptante</a>
-            <button onclick="window.location.href='perfil_usuario.html'" class="btn-volver" style="margin-left: 10px;">Volver</button>
+            <div class="sin-perfil-icono">
+                <i class="fa-solid fa-heart-circle-exclamation"></i>
+            </div>
+            <h3 class="sin-perfil-texto">¡Aún no has creado tu perfil de adoptante!</h3>
+            <p class="sin-perfil-subtexto">Crea tu ficha para poder postularte a las adopciones y conectar de forma directa con los refugios y fundaciones.</p>
+            <div class="sin-perfil-botones">
+                <a href="formulario_adoptante.html" class="btn-crear">
+                    <i class="fa-solid fa-plus-circle"></i> Crear Perfil de Adoptante
+                </a>
+                <button onclick="window.location.href='perfil_usuario.html'" class="btn-volver">
+                    <i class="fa-solid fa-arrow-left"></i> Volver
+                </button>
+            </div>
         </div>
 
         <!-- Botones de control si la ficha SÍ existe -->
         <div class="acciones-perfil" id="acciones-perfil" style="display: none;">
             <button onclick="irAEditar()" class="btn-editar"><i class="fa-solid fa-pen-to-square"></i> Editar Perfil</button>
-            <button onclick="eliminarPerfilAdoptante()" class="btn-eliminar" style="background-color: #ff5252; color: white; padding: 10px 20px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer;"><i class="fa-solid fa-trash"></i> Eliminar Perfil</button>
+            <button onclick="eliminarPerfilAdoptante()" class="btn-editar" style="background-color: rgba(255, 82, 82, 0.85);"><i class="fa-solid fa-trash"></i> Eliminar Perfil</button>
             <button onclick="window.location.href='perfil_usuario.html'" class="btn-volver"><i class="fa-solid fa-arrow-left"></i> Volver</button>
         </div>
 
@@ -225,13 +308,13 @@
                 } else {
                     document.getElementById('contenedor-ficha').style.display = 'none';
                     document.getElementById('acciones-perfil').style.display = 'none';
-                    document.getElementById('sin-perfil').style.display = 'block';
+                    document.getElementById('sin-perfil').style.display = 'flex'; // Usamos flex para centrar los elementos correctamente
                 }
 
             } catch (error) {
                 console.error("Error al cargar la ficha:", error);
                 document.getElementById('contenedor-ficha').style.display = 'none';
-                document.getElementById('sin-perfil').style.display = 'block';
+                document.getElementById('sin-perfil').style.display = 'flex';
             }
         });
     });

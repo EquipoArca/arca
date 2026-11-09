@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preguntas Frecuentes - ARCA</title>
+    <link rel="stylesheet" href="style_home.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="dark-mode.css">
+    <script>
+    if (localStorage.getItem("modo_oscuro") === "true") {
+        document.body.classList.add("dark-mode");
+    }
+    </script>
+    <style>
+        body {
+            font-family: 'Itim', cursive, sans-serif;
+            background-color: #fff0f7;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .top-nav {
+            position: fixed !important;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 999 !important;
+            background-color: #ffd6d8 !important;
+        }
+
+        /* Contenido Principal */
+        .main-content-faq {
+            margin-top: 75px;
+            margin-left: 60px;
+            padding: 30px 40px 45px 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: calc(100vh - 75px);
+            box-sizing: border-box;
+        }
+
+        /* Tarjeta Contenedora Principal */
+        .card-faq-principal {
+            width: 100%;
+            max-width: 850px;
+            background-color: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(14px);
+            border: 2px dashed rgba(229, 115, 115, 0.5);
+            border-radius: 38px;
+            padding: 40px 45px;
+            box-shadow: 0 20px 45px rgba(92, 64, 51, 0.08);
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        /* Título Centrado */
+        .faq-titulo-principal {
+            font-size: 2.4rem;
+            color: #442c20;
+            font-weight: 400;
+            text-align: center;
+            margin: 0 0 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .faq-titulo-principal i {
+            color: #e57373;
+        }
+
+        /* Lista de Acordeones / Preguntas */
+        .lista-faq-estilizada {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .item-faq-acordeon {
+            background-color: rgba(234, 243, 218, 0.72);
+            backdrop-filter: blur(6px);
+            border: 2px solid rgba(190, 198, 165, 0.7);
+            border-radius: 26px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+        }
+
+        .item-faq-acordeon:hover {
+            border-color: #e57373;
+            background-color: rgba(234, 243, 218, 0.95);
+        }
+
+        .faq-pregunta-btn {
+            width: 100%;
+            background: transparent;
+            border: none;
+            padding: 18px 24px;
+            font-family: 'Itim', cursive, sans-serif;
+            font-size: 1.15rem;
+            color: #4a5a1c;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            text-align: left;
+            box-sizing: border-box;
+        }
+
+        .faq-pregunta-btn i {
+            color: #e57373;
+            font-size: 1.1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .faq-respuesta-contenido {
+            max-height: 0;
+            overflow: hidden;
+            padding: 0 24px;
+            font-size: 1.05rem;
+            line-height: 1.5;
+            color: #442c20;
+            text-align: justify;
+            transition: max-height 0.35s ease, padding 0.35s ease;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-top: 1px solid transparent;
+        }
+
+        /* Estado abierto del acordeon */
+        .item-faq-acordeon.activo .faq-respuesta-contenido {
+            max-height: 250px;
+            padding: 16px 24px 20px 24px;
+            border-top-color: rgba(190, 198, 165, 0.5);
+        }
+
+        .item-faq-acordeon.activo .faq-pregunta-btn i {
+            transform: rotate(180deg);
+        }
+
+        /* Contenedor Inferior para Botón Volver */
+        .faq-footer-card {
+            display: flex;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .btn-volver-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background-color: rgba(251, 194, 196, 0.85);
+            backdrop-filter: blur(8px);
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            color: #442c20;
+            padding: 10px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(229, 115, 115, 0.15);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .btn-volver-pill:hover {
+            transform: scale(1.05) translateY(-2px);
+            background-color: rgba(251, 194, 196, 1);
+            box-shadow: 0 6px 18px rgba(229, 115, 115, 0.25);
+        }
+
+        /* Barra de contacto fija inferior */
+        .footer-contacto-bar {
+            position: fixed;
+            bottom: 0;
+            left: 60px;
+            right: 0;
+            background-color: #ffd6d8e6;
+            backdrop-filter: blur(8px);
+            border-top: 1px solid rgba(0,0,0,0.1);
+            padding: 10px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 800;
+        }
+
+        .contacto-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-size: 1rem;
+            color: #000;
+        }
+
+        .contacto-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: #000;
+            font-weight: 600;
+        }
+
+        .contacto-redes {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .titulo-contactanos {
+            font-weight: 700;
+            font-size: 1rem;
+            letter-spacing: 1px;
+            color: #000;
+            text-transform: uppercase;
+        }
+
+        .redes-iconos {
+            display: flex;
+            gap: 10px;
+        }
+
+        .redes-iconos a {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: transform 0.2s ease;
+        }
+
+        .redes-iconos a:hover {
+            transform: scale(1.15);
+        }
+
+        .bg-tiktok { background-color: #000000; }
+        .bg-facebook { background-color: #1877f2; }
+        .bg-x { background-color: #000000; }
+        .bg-instagram { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
+
+        .btn-sobre-nosotros {
+            background-color: #fbc2c4;
+            color: #000;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-size: 1rem;
+            text-decoration: none;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+
+        .btn-sobre-nosotros:hover {
+            transform: scale(1.05);
+            background-color: #f9a3a6;
+        }
+
+    </style>
+</head>
+<body>
+
+  <!-- Barra de Navegación Superior -->
+  <nav class="top-nav">
+    <div class="top-left">
+        <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu"></i>
+        
+        <div class="mini-logo-circle">
+            <img src="logo.png" alt="Logo">
+        </div>
+        <span class="page-title" id="titulo-pagina">Preguntas Frecuentes</span>
+    </div>
+
+    <div class="search-bar">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="input-busqueda-nav" name="busqueda" placeholder="Busca algo" aria-label="Buscar en la aplicación">
+        <i class="fa-solid fa-microphone"></i>
+    </div>
+
+    <div class="top-right">
+        <div class="user-header-info">
+
+            <!-- 1. PERFIL Y MINI MENÚ -->
+            <div class="user-profile-menu" id="user-profile-menu">
+                <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
+                    <img src="logo.png" id="user-avatar-img" alt="Perfil">
+                </div>
+
+                <div class="mini-menu-card" id="mini-menu-card">
+                    <div class="mini-menu-header">
+                        <span id="mini-menu-username">Usuario</span>
+                    </div>
+                    
+                    <hr class="mini-menu-divider">
+                    
+                    <a href="javascript:void(0)" onclick="mostrarSeccion('configuracion')" class="mini-menu-item btn-ajustes">
+                        <i class="fa-solid fa-gear"></i>
+                        <span>Ajustes</span>
+                    </a>
+                    
+                    <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Cerrar sesión</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 2. CAMPANA DE NOTIFICACIONES -->
+            <div class="notif-circle">
+                <a href="notificaciones.html" aria-label="Notificaciones"><i class="fa-solid fa-bell"></i></a>
+            </div>
+
+        </div>
+    </div>
+  </nav>
+
+    <!-- Barra Lateral (Sidebar) -->
+    <aside class="sidebar" id="sidebar">
+        <div class="side-icons">
+            <a href="home.html" class="menu-fila">
+                <i class="fa-solid fa-house"></i>
+                <span class="menu-text">Inicio</span>
+            </a>
+            <a href="perfil_usuario.html" class="menu-fila">
+                <i class="fa-solid fa-circle-user"></i>
+                <span class="menu-text">Perfil</span>
+            </a>
+            <a href="guardados_usuario.html" class="menu-fila">
+                <i class="fa-solid fa-bookmark"></i>
+                <span class="menu-text">Guardado</span>
+            </a>
+            <a href="mapa.html" class="menu-fila">
+                <i class="fa-solid fa-location-dot"></i>
+                <span class="menu-text">Mapa</span>
+            </a>
+            <a href="configuracion.html" class="menu-fila">
+                <i class="fa-solid fa-gear"></i>
+                <span class="menu-text">Ajustes</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Contenido Principal -->
+    <main class="main-content-faq">
+        <div class="card-faq-principal">
+            
+            <h1 class="faq-titulo-principal">
+                <i class="fa-solid fa-circle-question"></i> Preguntas Frecuentes
+            </h1>
+
+            <ul class="lista-faq-estilizada">
+                
+                <!-- Pregunta 1 -->
+                <li class="item-faq-acordeon">
+                    <button class="faq-pregunta-btn" onclick="toggleAcordeon(this)">
+                        <span>¿Cómo reporto un animal?</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-respuesta-contenido">
+                        Desde la pantalla principal haz clic en el botón “Reportar” y llena el formulario con los detalles de la situación (ubicación, fotos y descripción). Tu reporte será visible para usuarios y fundaciones cercanas.
+                    </div>
+                </li>
+
+                <!-- Pregunta 2 -->
+                <li class="item-faq-acordeon">
+                    <button class="faq-pregunta-btn" onclick="toggleAcordeon(this)">
+                        <span>¿Qué pasa con los reportes que haga?</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-respuesta-contenido">
+                        Tus reportes quedan registrados en la plataforma y pueden ser visualizados por refugios y rescatistas de la zona para brindar ayuda prioritaria. Además, puedes darles seguimiento desde tu perfil.
+                    </div>
+                </li>
+
+                <!-- Pregunta 3 -->
+                <li class="item-faq-acordeon">
+                    <button class="faq-pregunta-btn" onclick="toggleAcordeon(this)">
+                        <span>¿Cómo adopto un animal?</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-respuesta-contenido">
+                        Dirígete a la sección “Adopciones”, explora los perfiles disponibles y haz clic en “Mostrar interés” en la mascota que desees. Asegúrate de tener completo tu perfil de adoptante para que la fundación se ponga en contacto contigo.
+                    </div>
+                </li>
+
+                <!-- Pregunta 4 -->
+                <li class="item-faq-acordeon">
+                    <button class="faq-pregunta-btn" onclick="toggleAcordeon(this)">
+                        <span>¿Qué puedo donar?</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-respuesta-contenido">
+                        Puedes donar dinero, alimento seco o húmedo, juguetes, medicinas, cobijas y accesorios en buen estado ingresando a la sección de donaciones y seleccionando la fundación de tu preferencia.
+                    </div>
+                </li>
+
+            </ul>
+
+            <!-- Botón de Volver Abajo -->
+            <div class="faq-footer-card">
+                <a href="soporte.html" class="btn-volver-pill">
+                    <i class="fa-solid fa-arrow-left"></i> Volver
+                </a>
+            </div>
+
+        </div>
+    </main>
+
+    
+
+    <!-- Firebase v8 Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+
+    <!-- Script principal y lógica del acordeón -->
+    <script src="script.js"></script>
+    <script>
+        function toggleAcordeon(button) {
+            const item = button.parentElement;
+            const isOpen = item.classList.contains('activo');
+            
+            // Cierra todos los demás
+            document.querySelectorAll('.item-faq-acordeon').forEach(acc => {
+                acc.classList.remove('activo');
+            });
+
+            // Si no estaba abierto, lo abre
+            if (!isOpen) {
+                item.classList.add('activo');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const btnToggleMenu = document.getElementById('btn-toggle-menu');
+            const sidebar = document.getElementById('sidebar');
+
+            if (btnToggleMenu && sidebar) {
+                btnToggleMenu.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    sidebar.classList.toggle('sidebar-abierta');
+                });
+            }
+        });
+    </script>
+
+    <!-- Motor oculto de Google Translate -->
+    <div id="google_translate_element" style="display:none;"></div>
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({ pageLanguage: 'es', autoDisplay: false }, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+    <!-- Script para aplicar el idioma guardado al cambiar de página -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('app_selected_lang');
+            if (savedLang && savedLang !== 'es') {
+                const interval = setInterval(() => {
+                    const googleCombo = document.querySelector('.goog-te-combo');
+                    if (googleCombo) {
+                        googleCombo.value = savedLang;
+                        googleCombo.dispatchEvent(new Event('change'));
+                        clearInterval(interval);
+                    }
+                }, 200);
+            }
+        });
+    </script>
+    <style>
+        .goog-te-banner-frame { display: none !important; }
+        body { top: 0 !important; }
+        .skiptranslate { display: none !important; }
+    </style>
+</body>
+</html>

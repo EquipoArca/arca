@@ -17,10 +17,10 @@
     </script>
     <style>
         body {
-            padding-top: 70px;
             font-family: 'Itim', cursive, sans-serif;
+            background-color: #fff0f7;
             margin: 0;
-            background-color: #fdf6f6;
+            overflow-x: hidden;
         }
 
         .top-nav {
@@ -32,376 +32,343 @@
             background-color: #ffd6d8 !important;
         }
 
-        /* 1. Franja Superior del Título */
-        .banner-titulo-superior {
-            width: 100%;
-            background-color: #e5e5e5;
-            border-bottom: 1.5px solid #000;
-            border-top: 1.5px solid #000;
-            padding: 8px 0;
-            text-align: center;
-            box-sizing: border-box;
-            position: relative;
-            z-index: 10;
-        }
-
-        .banner-titulo-superior h1 {
-            font-family: 'Itim', cursive, sans-serif;
-            font-size: 2.1rem;
-            font-weight: 500;
-            color: #000;
-            margin: 0;
-            display: inline-flex;
-            align-items: center;
+        .main-content-error {
+            margin-top: 75px;
+            margin-left: 60px;
+            padding: 20px 40px 45px 40px;
+            display: flex;
             justify-content: center;
-            gap: 12px;
-        }
-
-        main.main-content {
-            margin: 0 !important;
-            padding: 0 !important;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        /* 2. Contenedor del Formulario */
-        .form-error-container {
-            width: 100%;
-            max-width: 1100px;
-            margin: 15px auto 0 auto;
-            padding: 0 40px;
+            align-items: flex-start;
+            min-height: calc(100vh - 75px);
             box-sizing: border-box;
+        }
+
+        .form-error-grid {
+            display: flex;
+            gap: 40px;
+            max-width: 1100px;
+            width: 100%;
+            background: transparent;
+        }
+
+        .columna-error-izq,
+        .columna-error-der {
+            flex: 1;
             display: flex;
             flex-direction: column;
+            gap: 22px;
         }
 
-        .columnas-grid {
-            display: grid;
-            grid-template-columns: 1fr 0.8fr 1.2fr;
-            gap: 30px;
-            align-items: start;
+        .titulo-capsula-arca {
+            background-color: #ffd6d8c5;
+            backdrop-filter: blur(8px);
+            padding: 8px 22px;
+            border-radius: 26px;
+            font-size: 1.2rem;
+            color: #333;
+            font-weight: 400;
+            display: inline-block;
+            align-self: flex-start;
+            box-shadow: 0 6px 15px rgba(229, 115, 115, 0.15);
+            border-bottom: 2px solid rgba(229, 115, 115, 0.3);
         }
 
-        .columna-box {
+        .grupo-checkboxes-error {
             display: flex;
             flex-direction: column;
             gap: 12px;
         }
 
-        .columna-box h2 {
-            font-size: 1.3rem;
-            color: #000;
-            margin: 0 0 5px 0;
-            text-align: center;
-            font-weight: 500;
+        .opcion-check-error {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            user-select: none;
         }
 
-        /* Columna 1: Textarea */
-        .textarea-que-ocurrio {
+        .opcion-check-error input[type="checkbox"] {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            accent-color: #e57373;
+            border-radius: 6px;
+        }
+
+        .texto-input-falso {
+            background-color: rgba(234, 243, 218, 0.72);
+            backdrop-filter: blur(6px);
+            border: 2px solid rgba(190, 198, 165, 0.7);
+            border-radius: 22px;
+            padding: 10px 18px;
+            font-size: 1.05rem;
+            color: #4a5a1c;
+            font-weight: 400;
             width: 100%;
-            height: 130px;
-            background-color: #ffffff;
-            border: 1px solid #ccc;
-            border-radius: 12px;
-            padding: 12px;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.04), 0 6px 15px rgba(0, 0, 0, 0.03);
+            box-sizing: border-box;
+        }
+
+        .subtitulo-campo {
+            font-size: 1rem;
+            color: #555;
+            font-weight: 400;
+            margin-bottom: 6px;
+        }
+
+        .textarea-arca {
+            width: 100%;
+            height: 120px;
+            background-color: rgba(234, 243, 218, 0.72);
+            backdrop-filter: blur(6px);
+            border: 2px solid rgba(190, 198, 165, 0.7);
+            border-radius: 22px;
+            padding: 14px 18px;
             font-family: 'Itim', cursive, sans-serif;
             font-size: 1rem;
-            resize: none;
-            box-sizing: border-box;
+            color: #4a5a1c;
             outline: none;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+            resize: none;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.04), 0 6px 15px rgba(0, 0, 0, 0.03);
+            box-sizing: border-box;
+            transition: all 0.3s ease;
         }
 
-        /* Columna 2: Checkboxes */
-        .opciones-donde {
+        .textarea-arca:focus {
+            border-color: #e57373;
+            background-color: rgba(234, 243, 218, 0.92);
+            box-shadow: 0 0 15px rgba(229, 115, 115, 0.25);
+        }
+
+        .zona-drop-arca {
+            border: 2.5px dashed rgba(190, 198, 165, 0.9);
+            border-radius: 28px;
+            background-color: rgba(234, 243, 218, 0.55);
+            backdrop-filter: blur(6px);
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: 15px;
-            padding-left: 20px;
-        }
-
-        .checkbox-label {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 1.1rem;
-            cursor: pointer;
-            color: #000;
-        }
-
-        .checkbox-label input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-            accent-color: #f39295;
-            border: 1.5px solid #000;
-            border-radius: 3px;
-        }
-
-        /* Columna 3: Capturas y Datos */
-        .columna-capturas {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .upload-area {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .upload-icon-circle {
-            width: 60px;
-            height: 60px;
-            background-color: rgba(255, 255, 255, 0.6);
-            border-radius: 50%;
-            display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.6rem;
-            color: #b0b0b0;
-        }
-
-        .upload-controls {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .btn-subir-archivo {
-            background-color: #ffffff;
-            border: 1px solid #ccc;
-            border-radius: 15px;
-            padding: 4px 14px;
-            font-family: 'Itim', cursive, sans-serif;
-            font-size: 0.85rem;
-            cursor: pointer;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-            transition: background-color 0.2s ease;
-        }
-
-        .btn-subir-archivo:hover {
-            background-color: #f5f5f5;
-        }
-
-        .drag-text {
-            font-size: 0.78rem;
-            color: #333;
-            font-weight: 600;
-        }
-
-        /* Campos de Usuario */
-        .user-fields {
-            width: 100%;
-            max-width: 280px;
-            display: flex;
-            flex-direction: column;
             gap: 8px;
-            margin-top: 2px;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
 
-        .input-group-row {
+        .zona-drop-arca:hover {
+            background-color: rgba(234, 243, 218, 0.8);
+            border-color: #e57373;
+        }
+
+        .circulo-plus-upload {
+            width: 44px;
+            height: 44px;
+            background-color: #e57373;
+            border-radius: 50%;
             display: flex;
+            justify-content: center;
             align-items: center;
-            gap: 10px;
-            font-size: 0.9rem;
-            font-weight: 600;
-        }
-
-        .input-group-row i {
+            color: #ffffff;
             font-size: 1.2rem;
-            color: #000;
-            width: 20px;
-            text-align: center;
+            box-shadow: 0 6px 15px rgba(229, 115, 115, 0.35);
         }
 
-        .input-group-row input {
-            flex: 1;
-            background: transparent;
+        .btn-subir-archivo-arca {
+            background-color: #fbc2c4;
             border: none;
-            border-bottom: 1px solid #777;
-            font-family: 'Itim', cursive, sans-serif;
-            font-size: 0.9rem;
-            padding: 2px 5px;
-            outline: none;
-        }
-
-        .info-nota {
-            font-size: 0.72rem;
-            color: #555;
-            text-align: center;
-            line-height: 1.2;
-            max-width: 280px;
-            margin: 2px 0;
-        }
-
-        /* Botón Enviar */
-        .btn-enviar-error {
-            margin-top: 5px;
-            background-color: #e5dfc5;
-            border: 1px solid #b8b298;
-            padding: 6px 32px;
+            padding: 8px 22px;
             border-radius: 20px;
             font-family: 'Itim', cursive, sans-serif;
             font-size: 1rem;
-            font-weight: 600;
+            color: #222;
             cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            transition: transform 0.2s ease, background-color 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
         }
 
-        .btn-enviar-error:hover {
-            transform: scale(1.03);
-            background-color: #dad4b9;
-        }
-
-        /* Contenedor y Botón Volver (Asegura posición sobre el fondo de animales y separación del footer) */
-        .volver-container {
-            width: 100%;
-            display: flex;
-            justify-content: flex-start;
-            margin-top: 15px;
-            margin-bottom: 110px; /* Margen para asegurar que no toque la barra fija */
-        }
-
-        .btn-volver-atras {
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            font-size: 2.5rem;
-            color: #000;
-            transition: transform 0.2s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .btn-volver-atras:hover {
-            transform: scale(1.15);
-        }
-
-        /* Barra de contacto fija inferior */
-        .footer-contacto-bar {
-            position: fixed;
-            bottom: 0;
-            left: 60px;
-            right: 0;
-            background-color: #ffd6d8e6;
-            backdrop-filter: blur(8px);
-            border-top: 1px solid rgba(0,0,0,0.1);
-            padding: 10px 40px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            z-index: 800;
-            font-family: 'Itim', cursive, sans-serif;
-        }
-
-        .contacto-info {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            font-size: 1rem;
-            color: #000;
-        }
-
-        .contacto-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-            color: #000;
-            font-weight: 600;
-        }
-
-        .contacto-item i {
-            font-size: 1.1rem;
-        }
-
-        .contacto-redes {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .titulo-contactanos {
-            font-weight: 700;
-            font-size: 1rem;
-            letter-spacing: 1px;
-            color: #000;
-            text-transform: uppercase;
-        }
-
-        .redes-iconos {
-            display: flex;
-            gap: 10px;
-        }
-
-        .redes-iconos a {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            text-decoration: none;
-            font-size: 1rem;
-            transition: transform 0.2s ease;
-        }
-
-        .redes-iconos a:hover {
-            transform: scale(1.15);
-        }
-
-        .bg-tiktok { background-color: #000000; }
-        .bg-facebook { background-color: #1877f2; }
-        .bg-x { background-color: #000000; }
-        .bg-instagram { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
-
-        .btn-sobre-nosotros {
-            background-color: #fbc2c4;
-            color: #000;
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            padding: 8px 20px;
-            border-radius: 25px;
-            font-family: 'Itim', cursive, sans-serif;
-            font-size: 1rem;
-            text-decoration: none;
-            font-weight: 500;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            transition: transform 0.2s ease, background-color 0.2s ease;
-        }
-
-        .btn-sobre-nosotros:hover {
+        .btn-subir-archivo-arca:hover {
             transform: scale(1.05);
             background-color: #f9a3a6;
         }
 
-        @media (max-width: 850px) {
-            .columnas-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-            .banner-titulo-superior h1 {
-                font-size: 1.6rem;
-            }
-            .footer-contacto-bar {
-                left: 0;
-                flex-direction: column;
-                gap: 12px;
-                padding: 12px;
-                position: relative;
-            }
-            .volver-container {
-                margin-bottom: 30px;
-            }
+        .texto-arrastrar {
+            font-size: 0.9rem;
+            color: #444;
+            margin-top: 4px;
+            text-align: center;
+        }
+
+        .input-contacto-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-contacto-wrapper i {
+            position: absolute;
+            left: 16px;
+            color: #728452;
+            font-size: 1.1rem;
+            z-index: 2;
+        }
+
+        .input-contacto-wrapper input {
+            width: 100%;
+            padding: 10px 18px 10px 46px;
+            background-color: rgba(234, 243, 218, 0.72);
+            backdrop-filter: blur(6px);
+            border: 2px solid rgba(190, 198, 165, 0.7);
+            border-radius: 22px;
+            font-family: 'Itim', cursive, sans-serif;
+            font-size: 1rem;
+            color: #4a5a1c;
+            outline: none;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.04), 0 6px 15px rgba(0, 0, 0, 0.03);
+            box-sizing: border-box;
+        }
+
+        .info-nota-contacto {
+            font-size: 0.85rem;
+            color: #666;
+            line-height: 1.3;
+            margin-top: 4px;
+        }
+
+        .acciones-inferiores-grid {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-enviar-error-arca {
+            background-color: #fbc2c4;
+            color: #222;
+            border: none;
+            padding: 12px 38px;
+            font-family: 'Itim', cursive, sans-serif;
+            font-size: 1.2rem;
+            font-weight: 400;
+            border-radius: 26px;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(229, 115, 115, 0.2);
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .btn-enviar-error-arca:hover {
+            transform: scale(1.06) translateY(-2px);
+            background-color: #f9a3a6;
+            box-shadow: 0 12px 30px rgba(229, 115, 115, 0.35);
+        }
+
+        .btn-volver-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background-color: rgba(251, 194, 196, 0.85);
+            backdrop-filter: blur(8px);
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            color: #442c20;
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(229, 115, 115, 0.15);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .btn-volver-pill:hover {
+            transform: scale(1.05) translateY(-2px);
+            background-color: rgba(251, 194, 196, 1);
+            box-shadow: 0 6px 18px rgba(229, 115, 115, 0.25);
+        }
+
+        /* Modal / Tarjetica de Éxito Flotante */
+        .modal-exito-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-exito-overlay.activo {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .tarjeta-modal-exito {
+            background-color: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            border: 2px dashed rgba(229, 115, 115, 0.6);
+            border-radius: 32px;
+            padding: 35px 40px;
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            transform: scale(0.8);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .modal-exito-overlay.activo .tarjeta-modal-exito {
+            transform: scale(1);
+        }
+
+        .icono-exito-circulo {
+            width: 65px;
+            height: 65px;
+            background-color: #ffd6d8;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #e57373;
+            font-size: 2rem;
+            margin: 0 auto 15px auto;
+            box-shadow: 0 8px 20px rgba(229, 115, 115, 0.3);
+        }
+
+        .titulo-modal-exito {
+            font-size: 1.5rem;
+            color: #442c20;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .texto-modal-exito {
+            font-size: 1.05rem;
+            color: #555;
+            line-height: 1.5;
+            margin-bottom: 25px;
+        }
+
+        .btn-cerrar-modal {
+            background-color: #fbc2c4;
+            color: #222;
+            border: none;
+            padding: 10px 30px;
+            font-family: 'Itim', cursive, sans-serif;
+            font-size: 1.1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(229, 115, 115, 0.2);
+            transition: transform 0.2s ease;
+        }
+
+        .btn-cerrar-modal:hover {
+            transform: scale(1.05);
+            background-color: #f9a3a6;
         }
     </style>
 </head>
@@ -426,7 +393,6 @@
 
     <div class="top-right">
         <div class="user-header-info">
-
             <div class="user-profile-menu" id="user-profile-menu">
                 <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
                     <img src="logo.png" id="user-avatar-img" alt="Perfil">
@@ -436,14 +402,11 @@
                     <div class="mini-menu-header">
                         <span id="mini-menu-username">Usuario</span>
                     </div>
-                    
                     <hr class="mini-menu-divider">
-                    
                     <a href="javascript:void(0)" onclick="mostrarSeccion('configuracion')" class="mini-menu-item btn-ajustes">
                         <i class="fa-solid fa-gear"></i>
                         <span>Ajustes</span>
                     </a>
-                    
                     <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini">
                         <i class="fa-solid fa-right-from-bracket"></i>
                         <span>Cerrar sesión</span>
@@ -454,7 +417,6 @@
             <div class="notif-circle">
                 <a href="notificaciones.html" aria-label="Notificaciones"><i class="fa-solid fa-bell"></i></a>
             </div>
-
         </div>
     </div>
   </nav>
@@ -485,128 +447,445 @@
         </div>
     </aside>
 
-    <!-- Franja Superior con el Título -->
-    <div class="banner-titulo-superior">
-        <h1>Reportar un error técnico <i class="fa-solid fa-wrench"></i></h1>
-    </div>
-
     <!-- Contenido Principal -->
-    <main class="main-content">
-        <form class="form-error-container" id="form-reportar-error" onsubmit="event.preventDefault();">
+    <main class="main-content-error">
+        <form class="form-error-grid" id="form-reportar-error" enctype="multipart/form-data">
             
-            <div class="columnas-grid">
-                
-                <!-- Columna 1: ¿Qué ocurrió? -->
-                <div class="columna-box">
-                    <h2>¿Qué ocurrió?</h2>
-                    <textarea class="textarea-que-ocurrio" placeholder=""></textarea>
-                </div>
-
-                <!-- Columna 2: ¿Dónde ocurrió? -->
-                <div class="columna-box">
-                    <h2>¿Dónde ocurrió?</h2>
-                    <div class="opciones-donde">
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="lugar_error" value="reportes">
-                            <span>Reportes</span>
+            <!-- Columna Izquierda: Opciones y Descripción -->
+            <div class="columna-error-izq">
+                <div>
+                    <span class="titulo-capsula-arca">¿Dónde ocurrió el error?</span>
+                    <div class="grupo-checkboxes-error" style="margin-top: 14px;">
+                        <label class="opcion-check-error">
+                            <input type="checkbox" name="lugar_error" value="Reportes">
+                            <div class="texto-input-falso">Reportes</div>
                         </label>
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="lugar_error" value="donaciones">
-                            <span>Donaciones</span>
+                        <label class="opcion-check-error">
+                            <input type="checkbox" name="lugar_error" value="Donaciones">
+                            <div class="texto-input-falso">Donaciones</div>
                         </label>
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="lugar_error" value="perfil">
-                            <span>Perfil</span>
+                        <label class="opcion-check-error">
+                            <input type="checkbox" name="lugar_error" value="Perfil">
+                            <div class="texto-input-falso">Perfil</div>
                         </label>
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="lugar_error" value="otro">
-                            <span>Otro</span>
+                        <label class="opcion-check-error">
+                            <input type="checkbox" name="lugar_error" value="Otro">
+                            <div class="texto-input-falso">Otro</div>
                         </label>
                     </div>
                 </div>
 
-                <!-- Columna 3: ¿Tienes capturas del error? -->
-                <div class="columna-box columna-capturas">
-                    <h2>¿Tienes capturas del error?</h2>
-                    
-                    <div class="upload-area">
-                        <div class="upload-icon-circle">
-                            <i class="fa-regular fa-image"></i>
-                        </div>
-                        <div class="upload-controls">
-                            <button type="button" class="btn-subir-archivo" onclick="document.getElementById('file-input').click()">Sube un archivo</button>
-                            <input type="file" id="file-input" style="display: none;" accept="image/*">
-                            <span class="drag-text">O arrastra una imagen aquí</span>
-                        </div>
-                    </div>
+                <div>
+                    <p class="subtitulo-campo">Descripción del problema (lo más detalladamente posible):</p>
+                    <textarea class="textarea-arca" id="descripcion-error" placeholder="Cuéntanos qué estabas haciendo cuando surgió el error..."></textarea>
+                </div>
+            </div>
 
-                    <div class="user-fields">
-                        <div class="input-group-row">
+            <!-- Columna Derecha: Fotos, Medio de Contacto y Botones -->
+            <div class="columna-error-der">
+                <div>
+                    <span class="titulo-capsula-arca">Agregar capturas (opcional)</span>
+                    <div class="zona-drop-arca" style="margin-top: 14px;" onclick="document.getElementById('file-input').click()">
+                        <div class="circulo-plus-upload">
+                            <i class="fa-solid fa-plus"></i>
+                        </div>
+                        <button type="button" class="btn-subir-archivo-arca">Sube un archivo</button>
+                        <input type="file" id="file-input" style="display: none;" accept="image/*">
+                        <span class="texto-arrastrar" id="nombre-archivo-seleccionado">o arrastra una imagen aquí</span>
+                    </div>
+                </div>
+
+                <div>
+                    <span class="titulo-capsula-arca">Deja un medio de contacto</span>
+                    <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 14px;">
+                        <div class="input-contacto-wrapper">
                             <i class="fa-regular fa-user"></i>
-                            <span>NOMBRE:</span>
-                            <input type="text" name="nombre_usuario">
+                            <input type="text" id="nombre-usuario-error" name="nombre_usuario" placeholder="Tu nombre completo">
                         </div>
-                        <div class="input-group-row">
+                        <div class="input-contacto-wrapper">
                             <i class="fa-regular fa-envelope"></i>
-                            <span>CORREO:</span>
-                            <input type="email" name="correo_usuario">
+                            <input type="email" id="correo-usuario-error" name="correo_usuario" placeholder="Tu correo electrónico">
                         </div>
+                        <p class="info-nota-contacto">
+                            Usaremos esta información para comunicarnos contigo en caso de requerir más detalles sobre el problema.
+                        </p>
                     </div>
-
-                    <p class="info-nota">
-                        Usaremos esta información para ponernos en contacto contigo en cuanto al error
-                    </p>
-
-                    <button type="submit" class="btn-enviar-error">ENVIAR</button>
                 </div>
 
+                <!-- Botones inferiores -->
+                <div class="acciones-inferiores-grid">
+                    <a href="soporte.html" class="btn-volver-pill">
+                        <i class="fa-solid fa-arrow-left"></i> Volver
+                    </a>
+                    <button type="submit" class="btn-enviar-error-arca">Enviar Reporte</button>
+                </div>
             </div>
-
-            <!-- Botón Volver perfectamente ubicado en la zona rosada claro -->
-            <div class="volver-container">
-                <a href="ayuda_soporte.html" class="btn-volver-atras" title="Volver">
-                    <i class="fa-regular fa-circle-left"></i>
-                </a>
-            </div>
-
         </form>
     </main>
 
-    <!-- Barra Inferior de Contacto -->
-    <footer class="footer-contacto-bar">
-        <div class="contacto-info">
-            <a href="mailto:equipoarca0@gmail.com" class="contacto-item">
-                <i class="fa-regular fa-envelope"></i>
-                <span>equipoarca0@gmail.com</span>
-            </a>
-            <a href="tel:5780318" class="contacto-item">
-                <i class="fa-solid fa-phone"></i>
-                <span>578-0318</span>
-            </a>
-        </div>
-
-        <div class="contacto-redes">
-            <span class="titulo-contactanos">CONTÁCTANOS:</span>
-            <div class="redes-iconos">
-                <a href="#" class="bg-tiktok" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a>
-                <a href="#" class="bg-facebook" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
-                <a href="#" class="bg-x" aria-label="X"><i class="fa-brands fa-x-twitter"></i></a>
-                <a href="#" class="bg-instagram" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+    <!-- Tarjetica / Modal de Éxito Flotante -->
+    <div class="modal-exito-overlay" id="modal-exito">
+        <div class="tarjeta-modal-exito">
+            <div class="icono-exito-circulo">
+                <i class="fa-solid fa-check"></i>
             </div>
+            <h3 class="titulo-modal-exito">¡Reporte enviado con éxito!</h3>
+            <p class="texto-modal-exito">
+                El reporte del error se ha enviado correctamente a <strong>arcaoficial0@gmail.com</strong>. Muy pronto el equipo de soporte se pondrá en contacto contigo a través de tu correo.
+            </p>
+            <button class="btn-cerrar-modal" onclick="cerrarModalExito()">Aceptar</button>
         </div>
+    </div>
 
-        <a href="sobre_nosotros.html" class="btn-sobre-nosotros">Sobre nosotros</a>
-    </footer>
+    
 
-    <!-- Firebase v8 Scripts -->
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
-
     <script src="script.js"></script>
     
     <script>
+
+        // ==========================================
+// ALERTA PERSONALIZADA ARCA
+// ==========================================
+function mostrarAlertaArca(titulo, mensaje, opciones = {}) {
+    const {
+        tipo = "error",
+        textoBoton = "Entendido",
+        alCerrar = null
+    } = opciones;
+
+    document.getElementById("alerta-arca-personalizada")?.remove();
+
+    if (!document.getElementById("estilos-alerta-arca")) {
+        const estilos = document.createElement("style");
+        estilos.id = "estilos-alerta-arca";
+        estilos.textContent = `
+            /* Estilos generales para error y aviso */
+            .arca-alerta-overlay {
+                position: fixed;
+                inset: 0;
+                z-index: 999999;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 20px;
+                background: rgba(40, 25, 35, 0.38);
+                backdrop-filter: blur(5px);
+                animation: arcaAparecer .22s ease;
+            }
+
+            .arca-alerta-tarjeta {
+                width: min(100%, 360px);
+                padding: 30px 25px 25px;
+                border: 2px solid #fff;
+                border-radius: 28px;
+                background: #FFF1F2;
+                box-shadow: 0 15px 45px rgba(120, 60, 80, .20);
+                text-align: center;
+                font-family: 'Itim', sans-serif;
+                animation: arcaSaltar .28s ease;
+            }
+
+            .arca-alerta-icono {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                width: 76px;
+                height: 76px;
+                margin: 0 auto 17px;
+                border: 3px solid white;
+                border-radius: 50%;
+                background: #FAD4DE;
+                font-size: 36px;
+            }
+
+            .arca-alerta-titulo {
+                margin: 0 0 10px;
+                color: #704653;
+                font-size: 25px;
+            }
+
+            .arca-alerta-mensaje {
+                margin: 0 0 23px;
+                color: #795F68;
+                font-size: 17px;
+                line-height: 1.5;
+                overflow-wrap: anywhere;
+            }
+
+           .arca-alerta-boton {
+                width: 100%;
+                padding: 12px 18px;
+                border: 0;
+                outline: none; /* <-- Añade esto */
+                border-radius: 18px;
+                background: #E985A0;
+                color: white;
+                font: inherit;
+                font-size: 17px;
+                cursor: pointer;
+                transition: transform .2s, background .2s;
+            }
+
+            .arca-alerta-boton:hover {
+                background: #D96F8D;
+                transform: translateY(-2px);
+            }
+
+            /* CSS EXCLUSIVO PARA EL TIPO "CONEXION" */
+            .custom-alert-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background-color: rgba(92, 64, 51, 0.45);
+                backdrop-filter: blur(8px);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 999999;
+                animation: arcaAparecer .22s ease;
+            }
+
+            .custom-alert-card {
+                position: relative;
+                background-color: rgba(235, 224, 223, 0.94);
+                backdrop-filter: blur(16px);
+                color: #333333;
+                padding: 32px 24px 28px 24px;
+                border-radius: 38px;
+                max-width: 380px;
+                width: 88%;
+                text-align: center;
+                box-shadow: 0 24px 50px rgba(92, 64, 51, 0.18);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                border: 2px solid rgba(255, 255, 255, 0.9);
+                font-family: 'Itim', sans-serif;
+                animation: entradaEscalonada 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            }
+
+            .alert-icon-circle {
+                width: 90px;
+                height: 90px;
+                background-color: #f7cac9;
+                border-radius: 50%;
+                border: 4px solid #ffffff;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-bottom: 20px;
+                box-shadow: 0 8px 20px rgba(247, 202, 201, 0.7);
+                animation: latidoSuave 2s ease-in-out infinite;
+            }
+
+            .alert-icon {
+                width: 44px;
+                height: 44px;
+            }
+
+            .custom-alert-title {
+                font-size: 1.25rem;
+                font-weight: 400;
+                color: #2b2b2b;
+                margin-bottom: 10px;
+                letter-spacing: 0.3px;
+            }
+
+            .custom-alert-message {
+                font-size: 0.9rem;
+                color: #666666;
+                line-height: 1.45;
+                margin-bottom: 24px;
+            }
+
+          .custom-alert-btn {
+                background-color: #ffffff;
+                color: #e57373;
+                border: 2px solid #ffffff;
+                outline: none; /* <-- Y esto aquí también */
+                border-radius: 26px;
+                padding: 12px 0;
+                width: 100%;
+                font-size: 0.95rem;
+                font-weight: 400;
+                cursor: pointer;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+                transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            }
+
+            .custom-alert-btn:hover {
+                background-color: #f9f9f9;
+                transform: scale(1.04) translateY(-2px);
+                box-shadow: 0 8px 20px rgba(229, 115, 115, 0.2);
+            }
+
+            @keyframes arcaAparecer {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+
+            @keyframes arcaSaltar {
+                from { opacity: 0; transform: scale(.92) translateY(8px); }
+                to { opacity: 1; transform: scale(1) translateY(0); }
+            }
+
+            @keyframes entradaEscalonada {
+                from { opacity: 0; transform: scale(0.92) translateY(8px); }
+                to { opacity: 1; transform: scale(1) translateY(0); }
+            }
+
+            @keyframes latidoSuave {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.05); }
+            }
+        `;
+        document.head.appendChild(estilos);
+    }
+
+    const overlay = document.createElement("div");
+    overlay.id = "alerta-arca-personalizada";
+
+    const tarjeta = document.createElement("div");
+    const icono = document.createElement("div");
+    const encabezado = document.createElement("h2");
+    const texto = document.createElement("p");
+    const boton = document.createElement("button");
+
+    if (tipo === "conexion") {
+        overlay.className = "custom-alert-overlay";
+        overlay.setAttribute("role", "alertdialog");
+        overlay.setAttribute("aria-modal", "true");
+
+        tarjeta.className = "custom-alert-card";
+
+        icono.className = "alert-icon-circle";
+        // Aquí incorporamos el icono SVG exacto con el círculo oscuro y el signo de exclamación (!)
+        icono.innerHTML = `
+            <svg class="alert-icon" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" fill="#4a4a4a"/>
+                <path d="M12 7v5" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                <circle cx="12" cy="16" r="1.2" fill="white"/>
+            </svg>
+        `;
+
+        encabezado.className = "custom-alert-title";
+        encabezado.textContent = titulo;
+
+        texto.className = "custom-alert-message";
+        texto.textContent = mensaje;
+
+        boton.type = "button";
+        boton.className = "custom-alert-btn";
+        boton.textContent = textoBoton;
+
+    } else {
+        overlay.className = "arca-alerta-overlay";
+        overlay.setAttribute("role", "alertdialog");
+        overlay.setAttribute("aria-modal", "true");
+
+        tarjeta.className = "arca-alerta-tarjeta";
+
+        const iconos = {
+            error: "♡",
+            aviso: "🌸"
+        };
+        icono.className = "arca-alerta-icono";
+        icono.textContent = iconos[tipo] || "♡";
+
+        encabezado.className = "arca-alerta-titulo";
+        encabezado.textContent = titulo;
+
+        texto.className = "arca-alerta-mensaje";
+        texto.textContent = mensaje;
+
+        boton.type = "button";
+        boton.className = "arca-alerta-boton";
+        boton.textContent = textoBoton;
+    }
+
+    boton.addEventListener("click", () => {
+        overlay.remove();
+        if (typeof alCerrar === "function") {
+            alCerrar();
+        }
+    });
+
+    tarjeta.append(icono, encabezado, texto, boton);
+    overlay.appendChild(tarjeta);
+    document.body.appendChild(overlay);
+
+    boton.focus();
+}
+        // Mostrar nombre del archivo seleccionado en el drop zone
+        const fileInput = document.getElementById('file-input');
+        const nombreArchivoSpan = document.getElementById('nombre-archivo-seleccionado');
+
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) {
+                nombreArchivoSpan.textContent = "📄 " + fileInput.files[0].name;
+            } else {
+                nombreArchivoSpan.textContent = "o arrastra una imagen aquí";
+            }
+        });
+
+        // Lógica de envío del formulario
+        document.getElementById('form-reportar-error').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData();
+            
+            // Recoger lugares seleccionados
+            const lugares = Array.from(document.querySelectorAll('input[name="lugar_error"]:checked'))
+                                 .map(cb => cb.value).join(', ');
+
+            formData.append('lugar_error', lugares || 'No especificado');
+            formData.append('descripcion', document.getElementById('descripcion-error').value);
+            formData.append('nombre_usuario', document.getElementById('nombre-usuario-error').value);
+            formData.append('correo_usuario', document.getElementById('correo-usuario-error').value);
+
+            // Adjuntar archivo si existe
+            if (fileInput.files[0]) {
+                formData.append('imagen_error', fileInput.files[0]);
+            }
+
+            try {
+                const response = await fetch('/api/enviar-reporte-error', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const resultado = await response.json();
+              if (response.ok && resultado.exito) {
+    // Mostrar la tarjetica flotante de éxito
+    document.getElementById('modal-exito').classList.add('activo');
+} else {
+    mostrarAlertaArca(
+        "Error al enviar el reporte: " + (resultado.error || "Inténtalo de nuevo."),
+        { tipo: "aviso" }
+    );
+    return;
+}
+            } catch (error) {
+                mostrarAlertaArca(
+                    "Error al enviar el reporte: " + error.message,
+                    { tipo: "aviso" }
+                );
+            }
+        });
+
+        function cerrarModalExito() {
+            document.getElementById('modal-exito').classList.remove('activo');
+            window.location.href = "soporte.html"; // O recargar la página
+        }
+
+        // Sidebar toggle
         document.addEventListener('DOMContentLoaded', () => {
             const btnToggleMenu = document.getElementById('btn-toggle-menu');
             const sidebar = document.getElementById('sidebar');

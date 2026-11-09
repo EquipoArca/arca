@@ -459,13 +459,16 @@ function mostrarSeccion(seccion) {
 }
 
 // ==========================================
-// 4. ARRASTRE Y SUBIDA DE ARCHIVOS
+// 4. ARRASTRE Y SUBIDA DE ARCHIVOS (MÁXIMO 3 FOTOS, SIN DUPLICADOS)
 // ==========================================
 const zonaArrastre = document.getElementById('zona-arrastre');
 const inputOculto = document.getElementById('input-archivo-oculto');
 const btnSubir = document.getElementById('btn-subir-archivo');
 const btnCirculo = document.getElementById('btn-circulo');
+const contenedorPreview = document.getElementById('contenedor-previsualizacion');
+const formReporte = document.getElementById('formReporteArca');
 
+const MAXIMO_FOTOS = 3;
 let archivosSeleccionados = [];
 
 function activarSelector() {
@@ -479,7 +482,8 @@ if (zonaArrastre && inputOculto && btnSubir) {
     inputOculto.addEventListener('change', (evento) => {
         const archivos = evento.target.files;
         if (archivos.length > 0) {
-            procesarArchivosMultiples(archivos);
+            procesarNuevosArchivos(archivos);
+            inputOculto.value = ''; 
         }
     });
 
@@ -502,36 +506,173 @@ if (zonaArrastre && inputOculto && btnSubir) {
     });
 
     zonaArrastre.addEventListener('drop', (evento) => {
-        const datosTransferidos = evento.dataTransfer;
-        const archivos = datosTransferidos.files;
-
+        const archivos = evento.dataTransfer.files;
         if (archivos.length > 0) {
-            const soloImagenes = Array.from(archivos).filter(arc => arc.type.startsWith('image/'));
-            if (soloImagenes.length > 0) {
-                procesarArchivosMultiples(soloImagenes);
-            } else {
-                mostrarAlertaArca(
-                "¡Formato incorrecto! 🌸",
-            "Por favor, arrasta archivos que sean únicamente imagenes.",
-            {Tipo: "aviso"});
-            }
+            procesarNuevosArchivos(archivos);
         }
     });
 }
 
-function procesarArchivosMultiples(nuevosArchivos) {
-    Array.from(nuevosArchivos).forEach(archivo => {
-        archivosSeleccionados.push(archivo);
+function procesarNuevosArchivos(nuevosArchivos) {
+    let excedioLimite = false;
+    let duplicadosIgnorados = false;
+
+    Array.from(nuevosArchivos).forEach(nuevoArchivo => {
+        if (!nuevoArchivo.type.startsWith('image/')) return;
+
+        // Validar si ya existe exactamente la misma foto para evitar duplicados
+        const yaExiste = archivosSeleccionados.some(
+            arc => arc.name === nuevoArchivo.name && 
+                   arc.size === nuevoArchivo.size && 
+                   arc.lastModified === nuevoArchivo.lastModified
+        );
+        
+        if (yaExiste) {
+            duplicadosIgnorados = true;
+            return;
+        }
+
+        // Validar si ya alcanzó el límite estricto de 3 fotos
+        if (archivosSeleccionados.length >= MAXIMO_FOTOS) {
+            excedioLimite = true;
+            return;
+        }
+
+        archivosSeleccionados.push(nuevoArchivo);
     });
 
-    const textoEstadoReal = document.querySelector('.texto-arrastra') || document.getElementById('texto-arrastra');
-    
-    if (textoEstadoReal) {
-        textoEstadoReal.innerText = `${archivosSeleccionados.length} imágenes listas para subir`;
-        textoEstadoReal.style.color = "#4caf50";
+    renderizarMiniaturas();
+
+    // Mostrar tu tarjeta de alerta personalizada de ARCA si intenta pasar de 3 fotos
+    if (excedioLimite) {
+        mostrarAlertaArca(
+            "¡Ey, no puedes hacer eso! 🌸",
+            "No puedes cargar más de tres imágenes. El máximo de imágenes que puedes adjuntar son tres.",
+            { tipo: "aviso" }
+        );
+    } else if (duplicadosIgnorados) {
+        mostrarAlertaArca(
+            "¡Fotografía repetida! 🌸",
+            "Ya habías seleccionado esta imagen antes.",
+            { tipo: "aviso" }
+        );
     }
 }
 
+function renderizarMiniaturas() {
+    const textoEstadoReal = document.querySelector('.texto-arrastra') || document.getElementById('texto-arrastra');
+    if (textoEstadoReal) {
+        if (archivosSeleccionados.length > 0) {
+            textoEstadoReal.innerText = `${archivosSeleccionados.length} de 3 fotos seleccionadas`;
+            textoEstadoReal.style.color = "#4caf50";
+        } else {
+            textoEstadoReal.innerText = "o arrastra una imagen aquí";
+            textoEstadoReal.style.color = "";
+        }
+    }
+
+    if (!contenedorPreview) return;
+    
+    contenedorPreview.innerHTML = '';
+
+    archivosSeleccionados.forEach((archivo, index) => {
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            if (!contenedorPreview) return;
+
+            const divCard = document.createElement('div');
+            divCard.style.position = 'relative';
+            divCard.style.display = 'inline-block';
+            divCard.style.margin = '8px';
+
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.style.width = '70px';
+            img.style.height = '70px';
+            img.style.objectFit = 'cover';
+            img.style.borderRadius = '8px';
+            img.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
+
+            const btnEliminar = document.createElement('button');
+            btnEliminar.type = 'button';
+            btnEliminar.innerHTML = '&times;';
+            btnEliminar.style.position = 'absolute';
+            btnEliminar.style.top = '-5px';
+            btnEliminar.style.right = '-5px';
+            btnEliminar.style.background = '#d16161';
+            btnEliminar.style.color = 'white';
+            btnEliminar.style.border = 'none';
+            btnEliminar.style.borderRadius = '50%';
+            btnEliminar.style.width = '20px';
+            btnEliminar.style.height = '20px';
+            btnEliminar.style.cursor = 'pointer';
+            btnEliminar.style.fontSize = '14px';
+            btnEliminar.style.display = 'flex';
+            btnEliminar.style.alignItems = 'center';
+            btnEliminar.style.justifyContent = 'center';
+
+            btnEliminar.onclick = () => {
+                archivosSeleccionados.splice(index, 1);
+                renderizarMiniaturas();
+            };
+
+            divCard.appendChild(img);
+            divCard.appendChild(btnEliminar);
+            contenedorPreview.appendChild(divCard);
+        };
+
+        reader.readAsDataURL(archivo);
+    });
+}
+
+// Interceptar envío del formulario para incluir las fotos validadas
+if (formReporte) {
+    formReporte.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        if (archivosSeleccionados.length > MAXIMO_FOTOS) {
+            mostrarAlertaArca(
+                "¡Ey, no puedes hacer eso! 🌸",
+                "No puedes cargar más de tres imágenes. El máximo de imágenes que puedes adjuntar son tres.",
+                { tipo: "aviso" }
+            );
+            return;
+        }
+
+        const formData = new FormData(formReporte);
+        formData.delete('fotos_reporte[]');
+
+        formData.delete('fotos_reporte[]');
+        archivosSeleccionados.forEach(file => {
+            formData.append('fotos_reporte[]', file);
+        });
+
+       try {
+            const respuesta = await fetch('/crear-reporte', {
+                method: 'POST',
+                body: formData 
+            });
+
+            const resultadoJson = await respuesta.json();
+
+        if (!respuesta.ok) throw new Error(resultadoJson.error || "Error al enviar el reporte");
+
+            mostrarAlertaArca(
+                "¡Reporte enviado! 🌸",
+                "Tu reporte se ha publicado con éxito.",
+                {
+                    tipo: "aviso",
+                    alCerrar: () => { window.location.href = "home.html"; }
+                }
+            );
+
+       } catch (error) {
+            console.error("Error al crear el reporte:", error);
+            mostrarAlertaArca("¡Error!", "No se pudo enviar el reporte: " + error.message);
+        }
+    });
+}
 // ==========================================
 // 5. CARGA DE REPORTES Y GRÁFICAS
 // ==========================================
@@ -1641,3 +1782,4 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
