@@ -2,7 +2,6 @@ require('dotenv').config();
 const mysql = require('mysql2');
 const express = require('express');
 const cors = require('cors');
-const nodemailer = require('nodemailer');
 const path = require('path');
 const multer = require('multer');
 const { initializeApp, cert } = require('firebase-admin/app');
@@ -66,20 +65,6 @@ db.connect((err) => {
     console.log('✅ Conectado exitosamente a la base de datos MySQL en Aiven!');
 });
 
-const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false,
-    auth: {
-        user: process.env.EMAIL_USER || 'arcaoficial0@gmail.com',
-        pass: process.env.EMAIL_PASS || 'darl pzpf sjgz aggx'
-    },
-    tls: {
-        rejectUnauthorized: false
-    },
-    family: 4
-});
-
 const codigosOTP = {};
 
 // ==========================================
@@ -116,39 +101,25 @@ app.post('/registrar-usuario', (req, res) => {
 
 app.post('/enviar-codigo-otp', async (req, res) => {
     const { correo } = req.body;
-
-    if (!correo) {
-        return res.status(400).json({ error: "El correo es requerido." });
-    }
+    if (!correo) return res.status(400).json({ error: "El correo es requerido." });
 
     const codigo = Math.floor(1000 + Math.random() * 9000).toString();
-   
-    codigosOTP[correo] = {
-        codigo: codigo,
-        expira: Date.now() + 2 * 60 * 1000
-    };
+    codigosOTP[correo] = { codigo: codigo, expira: Date.now() + 2 * 60 * 1000 };
 
     try {
-        await transporter.sendMail({
-            from: '"ARCA Cuidamos su vida, protegemos su alegría" <arcaoficial0@gmail.com>',
-            to: correo,
+        const { error } = await resend.emails.send({
+            from: 'ARCA <onboarding@resend.dev>',
+            to: [correo],
             subject: 'Código de verificación - ARCA',
-            html: `
-                <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #fde8e8; border-radius: 10px;">
-                    <h2 style="color: #e57373;">¡Hola! Te damos la bienvenida a ARCA</h2>
-                    <p>Tu código de verificación para completar el registro es:</p>
-                    <h1 style="font-size: 32px; letter-spacing: 5px; color: #222;">${codigo}</h1>
-                    <p style="font-size: 0.9em; color: #666;">Este código vence en 2 minutos. No lo compartas con nadie.</p>
-                </div>
-            `
+            html: `<h2>Tu código de verificación es: ${codigo}</h2>`
         });
-
+        if (error) throw error;
         res.json({ exito: true, mensaje: "Código enviado correctamente." });
-    } catch (error) {
-        console.error("Error enviando correo:", error);
+    } catch (err) {
+        console.error("Error enviando correo:", err);
         res.status(500).json({ error: "No se pudo enviar el correo de verificación." });
     }
-});
+}); 
 
 app.post('/verificar-otp', (req, res) => {
     const { correo, codigo } = req.body;
@@ -960,7 +931,6 @@ app.post('/api/crear-notificacion-recordatorio', (req, res) => {
         return res.status(400).json({ error: "Faltan datos requeridos (correo o mensaje)." });
     }
 
-    // Buscamos el id_usuarios destino usando el correo
     db.query("SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))", [correo], (err, results) => {
         if (err || results.length === 0) {
             return res.status(404).json({ error: "Usuario no encontrado en la base de datos." });
@@ -1799,7 +1769,6 @@ app.get('/api/ficha-adoptante-publica/:username', (req, res) => {
     });
 });
 
-
 // ==========================================
 // MÓDULO DE REGISTRO DE FUNDACIONES
 // ==========================================
@@ -2016,9 +1985,9 @@ app.post('/api/admin/aprobar-fundacion', async (req, res) => {
         if (err) return res.status(500).json({ exito: false, mensaje: "Error en base de datos" });
 
         try {
-            const mailOptions = {
-                from: '"ARCA - Administración" <arcaoficial0@gmail.com>',
-                to: correo_fundacion,
+            const { data, error } = await resend.emails.send({
+                from: 'ARCA - Administración <onboarding@resend.dev>',
+                to: [correo_fundacion],
                 subject: '🎉 ¡Tu cuenta en ARCA ha sido aprobada!',
                 html: `
                     <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
@@ -2027,10 +1996,16 @@ app.post('/api/admin/aprobar-fundacion', async (req, res) => {
                         <p>Ya puedes iniciar sesión en la plataforma.</p>
                     </div>
                 `
-            };
-            await transporter.sendMail(mailOptions);
+            });
+
+            if (error) {
+                console.error("❌ Error de Resend al aprobar fundación:", error);
+                return res.json({ exito: true, mensaje: "Fundación aprobada, pero falló el envío del correo." });
+            }
+
             res.json({ exito: true, mensaje: "Fundación aprobada y correo enviado." });
         } catch (mailError) {
+            console.error("❌ Error al enviar correo de aprobación:", mailError);
             res.json({ exito: true, mensaje: "Fundación aprobada, pero falló el correo." });
         }
     });
@@ -2112,7 +2087,6 @@ app.get('/api/obtener-fundacion', (req, res) => {
     });
 });
 
-// PUT: Actualizar datos de la fundación (con Redes Sociales e Imágenes en Base64)
 app.put('/api/actualizar-fundacion', express.json({ limit: '50mb' }), express.urlencoded({ limit: '50mb', extended: true }), (req, res) => {
     const {
         correo_fundacion,
@@ -2133,7 +2107,6 @@ app.put('/api/actualizar-fundacion', express.json({ limit: '50mb' }), express.ur
         return res.status(400).json({ exito: false, mensaje: "El correo es obligatorio." });
     }
 
-    // 1. Construimos la consulta base con los campos de texto
     let campos = [
         "Nombre_Comercial = ?",
         "Descripcion_mision = ?",
@@ -2158,19 +2131,16 @@ app.put('/api/actualizar-fundacion', express.json({ limit: '50mb' }), express.ur
         pagina_web || ''
     ];
 
-    // 2. Solo agregamos Foto_Portada si viene una imagen nueva
     if (foto_portada && foto_portada.startsWith('data:image')) {
         campos.push("Foto_Portada = ?");
         valores.push(foto_portada);
     }
 
-    // 3. Solo agregamos PFP_Fundacion si viene un logo nuevo
     if (pfp_fundacion && pfp_fundacion.startsWith('data:image')) {
         campos.push("PFP_Fundacion = ?");
         valores.push(pfp_fundacion);
     }
 
-    // 4. Cláusula WHERE
     const query = `UPDATE fundacion SET ${campos.join(', ')} WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(?))`;
     valores.push(correo_fundacion);
 
@@ -2187,18 +2157,16 @@ app.put('/api/actualizar-fundacion', express.json({ limit: '50mb' }), express.ur
         res.json({ exito: true, mensaje: "Perfil actualizado con éxito" });
     });
 });
+
 // ==========================================
 // MÓDULO DE CREACIÓN Y GESTIÓN DE EVENTOS
 // ==========================================
 app.post('/api/crear-evento', (req, res) => {
     const {
         nombre_evento,
-        entidad_organizadora, // Se puede guardar o usar para la entidad
         ubicacion,
         lugar,
         fecha_hora,
-        tipo_evento,          // id_tipo_evento o texto
-        animales_aplicables,  // id_animales_aplicables o texto
         detalles_adicionales,
         correo_fundacion
     } = req.body;
@@ -2207,7 +2175,6 @@ app.post('/api/crear-evento', (req, res) => {
         return res.status(400).json({ error: "Faltan campos obligatorios para registrar el evento." });
     }
 
-    // Primero buscamos el id_fundacion usando el correo
     db.query("SELECT id_fundacion FROM fundacion WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(?))", [correo_fundacion], (errF, resFund) => {
         if (errF || resFund.length === 0) {
             return res.status(404).json({ error: "No se encontró la fundación asociada a este correo." });
@@ -2235,14 +2202,12 @@ app.post('/api/crear-evento', (req, res) => {
 
             const idEventoGenerado = resultado.insertId;
 
-            // Registrar en publicaciones generales para el feed y guardados
             const queryPub = `INSERT INTO publicaciones (id_evento) VALUES (?)`;
             db.query(queryPub, [idEventoGenerado], (errPub) => {
                 if (errPub) {
                     console.error("⚠️ Advertencia: El evento se creó pero falló en publicaciones:", errPub.message);
                 }
 
-                // Enviar notificación a todos los usuarios normales
                 const mensajeNotif = `¡Nueva fundación organizó el evento '${nombre_evento}'!`;
                 const queryUsuariosNormales = `SELECT id_usuarios FROM usuarios WHERE tipo_usuario = 'usuario' OR tipo_usuario IS NULL`;
                
@@ -2267,7 +2232,6 @@ app.post('/api/crear-evento', (req, res) => {
     });
 });
 
-// Endpoint para listar los eventos en la sección de novedades
 app.get('/api/eventos', (req, res) => {
     const query = `
         SELECT e.*, f.Nombre_Comercial AS entidad_organizadora, f.PFP_Fundacion AS foto_fundacion
@@ -2283,9 +2247,7 @@ app.get('/api/eventos', (req, res) => {
         res.json(results);
     });
 });
-// ==========================================
-// ENDPOINT PARA EDITAR UN EVENTO EXISTENTE
-// ==========================================
+
 app.put('/api/eventos/:id', (req, res) => {
     const idEvento = req.params.id;
     const {
@@ -2301,7 +2263,6 @@ app.put('/api/eventos/:id', (req, res) => {
         return res.status(400).json({ error: "Faltan campos obligatorios para actualizar el evento." });
     }
 
-    // Verificamos que la fundación pertenezca al usuario que edita
     db.query("SELECT id_fundacion FROM fundacion WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(?))", [correo_fundacion], (errF, resFund) => {
         if (errF || resFund.length === 0) {
             return res.status(404).json({ error: "No se encontró la fundación asociada." });
@@ -2337,12 +2298,7 @@ app.put('/api/eventos/:id', (req, res) => {
         });
     });
 });
-// ==========================================
-// ENDPOINT GLOBAL DE NOVEDADES (FEED GENERAL)
-// ==========================================
-// ==========================================
-// ENDPOINT GLOBAL DE NOVEDADES (FEED GENERAL)
-// ==========================================
+
 app.get('/api/novedades', (req, res) => {
     const query = `
         SELECT
@@ -2408,7 +2364,6 @@ app.get('/api/novedades', (req, res) => {
 // ==========================================
 // MÓDULO DE SOPORTE TÉCNICO (REPORTE DE ERRORES)
 // ==========================================
-
 const uploadSoporte = multer({ dest: 'uploads/' });
 
 app.post('/api/enviar-reporte-error', uploadSoporte.single('imagen_error'), async (req, res) => {
@@ -2416,7 +2371,6 @@ app.post('/api/enviar-reporte-error', uploadSoporte.single('imagen_error'), asyn
         const { lugar_error, descripcion, nombre_usuario, correo_usuario } = req.body;
         const archivoAdjunto = req.file;
 
-        // Preparar la fotografía si el usuario adjuntó una
         const adjuntos = archivoAdjunto ? [
             {
                 filename: archivoAdjunto.originalname,
@@ -2424,7 +2378,6 @@ app.post('/api/enviar-reporte-error', uploadSoporte.single('imagen_error'), asyn
             }
         ] : [];
 
-        // Enviar el correo mediante Resend
         const { data, error } = await resend.emails.send({
             from: 'Soporte Técnico ARCA <onboarding@resend.dev>',
             to: ['jermybearmy02@gmail.com'],
@@ -2445,17 +2398,13 @@ app.post('/api/enviar-reporte-error', uploadSoporte.single('imagen_error'), asyn
             attachments: adjuntos
         });
 
-        // Comprobar si Resend devolvió un error
         if (error) {
             console.error('❌ Error de Resend:', error);
-
             return res.status(500).json({
                 exito: false,
                 error: 'No se pudo enviar el reporte.'
             });
         }
-
-        console.log('✅ Reporte enviado mediante Resend:', data);
 
         return res.status(200).json({
             exito: true,
@@ -2464,14 +2413,12 @@ app.post('/api/enviar-reporte-error', uploadSoporte.single('imagen_error'), asyn
 
     } catch (error) {
         console.error('❌ Error al enviar el correo de reporte:', error);
-
         return res.status(500).json({
             exito: false,
             error: 'No se pudo enviar el reporte.'
         });
 
     } finally {
-        // Eliminar la fotografía temporal después de procesarla
         if (req.file?.path) {
             await fs.promises.unlink(req.file.path).catch(() => {});
         }
