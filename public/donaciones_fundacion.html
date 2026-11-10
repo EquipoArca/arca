@@ -372,7 +372,7 @@
         </main>
     </main>
 
-    <!-- Firebase SDK -->
+<!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     
@@ -388,7 +388,8 @@
             const menu = document.getElementById('mini-menu-card');
             if (menu) menu.classList.toggle('show');
         }
-let donacionesGlobales = [];
+
+        let donacionesGlobales = [];
 
         async function cargarDonacionesFundacion() {
             const contenedor = document.getElementById('contenedor-donaciones');
@@ -401,28 +402,22 @@ let donacionesGlobales = [];
                 const res = await fetch(`/api/donaciones/fundacion?correo_fundacion=${encodeURIComponent(correo)}`);
                 if (!res.ok) throw new Error("Error al obtener donaciones");
 
-                donacionesGlobales = await res.json();
+                let listaDonaciones = await res.json();
+                donacionesGlobales = listaDonaciones; // Guardamos todas para los filtros de botones
 
                 // Verificamos si en la URL viene un id_donacion específico desde la notificación
                 const urlParams = new URLSearchParams(window.location.search);
                 const idDonacionBuscada = urlParams.get('id_donacion');
 
                 if (idDonacionBuscada) {
-                    // Filtramos inmediatamente para mostrar únicamente la donación de la notificación
-                    const donacionEspecifica = donacionesGlobales.filter(d => String(d.id_donacion) === String(idDonacionBuscada));
+                    // Filtramos estrictamente para quedarnos solo con la donación de la notificación
+                    listaDonaciones = listaDonaciones.filter(d => String(d.id_donacion) === String(idDonacionBuscada));
                     
-                    if (donacionEspecifica.length > 0) {
-                        renderizarListaDonaciones(donacionEspecifica);
-                        
-                        // Opcional: Agregamos un aviso visual discreto para indicarle a la fundación que está viendo un detalle específico
-                        const banner = document.querySelector('.banner-donaciones h1');
-                        if (banner) banner.textContent = "Detalle de Donación";
-                        return;
-                    }
+                    const banner = document.querySelector('.banner-donaciones h1');
+                    if (banner) banner.textContent = "Detalle de Donación";
                 }
 
-                // Si no viene ningún ID, mostramos la lista completa con normalidad
-                renderizarListaDonaciones(donacionesGlobales);
+                renderizarListaDonaciones(listaDonaciones);
 
             } catch (err) {
                 console.error(err);
@@ -444,7 +439,7 @@ let donacionesGlobales = [];
                 tarjeta.className = 'tarjeta-donacion';
                 tarjeta.style.animationDelay = `${index * 0.08}s`;
 
-                // Si esta tarjeta coincide con el ID de la URL, le añadimos un borde o efecto de brillo sutil para resaltarla
+                // Resaltamos con un borde y brillo especial si es la donación que vino por la URL
                 const urlParams = new URLSearchParams(window.location.search);
                 if (String(donacion.id_donacion) === String(urlParams.get('id_donacion'))) {
                     tarjeta.style.borderColor = '#e985a0';
@@ -481,6 +476,7 @@ let donacionesGlobales = [];
                 contenedor.appendChild(tarjeta);
             });
         }
+
         function filtrarDonaciones(filtro, btn) {
             document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('activo'));
             if (btn) btn.classList.add('activo');
@@ -507,25 +503,6 @@ let donacionesGlobales = [];
 
         firebase.auth().onAuthStateChanged(user => {
             if (user) cargarDonacionesFundacion();
-        });
-
-        // ==========================================
-        // FILTRAR AUTOMÁTICAMENTE SI VIENE UN ID EN LA URL
-        // ==========================================
-        document.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const idDonacionBuscada = urlParams.get('id_donacion');
-
-            if (idDonacionBuscada) {
-                setTimeout(() => {
-                    if (donacionesGlobales.length > 0) {
-                        const donacionEspecifica = donacionesGlobales.filter(d => String(d.id_donacion) === String(idDonacionBuscada));
-                        if (donacionEspecifica.length > 0) {
-                            renderizarListaDonaciones(donacionEspecifica);
-                        }
-                    }
-                }, 600);
-            }
         });
     </script>
 </body>
