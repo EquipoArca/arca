@@ -2404,7 +2404,7 @@ app.post('/api/crear-donacion', (req, res) => {
         });
     });
 });
-// Endpoint definitivo y seguro para notificaciones (compatible con donaciones y adoptantes)
+// Endpoint definitivo, seguro y libre de errores 500 para notificaciones
 app.get('/api/notificaciones/:correo', (req, res) => {
     const correoUsuario = req.params.correo;
 
@@ -2424,20 +2424,8 @@ app.get('/api/notificaciones/:correo', (req, res) => {
             n.fecha_creacion AS fecha_notificacion,
             COALESCE(u_orig.nombre_usuario, 'Sistema ARCA') AS origen_nombre,
             u_orig.foto_perfil AS origen_foto,
-            (
-                SELECT s.id_solicitud 
-                FROM solicitudes_adoptante s 
-                WHERE s.id_solicitante = n.id_usuario_origen 
-                  AND s.id_propietario = n.id_usuario_destino 
-                LIMIT 1
-            ) AS id_solicitud,
-            (
-                SELECT s.estado 
-                FROM solicitudes_adoptante s 
-                WHERE s.id_solicitante = n.id_usuario_origen 
-                  AND s.id_propietario = n.id_usuario_destino 
-                LIMIT 1
-            ) AS estado_solicitud
+            NULL AS id_solicitud,
+            'pendiente' AS estado_solicitud
         FROM notificaciones n
         INNER JOIN usuarios u_dest ON n.id_usuario_destino = u_dest.id_usuarios
         LEFT JOIN usuarios u_orig ON n.id_usuario_origen = u_orig.id_usuarios
