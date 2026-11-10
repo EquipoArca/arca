@@ -1562,14 +1562,21 @@ app.get('/api/perfil-publico/:parametro', (req, res) => {
     const parametro = decodeURIComponent(req.params.parametro).trim();
     const correoVisitante = req.query.correo_visitante;
 
+    // Si intentan consultar el Perfil del Sistema, responder no encontrado directo
+    if (parametro.toLowerCase() === 'sistema arca' || parametro.toLowerCase() === 'sistema_arca') {
+        return res.status(404).json({ error: "El perfil del sistema no es accesible como usuario." });
+    }
+
     const sql = `
         SELECT u.id_usuarios, u.nombre_usuario, u.foto_perfil, u.correo_usuario, u.Telefono_usuario
         FROM usuarios u
-        WHERE u.nombre_usuario LIKE ?
-           OR u.correo_usuario LIKE ?
+        WHERE LOWER(TRIM(u.nombre_usuario)) = LOWER(TRIM(?))
+           OR LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(?))
+           OR u.nombre_usuario LIKE ?
+        LIMIT 1
     `;
 
-    db.query(sql, [`%${parametro}%`, `%${parametro}%`], (err, results) => {
+    db.query(sql, [parametro, parametro, `%${parametro}%`], (err, results) => {
         if (err || results.length === 0) {
             return res.status(404).json({ error: "Usuario no encontrado" });
         }
