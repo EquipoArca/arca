@@ -103,16 +103,13 @@ app.post('/enviar-codigo-otp', (req, res) => {
         return res.status(400).json({ error: "El correo es requerido." });
     }
 
-    // Generar código aleatorio de 4 dígitos
     const codigo = Math.floor(1000 + Math.random() * 9000).toString();
     
-    // Guardar en memoria con 2 minutos de validez
     codigosOTP[correo] = { 
         codigo: codigo, 
         expira: Date.now() + 2 * 60 * 1000 
     };
 
-    // Responder al frontend con el código para que EmailJS lo envíe
     res.json({ 
         exito: true, 
         codigo: codigo, 
@@ -521,19 +518,19 @@ app.post('/crear-reporte', upload.array('fotos_reporte[]', 3), (req, res) => {
         return res.status(400).json({ error: "Faltan campos obligatorios para el reporte." });
     }
 
-let imagenesArray = [];
+    let imagenesArray = [];
     if (req.files && req.files.length > 0) {
         imagenesArray = req.files.map(file => `data:${file.mimetype};base64,${file.buffer.toString('base64')}`);
-    };
+    }
     const img_reporte = imagenesArray.length > 0 ? JSON.stringify(imagenesArray) : null;
 
-        db.query("SELECT id_usuarios FROM usuarios WHERE correo_usuario = ?", [correo_usuario], (err, results) => {
+    db.query("SELECT id_usuarios FROM usuarios WHERE correo_usuario = ?", [correo_usuario], (err, results) => {
         if (err || results.length === 0) {
             console.error("Error al buscar ID del usuario:", err);
             return res.status(500).json({ error: "No se pudo asociar el usuario al reporte." });
         }
 
-       const id_usuarios = results[0].id_usuarios;
+        const id_usuarios = results[0].id_usuarios;
         const Fecha_reporte = new Date().toISOString().split('T')[0];
 
         const queryVerificarDuplicado = `
@@ -920,9 +917,7 @@ app.get('/api/guardar-publicacion/:correo', (req, res) => {
         res.json(results);
     });
 });
-// ==========================================
-// ENDPOINT PARA CREAR RECORDATORIOS / NOTIFICACIONES
-// ==========================================
+
 app.post('/api/crear-notificacion-recordatorio', (req, res) => {
     const { correo, mensaje } = req.body;
 
@@ -952,6 +947,7 @@ app.post('/api/crear-notificacion-recordatorio', (req, res) => {
         });
     });
 });
+
 app.post('/api/quitar-guardado', (req, res) => {
     const { correo, id_publicacion } = req.body;
 
@@ -1132,6 +1128,7 @@ app.get('/api/publicaciones-globales', (req, res) => {
         res.json(rows);
     });
 });
+
 app.delete('/api/adopciones/:id', (req, res) => {
     const idAdopcion = req.params.id;
 
@@ -1672,37 +1669,6 @@ app.post('/api/solicitar-ver-adoptante', (req, res) => {
     });
 });
 
-// Buscar la cuenta de usuario vinculada a la fundación usando directamente su correo registrado
-// Buscar la cuenta de usuario vinculada a la fundación usando directamente su correo registrado
-            const queryUsuarioFundacion = `
-                SELECT id_usuarios 
-                FROM usuarios 
-                WHERE LOWER(TRIM(correo_usuario)) = (
-                    SELECT LOWER(TRIM(Correo_fundacion)) 
-                    FROM fundacion 
-                    WHERE id_fundacion = ?
-                )
-            `;
-
-            db.query(queryUsuarioFundacion, [id_fundacion], (errF, fundRes) => {
-                if (errF || fundRes.length === 0) {
-                    console.error("⚠️ Donación guardada, pero no se encontró la cuenta de usuario de la fundación ID:", id_fundacion);
-                } else {
-                    const idDestinoFundacion = fundRes[0].id_usuarios;
-                    const mensajeNotif = `@${nombreDonante} ha realizado una nueva donación de (${tipo_donacion}). ¡Ingresa a tu panel para gestionarla!`;
-
-                    // Guardar la notificación interna en la base de datos de ARCA
-                    const queryNotif = `
-                        INSERT INTO notificaciones (id_usuario_destino, id_usuario_origen, tipo, mensaje)
-                        VALUES (?, ?, 'nueva_donacion', ?)
-                    `;
-
-                    db.query(queryNotif, [idDestinoFundacion, id_usuario_donante, mensajeNotif], (errN) => {
-                        if (errN) console.error("❌ Error al insertar notificación interna:", errN.message);
-                        else console.log("✅ ¡Notificación de donación guardada con éxito en la cuenta de la fundación!");
-                    });
-                }
-            });
 app.post('/api/responder-solicitud-adoptante', (req, res) => {
     const { id_solicitud, accion, correo_propietario } = req.body;
     const nuevoEstado = accion === 'aceptar' ? 'aceptada' : 'rechazada';
@@ -1990,30 +1956,7 @@ app.post('/api/admin/aprobar-fundacion', async (req, res) => {
     db.query(queryUpdate, [id_fundacion], async (err) => {
         if (err) return res.status(500).json({ exito: false, mensaje: "Error en base de datos" });
 
-        try {
-            const { data, error } = await resend.emails.send({
-                from: 'ARCA - Administración <onboarding@resend.dev>',
-                to: [correo_fundacion],
-                subject: '🎉 ¡Tu cuenta en ARCA ha sido aprobada!',
-                html: `
-                    <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
-                        <h2 style="color: #e57373;">¡Hola, ${nombre_comercial || 'Fundación'}!</h2>
-                        <p>Tu solicitud ha sido revisada y <strong>aprobada</strong> por la administración de ARCA.</p>
-                        <p>Ya puedes iniciar sesión en la plataforma.</p>
-                    </div>
-                `
-            });
-
-            if (error) {
-                console.error("❌ Error de Resend al aprobar fundación:", error);
-                return res.json({ exito: true, mensaje: "Fundación aprobada, pero falló el envío del correo." });
-            }
-
-            res.json({ exito: true, mensaje: "Fundación aprobada y correo enviado." });
-        } catch (mailError) {
-            console.error("❌ Error al enviar correo de aprobación:", mailError);
-            res.json({ exito: true, mensaje: "Fundación aprobada, pero falló el correo." });
-        }
+        res.json({ exito: true, mensaje: "Fundación aprobada con éxito." });
     });
 });
 
@@ -2372,7 +2315,7 @@ app.get('/api/novedades', (req, res) => {
 // ==========================================
 const uploadSoporte = multer({ 
     storage: multer.memoryStorage(),
-    limits: { fileSize: 5 * 1024 * 1024 } // Límite de 5MB por imagen
+    limits: { fileSize: 5 * 1024 * 1024 }
 });
 
 app.post('/api/enviar-reporte-error', uploadSoporte.single('imagen_error'), (req, res) => {
@@ -2383,12 +2326,6 @@ app.post('/api/enviar-reporte-error', uploadSoporte.single('imagen_error'), (req
             return res.status(400).json({ exito: false, error: "La descripción del error es requerida." });
         }
 
-        console.log("🚨 Nuevo reporte de error recibido en el servidor:");
-        console.log(`- Usuario: ${nombre_usuario || 'Anónimo'} (${correo_usuario || 'Sin correo'})`);
-        console.log(`- Lugar del error: ${lugar_error || 'No especificado'}`);
-        console.log(`- Descripción: ${descripcion}`);
-
-        // Respuesta exitosa al cliente
         return res.status(200).json({
             exito: true,
             mensaje: "Reporte de error recibido y registrado con éxito."
@@ -2402,6 +2339,7 @@ app.post('/api/enviar-reporte-error', uploadSoporte.single('imagen_error'), (req
         });
     }
 });
+
 // ==========================================
 // MÓDULO DE DONACIONES A FUNDACIONES
 // ==========================================
@@ -2414,7 +2352,6 @@ app.post('/api/crear-donacion', (req, res) => {
         return res.status(400).json({ error: "Faltan datos obligatorios para registrar la donación." });
     }
 
-    // Buscar al usuario donante
     db.query("SELECT id_usuarios, nombre_usuario FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))", [correo_usuario], (err, userRes) => {
         if (err || userRes.length === 0) {
             return res.status(404).json({ error: "Usuario donante no encontrado." });
@@ -2423,7 +2360,6 @@ app.post('/api/crear-donacion', (req, res) => {
         const id_usuario_donante = userRes[0].id_usuarios;
         const nombreDonante = userRes[0].nombre_usuario;
 
-        // Insertar en la tabla de donaciones
         const queryInsert = `
             INSERT INTO donaciones (id_usuario, id_fundacion, tipo_donacion, descripcion_donacion, estado)
             VALUES (?, ?, ?, ?, 'pendiente')
@@ -2435,7 +2371,6 @@ app.post('/api/crear-donacion', (req, res) => {
                 return res.status(500).json({ error: "Error en el servidor al guardar la donación." });
             }
 
-            // Buscar la cuenta de usuario vinculada a la fundación usando el id_fundacion recibido
             const queryUsuarioFundacion = `
                 SELECT u.id_usuarios 
                 FROM usuarios u
@@ -2450,7 +2385,6 @@ app.post('/api/crear-donacion', (req, res) => {
                     const idDestinoFundacion = fundRes[0].id_usuarios;
                     const mensajeNotif = `@${nombreDonante} ha realizado una nueva donación de (${tipo_donacion}). ¡Ingresa a tu panel para gestionarla!`;
 
-                    // Guardar la notificación interna en la base de datos de ARCA
                     const queryNotif = `
                         INSERT INTO notificaciones (id_usuario_destino, id_usuario_origen, tipo, mensaje)
                         VALUES (?, ?, 'nueva_donacion', ?)
@@ -2470,7 +2404,8 @@ app.post('/api/crear-donacion', (req, res) => {
         });
     });
 });   
-// 2. Obtener las donaciones de una fundación (con filtros por estado)
+
+// 2. Obtener las donaciones de una fundación
 app.get('/api/donaciones/fundacion', (req, res) => {
     const { correo_fundacion, estado } = req.query;
 
@@ -2511,7 +2446,7 @@ app.get('/api/donaciones/fundacion', (req, res) => {
     });
 });
 
-// 3. Actualizar el estado de la donación (ej: pasar de 'pendiente' a 'recogida')
+// 3. Actualizar el estado de la donación
 app.put('/api/donaciones/:id/estado', (req, res) => {
     const idDonacion = req.params.id;
     const { estado } = req.body;
@@ -2529,10 +2464,11 @@ app.put('/api/donaciones/:id/estado', (req, res) => {
         res.json({ mensaje: "Estado de la donación actualizado con éxito." });
     });
 });
+
 // ==========================================
 // INICIALIZACIÓN DEL SERVIDOR
 // ==========================================
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en el puerto ${PORT}`);
