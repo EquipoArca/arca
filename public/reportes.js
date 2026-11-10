@@ -232,97 +232,96 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 // 5. Envío del Formulario
-    if (formReporte) {
-        formReporte.addEventListener('submit', async (e) => {
-            e.preventDefault();
+if (formReporte) {
+    formReporte.addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-            const btnSubmit = formReporte.querySelector('button[type="submit"]');
-            if (btnSubmit) {
-                btnSubmit.disabled = true;
-                btnSubmit.textContent = "Guardando reporte...";
+        const btnSubmit = formReporte.querySelector('button[type="submit"]');
+        if (btnSubmit) {
+            btnSubmit.disabled = true;
+            btnSubmit.textContent = "Guardando reporte...";
+        }
+
+        try {
+            const radioSeleccionado = document.querySelector('input[name="tipo_reporte"]:checked');
+            const idTipoReporte = radioSeleccionado ? radioSeleccionado.value : '1';
+
+            const descripcion = document.getElementById('descripcion-reporte')?.value || '';
+            const direccion = inputDireccion?.value || '';
+            const telefono = inputTel ? inputTel.value : '';
+            const correoContacto = inputCorreo ? inputCorreo.value : '';
+
+            const usuarioAuth = typeof firebase !== 'undefined' && firebase.auth().currentUser ? firebase.auth().currentUser : null;
+            const correoUsuarioLogueado = (usuarioAuth && usuarioAuth.email) ? usuarioAuth.email : (localStorage.getItem('correo_usuario') || correoContacto);
+
+            const formData = new FormData();
+            formData.append('id_tipo_reporte', idTipoReporte);
+            formData.append('Descripcion', descripcion);
+            formData.append('Ubicacion', direccion);
+            formData.append('telefono_contacto', telefono);
+            formData.append('correo_contacto', correoContacto);
+            formData.append('correo_usuario', correoUsuarioLogueado);
+
+            if (inputArchivo && inputArchivo.files.length > 0) {
+                for (let i = 0; i < inputArchivo.files.length; i++) {
+                    formData.append('fotos_reporte[]', inputArchivo.files[i]);
+                }
             }
 
-            try {
-                const radioSeleccionado = document.querySelector('input[name="tipo_reporte"]:checked');
-                const idTipoReporte = radioSeleccionado ? radioSeleccionado.value : '1';
+            // DETECCIÓN SEGURA DEL MODO EDICIÓN
+            const urlParamsSubmit = new URLSearchParams(window.location.search);
+            const idEditar = urlParamsSubmit.get('editar');
 
-                const descripcion = document.getElementById('descripcion-reporte')?.value || '';
-                const direccion = inputDireccion?.value || '';
-                const telefono = inputTel ? inputTel.value : '';
-                const correoContacto = inputCorreo ? inputCorreo.value : '';
+            let urlFetch = '/crear-reporte';
+            let metodoFetch = 'POST';
 
-                const usuarioAuth = typeof firebase !== 'undefined' && firebase.auth().currentUser ? firebase.auth().currentUser : null;
-                const correoUsuarioLogueado = (usuarioAuth && usuarioAuth.email) ? usuarioAuth.email : (localStorage.getItem('correo_usuario') || correoContacto);
+            if (idEditar && idEditar !== '') {
+                urlFetch = `/api/reportes/${idEditar}`;
+                metodoFetch = 'PUT'; // Forzamos PUT para evitar que caiga en la validación de duplicados POST
+            }
 
-                // Usamos FormData para que multer en el servidor (server.js) procese bien los campos y archivos
-                const formData = new FormData();
-                formData.append('id_tipo_reporte', idTipoReporte);
-                formData.append('Descripcion', descripcion);
-                formData.append('Ubicacion', direccion);
-                formData.append('telefono_contacto', telefono);
-                formData.append('correo_contacto', correoContacto);
-                formData.append('correo_usuario', correoUsuarioLogueado);
+            const respuesta = await fetch(urlFetch, {
+                method: metodoFetch,
+                body: formData 
+            });
 
-                // Si seleccionó archivos nuevos, los adjuntamos
-                if (inputArchivo && inputArchivo.files.length > 0) {
-                    for (let i = 0; i < inputArchivo.files.length; i++) {
-                        formData.append('fotos_reporte[]', inputArchivo.files[i]);
-                    }
-                }
+            const resultado = await respuesta.json();
 
-                const urlParamsSubmit = new URLSearchParams(window.location.search);
-                const idEditar = urlParamsSubmit.get('editar');
-
-                let urlFetch = '/crear-reporte';
-                let metodoFetch = 'POST';
-
-                if (idEditar) {
-                    urlFetch = `/api/reportes/${idEditar}`;
-                    metodoFetch = 'PUT';
-                }
-
-                const respuesta = await fetch(urlFetch, {
-                    method: metodoFetch,
-                    body: formData // Enviamos FormData directamente sin headers 'Content-Type' (el navegador los calcula automáticos)
-                });
-
-                const resultado = await respuesta.json();
-
-                if (respuesta.ok) {
-                    mostrarAlertaArca(
-                        "¡Reporte guardado!",
-                        "Tu reporte ha sido guardado exitosamente. 🌸",
-                        {
-                            tipo: "aviso",
-                            alCerrar: () => {
-                                formReporte.reset();
-                                window.location.href = 'mis_publicaciones.html';
-                            }
-                        }
-                    );
-                } else {
-                    mostrarAlertaArca(
-                        "Error en el servidor",
-                        resultado.error || "No se pudo guardar el reporte, inténtalo más tarde. ♡",
-                        { tipo: "error" }
-                    );
-                }
-
-            } catch (error) {
-                console.error("Error al enviar el reporte:", error);
+            if (respuesta.ok) {
                 mostrarAlertaArca(
-                    "Sin conexión con el servidor",
-                    "No se pudo conectar con el servidor. Inténtalo nuevamente más tarde.",
-                    { tipo: "conexion" }
+                    "¡Reporte guardado!",
+                    "Tu reporte ha sido guardado exitosamente. 🌸",
+                    {
+                        tipo: "aviso",
+                        alCerrar: () => {
+                            formReporte.reset();
+                            window.location.href = 'mis_publicaciones.html';
+                        }
+                    }
                 );
-            } finally {
-                if (btnSubmit) {
-                    btnSubmit.disabled = false;
-                    btnSubmit.textContent = "Enviar Reporte";
-                }
+            } else {
+                mostrarAlertaArca(
+                    "Error en el servidor",
+                    resultado.error || "No se pudo guardar el reporte, inténtalo más tarde. ♡",
+                    { tipo: "error" }
+                );
             }
-        });
-    }
+
+        } catch (error) {
+            console.error("Error al enviar el reporte:", error);
+            mostrarAlertaArca(
+                "Sin conexión con el servidor",
+                "No se pudo conectar con el servidor. Inténtalo nuevamente más tarde.",
+                { tipo: "conexion" }
+            );
+        } finally {
+            if (btnSubmit) {
+                btnSubmit.disabled = false;
+                btnSubmit.textContent = "Enviar Reporte";
+            }
+        }
+    });
+}
     // ==========================================
 // MODO EDICIÓN: Cargar datos si viene ?editar=ID
 // ==========================================
