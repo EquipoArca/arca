@@ -2404,6 +2404,41 @@ app.post('/api/crear-donacion', (req, res) => {
         });
     });
 });
+// Endpoint para obtener las notificaciones de un usuario/fundación por correo
+app.get('/api/notificaciones/:correo', (req, res) => {
+    const correoUsuario = req.params.correo;
+
+    if (!correoUsuario) {
+        return res.status(400).json({ error: "El correo es requerido." });
+    }
+
+    const sql = `
+        SELECT 
+            n.id_notificacion,
+            n.id_usuario_destino,
+            n.id_usuario_origen,
+            n.tipo,
+            n.mensaje,
+            n.leida,
+            n.fecha_creacion,
+            n.fecha_creacion AS fecha_notificacion,
+            COALESCE(u_orig.nombre_usuario, 'Sistema ARCA') AS origen_nombre,
+            u_orig.foto_perfil AS origen_foto
+        FROM notificaciones n
+        INNER JOIN usuarios u_dest ON n.id_usuario_destino = u_dest.id_usuarios
+        LEFT JOIN usuarios u_orig ON n.id_usuario_origen = u_orig.id_usuarios
+        WHERE LOWER(TRIM(u_dest.correo_usuario)) = LOWER(TRIM(?))
+        ORDER BY n.id_notificacion DESC
+    `;
+
+    db.query(sql, [correoUsuario], (err, results) => {
+        if (err) {
+            console.error("❌ Error al obtener notificaciones:", err.message);
+            return res.status(500).json({ error: "Error en el servidor al obtener notificaciones." });
+        }
+        res.json(results);
+    });
+});
 // 2. Obtener las donaciones de una fundación
 app.get('/api/donaciones/fundacion', (req, res) => {
     const { correo_fundacion, estado } = req.query;
