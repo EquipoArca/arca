@@ -70,21 +70,21 @@ const codigosOTP = {};
 // ==========================================
 app.post('/registrar-usuario', (req, res) => {
     const { Nombre_usuario, Fecha_nacimiento, Correo_usuario, Telefono_usuario } = req.body;
-   
+
     if (!Nombre_usuario || !Correo_usuario) {
         return res.status(400).json({ error: "El nombre de usuario y correo son obligatorios." });
     }
 
     db.query('SELECT id_usuarios FROM usuarios WHERE nombre_usuario = ?', [Nombre_usuario], (err, results) => {
         if (err) return res.status(500).json({ error: "Error en el servidor: " + err.message });
-       
+
         if (results.length > 0) {
             return res.status(400).json({ error: "Este nombre de usuario ya está ocupado. Intenta con otro." });
         }
 
         const sql = 'INSERT INTO usuarios(nombre_usuario, Fecha_nacimiento, correo_usuario, Telefono_usuario) VALUES (?, ?, ?, ?)';
         const valores = [Nombre_usuario, Fecha_nacimiento, Correo_usuario, Telefono_usuario];
-       
+
         db.query(sql, valores, (err, result) => {
             if (err) {
                 if (err.code === 'ER_DUP_ENTRY') {
@@ -103,13 +103,16 @@ app.post('/enviar-codigo-otp', (req, res) => {
         return res.status(400).json({ error: "El correo es requerido." });
     }
 
+    // Generar código aleatorio de 4 dígitos
     const codigo = Math.floor(1000 + Math.random() * 9000).toString();
-    
+
+    // Guardar en memoria con 2 minutos de validez
     codigosOTP[correo] = { 
         codigo: codigo, 
         expira: Date.now() + 2 * 60 * 1000 
     };
 
+    // Responder al frontend con el código para que EmailJS lo envíe
     res.json({ 
         exito: true, 
         codigo: codigo, 
@@ -170,7 +173,7 @@ app.get('/api/obtener-usuario', (req, res) => {
     }
 
     const query = "SELECT * FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))";
-   
+
     db.query(query, [correo], (err, results) => {
         if (err) {
             console.error("Error al consultar usuario:", err);
@@ -307,7 +310,7 @@ app.post('/cambiar-nombre-usuario', (req, res) => {
     const correoLimpio = correo_usuario.trim().toLowerCase();
 
     const queryDueñoPropio = "SELECT id_usuarios FROM usuarios WHERE nombre_usuario = ? AND LOWER(TRIM(correo_usuario)) = ?";
-   
+
     db.query(queryDueñoPropio, [nombreLimpio, correoLimpio], (errPropio, resPropio) => {
         if (errPropio) {
             console.error("❌ Error en consulta:", errPropio.message);
@@ -388,7 +391,7 @@ app.get('/validar-nombre-usuario', (req, res) => {
         WHERE nombre_usuario = ?
         ${correoLimpio ? 'AND LOWER(TRIM(correo_usuario)) != ?' : ''}
     `;
-   
+
     let params = correoLimpio ? [nombreLimpio, correoLimpio] : [nombreLimpio];
 
     db.query(sql, params, (err, results) => {
@@ -518,19 +521,19 @@ app.post('/crear-reporte', upload.array('fotos_reporte[]', 3), (req, res) => {
         return res.status(400).json({ error: "Faltan campos obligatorios para el reporte." });
     }
 
-    let imagenesArray = [];
+let imagenesArray = [];
     if (req.files && req.files.length > 0) {
         imagenesArray = req.files.map(file => `data:${file.mimetype};base64,${file.buffer.toString('base64')}`);
-    }
+    };
     const img_reporte = imagenesArray.length > 0 ? JSON.stringify(imagenesArray) : null;
 
-    db.query("SELECT id_usuarios FROM usuarios WHERE correo_usuario = ?", [correo_usuario], (err, results) => {
+        db.query("SELECT id_usuarios FROM usuarios WHERE correo_usuario = ?", [correo_usuario], (err, results) => {
         if (err || results.length === 0) {
             console.error("Error al buscar ID del usuario:", err);
             return res.status(500).json({ error: "No se pudo asociar el usuario al reporte." });
         }
 
-        const id_usuarios = results[0].id_usuarios;
+       const id_usuarios = results[0].id_usuarios;
         const Fecha_reporte = new Date().toISOString().split('T')[0];
 
         const queryVerificarDuplicado = `
@@ -569,7 +572,7 @@ app.post('/crear-reporte', upload.array('fotos_reporte[]', 3), (req, res) => {
 
                 const idReporteNuevo = result.insertId;
                 const queryInsertPublicacion = `INSERT INTO publicaciones (id_reporte) VALUES (?)`;
-               
+
                 db.query(queryInsertPublicacion, [idReporteNuevo], (errPub) => {
                     if (errPub) {
                         console.error("⚠️ Advertencia: El reporte se creó pero falló al registrarse en publicaciones:", errPub.message);
@@ -917,7 +920,9 @@ app.get('/api/guardar-publicacion/:correo', (req, res) => {
         res.json(results);
     });
 });
-
+// ==========================================
+// ENDPOINT PARA CREAR RECORDATORIOS / NOTIFICACIONES
+// ==========================================
 app.post('/api/crear-notificacion-recordatorio', (req, res) => {
     const { correo, mensaje } = req.body;
 
@@ -947,7 +952,6 @@ app.post('/api/crear-notificacion-recordatorio', (req, res) => {
         });
     });
 });
-
 app.post('/api/quitar-guardado', (req, res) => {
     const { correo, id_publicacion } = req.body;
 
@@ -1128,7 +1132,6 @@ app.get('/api/publicaciones-globales', (req, res) => {
         res.json(rows);
     });
 });
-
 app.delete('/api/adopciones/:id', (req, res) => {
     const idAdopcion = req.params.id;
 
@@ -1294,7 +1297,7 @@ app.post('/api/crear-adopcion', (req, res) => {
         const id_usuarios = results[0].id_usuarios;
         const correoRegistrado = results[0].correo_bd;
         const telefonoRegistrado = results[0].telefono_bd;
-       
+
         const correoFinal = (correo_contacto && correo_contacto.trim() !== "") ? correo_contacto : correoRegistrado;
         const telefonoFinal = (telefono_contacto && telefono_contacto.trim() !== "") ? telefono_contacto : telefonoRegistrado;
         const id_estado = 2;
@@ -1309,7 +1312,7 @@ app.post('/api/crear-adopcion', (req, res) => {
                 (nombre_animal, id_especie, otro_especie, id_estado, sexo_animal, fecha_nacimiento_animal_aprox, id_raza, otro_raza, id_tamaño, descripcion_animal, ciudad, barrio, fotos_animal, id_usuarios)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
-           
+
             db.query(queryAnimal, [
                 nombre_animal,
                 id_especie,
@@ -1331,10 +1334,10 @@ app.post('/api/crear-adopcion', (req, res) => {
                         res.status(500).json({ error: "Error al guardar el animal: " + errAnim.message });
                     });
                 }
-               
+
                 const idAnimalGenerado = resultadoAnimal.insertId;
                 const queryAdopcion = "INSERT INTO publicaciones_adopcion (id_animal, id_usuarios, telefono_contacto, correo_contacto) VALUES (?, ?, ?, ?)";
-               
+
                 db.query(queryAdopcion, [idAnimalGenerado, id_usuarios, telefonoFinal, correoFinal], (errAdop, resultadoAdopcion) => {
                     if (errAdop) {
                         return db.rollback(() => {
@@ -1344,7 +1347,7 @@ app.post('/api/crear-adopcion', (req, res) => {
 
                     const idAdopcionGenerado = resultadoAdopcion.insertId;
                     const queryPublicacion = "INSERT INTO publicaciones (id_animal, id_publicaciones_adopcion) VALUES (?, ?)";
-                   
+
                     db.query(queryPublicacion, [idAnimalGenerado, idAdopcionGenerado], (errPub) => {
                         if (errPub) {
                             return db.rollback(() => {
@@ -1562,21 +1565,14 @@ app.get('/api/perfil-publico/:parametro', (req, res) => {
     const parametro = decodeURIComponent(req.params.parametro).trim();
     const correoVisitante = req.query.correo_visitante;
 
-    // Si intentan consultar el Perfil del Sistema, responder no encontrado directo
-    if (parametro.toLowerCase() === 'sistema arca' || parametro.toLowerCase() === 'sistema_arca') {
-        return res.status(404).json({ error: "El perfil del sistema no es accesible como usuario." });
-    }
-
     const sql = `
         SELECT u.id_usuarios, u.nombre_usuario, u.foto_perfil, u.correo_usuario, u.Telefono_usuario
         FROM usuarios u
-        WHERE LOWER(TRIM(u.nombre_usuario)) = LOWER(TRIM(?))
-           OR LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(?))
-           OR u.nombre_usuario LIKE ?
-        LIMIT 1
+        WHERE u.nombre_usuario LIKE ?
+           OR u.correo_usuario LIKE ?
     `;
 
-    db.query(sql, [parametro, parametro, `%${parametro}%`], (err, results) => {
+    db.query(sql, [`%${parametro}%`, `%${parametro}%`], (err, results) => {
         if (err || results.length === 0) {
             return res.status(404).json({ error: "Usuario no encontrado" });
         }
@@ -1622,40 +1618,30 @@ app.post('/api/alternar-seguimiento', (req, res) => {
     const { correo_seguidor, id_seguido } = req.body;
 
     db.query("SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))", [correo_seguidor], (err, rows) => {
-        if (err || !rows || rows.length === 0) return res.status(400).json({ error: "Usuario no encontrado" });
+        if (err || rows.length === 0) return res.status(400).json({ error: "Usuario no encontrado" });
         const idSeguidor = rows[0].id_usuarios;
 
         db.query("SELECT id_seguidor FROM seguidores WHERE id_usuario_seguidor = ? AND id_usuario_seguido = ?", [idSeguidor, id_seguido], (errExist, exist) => {
-            if (exist && exist.length > 0) {
+            if (exist.length > 0) {
                 db.query("DELETE FROM seguidores WHERE id_seguidor = ?", [exist[0].id_seguidor], () => {
                     res.json({ siguiendo: false, mensaje: "Has dejado de seguir a este usuario." });
                 });
             } else {
-                db.query("INSERT INTO seguidores (id_usuario_seguidor, id_usuario_seguido) VALUES (?, ?)", [idSeguidor, id_seguido], (errIns) => {
-                    if (errIns) return res.status(500).json({ error: "Error al seguir usuario" });
-
-                    // SOLO CREAR NOTIFICACIÓN SI NO ES A SÍ MISMO
-                    if (Number(idSeguidor) !== Number(id_seguido)) {
-                        db.query(
-                            "INSERT INTO notificaciones (id_usuario_destino, id_usuario_origen, tipo, mensaje) VALUES (?, ?, 'nuevo_seguidor', 'comenzó a seguirte.')",
-                            [id_seguido, idSeguidor],
-                            (errN) => {
-                                if (errN) console.error("❌ Error al insertar notificación de seguidor:", errN.message);
-                            }
-                        );
-                    }
+                db.query("INSERT INTO seguidores (id_usuario_seguidor, id_usuario_seguido) VALUES (?, ?)", [idSeguidor, id_seguido], () => {
+                    db.query("INSERT INTO notificaciones (id_usuario_destino, id_usuario_origen, tipo, mensaje) VALUES (?, ?, 'nuevo_seguidor', 'comenzó a seguirte.')", [id_seguido, idSeguidor]);
                     res.json({ siguiendo: true, mensaje: "Ahora sigues a este usuario" });
                 });
             }
         });
     });
 });
+
 app.post('/api/solicitar-ver-adoptante', (req, res) => {
     const { correo_solicitante, id_propietario } = req.body;
 
     db.query("SELECT id_usuarios, nombre_usuario FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))", [correo_solicitante], (err, rows) => {
-        if (err || !rows || rows.length === 0) return res.status(400).json({ error: "Error de usuario" });
-       
+        if (err || rows.length === 0) return res.status(400).json({ error: "Error de usuario" });
+
         const idSolicitante = rows[0].id_usuarios;
         const nombreSolicitante = rows[0].nombre_usuario;
 
@@ -1671,23 +1657,46 @@ app.post('/api/solicitar-ver-adoptante', (req, res) => {
             }
 
             const sql = "INSERT INTO solicitudes_adoptante (id_solicitante, id_propietario, estado) VALUES (?, ?, 'pendiente') ON DUPLICATE KEY UPDATE estado='pendiente'";
-            db.query(sql, [idSolicitante, id_propietario], (errSql) => {
-                if (errSql) return res.status(500).json({ error: "Error al registrar la solicitud." });
+            db.query(sql, [idSolicitante, id_propietario], () => {
+                const msg = `@${nombreSolicitante} quiere ver tu perfil de adoptante.`;
+                const checkNotif = "SELECT id_notificacion FROM notificaciones WHERE id_usuario_destino = ? AND id_usuario_origen = ? AND tipo = 'solicitud_adoptante' AND leida = 0";
 
-                const msg = `quiere ver tu perfil de adoptante.`;
-                
-                // INSERCIÓN DIRECTA SEGUARA SIN CONSULTA QUE PUEDA FALLAR
-                db.query(
-                    "INSERT INTO notificaciones (id_usuario_destino, id_usuario_origen, tipo, mensaje) VALUES (?, ?, 'solicitud_adoptante', ?)",
-                    [id_propietario, idSolicitante, msg],
-                    (errNoti) => {
-                        if (errNoti) console.error("❌ Error al insertar notificación de adoptante:", errNoti.message);
+                db.query(checkNotif, [id_propietario, idSolicitante], (errN, resN) => {
+                    if (!resN || resN.length === 0) {
+                        db.query("INSERT INTO notificaciones (id_usuario_destino, id_usuario_origen, tipo, mensaje) VALUES (?, ?, 'solicitud_adoptante', ?)", [id_propietario, idSolicitante, msg]);
                     }
-                );
-
-                res.json({ exito: true, mensaje: "Solicitud enviada correctamente.", estado: 'pendiente' });
+                    res.json({ exito: true, mensaje: "Solicitud enviada correctamente.", estado: 'pendiente' });
+                });
             });
         });
+    });
+});
+
+app.get('/api/notificaciones/:correo', (req, res) => {
+    const { correo } = req.params;
+
+
+
+
+
+    const sql = `
+        SELECT n.id_notificacion, n.tipo, n.mensaje, n.leida, n.fecha_notificacion,
+               u_origen.nombre_usuario AS origen_nombre, u_origen.foto_perfil AS origen_foto,
+               s.id_solicitud, s.estado AS estado_solicitud
+        FROM notificaciones n
+        JOIN usuarios u_destino ON n.id_usuario_destino = u_destino.id_usuarios
+        LEFT JOIN usuarios u_origen ON n.id_usuario_origen = u_origen.id_usuarios
+        LEFT JOIN solicitudes_adoptante s ON (s.id_solicitante = n.id_usuario_origen AND s.id_propietario = n.id_usuario_destino)
+        WHERE LOWER(TRIM(u_destino.correo_usuario)) = LOWER(TRIM(?))
+        ORDER BY n.fecha_notificacion DESC
+    `;
+
+    db.query(sql, [correo], (err, results) => {
+        if (err) {
+            console.error("Error al obtener notificaciones:", err);
+            return res.status(500).json({ error: "Error interno" });
+        }
+        res.json(results);
     });
 });
 
@@ -1813,7 +1822,7 @@ app.post('/api/registrar-fundacion', express.json({ limit: '20mb' }), async (req
             INSERT INTO documentacion (certificado_existencia, estatuto, estado_financiero, registro_oficial)
             VALUES (?, ?, ?, ?)
         `;
-       
+
         db.query(queryDocumentacion, [certBuffer, estatutoBuffer, financieroBuffer, registroBuffer], (errDoc, resultadoDoc) => {
             if (errDoc) {
                 console.error("❌ Error al guardar documentación:", errDoc.sqlMessage || errDoc);
@@ -1876,7 +1885,7 @@ app.post('/api/registrar-fundacion', express.json({ limit: '20mb' }), async (req
                         INSERT INTO representante (nombre_completo, documento, telefono, correo, id_fundacion)
                         VALUES (?, ?, ?, ?, ?)
                     `;
-                   
+
                     db.query(queryRepresentante, [rep_nombre || '', rep_documento || '', rep_telefono || '', rep_correo || '', idFundacionGenerado], () => {
                         res.json({ exito: true, mensaje: "¡Fundación registrada con éxito!" });
                     });
@@ -1978,7 +1987,30 @@ app.post('/api/admin/aprobar-fundacion', async (req, res) => {
     db.query(queryUpdate, [id_fundacion], async (err) => {
         if (err) return res.status(500).json({ exito: false, mensaje: "Error en base de datos" });
 
-        res.json({ exito: true, mensaje: "Fundación aprobada con éxito." });
+        try {
+            const { data, error } = await resend.emails.send({
+                from: 'ARCA - Administración <onboarding@resend.dev>',
+                to: [correo_fundacion],
+                subject: '🎉 ¡Tu cuenta en ARCA ha sido aprobada!',
+                html: `
+                    <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+                        <h2 style="color: #e57373;">¡Hola, ${nombre_comercial || 'Fundación'}!</h2>
+                        <p>Tu solicitud ha sido revisada y <strong>aprobada</strong> por la administración de ARCA.</p>
+                        <p>Ya puedes iniciar sesión en la plataforma.</p>
+                    </div>
+                `
+            });
+
+            if (error) {
+                console.error("❌ Error de Resend al aprobar fundación:", error);
+                return res.json({ exito: true, mensaje: "Fundación aprobada, pero falló el envío del correo." });
+            }
+
+            res.json({ exito: true, mensaje: "Fundación aprobada y correo enviado." });
+        } catch (mailError) {
+            console.error("❌ Error al enviar correo de aprobación:", mailError);
+            res.json({ exito: true, mensaje: "Fundación aprobada, pero falló el correo." });
+        }
     });
 });
 
@@ -2181,7 +2213,7 @@ app.post('/api/crear-evento', (req, res) => {
 
                 const mensajeNotif = `¡Nueva fundación organizó el evento '${nombre_evento}'!`;
                 const queryUsuariosNormales = `SELECT id_usuarios FROM usuarios WHERE tipo_usuario = 'usuario' OR tipo_usuario IS NULL`;
-               
+
                 db.query(queryUsuariosNormales, (errU, usuarios) => {
                     if (!errU && usuarios && usuarios.length > 0) {
                         db.query("SELECT id_usuarios FROM usuarios WHERE correo_usuario = ?", [correo_fundacion], (errUsr, resUsr) => {
@@ -2337,7 +2369,7 @@ app.get('/api/novedades', (req, res) => {
 // ==========================================
 const uploadSoporte = multer({ 
     storage: multer.memoryStorage(),
-    limits: { fileSize: 5 * 1024 * 1024 }
+    limits: { fileSize: 5 * 1024 * 1024 } // Límite de 5MB por imagen
 });
 
 app.post('/api/enviar-reporte-error', uploadSoporte.single('imagen_error'), (req, res) => {
@@ -2348,6 +2380,12 @@ app.post('/api/enviar-reporte-error', uploadSoporte.single('imagen_error'), (req
             return res.status(400).json({ exito: false, error: "La descripción del error es requerida." });
         }
 
+        console.log("🚨 Nuevo reporte de error recibido en el servidor:");
+        console.log(`- Usuario: ${nombre_usuario || 'Anónimo'} (${correo_usuario || 'Sin correo'})`);
+        console.log(`- Lugar del error: ${lugar_error || 'No especificado'}`);
+        console.log(`- Descripción: ${descripcion}`);
+
+        // Respuesta exitosa al cliente
         return res.status(200).json({
             exito: true,
             mensaje: "Reporte de error recibido y registrado con éxito."
@@ -2361,6 +2399,9 @@ app.post('/api/enviar-reporte-error', uploadSoporte.single('imagen_error'), (req
         });
     }
 });
+// ==========================================
+// MÓDULO DE DONACIONES A FUNDACIONES
+// ==========================================
 
 // 1. Registrar una donación nueva (desde el usuario) y notificar dentro de la app a la fundación
 app.post('/api/crear-donacion', (req, res) => {
@@ -2370,6 +2411,7 @@ app.post('/api/crear-donacion', (req, res) => {
         return res.status(400).json({ error: "Faltan datos obligatorios para registrar la donación." });
     }
 
+    // Buscar al usuario donante
     db.query("SELECT id_usuarios, nombre_usuario FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))", [correo_usuario], (err, userRes) => {
         if (err || userRes.length === 0) {
             return res.status(404).json({ error: "Usuario donante no encontrado." });
@@ -2378,6 +2420,7 @@ app.post('/api/crear-donacion', (req, res) => {
         const id_usuario_donante = userRes[0].id_usuarios;
         const nombreDonante = userRes[0].nombre_usuario;
 
+        // Insertar en la tabla de donaciones
         const queryInsert = `
             INSERT INTO donaciones (id_usuario, id_fundacion, tipo_donacion, descripcion_donacion, estado)
             VALUES (?, ?, ?, ?, 'pendiente')
@@ -2389,15 +2432,12 @@ app.post('/api/crear-donacion', (req, res) => {
                 return res.status(500).json({ error: "Error en el servidor al guardar la donación." });
             }
 
-            // Búsqueda directa y blindada del id de usuario de la fundación
+            // Buscar la cuenta de usuario vinculada a la fundación seleccionada para la notificación en la app
             const queryUsuarioFundacion = `
-                SELECT id_usuarios 
-                FROM usuarios 
-                WHERE LOWER(TRIM(correo_usuario)) = (
-                    SELECT LOWER(TRIM(Correo_fundacion)) 
-                    FROM fundacion 
-                    WHERE id_fundacion = ?
-                )
+                SELECT u.id_usuarios 
+                FROM usuarios u
+                JOIN fundacion f ON LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(f.Correo_fundacion))
+                WHERE f.id_fundacion = ?
             `;
 
             db.query(queryUsuarioFundacion, [id_fundacion], (errF, fundRes) => {
@@ -2407,17 +2447,15 @@ app.post('/api/crear-donacion', (req, res) => {
                     const idDestinoFundacion = fundRes[0].id_usuarios;
                     const mensajeNotif = `@${nombreDonante} ha realizado una nueva donación de (${tipo_donacion}). ¡Ingresa a tu panel para gestionarla!`;
 
+                    // Guardar la notificación interna en la base de datos de ARCA
                     const queryNotif = `
                         INSERT INTO notificaciones (id_usuario_destino, id_usuario_origen, tipo, mensaje)
                         VALUES (?, ?, 'nueva_donacion', ?)
                     `;
 
                     db.query(queryNotif, [idDestinoFundacion, id_usuario_donante, mensajeNotif], (errN) => {
-                        if (errN) {
-                            console.error("❌ Error al insertar notificación interna:", errN.message);
-                        } else {
-                            console.log("✅ ¡Notificación de donación guardada con éxito en la cuenta de la fundación!");
-                        }
+                        if (errN) console.error("❌ Error al insertar notificación interna:", errN.message);
+                        else console.log("✅ Notificación guardada exitosamente en la cuenta de la fundación en la app.");
                     });
                 }
             });
@@ -2425,44 +2463,8 @@ app.post('/api/crear-donacion', (req, res) => {
             res.status(201).json({ mensaje: "¡Donación registrada con éxito!", id_donacion: result.insertId });
         });
     });
-});
-app.get('/api/notificaciones/:correo', (req, res) => {
-    const correoUsuario = req.params.correo;
-
-    if (!correoUsuario) {
-        return res.status(400).json({ error: "El correo es requerido." });
-    }
-
-    // Consulta limpia y directa para evitar fallos de columnas faltantes o joins complejos
-    const sql = `
-        SELECT 
-            n.id_notificacion,
-            n.id_usuario_destino,
-            n.id_usuario_origen,
-            n.tipo,
-            n.mensaje,
-            COALESCE(n.leida, 0) AS leida,
-            COALESCE(n.fecha_creacion, NOW()) AS fecha_notificacion,
-            COALESCE(u_orig.nombre_usuario, 'Sistema ARCA') AS origen_nombre,
-            u_orig.foto_perfil AS origen_foto,
-            NULL AS id_solicitud,
-            'pendiente' AS estado_solicitud
-        FROM notificaciones n
-        INNER JOIN usuarios u_dest ON n.id_usuario_destino = u_dest.id_usuarios
-        LEFT JOIN usuarios u_orig ON n.id_usuario_origen = u_orig.id_usuarios
-        WHERE LOWER(TRIM(u_dest.correo_usuario)) = LOWER(TRIM(?))
-        ORDER BY n.id_notificacion DESC
-    `;
-
-    db.query(sql, [correoUsuario], (err, results) => {
-        if (err) {
-            console.error("❌ Error crítico en notificaciones:", err.message);
-            return res.status(500).json({ error: "Error en el servidor al obtener notificaciones." });
-        }
-        res.json(results);
-    });
-});
-// 2. Obtener las donaciones de una fundación
+});     
+// 2. Obtener las donaciones de una fundación (con filtros por estado)
 app.get('/api/donaciones/fundacion', (req, res) => {
     const { correo_fundacion, estado } = req.query;
 
@@ -2503,7 +2505,7 @@ app.get('/api/donaciones/fundacion', (req, res) => {
     });
 });
 
-// 3. Actualizar el estado de la donación
+// 3. Actualizar el estado de la donación (ej: pasar de 'pendiente' a 'recogida')
 app.put('/api/donaciones/:id/estado', (req, res) => {
     const idDonacion = req.params.id;
     const { estado } = req.body;
@@ -2521,11 +2523,11 @@ app.put('/api/donaciones/:id/estado', (req, res) => {
         res.json({ mensaje: "Estado de la donación actualizado con éxito." });
     });
 });
-
 // ==========================================
 // INICIALIZACIÓN DEL SERVIDOR
 // ==========================================
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 3000;
+
 
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en el puerto ${PORT}`);

@@ -3,9 +3,8 @@ function obtenerContenedor() {
 }
 
 function obtenerCorreoUsuarioActivo() {
-    if (typeof firebase !== 'undefined' && firebase.auth().currentUser && firebase.auth().currentUser.email) {
-        return firebase.auth().currentUser.email;
-    }
+    const authUser = typeof firebase !== 'undefined' && firebase.auth().currentUser;
+    if (authUser && authUser.email) return authUser.email;
 
     return localStorage.getItem('correo_usuario') || 
            localStorage.getItem('usuario_correo') || 
@@ -47,7 +46,7 @@ async function cargarNotificacionesServidor() {
         if (!respuesta.ok) throw new Error("Error al obtener notificaciones");
 
         const notificaciones = await respuesta.json();
-        
+
         const notificacionesUnicas = [];
         const idsVistos = new Set();
 
@@ -65,10 +64,11 @@ async function cargarNotificacionesServidor() {
         console.error("Error cargando notificaciones:", error);
     }
 }
+
 function renderizarNotificaciones(lista) {
     const contenedor = obtenerContenedor();
     if (!contenedor) return;
-    
+
     contenedor.innerHTML = '';
 
     if (!lista || lista.length === 0) {
@@ -107,37 +107,37 @@ function renderizarNotificaciones(lista) {
         tarjeta.style.alignItems = 'center';
 
         const fechaStr = notif.fecha_notificacion ? notif.fecha_notificacion.split('T')[0] : 'Reciente';
-        
-        const esSistema = !notif.origen_nombre || notif.origen_nombre === 'Sistema ARCA' || !notif.id_usuario_origen;
-        
-        const autorNombre = !esSistema 
+
+        // Convertimos el nombre de usuario en un enlace interactivo <a> hacia su perfil público
+        const autorNombre = notif.origen_nombre 
             ? `<a href="perfil_publico.html?user=${encodeURIComponent(notif.origen_nombre)}" style="color: #e06d53; font-weight: bold; text-decoration: none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">@${notif.origen_nombre}</a>` 
-            : '<span style="color: #e06d53; font-weight: bold;">@Sistema ARCA</span>';
+            : 'Sistema ARCA';
 
         let htmlAccion = '';
+        if (notif.tipo === 'solicitud_adoptante' && notif.estado_solicitud === 'pendiente') {
+            htmlAccion = `
+                <div style="display: flex; gap: 8px; margin-top: 8px;">
+                    <button onclick="responderSolicitud(${notif.id_solicitud}, 'aceptar')" style="background: #25d366; color: white; border: none; padding: 6px 14px; border-radius: 12px; cursor: pointer; font-weight: bold; font-family: 'Itim';">Aceptar</button>
+                    <button onclick="responderSolicitud(${notif.id_solicitud}, 'rechazar')" style="background: #d9534f; color: white; border: none; padding: 6px 14px; border-radius: 12px; cursor: pointer; font-weight: bold; font-family: 'Itim';">Rechazar</button>
+                </div>
+            `;
+        } else if (notif.tipo === 'solicitud_adoptante' && notif.estado_solicitud === 'aceptada') {
+            htmlAccion = `<span style="color: #25d366; font-weight: bold; font-size: 13.5px;"> Solicitud aceptada ✓</span>`;
 
-        if (notif.tipo === 'solicitud_adoptante' && notif.id_solicitud) {
-            if (notif.estado_solicitud === 'pendiente') {
-                htmlAccion = `
-                    <div style="display: flex; gap: 8px; margin-top: 8px;">
-                        <button onclick="responderSolicitud(${notif.id_solicitud}, 'aceptar')" style="background: #25d366; color: white; border: none; padding: 6px 14px; border-radius: 12px; cursor: pointer; font-weight: bold; font-family: 'Itim';">Aceptar</button>
-                        <button onclick="responderSolicitud(${notif.id_solicitud}, 'rechazar')" style="background: #d9534f; color: white; border: none; padding: 6px 14px; border-radius: 12px; cursor: pointer; font-weight: bold; font-family: 'Itim';">Rechazar</button>
-                    </div>
-                `;
-            } else if (notif.estado_solicitud === 'aceptada') {
-                htmlAccion = `<span style="color: #25d366; font-weight: bold; font-size: 13.5px;"> Solicitud aceptada ✓</span>`;
-            }
+
+
+
+
         } else if (notif.tipo === 'nueva_donacion') {
+            // INTEGRACIÓN: Acciones específicas para cuando llega una nueva donación pendiente
             htmlAccion = `
                 <div style="display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;">
-                    ${!esSistema ? `<a href="perfil_publico.html?user=${encodeURIComponent(notif.origen_nombre)}" style="background: #e8a87c; color: white; text-decoration: none; padding: 6px 14px; border-radius: 12px; font-weight: bold; font-family: 'Itim'; display: inline-block;">Ver perfil del donante</a>` : ''}
+                    <a href="perfil_publico.html?user=${encodeURIComponent(notif.origen_nombre)}" style="background: #e8a87c; color: white; text-decoration: none; padding: 6px 14px; border-radius: 12px; font-weight: bold; font-family: 'Itim'; display: inline-block;">Ver perfil del donante</a>
                     <button onclick="abrirModalGestionDonacion('${notif.mensaje}')" style="background: #fffde8; border: 1px solid #f0e6b8; padding: 6px 14px; border-radius: 12px; cursor: pointer; font-weight: bold; font-family: 'Itim';">Gestionar donación</button>
                 </div>
             `;
         } else {
-            if (!esSistema) {
-                htmlAccion = `<button onclick="window.location.href='perfil_publico.html?user=${encodeURIComponent(notif.origen_nombre)}'" style="background: #fffde8; border: 1px solid #f0e6b8; padding: 6px 14px; border-radius: 12px; cursor: pointer; font-weight: bold; font-family: 'Itim'; margin-top: 6px;">Ver perfil</button>`;
-            }
+            htmlAccion = `<button onclick="window.location.href='perfil_publico.html?user=${notif.origen_nombre}'" style="background: #fffde8; border: 1px solid #f0e6b8; padding: 6px 14px; border-radius: 12px; cursor: pointer; font-weight: bold; font-family: 'Itim'; margin-top: 6px;">Ver perfil</button>`;
         }
 
         tarjeta.innerHTML = `
@@ -156,6 +156,7 @@ function renderizarNotificaciones(lista) {
         contenedor.appendChild(tarjeta);
     });
 }
+
 window.responderSolicitud = async function(idSolicitud, accion) {
     const correoPropietario = obtenerCorreoUsuarioActivo();
     try {
@@ -194,14 +195,9 @@ window.eliminarNotificacionBd = async function(idNotificacion) {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-    if (typeof firebase !== 'undefined' && firebase.auth) {
-        firebase.auth().onAuthStateChanged((user) => {
-            if (user) {
-                cargarNotificacionesServidor();
-            } else {
-                // Intentar de todas formas por si hay localStorage activo
-                cargarNotificacionesServidor();
-            }
+    if (typeof firebase !== 'undefined') {
+        firebase.auth().onAuthStateChanged(() => {
+            cargarNotificacionesServidor();
         });
     } else {
         cargarNotificacionesServidor();
