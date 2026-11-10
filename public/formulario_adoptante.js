@@ -23,9 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 await cargarDatosRegistroUsuario(user.email);
             }
         }
-    }
-);
-    });
+    }); // <-- Aquí se cierra correctamente firebase.auth().onAuthStateChanged
 
     if (form) {
         form.addEventListener('input', () => { formularioModificado = true; });
@@ -66,7 +64,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 hay_niños_en_casa: getRadioValue('hay_niños_en_casa'),
                 con_quien_vives: document.getElementById('con_quien_vives')?.value.trim() || '',
                 tiene_otras_mascotas: getRadioValue('tiene_otras_mascotas'),
-                // CORREGIDO: Ahora lee correctamente el valor del radio (0 o 1) en lugar de buscar un ID inexistente
                 prosupuesto_mensual: document.getElementById('prosupuesto_mensual')?.value.trim() || 'No definido',
                 horas_ausente: parseInt(document.getElementById('horas_ausente')?.value || 0, 10),
                 cuidador: document.getElementById('cuidador')?.value.trim() || '',
@@ -104,6 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+}); // <-- ¡AQUÍ ES DONDE DEBE CERRAR EL 'DOMContentLoaded'!
 
 // Función para cargar datos cuando se presiona "Editar Perfil"
 async function cargarDatosCompletosAdoptante(correo) {
