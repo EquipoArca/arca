@@ -2524,6 +2524,66 @@ app.put('/api/donaciones/:id/estado', (req, res) => {
     });
 });
 // ==========================================
+// MÓDULO DE DONACIONES A FUNDACIONES (EXTENSIÓN USUARIO)
+// ==========================================
+
+// 4. Obtener el historial de donaciones hechas por un usuario normal
+app.get('/api/donaciones/usuario', (req, res) => {
+    const { correo_usuario } = req.query;
+
+    if (!correo_usuario) {
+        return res.status(400).json({ error: "Se requiere el correo del usuario." });
+    }
+
+    db.query("SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))", [correo_usuario], (err, userRes) => {
+        if (err || userRes.length === 0) {
+            return res.status(404).json({ error: "Usuario no encontrado." });
+        }
+
+        const id_usuario = userRes[0].id_usuarios;
+
+        const query = `
+            SELECT d.*, f.Nombre_Comercial AS nombre_fundacion, f.PFP_Fundacion AS foto_fundacion, f.Telefono_fundacion AS telefono_fundacion
+            FROM donaciones d
+            JOIN fundacion f ON d.id_fundacion = f.id_fundacion
+            WHERE d.id_usuario = ?
+            ORDER BY d.fecha_donacion DESC
+        `;
+
+        db.query(query, [id_usuario], (errDon, donaciones) => {
+            if (errDon) {
+                console.error("❌ Error al obtener donaciones del usuario:", errDon.message);
+                return res.status(500).json({ error: "Error al consultar las donaciones." });
+            }
+
+            res.json(donaciones);
+        });
+    });
+});
+
+// 5. Eliminar una donación del sistema (por parte del usuario que la creó)
+app.delete('/api/donaciones/:id', (req, res) => {
+    const idDonacion = req.params.id;
+
+    if (!idDonacion) {
+        return res.status(400).json({ error: "ID de donación inválido." });
+    }
+
+    const query = "DELETE FROM donaciones WHERE id_donacion = ?";
+    db.query(query, [idDonacion], (err, result) => {
+        if (err) {
+            console.error("❌ Error al eliminar la donación:", err.message);
+            return res.status(500).json({ error: "Error en el servidor al eliminar la donación." });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: "No se encontró la donación." });
+        }
+
+        res.json({ mensaje: "¡Donación eliminada con éxito del sistema!" });
+    });
+});
+// ==========================================
 // INICIALIZACIÓN DEL SERVIDOR
 // ==========================================
 const PORT = process.env.PORT || 3000;

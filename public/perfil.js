@@ -1051,3 +1051,107 @@ function mostrarAlertaArca(titulo, mensaje, opciones = {}) {
 
     boton.focus();
 }
+// ==========================================
+// GESTIÓN DE MIS DONACIONES (VISTA USUARIO)
+// ==========================================
+window.abrirModalMisDonaciones = async function() {
+    const modal = document.getElementById('modal-mis-donaciones');
+    if (modal) {
+        modal.style.display = 'flex';
+        await cargarMisDonacionesUsuario();
+    }
+};
+
+window.cerrarModalMisDonaciones = function() {
+    const modal = document.getElementById('modal-mis-donaciones');
+    if (modal) modal.style.display = 'none';
+};
+
+window.cerrarModalDonacionesOverlay = function(event) {
+    if (event.target.id === 'modal-mis-donaciones') {
+        window.cerrarModalMisDonaciones();
+    }
+};
+
+async function cargarMisDonacionesUsuario() {
+    const contenedor = document.getElementById('lista-donaciones-usuario-container');
+    if (!contenedor) return;
+
+    contenedor.innerHTML = '<p style="text-align: center; color: #666; font-style: italic;">Cargando tus donaciones...</p>';
+
+    const user = firebase.auth().currentUser;
+    if (!user || !user.email) {
+        contenedor.innerHTML = '<p style="text-align: center; color: #d9534f;">Inicia sesión para ver tus donaciones.</p>';
+        return;
+    }
+
+    try {
+        const res = await fetch(`/api/donaciones/usuario?correo_usuario=${encodeURIComponent(user.email)}`);
+        const donaciones = await res.json();
+
+        if (Array.isArray(donaciones) && donaciones.length > 0) {
+            contenedor.innerHTML = '';
+            donaciones.forEach(donacion => {
+                const fecha = donacion.fecha_donacion ? donacion.fecha_donacion.split('T')[0] : 'Reciente';
+                const avatarFundacion = donacion.foto_fundacion || 'logo.png';
+                
+                // Estilo dinámico según estado
+                const esRecogida = donacion.estado === 'recogida';
+                const estiloEstado = esRecogida 
+                    ? 'background: #e2fcd9; color: #2e7d32; border: 1px solid #c8e6c9;' 
+                    : 'background: #fff8e1; color: #f57f17; border: 1px solid #ffe0b2;';
+                const textoEstado = esRecogida ? 'Recogida ✓' : 'Pendiente ⏳';
+
+                const tarjeta = document.createElement('div');
+                tarjeta.style.cssText = 'display: flex; flex-direction: column; gap: 8px; background: #fffde8; padding: 15px; border-radius: 16px; border: 1px solid #f0e6b8; box-shadow: 0 4px 10px rgba(0,0,0,0.03);';
+
+                tarjeta.innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <img src="${avatarFundacion}" alt="Fundación" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 2px solid #fca38d;">
+                            <div>
+                                <span style="font-weight: bold; color: #2b2b2b; display: block; font-size: 15px;">${donacion.nombre_fundacion || 'Fundación'}</span>
+                                <span style="font-size: 12px; color: #777;">${fecha}</span>
+                            </div>
+                        </div>
+                        <span style="padding: 4px 10px; border-radius: 10px; font-size: 12px; font-weight: bold; ${estiloEstado}">${textoEstado}</span>
+                    </div>
+                    <div style="font-size: 14px; color: #444; background: #ffffff; padding: 10px; border-radius: 10px; border: 1px solid #fce4ec;">
+                        <strong>Tipo:</strong> ${donacion.tipo_donacion}<br>
+                        <strong>Detalle:</strong> ${donacion.descripcion_donacion || 'Sin especificación'}
+                    </div>
+                    <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px;">
+                        <button onclick="eliminarDonacionUsuario(${donacion.id_donacion})" style="background: #d9534f; color: white; border: none; padding: 6px 14px; border-radius: 12px; cursor: pointer; font-family: 'Itim'; font-size: 13px; font-weight: bold;">
+                            <i class="fa-solid fa-trash-can" style="margin-right: 4px;"></i> Eliminar
+                        </button>
+                    </div>
+                `;
+                contenedor.appendChild(tarjeta);
+            });
+        } else {
+            contenedor.innerHTML = `<p style="text-align: center; color: #666; font-style: italic; padding: 20px 0;">No has realizado ninguna donación todavía.</p>`;
+        }
+    } catch (e) {
+        console.error("Error al cargar donaciones:", e);
+        contenedor.innerHTML = `<p style="text-align: center; color: #d9534f;">Error al conectar con el servidor.</p>`;
+    }
+}
+
+window.eliminarDonacionUsuario = async function(idDonacion) {
+    if (!confirm("¿Estás seguro de que deseas eliminar esta donación del sistema?")) return;
+
+    try {
+        const res = await fetch(`/api/donaciones/${idDonacion}`, { method: 'DELETE' });
+        const data = await res.json();
+
+        if (res.ok) {
+            mostrarAlertaArca("¡Eliminado!", "La donación ha sido borrada con éxito. 🌸", { tipo: "aviso" });
+            cargarMisDonacionesUsuario(); // Recargar lista
+        } else {
+            throw new Error(data.error || "No se pudo eliminar");
+        }
+    } catch (e) {
+        console.error("Error al eliminar donación:", e);
+        mostrarAlertaArca("Error", "No se pudo eliminar la donación.", { tipo: "error" });
+    }
+};
