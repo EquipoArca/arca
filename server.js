@@ -2340,10 +2340,6 @@ app.post('/api/enviar-reporte-error', uploadSoporte.single('imagen_error'), (req
     }
 });
 
-// ==========================================
-// MÓDULO DE DONACIONES A FUNDACIONES
-// ==========================================
-
 // 1. Registrar una donación nueva (desde el usuario) y notificar dentro de la app a la fundación
 app.post('/api/crear-donacion', (req, res) => {
     const { correo_usuario, id_fundacion, tipo_donacion, descripcion_donacion } = req.body;
@@ -2371,11 +2367,15 @@ app.post('/api/crear-donacion', (req, res) => {
                 return res.status(500).json({ error: "Error en el servidor al guardar la donación." });
             }
 
+            // Búsqueda directa y blindada del id de usuario de la fundación
             const queryUsuarioFundacion = `
-                SELECT u.id_usuarios 
-                FROM usuarios u
-                JOIN fundacion f ON LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(f.Correo_fundacion))
-                WHERE f.id_fundacion = ?
+                SELECT id_usuarios 
+                FROM usuarios 
+                WHERE LOWER(TRIM(correo_usuario)) = (
+                    SELECT LOWER(TRIM(Correo_fundacion)) 
+                    FROM fundacion 
+                    WHERE id_fundacion = ?
+                )
             `;
 
             db.query(queryUsuarioFundacion, [id_fundacion], (errF, fundRes) => {
@@ -2403,8 +2403,7 @@ app.post('/api/crear-donacion', (req, res) => {
             res.status(201).json({ mensaje: "¡Donación registrada con éxito!", id_donacion: result.insertId });
         });
     });
-});   
-
+});
 // 2. Obtener las donaciones de una fundación
 app.get('/api/donaciones/fundacion', (req, res) => {
     const { correo_fundacion, estado } = req.query;
