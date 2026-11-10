@@ -2433,6 +2433,7 @@ app.get('/api/notificaciones/:correo', (req, res) => {
         return res.status(400).json({ error: "El correo es requerido." });
     }
 
+    // Consulta limpia y directa para evitar fallos de columnas faltantes o joins complejos
     const sql = `
         SELECT 
             n.id_notificacion,
@@ -2440,25 +2441,22 @@ app.get('/api/notificaciones/:correo', (req, res) => {
             n.id_usuario_origen,
             n.tipo,
             n.mensaje,
-            n.leida,
-            n.fecha_creacion AS fecha_notificacion,
+            COALESCE(n.leida, 0) AS leida,
+            COALESCE(n.fecha_creacion, NOW()) AS fecha_notificacion,
             COALESCE(u_orig.nombre_usuario, 'Sistema ARCA') AS origen_nombre,
             u_orig.foto_perfil AS origen_foto,
-            s.id_solicitud,
-            COALESCE(s.estado, 'pendiente') AS estado_solicitud
+            NULL AS id_solicitud,
+            'pendiente' AS estado_solicitud
         FROM notificaciones n
         INNER JOIN usuarios u_dest ON n.id_usuario_destino = u_dest.id_usuarios
         LEFT JOIN usuarios u_orig ON n.id_usuario_origen = u_orig.id_usuarios
-        LEFT JOIN solicitudes_adoptante s ON (
-            s.id_propietario = n.id_usuario_destino AND s.id_solicitante = n.id_usuario_origen
-        )
         WHERE LOWER(TRIM(u_dest.correo_usuario)) = LOWER(TRIM(?))
         ORDER BY n.id_notificacion DESC
     `;
 
     db.query(sql, [correoUsuario], (err, results) => {
         if (err) {
-            console.error("❌ Error al obtener notificaciones detalladas:", err.message);
+            console.error("❌ Error crítico en notificaciones:", err.message);
             return res.status(500).json({ error: "Error en el servidor al obtener notificaciones." });
         }
         res.json(results);
