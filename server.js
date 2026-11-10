@@ -521,55 +521,67 @@ app.post('/crear-reporte', upload.array('fotos_reporte[]', 3), (req, res) => {
         return res.status(400).json({ error: "Faltan campos obligatorios para el reporte." });
     }
 
-    let imagenesArray = [];
+let imagenesArray = [];
     if (req.files && req.files.length > 0) {
         imagenesArray = req.files.map(file => `data:${file.mimetype};base64,${file.buffer.toString('base64')}`);
-    }
+    };
     const img_reporte = imagenesArray.length > 0 ? JSON.stringify(imagenesArray) : null;
 
-    db.query("SELECT id_usuarios FROM usuarios WHERE correo_usuario = ?", [correo_usuario], (err, results) => {
+        db.query("SELECT id_usuarios FROM usuarios WHERE correo_usuario = ?", [correo_usuario], (err, results) => {
         if (err || results.length === 0) {
             console.error("Error al buscar ID del usuario:", err);
             return res.status(500).json({ error: "No se pudo asociar el usuario al reporte." });
         }
 
-        const id_usuarios = results[0].id_usuarios;
+       const id_usuarios = results[0].id_usuarios;
         const Fecha_reporte = new Date().toISOString().split('T')[0];
 
-        const queryInsertReporte = `
-            INSERT INTO reportes
-            (id_tipo_reporte, Descripcion, Ubicacion, telefono_contacto, correo_contacto, Fecha_reporte, img_reporte, id_usuarios)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        const queryVerificarDuplicado = `
+            SELECT id_reporte FROM reportes
+            WHERE id_usuarios = ? AND Descripcion = ? AND Ubicacion = ?
+            AND Fecha_reporte = ?
         `;
 
-        const valores = [
-            id_tipo_reporte,
-            Descripcion,
-            Ubicacion,
-            telefono_contacto || null,
-            correo_contacto || null,
-            Fecha_reporte,
-            img_reporte, 
-            id_usuarios
-        ];
-
-        db.query(queryInsertReporte, valores, (errResult, result) => {
-            if (errResult) {
-                console.error("❌ ERROR AL GUARDAR REPORTE:", errResult.message);
-                return res.status(500).json({ error: "Error al guardar en la base de datos: " + errResult.message });
+        db.query(queryVerificarDuplicado, [id_usuarios, Descripcion, Ubicacion, Fecha_reporte], (errDup, dupResults) => {
+            if (!errDup && dupResults.length > 0) {
+                return res.status(400).json({ error: "Ya has enviado este reporte recientemente. Evita duplicados." });
             }
 
-            const idReporteNuevo = result.insertId;
-            const queryInsertPublicacion = `INSERT INTO publicaciones (id_reporte) VALUES (?)`;
+            const queryInsertReporte = `
+                INSERT INTO reportes
+                (id_tipo_reporte, Descripcion, Ubicacion, telefono_contacto, correo_contacto, Fecha_reporte, img_reporte, id_usuarios)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            `;
 
-            db.query(queryInsertPublicacion, [idReporteNuevo], (errPub) => {
-                if (errPub) {
-                    console.error("⚠️ Advertencia: El reporte se creó pero falló al registrarse en publicaciones:", errPub.message);
+            const valores = [
+                id_tipo_reporte,
+                Descripcion,
+                Ubicacion,
+                telefono_contacto || null,
+                correo_contacto || null,
+                Fecha_reporte,
+                img_reporte, 
+                id_usuarios
+            ];
+
+            db.query(queryInsertReporte, valores, (errResult, result) => {
+                if (errResult) {
+                    console.error("❌ ERROR AL GUARDAR REPORTE:", errResult.message);
+                    return res.status(500).json({ error: "Error al guardar en la base de datos: " + errResult.message });
                 }
 
-                res.status(201).json({
-                    mensaje: "Reporte creado exitosamente",
-                    id_reporte: idReporteNuevo
+                const idReporteNuevo = result.insertId;
+                const queryInsertPublicacion = `INSERT INTO publicaciones (id_reporte) VALUES (?)`;
+
+                db.query(queryInsertPublicacion, [idReporteNuevo], (errPub) => {
+                    if (errPub) {
+                        console.error("⚠️ Advertencia: El reporte se creó pero falló al registrarse en publicaciones:", errPub.message);
+                    }
+
+                    res.status(201).json({
+                        mensaje: "Reporte creado exitosamente",
+                        id_reporte: idReporteNuevo
+                    });
                 });
             });
         });

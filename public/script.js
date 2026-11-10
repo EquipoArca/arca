@@ -629,63 +629,7 @@ function renderizarMiniaturas() {
     });
 }
 
-// Interceptar envío del formulario para incluir las fotos validadas
-if (formReporte) {
-    formReporte.addEventListener('submit', async (e) => {
-        e.preventDefault();
 
-        if (archivosSeleccionados.length > MAXIMO_FOTOS) {
-            mostrarAlertaArca(
-                "¡Ey, no puedes hacer eso! 🌸",
-                "No puedes cargar más de tres imágenes. El máximo de imágenes que puedes adjuntar son tres.",
-                { tipo: "aviso" }
-            );
-            return;
-        }
-
-        const formData = new FormData(formReporte);
-        formData.delete('fotos_reporte[]');
-
-        // Obtener el correo del usuario actual desde Firebase o localStorage
-        const user = typeof firebase !== 'undefined' && firebase.auth().currentUser ? firebase.auth().currentUser : null;
-        const correoUsuario = (user && user.email) ? user.email : (localStorage.getItem('correo_usuario') || '');
-
-        // Mapear los nombres del formulario HTML a los que exige el backend (server.js)
-        formData.set('id_tipo_reporte', formData.get('tipo_reporte') || '');
-        formData.set('Descripcion', formData.get('descripcion_reporte') || '');
-        formData.set('Ubicacion', formData.get('direccion_reporte') || '');
-        formData.set('correo_usuario', correoUsuario);
-
-        // Adjuntar las fotos validadas
-        archivosSeleccionados.forEach(file => {
-            formData.append('fotos_reporte[]', file);
-        });
-
-        try {
-            const respuesta = await fetch('/crear-reporte', {
-                method: 'POST',
-                body: formData 
-            });
-
-            const resultadoJson = await respuesta.json();
-
-            if (!respuesta.ok) throw new Error(resultadoJson.error || "Error al enviar el reporte");
-
-            mostrarAlertaArca(
-                "¡Reporte enviado! 🌸",
-                "Tu reporte se ha publicado con éxito.",
-                {
-                    tipo: "aviso",
-                    alCerrar: () => { window.location.href = "home.html"; }
-                }
-            );
-
-        } catch (error) {
-            console.error("Error al crear el reporte:", error);
-            mostrarAlertaArca("¡Error!", "No se pudo enviar el reporte: " + error.message);
-        }
-    });
-}
 // ==========================================
 // 5. CARGA DE REPORTES Y GRÁFICAS
 // ==========================================
