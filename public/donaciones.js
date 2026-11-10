@@ -94,8 +94,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (respuesta.ok) {
                     // ALERTA DE ÉXITO CON ESTILO ARCA
                     mostrarAlertaArca(
-                        "¡Donación Enviada!", 
-                        "Tu donación se registró con éxito y la fundación ha sido notificada. ¡Muchas gracias por apoyar!", 
+                        "Donación Enviada", 
+                        "Tu donación se registró con éxito y la fundación ha sido notificada, pronto recibiras actualizaciones para llevar a cabo la donación. Muchas gracias por tu apoyo", 
                         {
                             tipo: "aviso",
                             textoBoton: "Ir al Inicio",

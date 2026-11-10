@@ -1675,6 +1675,10 @@ app.post('/api/solicitar-ver-adoptante', (req, res) => {
 app.get('/api/notificaciones/:correo', (req, res) => {
     const { correo } = req.params;
 
+    if (!correo) {
+        return res.status(400).json({ error: "Correo requerido" });
+    }
+
     const sql = `
         SELECT n.id_notificacion, n.tipo, n.mensaje, n.leida, n.fecha_notificacion,
                u_origen.nombre_usuario AS origen_nombre, u_origen.foto_perfil AS origen_foto,
@@ -1682,20 +1686,19 @@ app.get('/api/notificaciones/:correo', (req, res) => {
         FROM notificaciones n
         JOIN usuarios u_destino ON n.id_usuario_destino = u_destino.id_usuarios
         LEFT JOIN usuarios u_origen ON n.id_usuario_origen = u_origen.id_usuarios
-        LEFT JOIN solicitudes_adoptante s ON (s.id_solicitante = n.id_usuario_origen AND s.id_propietario = n.id_usuario_destino)
+        LEFT JOIN solicitudes_adoptante s ON (s.id_solicitante = n.id_usuario_origen AND s.id_propietario = n.id_usuario_destino AND n.tipo = 'solicitud_adoptante')
         WHERE LOWER(TRIM(u_destino.correo_usuario)) = LOWER(TRIM(?))
         ORDER BY n.fecha_notificacion DESC
     `;
 
     db.query(sql, [correo], (err, results) => {
         if (err) {
-            console.error("Error al obtener notificaciones:", err);
-            return res.status(500).json({ error: "Error interno" });
+            console.error("❌ Error al obtener notificaciones en el servidor:", err.message);
+            return res.status(500).json({ error: "Error interno al consultar notificaciones" });
         }
         res.json(results);
     });
 });
-
 app.post('/api/responder-solicitud-adoptante', (req, res) => {
     const { id_solicitud, accion, correo_propietario } = req.body;
     const nuevoEstado = accion === 'aceptar' ? 'aceptada' : 'rechazada';
