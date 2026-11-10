@@ -3,8 +3,9 @@ function obtenerContenedor() {
 }
 
 function obtenerCorreoUsuarioActivo() {
-    const authUser = typeof firebase !== 'undefined' && firebase.auth().currentUser;
-    if (authUser && authUser.email) return authUser.email;
+    if (typeof firebase !== 'undefined' && firebase.auth().currentUser && firebase.auth().currentUser.email) {
+        return firebase.auth().currentUser.email;
+    }
 
     return localStorage.getItem('correo_usuario') || 
            localStorage.getItem('usuario_correo') || 
@@ -192,9 +193,14 @@ window.eliminarNotificacionBd = async function(idNotificacion) {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-    if (typeof firebase !== 'undefined') {
-        firebase.auth().onAuthStateChanged(() => {
-            cargarNotificacionesServidor();
+    if (typeof firebase !== 'undefined' && firebase.auth) {
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                cargarNotificacionesServidor();
+            } else {
+                // Intentar de todas formas por si hay localStorage activo
+                cargarNotificacionesServidor();
+            }
         });
     } else {
         cargarNotificacionesServidor();

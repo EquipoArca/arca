@@ -1615,29 +1615,39 @@ app.post('/api/alternar-seguimiento', (req, res) => {
     const { correo_seguidor, id_seguido } = req.body;
 
     db.query("SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))", [correo_seguidor], (err, rows) => {
-        if (err || rows.length === 0) return res.status(400).json({ error: "Usuario no encontrado" });
+        if (err || !rows || rows.length === 0) return res.status(400).json({ error: "Usuario no encontrado" });
         const idSeguidor = rows[0].id_usuarios;
 
         db.query("SELECT id_seguidor FROM seguidores WHERE id_usuario_seguidor = ? AND id_usuario_seguido = ?", [idSeguidor, id_seguido], (errExist, exist) => {
-            if (exist.length > 0) {
+            if (exist && exist.length > 0) {
                 db.query("DELETE FROM seguidores WHERE id_seguidor = ?", [exist[0].id_seguidor], () => {
                     res.json({ siguiendo: false, mensaje: "Has dejado de seguir a este usuario." });
                 });
             } else {
-                db.query("INSERT INTO seguidores (id_usuario_seguidor, id_usuario_seguido) VALUES (?, ?)", [idSeguidor, id_seguido], () => {
-                    db.query("INSERT INTO notificaciones (id_usuario_destino, id_usuario_origen, tipo, mensaje) VALUES (?, ?, 'nuevo_seguidor', 'comenzó a seguirte.')", [id_seguido, idSeguidor]);
+                db.query("INSERT INTO seguidores (id_usuario_seguidor, id_usuario_seguido) VALUES (?, ?)", [idSeguidor, id_seguido], (errIns) => {
+                    if (errIns) return res.status(500).json({ error: "Error al seguir usuario" });
+
+                    // SOLO CREAR NOTIFICACIÓN SI NO ES A SÍ MISMO
+                    if (Number(idSeguidor) !== Number(id_seguido)) {
+                        db.query(
+                            "INSERT INTO notificaciones (id_usuario_destino, id_usuario_origen, tipo, mensaje) VALUES (?, ?, 'nuevo_seguidor', 'comenzó a seguirte.')",
+                            [id_seguido, idSeguidor],
+                            (errN) => {
+                                if (errN) console.error("❌ Error al insertar notificación de seguidor:", errN.message);
+                            }
+                        );
+                    }
                     res.json({ siguiendo: true, mensaje: "Ahora sigues a este usuario" });
                 });
             }
         });
     });
 });
-
 app.post('/api/solicitar-ver-adoptante', (req, res) => {
     const { correo_solicitante, id_propietario } = req.body;
 
     db.query("SELECT id_usuarios, nombre_usuario FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))", [correo_solicitante], (err, rows) => {
-        if (err || rows.length === 0) return res.status(400).json({ error: "Error de usuario" });
+        if (err || !rows || rows.length === 0) return res.status(400).json({ error: "Error de usuario" });
        
         const idSolicitante = rows[0].id_usuarios;
         const nombreSolicitante = rows[0].nombre_usuario;
@@ -1654,16 +1664,21 @@ app.post('/api/solicitar-ver-adoptante', (req, res) => {
             }
 
             const sql = "INSERT INTO solicitudes_adoptante (id_solicitante, id_propietario, estado) VALUES (?, ?, 'pendiente') ON DUPLICATE KEY UPDATE estado='pendiente'";
-            db.query(sql, [idSolicitante, id_propietario], () => {
-                const msg = `@${nombreSolicitante} quiere ver tu perfil de adoptante.`;
-                const checkNotif = "SELECT id_notificacion FROM notificaciones WHERE id_usuario_destino = ? AND id_usuario_origen = ? AND tipo = 'solicitud_adoptante' AND leida = 0";
-               
-                db.query(checkNotif, [id_propietario, idSolicitante], (errN, resN) => {
-                    if (!resN || resN.length === 0) {
-                        db.query("INSERT INTO notificaciones (id_usuario_destino, id_usuario_origen, tipo, mensaje) VALUES (?, ?, 'solicitud_adoptante', ?)", [id_propietario, idSolicitante, msg]);
+            db.query(sql, [idSolicitante, id_propietario], (errSql) => {
+                if (errSql) return res.status(500).json({ error: "Error al registrar la solicitud." });
+
+                const msg = `quiere ver tu perfil de adoptante.`;
+                
+                // INSERCIÓN DIRECTA SEGUARA SIN CONSULTA QUE PUEDA FALLAR
+                db.query(
+                    "INSERT INTO notificaciones (id_usuario_destino, id_usuario_origen, tipo, mensaje) VALUES (?, ?, 'solicitud_adoptante', ?)",
+                    [id_propietario, idSolicitante, msg],
+                    (errNoti) => {
+                        if (errNoti) console.error("❌ Error al insertar notificación de adoptante:", errNoti.message);
                     }
-                    res.json({ exito: true, mensaje: "Solicitud enviada correctamente.", estado: 'pendiente' });
-                });
+                );
+
+                res.json({ exito: true, mensaje: "Solicitud enviada correctamente.", estado: 'pendiente' });
             });
         });
     });
@@ -2404,7 +2419,6 @@ app.post('/api/crear-donacion', (req, res) => {
         });
     });
 });
-// Endpoint definitivo, seguro y libre de errores 500 para notificaciones
 app.get('/api/notificaciones/:correo', (req, res) => {
     const correoUsuario = req.params.correo;
 
@@ -2420,15 +2434,17 @@ app.get('/api/notificaciones/:correo', (req, res) => {
             n.tipo,
             n.mensaje,
             n.leida,
-            n.fecha_creacion,
             n.fecha_creacion AS fecha_notificacion,
             COALESCE(u_orig.nombre_usuario, 'Sistema ARCA') AS origen_nombre,
             u_orig.foto_perfil AS origen_foto,
-            NULL AS id_solicitud,
-            'pendiente' AS estado_solicitud
+            s.id_solicitud,
+            COALESCE(s.estado, 'pendiente') AS estado_solicitud
         FROM notificaciones n
         INNER JOIN usuarios u_dest ON n.id_usuario_destino = u_dest.id_usuarios
         LEFT JOIN usuarios u_orig ON n.id_usuario_origen = u_orig.id_usuarios
+        LEFT JOIN solicitudes_adoptante s ON (
+            s.id_propietario = n.id_usuario_destino AND s.id_solicitante = n.id_usuario_origen
+        )
         WHERE LOWER(TRIM(u_dest.correo_usuario)) = LOWER(TRIM(?))
         ORDER BY n.id_notificacion DESC
     `;
@@ -2436,7 +2452,7 @@ app.get('/api/notificaciones/:correo', (req, res) => {
     db.query(sql, [correoUsuario], (err, results) => {
         if (err) {
             console.error("❌ Error al obtener notificaciones:", err.message);
-            return res.status(500).json({ error: "Error en el servidor al obtener notificaciones: " + err.message });
+            return res.status(500).json({ error: "Error en el servidor al obtener notificaciones." });
         }
         res.json(results);
     });
