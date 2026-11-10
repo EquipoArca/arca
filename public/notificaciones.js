@@ -108,7 +108,7 @@ function renderizarNotificaciones(lista) {
 
         const fechaStr = notif.fecha_notificacion ? notif.fecha_notificacion.split('T')[0] : 'Reciente';
         
-        // MODIFICACIÓN CLAVE: Convertimos el nombre de usuario en un enlace interactivo <a>
+        // Convertimos el nombre de usuario en un enlace interactivo <a> hacia su perfil público
         const autorNombre = notif.origen_nombre 
             ? `<a href="perfil_publico.html?user=${encodeURIComponent(notif.origen_nombre)}" style="color: #e06d53; font-weight: bold; text-decoration: none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">@${notif.origen_nombre}</a>` 
             : 'Sistema ARCA';
@@ -123,6 +123,14 @@ function renderizarNotificaciones(lista) {
             `;
         } else if (notif.tipo === 'solicitud_adoptante' && notif.estado_solicitud === 'aceptada') {
             htmlAccion = `<span style="color: #25d366; font-weight: bold; font-size: 13.5px;"> Solicitud aceptada ✓</span>`;
+        } else if (notif.tipo === 'nueva_donacion') {
+            // INTEGRACIÓN: Acciones específicas para cuando llega una nueva donación pendiente
+            htmlAccion = `
+                <div style="display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;">
+                    <a href="perfil_publico.html?user=${encodeURIComponent(notif.origen_nombre)}" style="background: #e8a87c; color: white; text-decoration: none; padding: 6px 14px; border-radius: 12px; font-weight: bold; font-family: 'Itim'; display: inline-block;">Ver perfil del donante</a>
+                    <button onclick="abrirModalGestionDonacion('${notif.mensaje}')" style="background: #fffde8; border: 1px solid #f0e6b8; padding: 6px 14px; border-radius: 12px; cursor: pointer; font-weight: bold; font-family: 'Itim';">Gestionar donación</button>
+                </div>
+            `;
         } else {
             htmlAccion = `<button onclick="window.location.href='perfil_publico.html?user=${notif.origen_nombre}'" style="background: #fffde8; border: 1px solid #f0e6b8; padding: 6px 14px; border-radius: 12px; cursor: pointer; font-weight: bold; font-family: 'Itim'; margin-top: 6px;">Ver perfil</button>`;
         }
@@ -153,16 +161,24 @@ window.responderSolicitud = async function(idSolicitud, accion) {
             body: JSON.stringify({ id_solicitud: idSolicitud, accion, correo_propietario: correoPropietario })
         });
         const data = await res.json();
-      mostrarAlertaArca(data.mensaje, { 
+        mostrarAlertaArca("Aviso", data.mensaje, { 
+            tipo: "aviso",
+            alCerrar: () => {
+                cargarNotificacionesServidor(); 
+            }
+        });
+    } catch (e) {
+        console.error("Error respondiendo solicitud ♡", e);
+    }
+};
+
+// Función disparada al hacer clic en gestionar la donación desde la notificación
+window.abrirModalGestionDonacion = function(mensajeNotificacion) {
+    mostrarAlertaArca("Gestión de Donación", `Detalle: ${mensajeNotificacion}\n\nPuedes marcar esta donación como recogida desde tu panel de control principal de la fundación.`, {
         tipo: "aviso",
-        alCerrar: () => {
-            cargarNotificacionesServidor(); 
-        }
+        textoBoton: "Entendido"
     });
-} catch (e) {
-    console.error("Error respondiendo solicitud ♡", e);
-}
-}
+};
 
 window.eliminarNotificacionBd = async function(idNotificacion) {
     try {
@@ -250,6 +266,7 @@ function mostrarAlertaArca(titulo, mensaje, opciones = {}) {
                 font-size: 17px;
                 line-height: 1.5;
                 overflow-wrap: anywhere;
+                white-space: pre-line;
             }
 
            .arca-alerta-boton {

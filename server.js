@@ -2399,7 +2399,7 @@ app.post('/api/enviar-reporte-error', uploadSoporte.single('imagen_error'), (req
 // MÓDULO DE DONACIONES A FUNDACIONES
 // ==========================================
 
-// 1. Registrar una donación nueva (desde el usuario)
+// 1. Registrar una donación nueva (desde el usuario) y notificar dentro de la app a la fundación
 app.post('/api/crear-donacion', (req, res) => {
     const { correo_usuario, id_fundacion, tipo_donacion, descripcion_donacion } = req.body;
 
@@ -2407,40 +2407,51 @@ app.post('/api/crear-donacion', (req, res) => {
         return res.status(400).json({ error: "Faltan datos obligatorios para registrar la donación." });
     }
 
+    // Buscar al usuario donante
     db.query("SELECT id_usuarios, nombre_usuario FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))", [correo_usuario], (err, userRes) => {
         if (err || userRes.length === 0) {
-            return res.status(404).json({ error: "Usuario no encontrado." });
+            return res.status(404).json({ error: "Usuario donante no encontrado." });
         }
 
-        const id_usuario = userRes[0].id_usuarios;
-        const nombreUsuario = userRes[0].nombre_usuario;
+        const id_usuario_donante = userRes[0].id_usuarios;
+        const nombreDonante = userRes[0].nombre_usuario;
 
+        // Insertar en la tabla de donaciones
         const queryInsert = `
             INSERT INTO donaciones (id_usuario, id_fundacion, tipo_donacion, descripcion_donacion, estado)
             VALUES (?, ?, ?, ?, 'pendiente')
         `;
 
-        db.query(queryInsert, [id_usuario, id_fundacion, tipo_donacion, descripcion_donacion || ''], (errInsert, result) => {
+        db.query(queryInsert, [id_usuario_donante, id_fundacion, tipo_donacion, descripcion_donacion || ''], (errInsert, result) => {
             if (errInsert) {
-                console.error("❌ Error al registrar donación:", errInsert.message);
+                console.error("❌ Error al registrar donación en BD:", errInsert.message);
                 return res.status(500).json({ error: "Error en el servidor al guardar la donación." });
             }
 
-            // Notificar a la fundación
-            db.query("SELECT Correo_fundacion, id_fundacion FROM fundacion WHERE id_fundacion = ?", [id_fundacion], (errF, fundRes) => {
-                if (!errF && fundRes.length > 0) {
-                    const correoFundacion = fundRes[0].Correo_fundacion;
+            // Buscar la cuenta de usuario vinculada a la fundación seleccionada para la notificación en la app
+            const queryUsuarioFundacion = `
+                SELECT u.id_usuarios 
+                FROM usuarios u
+                JOIN fundacion f ON LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(f.Correo_fundacion))
+                WHERE f.id_fundacion = ?
+            `;
 
-                    db.query("SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))", [correoFundacion], (errUsrF, usrFRes) => {
-                        if (!errUsrF && usrFRes.length > 0) {
-                            const idDestinoFundacion = usrFRes[0].id_usuarios;
-                            const mensajeNotif = `@${nombreUsuario} ha realizado una nueva donación (${tipo_donacion}). ¡Revísala para gestionarla!`;
+            db.query(queryUsuarioFundacion, [id_fundacion], (errF, fundRes) => {
+                if (errF || fundRes.length === 0) {
+                    console.error("⚠️ Donación guardada, pero no se encontró la cuenta de usuario de la fundación ID:", id_fundacion);
+                } else {
+                    const idDestinoFundacion = fundRes[0].id_usuarios;
+                    const mensajeNotif = `@${nombreDonante} ha realizado una nueva donación de (${tipo_donacion}). ¡Ingresa a tu panel para gestionarla!`;
 
-                            db.query(
-                                "INSERT INTO notificaciones (id_usuario_destino, id_usuario_origen, tipo, mensaje) VALUES (?, ?, 'nueva_donacion', ?)",
-                                [idDestinoFundacion, id_usuario, mensajeNotif]
-                            );
-                        }
+                    // Guardar la notificación interna en la base de datos de ARCA
+                    const queryNotif = `
+                        INSERT INTO notificaciones (id_usuario_destino, id_usuario_origen, tipo, mensaje)
+                        VALUES (?, ?, 'nueva_donacion', ?)
+                    `;
+
+                    db.query(queryNotif, [idDestinoFundacion, id_usuario_donante, mensajeNotif], (errN) => {
+                        if (errN) console.error("❌ Error al insertar notificación interna:", errN.message);
+                        else console.log("✅ Notificación guardada exitosamente en la cuenta de la fundación en la app.");
                     });
                 }
             });
@@ -2448,8 +2459,7 @@ app.post('/api/crear-donacion', (req, res) => {
             res.status(201).json({ mensaje: "¡Donación registrada con éxito!", id_donacion: result.insertId });
         });
     });
-});
-
+});     
 // 2. Obtener las donaciones de una fundación (con filtros por estado)
 app.get('/api/donaciones/fundacion', (req, res) => {
     const { correo_fundacion, estado } = req.query;
