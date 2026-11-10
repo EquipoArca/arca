@@ -2458,37 +2458,8 @@ app.get('/api/notificaciones/:correo', (req, res) => {
 
     db.query(sql, [correoUsuario], (err, results) => {
         if (err) {
-            console.error("❌ Error al obtener notificaciones detalladas, intentando fallback básico:", err.message);
-            
-            // FALLBACK DE EMERGENCIA: Si la consulta con JOINS complejos falla, 
-            // devolvemos las notificaciones básicas directamente para que la página no colapse en 500.
-            const sqlFallback = `
-                SELECT 
-                    n.id_notificacion,
-                    n.id_usuario_destino,
-                    n.id_usuario_origen,
-                    n.tipo,
-                    n.mensaje,
-                    0 AS leida,
-                    NOW() AS fecha_notificacion,
-                    'Sistema ARCA' AS origen_nombre,
-                    NULL AS origen_foto,
-                    NULL AS id_solicitud,
-                    'pendiente' AS estado_solicitud
-                FROM notificaciones n
-                INNER JOIN usuarios u ON n.id_usuario_destino = u.id_usuarios
-                WHERE LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(?))
-                ORDER BY n.id_notificacion DESC
-            `;
-            
-            db.query(sqlFallback, [correoUsuario], (errFb, resultsFb) => {
-                if (errFb) {
-                    console.error("❌ Error crítico en fallback de notificaciones:", errFb.message);
-                    return res.status(500).json({ error: "Error en el servidor al obtener notificaciones." });
-                }
-                return res.json(resultsFb);
-            });
-            return;
+            console.error("❌ Error al obtener notificaciones detalladas:", err.message);
+            return res.status(500).json({ error: "Error en el servidor al obtener notificaciones." });
         }
         res.json(results);
     });

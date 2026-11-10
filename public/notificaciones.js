@@ -108,7 +108,7 @@ function renderizarNotificaciones(lista) {
 
         const fechaStr = notif.fecha_notificacion ? notif.fecha_notificacion.split('T')[0] : 'Reciente';
         
-        const esSistema = !notif.origen_nombre || notif.origen_nombre === 'Sistema ARCA';
+        const esSistema = !notif.origen_nombre || notif.origen_nombre === 'Sistema ARCA' || !notif.id_usuario_origen;
         
         const autorNombre = !esSistema 
             ? `<a href="perfil_publico.html?user=${encodeURIComponent(notif.origen_nombre)}" style="color: #e06d53; font-weight: bold; text-decoration: none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">@${notif.origen_nombre}</a>` 
@@ -116,7 +116,6 @@ function renderizarNotificaciones(lista) {
 
         let htmlAccion = '';
 
-        // SECCIÓN ADOPTANTE
         if (notif.tipo === 'solicitud_adoptante' && notif.id_solicitud) {
             if (notif.estado_solicitud === 'pendiente') {
                 htmlAccion = `
@@ -128,7 +127,6 @@ function renderizarNotificaciones(lista) {
             } else if (notif.estado_solicitud === 'aceptada') {
                 htmlAccion = `<span style="color: #25d366; font-weight: bold; font-size: 13.5px;"> Solicitud aceptada ✓</span>`;
             }
-        // SECCIÓN DONACIONES
         } else if (notif.tipo === 'nueva_donacion') {
             htmlAccion = `
                 <div style="display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;">
@@ -137,7 +135,6 @@ function renderizarNotificaciones(lista) {
                 </div>
             `;
         } else {
-            // SOLO MOSTRAR BOTÓN DE VER PERFIL SI NO ES UNA NOTIFICACIÓN DEL SISTEMA
             if (!esSistema) {
                 htmlAccion = `<button onclick="window.location.href='perfil_publico.html?user=${encodeURIComponent(notif.origen_nombre)}'" style="background: #fffde8; border: 1px solid #f0e6b8; padding: 6px 14px; border-radius: 12px; cursor: pointer; font-weight: bold; font-family: 'Itim'; margin-top: 6px;">Ver perfil</button>`;
             }
