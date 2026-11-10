@@ -2435,7 +2435,7 @@ app.post('/api/crear-donacion', (req, res) => {
                 return res.status(500).json({ error: "Error en el servidor al guardar la donación." });
             }
 
-            // Buscar la cuenta de usuario vinculada a la fundación seleccionada para la notificación en la app
+            // Buscar la cuenta de usuario vinculada a la fundación usando el id_fundacion del body
             const queryUsuarioFundacion = `
                 SELECT u.id_usuarios 
                 FROM usuarios u
@@ -2458,7 +2458,7 @@ app.post('/api/crear-donacion', (req, res) => {
 
                     db.query(queryNotif, [idDestinoFundacion, id_usuario_donante, mensajeNotif], (errN) => {
                         if (errN) console.error("❌ Error al insertar notificación interna:", errN.message);
-                        else console.log("✅ Notificación guardada exitosamente en la cuenta de la fundación en la app.");
+                        else console.log("✅ ¡Notificación de donación guardada con éxito en la cuenta de la fundación!");
                     });
                 }
             });
@@ -2466,7 +2466,7 @@ app.post('/api/crear-donacion', (req, res) => {
             res.status(201).json({ mensaje: "¡Donación registrada con éxito!", id_donacion: result.insertId });
         });
     });
-});     
+});    
 // 2. Obtener las donaciones de una fundación (con filtros por estado)
 app.get('/api/donaciones/fundacion', (req, res) => {
     const { correo_fundacion, estado } = req.query;
