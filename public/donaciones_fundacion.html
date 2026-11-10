@@ -388,8 +388,7 @@
             const menu = document.getElementById('mini-menu-card');
             if (menu) menu.classList.toggle('show');
         }
-
-        let donacionesGlobales = [];
+let donacionesGlobales = [];
 
         async function cargarDonacionesFundacion() {
             const contenedor = document.getElementById('contenedor-donaciones');
@@ -403,7 +402,28 @@
                 if (!res.ok) throw new Error("Error al obtener donaciones");
 
                 donacionesGlobales = await res.json();
+
+                // Verificamos si en la URL viene un id_donacion específico desde la notificación
+                const urlParams = new URLSearchParams(window.location.search);
+                const idDonacionBuscada = urlParams.get('id_donacion');
+
+                if (idDonacionBuscada) {
+                    // Filtramos inmediatamente para mostrar únicamente la donación de la notificación
+                    const donacionEspecifica = donacionesGlobales.filter(d => String(d.id_donacion) === String(idDonacionBuscada));
+                    
+                    if (donacionEspecifica.length > 0) {
+                        renderizarListaDonaciones(donacionEspecifica);
+                        
+                        // Opcional: Agregamos un aviso visual discreto para indicarle a la fundación que está viendo un detalle específico
+                        const banner = document.querySelector('.banner-donaciones h1');
+                        if (banner) banner.textContent = "Detalle de Donación";
+                        return;
+                    }
+                }
+
+                // Si no viene ningún ID, mostramos la lista completa con normalidad
                 renderizarListaDonaciones(donacionesGlobales);
+
             } catch (err) {
                 console.error(err);
                 contenedor.innerHTML = `<p style="text-align:center; color: #d9534f;">No se pudieron cargar las donaciones.</p>`;
@@ -423,6 +443,13 @@
                 const tarjeta = document.createElement('article');
                 tarjeta.className = 'tarjeta-donacion';
                 tarjeta.style.animationDelay = `${index * 0.08}s`;
+
+                // Si esta tarjeta coincide con el ID de la URL, le añadimos un borde o efecto de brillo sutil para resaltarla
+                const urlParams = new URLSearchParams(window.location.search);
+                if (String(donacion.id_donacion) === String(urlParams.get('id_donacion'))) {
+                    tarjeta.style.borderColor = '#e985a0';
+                    tarjeta.style.boxShadow = '0 0 25px rgba(233, 133, 160, 0.4)';
+                }
 
                 const fecha = donacion.fecha_donacion ? donacion.fecha_donacion.split('T')[0] : 'Reciente';
                 const estadoBadge = donacion.estado === 'recogida' 
@@ -454,7 +481,6 @@
                 contenedor.appendChild(tarjeta);
             });
         }
-
         function filtrarDonaciones(filtro, btn) {
             document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('activo'));
             if (btn) btn.classList.add('activo');
