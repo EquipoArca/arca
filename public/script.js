@@ -1102,7 +1102,7 @@ async function cargarNovedadesSeguras() {
                     }
                 }
 
-                const fechaFormateada = pub.Fecha_reporte ? pub.Fecha_reporte.split('T')[0] : '';
+                const fechaFormateada = pub.Fecha_reporte ? pub.Fecha_reporte.split('T')[0].split(' ')[0] : '';
                 let ubicacionTextoBruta = pub.Ubicacion || pub.ubicacion || 'Medellín';
                 let ubicacionBonita = typeof obtenerNombreUbicacionGlobal === 'function' 
                     ? await obtenerNombreUbicacionGlobal(ubicacionTextoBruta) 

@@ -534,7 +534,7 @@ let imagenesArray = [];
         }
 
        const id_usuarios = results[0].id_usuarios;
-        const Fecha_reporte = new Date().toISOString().split('T')[0];
+       const Fecha_reporte = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
         const queryVerificarDuplicado = `
             SELECT id_reporte FROM reportes

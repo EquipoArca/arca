@@ -97,11 +97,13 @@ document.addEventListener('DOMContentLoaded', () => {
             zonaDrop.addEventListener(eventName, () => zonaDrop.classList.remove('highlight'), false);
         });
 
-        // Evento Drop
+        
         zonaDrop.addEventListener('drop', (e) => {
             const dt = e.dataTransfer;
             if (dt.files && dt.files.length > 0 && inputArchivo) {
-                inputArchivo.files = dt.files;
+                const dataTransfer = new DataTransfer();
+                Array.from(dt.files).forEach(file => dataTransfer.items.add(file));
+                inputArchivo.files = dataTransfer.files; // ✅ Ahora sí se asignan correctamente
                 procesarPrevisualizacion(dt.files);
             }
         });
