@@ -2404,7 +2404,7 @@ app.post('/api/crear-donacion', (req, res) => {
         });
     });
 });
-// Endpoint definitivo y blindado para obtener notificaciones sin errores 500
+// Endpoint blindado para notificaciones (compatible con adoptantes, donaciones y eventos)
 app.get('/api/notificaciones/:correo', (req, res) => {
     const correoUsuario = req.params.correo;
 
@@ -2424,11 +2424,16 @@ app.get('/api/notificaciones/:correo', (req, res) => {
             n.fecha_creacion AS fecha_notificacion,
             COALESCE(u_orig.nombre_usuario, 'Sistema ARCA') AS origen_nombre,
             u_orig.foto_perfil AS origen_foto,
-            NULL AS id_solicitud,
-            'pendiente' AS estado_solicitud
+            s.id_solicitud,
+            s.estado AS estado_solicitud
         FROM notificaciones n
         INNER JOIN usuarios u_dest ON n.id_usuario_destino = u_dest.id_usuarios
         LEFT JOIN usuarios u_orig ON n.id_usuario_origen = u_orig.id_usuarios
+        LEFT JOIN solicitudes_adoptante s ON (
+            n.tipo = 'solicitud_adoptante' 
+            AND s.id_solicitante = n.id_usuario_origen 
+            AND s.id_propietario = n.id_usuario_destino
+        )
         WHERE LOWER(TRIM(u_dest.correo_usuario)) = LOWER(TRIM(?))
         ORDER BY n.id_notificacion DESC
     `;
@@ -2436,7 +2441,7 @@ app.get('/api/notificaciones/:correo', (req, res) => {
     db.query(sql, [correoUsuario], (err, results) => {
         if (err) {
             console.error("❌ Error al obtener notificaciones:", err.message);
-            return res.status(500).json({ error: "Error en el servidor al obtener notificaciones." });
+            return res.status(500).json({ error: "Error en el servidor al obtener notificaciones: " + err.message });
         }
         res.json(results);
     });

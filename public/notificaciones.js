@@ -108,23 +108,26 @@ function renderizarNotificaciones(lista) {
 
         const fechaStr = notif.fecha_notificacion ? notif.fecha_notificacion.split('T')[0] : 'Reciente';
         
-        // Convertimos el nombre de usuario en un enlace interactivo <a> hacia su perfil público
         const autorNombre = notif.origen_nombre 
             ? `<a href="perfil_publico.html?user=${encodeURIComponent(notif.origen_nombre)}" style="color: #e06d53; font-weight: bold; text-decoration: none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">@${notif.origen_nombre}</a>` 
             : 'Sistema ARCA';
 
         let htmlAccion = '';
-        if (notif.tipo === 'solicitud_adoptante' && notif.estado_solicitud === 'pendiente') {
-            htmlAccion = `
-                <div style="display: flex; gap: 8px; margin-top: 8px;">
-                    <button onclick="responderSolicitud(${notif.id_solicitud}, 'aceptar')" style="background: #25d366; color: white; border: none; padding: 6px 14px; border-radius: 12px; cursor: pointer; font-weight: bold; font-family: 'Itim';">Aceptar</button>
-                    <button onclick="responderSolicitud(${notif.id_solicitud}, 'rechazar')" style="background: #d9534f; color: white; border: none; padding: 6px 14px; border-radius: 12px; cursor: pointer; font-weight: bold; font-family: 'Itim';">Rechazar</button>
-                </div>
-            `;
-        } else if (notif.tipo === 'solicitud_adoptante' && notif.estado_solicitud === 'aceptada') {
-            htmlAccion = `<span style="color: #25d366; font-weight: bold; font-size: 13.5px;"> Solicitud aceptada ✓</span>`;
+
+        // SECCIÓN ADOPTANTE (CONSERVA TODA SU FUNCIONALIDAD)
+        if (notif.tipo === 'solicitud_adoptante' && notif.id_solicitud) {
+            if (notif.estado_solicitud === 'pendiente') {
+                htmlAccion = `
+                    <div style="display: flex; gap: 8px; margin-top: 8px;">
+                        <button onclick="responderSolicitud(${notif.id_solicitud}, 'aceptar')" style="background: #25d366; color: white; border: none; padding: 6px 14px; border-radius: 12px; cursor: pointer; font-weight: bold; font-family: 'Itim';">Aceptar</button>
+                        <button onclick="responderSolicitud(${notif.id_solicitud}, 'rechazar')" style="background: #d9534f; color: white; border: none; padding: 6px 14px; border-radius: 12px; cursor: pointer; font-weight: bold; font-family: 'Itim';">Rechazar</button>
+                    </div>
+                `;
+            } else if (notif.estado_solicitud === 'aceptada') {
+                htmlAccion = `<span style="color: #25d366; font-weight: bold; font-size: 13.5px;"> Solicitud aceptada ✓</span>`;
+            }
+        // SECCIÓN DONACIONES
         } else if (notif.tipo === 'nueva_donacion') {
-            // INTEGRACIÓN: Acciones específicas para cuando llega una nueva donación pendiente
             htmlAccion = `
                 <div style="display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;">
                     <a href="perfil_publico.html?user=${encodeURIComponent(notif.origen_nombre)}" style="background: #e8a87c; color: white; text-decoration: none; padding: 6px 14px; border-radius: 12px; font-weight: bold; font-family: 'Itim'; display: inline-block;">Ver perfil del donante</a>
@@ -151,7 +154,6 @@ function renderizarNotificaciones(lista) {
         contenedor.appendChild(tarjeta);
     });
 }
-
 window.responderSolicitud = async function(idSolicitud, accion) {
     const correoPropietario = obtenerCorreoUsuarioActivo();
     try {
