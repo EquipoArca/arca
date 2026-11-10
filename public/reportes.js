@@ -231,8 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
             reader.onerror = (error) => reject(error);
         });
     };
-
-    // 5. Envío del Formulario
+// 5. Envío del Formulario
     if (formReporte) {
         formReporte.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -245,104 +244,85 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 const radioSeleccionado = document.querySelector('input[name="tipo_reporte"]:checked');
-                const idTipoReporte = radioSeleccionado ? parseInt(radioSeleccionado.value) : 1;
+                const idTipoReporte = radioSeleccionado ? radioSeleccionado.value : '1';
 
                 const descripcion = document.getElementById('descripcion-reporte')?.value || '';
                 const direccion = inputDireccion?.value || '';
                 const telefono = inputTel ? inputTel.value : '';
                 const correoContacto = inputCorreo ? inputCorreo.value : '';
 
-                let fotoBase64 = null;
+                const usuarioAuth = typeof firebase !== 'undefined' && firebase.auth().currentUser ? firebase.auth().currentUser : null;
+                const correoUsuarioLogueado = (usuarioAuth && usuarioAuth.email) ? usuarioAuth.email : (localStorage.getItem('correo_usuario') || correoContacto);
 
-            if (inputArchivo && inputArchivo.files.length > 0) {
-                // Si el usuario seleccionó una FOTO NUEVA, la convertimos
-                fotoBase64 = await convertirABase64(inputArchivo.files[0]);
-            } else {
-                // Si NO seleccionó ninguna nueva, CONSERVAMOS la que ya tenía
-                fotoBase64 = window.imagenBase64Actual || null;
-            }
+                // Usamos FormData para que multer en el servidor (server.js) procese bien los campos y archivos
+                const formData = new FormData();
+                formData.append('id_tipo_reporte', idTipoReporte);
+                formData.append('Descripcion', descripcion);
+                formData.append('Ubicacion', direccion);
+                formData.append('telefono_contacto', telefono);
+                formData.append('correo_contacto', correoContacto);
+                formData.append('correo_usuario', correoUsuarioLogueado);
 
-                const usuarioAuth = firebase.auth().currentUser;
-                const correoUsuarioLogueado = usuarioAuth ? usuarioAuth.email : correoContacto;
+                // Si seleccionó archivos nuevos, los adjuntamos
+                if (inputArchivo && inputArchivo.files.length > 0) {
+                    for (let i = 0; i < inputArchivo.files.length; i++) {
+                        formData.append('fotos_reporte[]', inputArchivo.files[i]);
+                    }
+                }
 
-                const datosReporte = {
-                    id_tipo_reporte: idTipoReporte,
-                    Descripcion: descripcion,
-                    Ubicacion: direccion,
-                    telefono_contacto: telefono,
-                    correo_contacto: correoContacto,
-                    img_reporte: fotoBase64,
-                    correo_usuario: correoUsuarioLogueado
-                };
+                const urlParamsSubmit = new URLSearchParams(window.location.search);
+                const idEditar = urlParamsSubmit.get('editar');
 
-        
-            const urlParamsSubmit = new URLSearchParams(window.location.search);
-            const idEditar = urlParamsSubmit.get('editar');
+                let urlFetch = '/crear-reporte';
+                let metodoFetch = 'POST';
 
-            let urlFetch = '/crear-reporte';
-            let metodoFetch = 'POST';
+                if (idEditar) {
+                    urlFetch = `/api/reportes/${idEditar}`;
+                    metodoFetch = 'PUT';
+                }
 
-            if (idEditar) {
-                urlFetch = `/api/reportes/${idEditar}`;
-                metodoFetch = 'PUT';
-            }
-
-            const respuesta = await fetch(urlFetch, {
-                method: metodoFetch,
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(datosReporte)
-            });
+                const respuesta = await fetch(urlFetch, {
+                    method: metodoFetch,
+                    body: formData // Enviamos FormData directamente sin headers 'Content-Type' (el navegador los calcula automáticos)
+                });
 
                 const resultado = await respuesta.json();
 
                 if (respuesta.ok) {
                     mostrarAlertaArca(
-                        "¡Reporte guardado! ",
+                        "¡Reporte guardado!",
                         "Tu reporte ha sido guardado exitosamente. 🌸",
-                        {tipo: "aviso",
-                        alCerrar: () => {
-                    formReporte.reset();
+                        {
+                            tipo: "aviso",
+                            alCerrar: () => {
+                                formReporte.reset();
+                                window.location.href = 'mis_publicaciones.html';
+                            }
+                        }
+                    );
+                } else {
+                    mostrarAlertaArca(
+                        "Error en el servidor",
+                        resultado.error || "No se pudo guardar el reporte, inténtalo más tarde. ♡",
+                        { tipo: "error" }
+                    );
+                }
 
-                    const textoArrastra = document.getElementById('texo-arrastra');
-                    if (textoArrastra) {
-                        textoArrastra.textContent = "Arrastra tu imagen aquí o haz clic para buscar";
-                    }
-
-                    const contenedorPreview = document.getElementById('preview-container');
-                    if (contenedorPreview) {
-                        contenedorPreview.innerHTML = '';
-                    }
-                    window.location.href = 'mis_publicaciones.html';
+            } catch (error) {
+                console.error("Error al enviar el reporte:", error);
+                mostrarAlertaArca(
+                    "Sin conexión con el servidor",
+                    "No se pudo conectar con el servidor. Inténtalo nuevamente más tarde.",
+                    { tipo: "conexion" }
+                );
+            } finally {
+                if (btnSubmit) {
+                    btnSubmit.disabled = false;
+                    btnSubmit.textContent = "Enviar Reporte";
                 }
             }
-        
-        );
-
-    } else {
-        mostrarAlertaArca(
-                "Error en el servidor",
-                resultado.error || "No se pudo guardar el reporte, inténtalo más tarde. ♡",
-                { tipo: "error" }
-            );
-        }
-
-    } catch (error) {
-        console.error("Error al enviar el reporte:", error);
-        mostrarAlertaArca(
-            "Sin conexión con el servidor",
-            "No se pudo conectar con el servidor. Inténtalo nuevamente más tarde.",
-            { tipo: "conexion" } 
-        );
-    } finally {
-        if (btnSubmit) {
-            btnSubmit.disabled = false;
-            btnSubmit.textContent = "Enviar Reporte";
-        }
+        });
     }
-});
-}
     // ==========================================
 // MODO EDICIÓN: Cargar datos si viene ?editar=ID
 // ==========================================
