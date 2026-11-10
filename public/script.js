@@ -192,7 +192,7 @@ function activarModoFull() {
             );
         };
     });
-}
+
 
 function toggleSidebar() {
     const sidebar = document.querySelector('.sidebar');
