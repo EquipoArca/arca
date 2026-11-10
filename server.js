@@ -2460,7 +2460,7 @@ app.post('/api/crear-donacion', (req, res) => {
                 }
             });
 
-            res.status(201).json({ mensaje: "¡Donación registrada con éxito!", id_donacion: result.insertId });
+            res.status(201).json({ mensaje: "Donación registrada con éxito", id_donacion: result.insertId });
         });
     });
 });     

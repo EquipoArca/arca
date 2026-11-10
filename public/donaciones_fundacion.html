@@ -484,6 +484,27 @@
         firebase.auth().onAuthStateChanged(user => {
             if (user) cargarDonacionesFundacion();
         });
+        // Añade esto al final de tus scripts en donaciones_fundacion.html
+document.addEventListener('DOMContentLoaded', () => {
+    // Esperamos a que carguen las donaciones del servidor y luego verificamos si hay un ID en la URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const idDonacionBuscada = urlParams.get('id_donacion');
+
+    if (idDonacionBuscada) {
+        // Damos un pequeño respiro para asegurarnos de que las tarjetas ya se pintaron en el DOM
+        setTimeout(() => {
+            // Buscamos la tarjeta o podemos filtrar directamente para mostrar solo esa
+            const tarjetas = document.querySelectorAll('.tarjeta-donacion');
+            // Si quieres puedes filtrar globalmente la lista para que solo se vea esa:
+            if (donacionesGlobales.length > 0) {
+                const donacionEspecifica = donacionesGlobales.filter(d => String(d.id_donacion) === String(idDonacionBuscada));
+                if (donacionEspecifica.length > 0) {
+                    renderizarListaDonaciones(donacionEspecifica);
+                }
+            }
+        }, 600);
+    }
+});
     </script>
 </body>
 </html>

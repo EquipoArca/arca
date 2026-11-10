@@ -128,15 +128,16 @@ function renderizarNotificaciones(lista) {
 
 
 
-        } else if (notif.tipo === 'nueva_donacion') {
-            // INTEGRACIÓN: Acciones específicas para cuando llega una nueva donación pendiente
-            htmlAccion = `
-                <div style="display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;">
-                    <a href="perfil_publico.html?user=${encodeURIComponent(notif.origen_nombre)}" style="background: #e8a87c; color: white; text-decoration: none; padding: 6px 14px; border-radius: 12px; font-weight: bold; font-family: 'Itim'; display: inline-block;">Ver perfil del donante</a>
-                    <button onclick="abrirModalGestionDonacion('${notif.mensaje}')" style="background: #fffde8; border: 1px solid #f0e6b8; padding: 6px 14px; border-radius: 12px; cursor: pointer; font-weight: bold; font-family: 'Itim';">Gestionar donación</button>
-                </div>
-            `;
-        } else {
+} else if (notif.tipo === 'nueva_donacion') {
+    // Si la notificación trae el id de la donación, se lo enviamos a la función
+    const idDonacionAsociada = notif.id_donacion || '';
+    htmlAccion = `
+        <div style="display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;">
+            <a href="perfil_publico.html?user=${encodeURIComponent(notif.origen_nombre)}" style="background: #e8a87c; color: white; text-decoration: none; padding: 6px 14px; border-radius: 12px; font-family: 'Itim'; display: inline-block;">Ver perfil</a>
+            <button onclick="abrirModalGestionDonacion('${notif.mensaje}', '${idDonacionAsociada}')" style="background: #e985a0; color: white; border: none; padding: 6px 14px; border-radius: 50px; cursor: pointer; font-family: 'Itim';">Ver esta donación</button>
+        </div>
+    `;
+} else {
             htmlAccion = `<button onclick="window.location.href='perfil_publico.html?user=${notif.origen_nombre}'" style="background: #fffde8; border: 1px solid #f0e6b8; padding: 6px 14px; border-radius: 12px; cursor: pointer; font-weight: bold; font-family: 'Itim'; margin-top: 6px;">Ver perfil</button>`;
         }
 
@@ -178,13 +179,14 @@ window.responderSolicitud = async function(idSolicitud, accion) {
 };
 
 // Función disparada al hacer clic en gestionar la donación desde la notificación
-window.abrirModalGestionDonacion = function(mensajeNotificacion) {
-    mostrarAlertaArca("Gestión de Donación", `Detalle: ${mensajeNotificacion}\n\nPuedes marcar esta donación como recogida desde tu panel de control principal de la fundación.`, {
-        tipo: "aviso",
-        textoBoton: "Entendido"
-    });
+window.abrirModalGestionDonacion = function(mensajeNotificacion, idDonacion) {
+    // Si tenemos el ID específico de la donación, lo pasamos por parámetro en la URL
+    if (idDonacion) {
+        window.location.href = `donaciones_fundacion.html?id_donacion=${idDonacion}`;
+    } else {
+        window.location.href = "donaciones_fundacion.html";
+    }
 };
-
 window.eliminarNotificacionBd = async function(idNotificacion) {
     try {
         await fetch(`/api/notificaciones/${idNotificacion}`, { method: 'DELETE' });
