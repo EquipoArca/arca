@@ -134,7 +134,7 @@ function renderizarNotificaciones(lista) {
     htmlAccion = `
         <div style="display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;">
             <a href="perfil_publico.html?user=${encodeURIComponent(notif.origen_nombre)}" style="background: #e8a87c; color: white; text-decoration: none; padding: 6px 14px; border-radius: 12px; font-family: 'Itim'; display: inline-block;">Ver perfil</a>
-            <button onclick="abrirModalGestionDonacion('${notif.mensaje}', '${idDonacionAsociada}')" style="background: #e985a0; color: white; border: none; padding: 6px 14px; border-radius: 50px; cursor: pointer; font-family: 'Itim';">Ver esta donación</button>
+            <button onclick="abrirModalGestionDonacion('${notif.mensaje}', '${idDonacionAsociada}')" style="background: #e985a0; color: white; border: none; padding: 6px 14px; border-radius: 50px; cursor: pointer; font-family: 'Itim';">Gestionar donación</button>
         </div>
     `;
 } else {

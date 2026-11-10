@@ -50,27 +50,27 @@
         }
 
         /* Banner de ancho completo (100% de lado a lado) con Glassmorphism suave */
-.banner-donaciones {
-    width: 100%;
-    margin: 0;
-    padding: 45px 20px 35px 20px;
-    box-sizing: border-box;
-    background: rgba(237, 228, 202, 0.75);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    text-align: center;
-    border-bottom: 2px solid rgba(255, 255, 255, 0.5);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
-    border-radius: 0; /* Quita esquinas redondeadas para pegar de lado a lado */
-}
+        .banner-donaciones {
+            width: 100%;
+            margin: 0;
+            padding: 45px 20px 35px 20px;
+            box-sizing: border-box;
+            background: rgba(237, 228, 202, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            text-align: center;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+            border-radius: 0;
+        }
 
-/* Asegurar que la pantalla principal no le meta padding superior ni lateral al banner */
-.main-content {
-    padding-top: 0 !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-    overflow-x: hidden;
-}
+        /* Asegurar que la pantalla principal no le meta padding superior ni lateral al banner */
+        .main-content {
+            padding-top: 0 !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+            overflow-x: hidden;
+        }
 
         .banner-donaciones h1 {
             margin: 0;
@@ -87,7 +87,7 @@
             animation: latidoLento 2.5s ease-in-out infinite;
         }
 
-        /* Contenedor de Botones de Filtro (Glassmorphism + Botones Redondos) */
+        /* Contenedor de Botones de Filtro */
         .contenedor-botones-filtros {
             display: flex;
             flex-direction: column;
@@ -101,7 +101,7 @@
         .btn-filtro {
             width: 100%;
             padding: 13px 24px;
-            border-radius: 50px; /* Redondos por completo */
+            border-radius: 50px;
             border: 2px solid rgba(255, 255, 255, 0.8);
             background: rgba(252, 213, 206, 0.85);
             backdrop-filter: blur(8px);
@@ -195,7 +195,7 @@
             color: #4a3b32;
         }
 
-        /* Badges de Estado Suaves */
+        /* Badges de Estado */
         .badge-estado {
             padding: 7px 16px;
             border-radius: 50px;
@@ -216,7 +216,6 @@
             border: 1px solid rgba(180, 225, 190, 0.5);
         }
 
-        /* Detalle interno translúcido */
         .detalle-donacion {
             font-size: 1.05rem;
             color: #555555;
@@ -233,7 +232,6 @@
             gap: 12px;
         }
 
-        /* Botón de cambio de estado completamente redondo y elegante */
         .btn-cambiar-estado {
             background: #e985a0;
             color: white;
@@ -252,7 +250,7 @@
             box-shadow: 0 10px 22px rgba(217, 111, 141, 0.45);
         }
 
-        /* Ajustes específicos para Modo Oscuro con Glassmorphism */
+        /* Modo Oscuro */
         body.dark-mode .banner-donaciones {
             background: rgba(45, 38, 42, 0.75);
             border-bottom-color: rgba(255, 255, 255, 0.08);
@@ -330,7 +328,7 @@
         </div>
     </nav>
     
-    <!-- Barra Lateral Reutilizada -->
+    <!-- Barra Lateral -->
     <aside class="sidebar" id="sidebar">
         <div class="side-icons">
             <a href="home.html" class="menu-fila">
@@ -484,27 +482,25 @@
         firebase.auth().onAuthStateChanged(user => {
             if (user) cargarDonacionesFundacion();
         });
-        // Añade esto al final de tus scripts en donaciones_fundacion.html
-document.addEventListener('DOMContentLoaded', () => {
-    // Esperamos a que carguen las donaciones del servidor y luego verificamos si hay un ID en la URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const idDonacionBuscada = urlParams.get('id_donacion');
 
-    if (idDonacionBuscada) {
-        // Damos un pequeño respiro para asegurarnos de que las tarjetas ya se pintaron en el DOM
-        setTimeout(() => {
-            // Buscamos la tarjeta o podemos filtrar directamente para mostrar solo esa
-            const tarjetas = document.querySelectorAll('.tarjeta-donacion');
-            // Si quieres puedes filtrar globalmente la lista para que solo se vea esa:
-            if (donacionesGlobales.length > 0) {
-                const donacionEspecifica = donacionesGlobales.filter(d => String(d.id_donacion) === String(idDonacionBuscada));
-                if (donacionEspecifica.length > 0) {
-                    renderizarListaDonaciones(donacionEspecifica);
-                }
+        // ==========================================
+        // FILTRAR AUTOMÁTICAMENTE SI VIENE UN ID EN LA URL
+        // ==========================================
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const idDonacionBuscada = urlParams.get('id_donacion');
+
+            if (idDonacionBuscada) {
+                setTimeout(() => {
+                    if (donacionesGlobales.length > 0) {
+                        const donacionEspecifica = donacionesGlobales.filter(d => String(d.id_donacion) === String(idDonacionBuscada));
+                        if (donacionEspecifica.length > 0) {
+                            renderizarListaDonaciones(donacionEspecifica);
+                        }
+                    }
+                }, 600);
             }
-        }, 600);
-    }
-});
+        });
     </script>
 </body>
 </html>
