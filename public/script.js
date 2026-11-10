@@ -158,10 +158,11 @@ function activarModoFull() {
     const cardReportar = document.querySelector(".card.report");
     const cardAdopciones = document.querySelector(".card.adopt");
     const cardDonaciones = document.querySelector(".card.donate");
+    const tipoUsuario = localStorage.getItem('tipo_usuario') || 'usuario';
 
     if (cardReportar) {
         cardReportar.removeAttribute("onclick");
-        cardReportar.setAttribute("href", "formularior.html");
+        cardReportar.setAttribute("href", tipoUsuario === 'fundacion' ? "reportes_fundacion.html" : "formularior.html");
     }
     if (cardAdopciones) {
         cardAdopciones.removeAttribute("onclick");
@@ -169,7 +170,8 @@ function activarModoFull() {
     }
     if (cardDonaciones) {
         cardDonaciones.removeAttribute("onclick");
-        cardDonaciones.setAttribute("href", "donaciones.html");
+        // Si es fundación va a la vista de gestión creada, si es usuario va a la interfaz de donar
+        cardDonaciones.setAttribute("href", tipoUsuario === 'fundacion' ? "donaciones_fundacion.html" : "donaciones.html");
     }
 
     const iconoNotif = document.querySelector(".notif-circle a");
@@ -177,6 +179,7 @@ function activarModoFull() {
         iconoNotif.removeAttribute("onclick");
         iconoNotif.setAttribute("href", "notificaciones.html");
     }
+}
 
     const botonesDetalles = document.querySelectorAll(".btn-detalles");
     botonesDetalles.forEach((boton) => {
