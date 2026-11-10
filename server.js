@@ -1672,33 +1672,37 @@ app.post('/api/solicitar-ver-adoptante', (req, res) => {
     });
 });
 
-app.get('/api/notificaciones/:correo', (req, res) => {
-    const { correo } = req.params;
+// Buscar la cuenta de usuario vinculada a la fundación usando directamente su correo registrado
+// Buscar la cuenta de usuario vinculada a la fundación usando directamente su correo registrado
+            const queryUsuarioFundacion = `
+                SELECT id_usuarios 
+                FROM usuarios 
+                WHERE LOWER(TRIM(correo_usuario)) = (
+                    SELECT LOWER(TRIM(Correo_fundacion)) 
+                    FROM fundacion 
+                    WHERE id_fundacion = ?
+                )
+            `;
 
-    if (!correo) {
-        return res.status(400).json({ error: "Correo requerido" });
-    }
+            db.query(queryUsuarioFundacion, [id_fundacion], (errF, fundRes) => {
+                if (errF || fundRes.length === 0) {
+                    console.error("⚠️ Donación guardada, pero no se encontró la cuenta de usuario de la fundación ID:", id_fundacion);
+                } else {
+                    const idDestinoFundacion = fundRes[0].id_usuarios;
+                    const mensajeNotif = `@${nombreDonante} ha realizado una nueva donación de (${tipo_donacion}). ¡Ingresa a tu panel para gestionarla!`;
 
-    const sql = `
-        SELECT n.id_notificacion, n.tipo, n.mensaje, n.leida, n.fecha_notificacion,
-               u_origen.nombre_usuario AS origen_nombre, u_origen.foto_perfil AS origen_foto,
-               s.id_solicitud, s.estado AS estado_solicitud
-        FROM notificaciones n
-        JOIN usuarios u_destino ON n.id_usuario_destino = u_destino.id_usuarios
-        LEFT JOIN usuarios u_origen ON n.id_usuario_origen = u_origen.id_usuarios
-        LEFT JOIN solicitudes_adoptante s ON (s.id_solicitante = n.id_usuario_origen AND s.id_propietario = n.id_usuario_destino AND n.tipo = 'solicitud_adoptante')
-        WHERE LOWER(TRIM(u_destino.correo_usuario)) = LOWER(TRIM(?))
-        ORDER BY n.fecha_notificacion DESC
-    `;
+                    // Guardar la notificación interna en la base de datos de ARCA
+                    const queryNotif = `
+                        INSERT INTO notificaciones (id_usuario_destino, id_usuario_origen, tipo, mensaje)
+                        VALUES (?, ?, 'nueva_donacion', ?)
+                    `;
 
-    db.query(sql, [correo], (err, results) => {
-        if (err) {
-            console.error("❌ Error al obtener notificaciones en el servidor:", err.message);
-            return res.status(500).json({ error: "Error interno al consultar notificaciones" });
-        }
-        res.json(results);
-    });
-});
+                    db.query(queryNotif, [idDestinoFundacion, id_usuario_donante, mensajeNotif], (errN) => {
+                        if (errN) console.error("❌ Error al insertar notificación interna:", errN.message);
+                        else console.log("✅ ¡Notificación de donación guardada con éxito en la cuenta de la fundación!");
+                    });
+                }
+            });
 app.post('/api/responder-solicitud-adoptante', (req, res) => {
     const { id_solicitud, accion, correo_propietario } = req.body;
     const nuevoEstado = accion === 'aceptar' ? 'aceptada' : 'rechazada';
