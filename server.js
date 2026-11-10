@@ -2404,7 +2404,7 @@ app.post('/api/crear-donacion', (req, res) => {
         });
     });
 });
-// Endpoint blindado para notificaciones (compatible con adoptantes, donaciones y eventos)
+// Endpoint definitivo y seguro para notificaciones (compatible con donaciones y adoptantes)
 app.get('/api/notificaciones/:correo', (req, res) => {
     const correoUsuario = req.params.correo;
 
@@ -2424,16 +2424,23 @@ app.get('/api/notificaciones/:correo', (req, res) => {
             n.fecha_creacion AS fecha_notificacion,
             COALESCE(u_orig.nombre_usuario, 'Sistema ARCA') AS origen_nombre,
             u_orig.foto_perfil AS origen_foto,
-            s.id_solicitud,
-            s.estado AS estado_solicitud
+            (
+                SELECT s.id_solicitud 
+                FROM solicitudes_adoptante s 
+                WHERE s.id_solicitante = n.id_usuario_origen 
+                  AND s.id_propietario = n.id_usuario_destino 
+                LIMIT 1
+            ) AS id_solicitud,
+            (
+                SELECT s.estado 
+                FROM solicitudes_adoptante s 
+                WHERE s.id_solicitante = n.id_usuario_origen 
+                  AND s.id_propietario = n.id_usuario_destino 
+                LIMIT 1
+            ) AS estado_solicitud
         FROM notificaciones n
         INNER JOIN usuarios u_dest ON n.id_usuario_destino = u_dest.id_usuarios
         LEFT JOIN usuarios u_orig ON n.id_usuario_origen = u_orig.id_usuarios
-        LEFT JOIN solicitudes_adoptante s ON (
-            n.tipo = 'solicitud_adoptante' 
-            AND s.id_solicitante = n.id_usuario_origen 
-            AND s.id_propietario = n.id_usuario_destino
-        )
         WHERE LOWER(TRIM(u_dest.correo_usuario)) = LOWER(TRIM(?))
         ORDER BY n.id_notificacion DESC
     `;
