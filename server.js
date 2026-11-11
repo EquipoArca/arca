@@ -499,12 +499,13 @@ app.delete('/api/eliminar-adoptante/:id_usuarios', (req, res) => {
     });
 });
 
-// ==========================================
-// REPORTES Y ESTADÍSTICAS
-// ==========================================
+
 const upload = multer({
     storage: multer.memoryStorage(),
-    limits: { fileSize: 5 * 1024 * 1024 }
+    limits: { 
+        fileSize: 5 * 1024 * 1024, // 5MB por foto
+        files: 3 // 👈 ¡ESTO ES LO QUE FALTABA! Permite exactamente hasta 3 archivos
+    }
 });
 
 app.post('/crear-reporte', upload.array('fotos_reporte[]', 3), (req, res) => {
