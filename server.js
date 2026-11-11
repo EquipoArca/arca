@@ -1195,7 +1195,7 @@ app.get('/api/reportes/:id', (req, res) => {
     });
 });
 
-app.put('/api/reportes/:id', upload.any(), (req, res) => {
+app.put('/api/reportes/:id', uploadMiddleware, (req, res) => {
     try {
         const idReporte = req.params.id;
         
@@ -1219,8 +1219,10 @@ app.put('/api/reportes/:id', upload.any(), (req, res) => {
 
         let imagenesFinales = [];
 
+        // 1. Manejo ultra seguro de las imágenes existentes (las que se quedaron tras borrar alguna)
         if (img_reporte_existente) {
             try {
+                // Si viene como string JSON (ej: '["url1","url2"]')
                 const parsed = JSON.parse(img_reporte_existente);
                 if (Array.isArray(parsed)) {
                     imagenesFinales = parsed;
@@ -1228,12 +1230,14 @@ app.put('/api/reportes/:id', upload.any(), (req, res) => {
                     imagenesFinales.push(parsed);
                 }
             } catch (e) {
-                if (typeof img_reporte_existente === 'string' && img_reporte_existente.trim() !== '') {
+                // Si viene como texto plano o URL directa
+                if (typeof img_reporte_existente === 'string' && img_reporte_existente.trim() !== '' && img_reporte_existente !== '[]') {
                     imagenesFinales.push(img_reporte_existente);
                 }
             }
         }
 
+        // 2. Si el usuario decidió subir fotos NUEVAS además de las que dejó
         if (req.files && Array.isArray(req.files) && req.files.length > 0) {
             req.files.forEach(file => {
                 if (file && file.buffer) {
@@ -1242,6 +1246,7 @@ app.put('/api/reportes/:id', upload.any(), (req, res) => {
             });
         }
 
+        // Si el usuario eliminó TODAS las fotos, esto quedará vacío y guardará NULL en la BD
         const imgReporteFinalStr = imagenesFinales.length > 0 ? JSON.stringify(imagenesFinales) : null;
 
         const sql = `
@@ -1267,7 +1272,7 @@ app.put('/api/reportes/:id', upload.any(), (req, res) => {
 
         db.query(sql, valores, (err, result) => {
             if (err) {
-                console.error("❌ Error en MySQL al actualizar:", err.message);
+                console.error("❌ Error en MySQL al actualizar reporte:", err.message);
                 return res.status(500).json({ error: "Error en base de datos: " + err.message });
             }
 
