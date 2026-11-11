@@ -239,7 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 5. Envío del Formulario
+// 5. Envío del Formulario
     if (formReporte) {
         formReporte.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -262,7 +262,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const usuarioAuth = typeof firebase !== 'undefined' && firebase.auth().currentUser ? firebase.auth().currentUser : null;
                 const correoUsuarioLogueado = (usuarioAuth && usuarioAuth.email) ? usuarioAuth.email : (localStorage.getItem('correo_usuario') || correoContacto);
 
-               const formData = new FormData();
+                const formData = new FormData();
                 formData.append('id_tipo_reporte', idTipoReporte);
                 formData.append('Descripcion', descripcion);
                 formData.append('Ubicacion', direccion);
@@ -270,12 +270,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 formData.append('correo_contacto', correoContacto);
                 formData.append('correo_usuario', correoUsuarioLogueado);
 
-                // Forzamos el envío de cada archivo seleccionado en el array visual
+                // =========================================================
+                // DEPURACIÓN CLAVE EN CLIENTE: Inyectar archivos y verificar
+                // =========================================================
+                console.log("🔍 Archivos en el array frontend antes de enviar:", archivosSeleccionados);
+
                 if (archivosSeleccionados && archivosSeleccionados.length > 0) {
-                    archivosSeleccionados.forEach((file, index) => {
+                    archivosSeleccionados.forEach((file) => {
                         formData.append('fotos_reporte', file, file.name);
                     });
                 }
+
+                // Imprimimos para verificar que el FormData sí lleva los archivos
+                for (let pair of formData.entries()) {
+                    console.log(`📦 FormData -> ${pair[0]}:`, pair[1]);
+                }
+                // =========================================================
 
                 // DETECCIÓN SEGURA DEL MODO EDICIÓN
                 const urlParamsSubmit = new URLSearchParams(window.location.search);
@@ -331,7 +341,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-
     // 6. MODO EDICIÓN: Cargar datos si viene ?editar=ID
     const urlParams = new URLSearchParams(window.location.search);
     const idReporteEditar = urlParams.get('editar');
