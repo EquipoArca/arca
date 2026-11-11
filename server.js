@@ -40,6 +40,41 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(cors());
 
 // ==========================================
+// CONFIGURACIÓN DE MULTER (¡MOVIDA AQUÍ ARRIBA PARA EVITAR EL ERROR!)
+// ==========================================
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { 
+        fileSize: 5 * 1024 * 1024,      // 5MB máximo por cada foto individual
+        files: 3,                       // Limita estrictamente a máximo 3 archivos subidos
+        fieldSize: 10 * 1024 * 1024     // Amplía el límite de texto para campos largos como los JSONs de imágenes existentes
+    }
+});
+
+// Middleware seguro para atrapar errores de Multer y devolverlos en JSON limpio
+const uploadMiddleware = (req, res, next) => {
+    upload.any()(req, res, function (err) {
+        if (err instanceof multer.MulterError) {
+            console.error("❌ Error de Multer:", err.message);
+            if (err.code === 'LIMIT_FILE_COUNT') {
+                return res.status(400).json({ error: "Solo puedes subir un máximo de 3 imágenes. 🌸" });
+            }
+            if (err.code === 'LIMIT_FIELD_VALUE') {
+                return res.status(400).json({ error: "El contenido enviado es demasiado largo para el servidor." });
+            }
+            if (err.code === 'LIMIT_FILE_SIZE') {
+                return res.status(400).json({ error: "Una de las imágenes pesa más de 5MB. 🌸" });
+            }
+            return res.status(400).json({ error: "Error al procesar los archivos: " + err.message });
+        } else if (err) {
+            console.error("❌ Error desconocido en subida:", err.message);
+            return res.status(400).json({ error: "Error al procesar la solicitud." });
+        }
+        next();
+    });
+};
+
+// ==========================================
 // ARCHIVOS ESTÁTICOS
 // ==========================================
 app.use(express.static(path.join(__dirname, 'public')));
@@ -2387,38 +2422,6 @@ app.get('/api/novedades', (req, res) => {
         res.json(rows);
     });
 });
-
-const upload = multer({
-    storage: multer.memoryStorage(),
-    limits: { 
-        fileSize: 5 * 1024 * 1024,      // 5MB máximo por cada foto individual
-        files: 3,                       // 👈 Limita estrictamente a máximo 3 archivos subidos
-        fieldSize: 10 * 1024 * 1024     // 👈 Amplía el límite de texto para campos largos como los JSONs de imágenes existentes
-    }
-});
-
-// Middleware seguro para atrapar errores de Multer y devolverlos en JSON limpio
-const uploadMiddleware = (req, res, next) => {
-    upload.any()(req, res, function (err) {
-        if (err instanceof multer.MulterError) {
-            console.error("❌ Error de Multer:", err.message);
-            if (err.code === 'LIMIT_FILE_COUNT') {
-                return res.status(400).json({ error: "Solo puedes subir un máximo de 3 imágenes. 🌸" });
-            }
-            if (err.code === 'LIMIT_FIELD_VALUE') {
-                return res.status(400).json({ error: "El contenido enviado es demasiado largo para el servidor." });
-            }
-            if (err.code === 'LIMIT_FILE_SIZE') {
-                return res.status(400).json({ error: "Una de las imágenes pesa más de 5MB. 🌸" });
-            }
-            return res.status(400).json({ error: "Error al procesar los archivos: " + err.message });
-        } else if (err) {
-            console.error("❌ Error desconocido en subida:", err.message);
-            return res.status(400).json({ error: "Error al procesar la solicitud." });
-        }
-        next();
-    });
-};
 app.post('/api/enviar-reporte-error', uploadSoporte.single('imagen_error'), (req, res) => {
     try {
         const { lugar_error, descripcion, nombre_usuario, correo_usuario } = req.body;
