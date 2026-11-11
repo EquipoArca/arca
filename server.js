@@ -1213,12 +1213,21 @@ app.put('/api/reportes/:id', upload.any(), (req, res) => {
 
     let imagenesFinales = [];
 
-    // 1. Recuperar las imágenes que ya estaban y el usuario decidió conservar
+    // 1. Recuperar de forma segura las imágenes existentes que el usuario decidió conservar
     if (img_reporte_existente) {
         try {
             const parsed = JSON.parse(img_reporte_existente);
-            if (Array.isArray(parsed)) imagenesFinales = parsed;
-        } catch(e) {}
+            if (Array.isArray(parsed)) {
+                imagenesFinales = parsed;
+            } else if (typeof parsed === 'string') {
+                imagenesFinales.push(parsed);
+            }
+        } catch (e) {
+            // Si no era un JSON válido pero viene como string plano, lo agregamos directo
+            if (typeof img_reporte_existente === 'string' && img_reporte_existente.trim() !== '') {
+                imagenesFinales.push(img_reporte_existente);
+            }
+        }
     }
 
     // 2. Agregar las nuevas fotos que haya subido el usuario en la edición
@@ -1242,9 +1251,9 @@ app.put('/api/reportes/:id', upload.any(), (req, res) => {
     `;
 
     const valores = [
-        id_tipo_reporte,
-        descFinal,
-        ubiFinal,
+        id_tipo_reporte || 1,
+        descFinal || '',
+        ubiFinal || '',
         telefono_contacto || null,
         correo_contacto || null,
         imgReporteFinalStr,
@@ -1253,7 +1262,7 @@ app.put('/api/reportes/:id', upload.any(), (req, res) => {
 
     db.query(sql, valores, (err, result) => {
         if (err) {
-            console.error("❌ Error al actualizar el reporte:", err);
+            console.error("❌ Error al actualizar el reporte en MySQL:", err.message);
             return res.status(500).json({ error: "Error al actualizar en la base de datos: " + err.message });
         }
 
