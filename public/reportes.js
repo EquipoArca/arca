@@ -270,7 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const usuarioAuth = typeof firebase !== 'undefined' && firebase.auth().currentUser ? firebase.auth().currentUser : null;
                 const correoUsuarioLogueado = (usuarioAuth && usuarioAuth.email) ? usuarioAuth.email : (localStorage.getItem('correo_usuario') || correoContacto);
 
-               const formData = new FormData();
+              const formData = new FormData();
                 formData.append('id_tipo_reporte', idTipoReporte || '1');
                 formData.append('Descripcion', descripcion || '');
                 formData.append('Ubicacion', direccion || '');
@@ -278,7 +278,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 formData.append('correo_contacto', correoContacto || '');
                 formData.append('correo_usuario', correoUsuarioLogueado || '');
 
-                // Separar archivos nuevos y URLs existentes
                 const archivosNuevos = archivosSeleccionados.filter(item => item instanceof File);
                 const urlsExistentes = archivosSeleccionados.filter(item => typeof item === 'string');
 

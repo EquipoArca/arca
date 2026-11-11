@@ -1196,114 +1196,92 @@ app.get('/api/reportes/:id', (req, res) => {
 });
 
 app.put('/api/reportes/:id', upload.any(), (req, res) => {
-    const idReporte = req.params.id;
-    
-    if (!idReporte || idReporte === 'undefined') {
-        return res.status(400).json({ error: "ID de reporte inválido para actualizar." });
-    }
-
-    const {
-        id_tipo_reporte,
-        descripcion_reporte,
-        Descripcion,
-        direccion_reporte,
-        Ubicacion,
-        telefono_contacto,
-        correo_contacto,
-        img_reporte_existente
-    } = req.body;
-
-    const descFinal = descripcion_reporte || Descripcion || '';
-    const ubiFinal = direccion_reporte || Ubicacion || '';
-
-    let imagenesFinales = [];
-
-    if (img_reporte_existente) {
-        try {
-            const parsed = JSON.parse(img_reporte_existente);
-            if (Array.isArray(parsed)) {
-                imagenesFinales = parsed;
-            } else if (typeof parsed === 'string' && parsed.trim() !== '') {
-                imagenesFinales.push(parsed);
-            }
-        } catch (e) {
-            if (typeof img_reporte_existente === 'string' && img_reporte_existente.trim() !== '') {
-                imagenesFinales.push(img_reporte_existente);
-            }
+    try {
+        const idReporte = req.params.id;
+        
+        if (!idReporte || idReporte === 'undefined') {
+            return res.status(400).json({ error: "ID de reporte inválido para actualizar." });
         }
-    }
 
-    if (req.files && req.files.length > 0) {
-        req.files.forEach(file => {
-            if (file && file.buffer) {
-                imagenesFinales.push(`data:${file.mimetype};base64,${file.buffer.toString('base64')}`);
-            }
-        });
-    }
+        const {
+            id_tipo_reporte,
+            descripcion_reporte,
+            Descripcion,
+            direccion_reporte,
+            Ubicacion,
+            telefono_contacto,
+            correo_contacto,
+            img_reporte_existente
+        } = req.body || {};
 
-    const imgReporteFinalStr = imagenesFinales.length > 0 ? JSON.stringify(imagenesFinales) : null;
+        const descFinal = descripcion_reporte || Descripcion || '';
+        const ubiFinal = direccion_reporte || Ubicacion || '';
 
-    // Intentamos actualizar primero incluyendo la imagen
-    const sqlConImagen = `
-        UPDATE reportes
-        SET id_tipo_reporte = ?,
-            Descripcion = ?,
-            Ubicacion = ?,
-            telefono_contacto = ?,
-            correo_contacto = ?,
-            img_reporte = ?
-        WHERE id_reporte = ?
-    `;
+        let imagenesFinales = [];
 
-    const valores = [
-        id_tipo_reporte || 1,
-        descFinal,
-        ubiFinal,
-        telefono_contacto || null,
-        correo_contacto || null,
-        imgReporteFinalStr,
-        idReporte
-    ];
-
-    db.query(sqlConImagen, valores, (err, result) => {
-        if (err) {
-            console.error("❌ ERROR MYSQL AL ACTUALIZAR REPORTE (Intentando fallback sin imagen):", err.sqlMessage || err.message);
-            
-            // PLAN B: Si la columna img_reporte diera problemas en tu BD, actualizamos los textos básicos para que al menos guarde los cambios de texto
-            const sqlSinImagen = `
-                UPDATE reportes
-                SET id_tipo_reporte = ?,
-                    Descripcion = ?,
-                    Ubicacion = ?,
-                    telefono_contacto = ?,
-                    correo_contacto = ?
-                WHERE id_reporte = ?
-            `;
-            const valoresSinImagen = [
-                id_tipo_reporte || 1,
-                descFinal,
-                ubiFinal,
-                telefono_contacto || null,
-                correo_contacto || null,
-                idReporte
-            ];
-
-            db.query(sqlSinImagen, valoresSinImagen, (err2, result2) => {
-                if (err2) {
-                    console.error("❌ ERROR CRÍTICO SQL SIN IMAGEN:", err2.sqlMessage || err2.message);
-                    return res.status(500).json({ error: "Error en base de datos: " + err2.message });
+        if (img_reporte_existente) {
+            try {
+                const parsed = JSON.parse(img_reporte_existente);
+                if (Array.isArray(parsed)) {
+                    imagenesFinales = parsed;
+                } else if (typeof parsed === 'string' && parsed.trim() !== '') {
+                    imagenesFinales.push(parsed);
                 }
-                return res.json({ mensaje: "¡Reporte actualizado con éxito (texto guardado)!" });
+            } catch (e) {
+                if (typeof img_reporte_existente === 'string' && img_reporte_existente.trim() !== '') {
+                    imagenesFinales.push(img_reporte_existente);
+                }
+            }
+        }
+
+        if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+            req.files.forEach(file => {
+                if (file && file.buffer) {
+                    imagenesFinales.push(`data:${file.mimetype};base64,${file.buffer.toString('base64')}`);
+                }
             });
-            return;
         }
 
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ error: "No se encontró el reporte en la base de datos." });
-        }
+        const imgReporteFinalStr = imagenesFinales.length > 0 ? JSON.stringify(imagenesFinales) : null;
 
-        return res.json({ mensaje: "¡Reporte actualizado con éxito!" });
-    });
+        const sql = `
+            UPDATE reportes
+            SET id_tipo_reporte = ?,
+                Descripcion = ?,
+                Ubicacion = ?,
+                telefono_contacto = ?,
+                correo_contacto = ?,
+                img_reporte = ?
+            WHERE id_reporte = ?
+        `;
+
+        const valores = [
+            id_tipo_reporte || 1,
+            descFinal,
+            ubiFinal,
+            telefono_contacto || null,
+            correo_contacto || null,
+            imgReporteFinalStr,
+            idReporte
+        ];
+
+        db.query(sql, valores, (err, result) => {
+            if (err) {
+                console.error("❌ Error en MySQL al actualizar:", err.message);
+                return res.status(500).json({ error: "Error en base de datos: " + err.message });
+            }
+
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ error: "No se encontró el reporte en la base de datos." });
+            }
+
+            return res.json({ mensaje: "¡Reporte actualizado con éxito!" });
+        });
+
+    } catch (errorPrueba) {
+        console.error("❌ Excepción crítica capturada en PUT /api/reportes/:id:", errorPrueba.message);
+        return res.status(500).json({ error: "Excepción interna en servidor: " + errorPrueba.message });
+    }
 });
 // ==========================================
 // MÓDULO CREACIÓN DE ADOPCIONES
