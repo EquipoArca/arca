@@ -589,18 +589,16 @@
                         </div>
 
                         ${arrayFotos.length > 0 ? `
-                            <div style="display: grid; grid-template-columns: ${arrayFotos.length === 1 ? '1fr' : arrayFotos.length === 2 ? '1fr 1fr' : '1.2fr 1fr'}; gap: 6px; width: 100%; height: 170px; border-radius: 20px; overflow: hidden; border: 2px solid rgba(255, 255, 255, 0.9);">
+                            <div style="display: grid; grid-template-columns: ${arrayFotos.length === 1 ? '1fr' : arrayFotos.length === 2 ? '1fr 1fr' : '1fr 1fr'}; grid-template-rows: ${arrayFotos.length === 3 ? '1fr 1fr' : '1fr'}; gap: 6px; width: 100%; height: 180px; border-radius: 20px; overflow: hidden; border: 2px solid rgba(255, 255, 255, 0.9);">
                                 ${arrayFotos.length === 3 ? `
-                                    <div style="width: 100%; height: 100%; overflow: hidden;">
+                                    <div style="grid-row: span 2; width: 100%; height: 100%; overflow: hidden;">
                                         <img src="${arrayFotos[0]}" alt="Fotografía" style="width: 100%; height: 100%; object-fit: cover;">
                                     </div>
-                                    <div style="display: flex; flex-direction: column; gap: 6px; height: 100%;">
-                                        <div style="width: 100%; height: calc(50% - 3px); overflow: hidden;">
-                                            <img src="${arrayFotos[1]}" alt="Fotografía" style="width: 100%; height: 100%; object-fit: cover;">
-                                        </div>
-                                        <div style="width: 100%; height: calc(50% - 3px); overflow: hidden;">
-                                            <img src="${arrayFotos[2]}" alt="Fotografía" style="width: 100%; height: 100%; object-fit: cover;">
-                                        </div>
+                                    <div style="width: 100%; height: 100%; overflow: hidden;">
+                                        <img src="${arrayFotos[1]}" alt="Fotografía" style="width: 100%; height: 100%; object-fit: cover;">
+                                    </div>
+                                    <div style="width: 100%; height: 100%; overflow: hidden;">
+                                        <img src="${arrayFotos[2]}" alt="Fotografía" style="width: 100%; height: 100%; object-fit: cover;">
                                     </div>
                                 ` : arrayFotos.map(foto => `
                                     <div style="width: 100%; height: 100%; overflow: hidden;">
