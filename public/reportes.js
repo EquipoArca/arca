@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnSubirArchivo = document.getElementById('btn-subir-archivo');
     const btnCirculo = document.getElementById('btn-circulo');
     const zonaDrop = document.querySelector('.zona-drop') || document.getElementById('zona-arrastre');
+    const contenedorPreview = document.getElementById('preview-container') || document.getElementById('contenedor-previsualizacion');
 
     const MAXIMO_FOTOS = 3;
     let archivosSeleccionados = [];
@@ -80,10 +81,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!inputArchivo) return;
         const dataTransfer = new DataTransfer();
         archivosSeleccionados.forEach(file => dataTransfer.items.add(file));
-        inputArchivo.files = dataTransfer.files; // Asigna los archivos reales al input oculto
+        inputArchivo.files = dataTransfer.files;
     }
 
-    // 4. Selección y Arrastre de Archivos (Drag & Drop + Previsualización unificada)
+    // 4. Selección y Arrastre de Archivos (Drag & Drop + Previsualización)
     const activarInputArchivo = (e) => {
         e.preventDefault();
         if (inputArchivo) inputArchivo.click();
@@ -92,30 +93,39 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnSubirArchivo) btnSubirArchivo.addEventListener('click', activarInputArchivo);
     if (btnCirculo) btnCirculo.addEventListener('click', activarInputArchivo);
 
-    if (zonaDrop && inputArchivo) {
+    if (inputArchivo) {
+        inputArchivo.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                procesarNuevosArchivos(e.target.files);
+                inputArchivo.value = '';
+            }
+        });
+    }
+
+    if (zonaDrop) {
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             zonaDrop.addEventListener(eventName, (e) => e.preventDefault(), false);
             document.body.addEventListener(eventName, (e) => e.preventDefault(), false);
         });
 
         ['dragenter', 'dragover'].forEach(eventName => {
-            zonaDrop.addEventListener(eventName, () => zonaDrop.classList.add('highlight'), false);
+            zonaDrop.addEventListener(eventName, () => {
+                zonaDrop.style.border = "2px dashed #fbc2c4";
+                zonaDrop.style.backgroundColor = "rgba(251, 194, 196, 0.2)";
+            }, false);
         });
 
         ['dragleave', 'drop'].forEach(eventName => {
-            zonaDrop.addEventListener(eventName, () => zonaDrop.classList.remove('highlight'), false);
+            zonaDrop.addEventListener(eventName, () => {
+                zonaDrop.style.border = "none";
+                zonaDrop.style.backgroundColor = "transparent";
+            }, false);
         });
 
         zonaDrop.addEventListener('drop', (e) => {
             const dt = e.dataTransfer;
             if (dt.files && dt.files.length > 0) {
                 procesarNuevosArchivos(dt.files);
-            }
-        });
-
-        inputArchivo.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                procesarNuevosArchivos(e.target.files);
             }
         });
     }
@@ -165,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderizarMiniaturas() {
-        const textoArrastra = document.getElementById('texto-arrastra') || document.getElementById('texo-arrastra');
+        const textoArrastra = document.getElementById('texto-arrastra') || document.getElementById('texo-arrastra') || document.querySelector('.texto-arrastra');
         if (textoArrastra) {
             if (archivosSeleccionados.length > 0) {
                 textoArrastra.textContent = `${archivosSeleccionados.length} de 3 fotos seleccionadas`;
@@ -176,70 +186,57 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        let contenedorPreview = document.getElementById('preview-container') || document.getElementById('contenedor-previsualizacion');
-        if (!contenedorPreview && zonaDrop) {
-            contenedorPreview = document.createElement('div');
-            contenedorPreview.id = 'preview-container';
-            contenedorPreview.style.display = 'flex';
-            contenedorPreview.style.flexWrap = 'wrap';
-            contenedorPreview.style.gap = '10px';
-            contenedorPreview.style.marginTop = '12px';
-            contenedorPreview.style.justifyContent = 'center';
-            zonaDrop.appendChild(contenedorPreview);
-        }
+        if (!contenedorPreview) return;
+        contenedorPreview.innerHTML = ''; 
 
-        if (contenedorPreview) {
-            contenedorPreview.innerHTML = ''; 
+        archivosSeleccionados.forEach((file, index) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (e) => {
+                const wrapper = document.createElement('div');
+                wrapper.style.position = 'relative';
+                wrapper.style.display = 'inline-block';
+                wrapper.style.margin = '4px';
 
-            archivosSeleccionados.forEach((file, index) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = (e) => {
-                    const wrapper = document.createElement('div');
-                    wrapper.style.position = 'relative';
-                    wrapper.style.display = 'inline-block';
-                    wrapper.style.margin = '4px';
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.style.width = '70px';
+                img.style.height = '70px';
+                img.style.objectFit = 'cover';
+                img.style.borderRadius = '8px';
+                img.style.border = '1px solid rgba(255, 255, 255, 0.3)';
+                img.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
 
-                    const img = document.createElement('img');
-                    img.src = e.target.result;
-                    img.style.width = '70px';
-                    img.style.height = '70px';
-                    img.style.objectFit = 'cover';
-                    img.style.borderRadius = '8px';
-                    img.style.border = '1px solid rgba(255, 255, 255, 0.3)';
-                    img.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
+                const btnBorrar = document.createElement('button');
+                btnBorrar.innerHTML = '&times;';
+                btnBorrar.type = 'button';
+                btnBorrar.style.position = 'absolute';
+                btnBorrar.style.top = '-5px';
+                btnBorrar.style.right = '-5px';
+                btnBorrar.style.background = '#ff4d4d';
+                btnBorrar.style.color = '#fff';
+                btnBorrar.style.border = 'none';
+                btnBorrar.style.borderRadius = '50%';
+                btnBorrar.style.width = '20px';
+                btnBorrar.style.height = '20px';
+                btnBorrar.style.cursor = 'pointer';
+                btnBorrar.style.fontSize = '12px';
+                btnBorrar.style.display = 'flex';
+                btnBorrar.style.alignItems = 'center';
+                btnBorrar.style.justifyContent = 'center';
 
-                    const btnBorrar = document.createElement('button');
-                    btnBorrar.innerHTML = '&times;';
-                    btnBorrar.type = 'button';
-                    btnBorrar.style.position = 'absolute';
-                    btnBorrar.style.top = '-5px';
-                    btnBorrar.style.right = '-5px';
-                    btnBorrar.style.background = '#ff4d4d';
-                    btnBorrar.style.color = '#fff';
-                    btnBorrar.style.border = 'none';
-                    btnBorrar.style.borderRadius = '50%';
-                    btnBorrar.style.width = '20px';
-                    btnBorrar.style.height = '20px';
-                    btnBorrar.style.cursor = 'pointer';
-                    btnBorrar.style.fontSize = '12px';
-                    btnBorrar.style.display = 'flex';
-                    btnBorrar.style.alignItems = 'center';
-                    btnBorrar.style.justifyContent = 'center';
+                btnBorrar.addEventListener('click', (evt) => {
+                    evt.stopPropagation();
+                    archivosSeleccionados.splice(index, 1);
+                    sincronizarInputFiles();
+                    renderizarMiniaturas();
+                });
 
-                    btnBorrar.addEventListener('click', (evt) => {
-                        evt.stopPropagation();
-                        archivosSeleccionados.splice(index, 1);
-                        sincronizarInputFiles();
-                        renderizarMiniaturas();
-                    });
-
-                    wrapper.appendChild(img);
-                    wrapper.appendChild(btnBorrar);
-                    contenedorPreview.appendChild(wrapper);
-                };
-            });
-        }
+                wrapper.appendChild(img);
+                wrapper.appendChild(btnBorrar);
+                contenedorPreview.appendChild(wrapper);
+            };
+        });
     }
 
     // 5. Envío del Formulario
@@ -273,7 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 formData.append('correo_contacto', correoContacto);
                 formData.append('correo_usuario', correoUsuarioLogueado);
 
-                // AHORA:
+                // Adjuntar las fotos sincronizadas correctamente
                 if (inputArchivo && inputArchivo.files.length > 0) {
                     for (let i = 0; i < inputArchivo.files.length; i++) {
                         formData.append('fotos_reporte', inputArchivo.files[i]);
