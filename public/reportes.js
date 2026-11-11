@@ -270,11 +270,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 formData.append('correo_contacto', correoContacto);
                 formData.append('correo_usuario', correoUsuarioLogueado);
 
-                // Adjuntar las fotos sincronizadas correctamente
-                if (inputArchivo && inputArchivo.files.length > 0) {
-                    for (let i = 0; i < inputArchivo.files.length; i++) {
-                        formData.append('fotos_reporte', inputArchivo.files[i]);
-                    }
+                // Adjuntamos directamente desde nuestro array de archivos seleccionados
+                if (archivosSeleccionados && archivosSeleccionados.length > 0) {
+                    archivosSeleccionados.forEach(file => {
+                        formData.append('fotos_reporte', file);
+                    });
                 }
 
                 // DETECCIÓN SEGURA DEL MODO EDICIÓN
