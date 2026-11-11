@@ -507,8 +507,10 @@ const upload = multer({
         files: 3 // 👈 ¡ESTO ES LO QUE FALTABA! Permite exactamente hasta 3 archivos
     }
 });
+// Aceptamos cualquier variante de nombre con la que el navegador envíe las fotos (hasta 3 archivos)
+const uploadReporteMiddleware = upload.any();
 
-app.post('/crear-reporte', upload.array('fotos_reporte[]', 3), (req, res) => {
+app.post('/crear-reporte', uploadReporteMiddleware, (req, res) => {
     const {
         id_tipo_reporte,
         Descripcion,
@@ -518,18 +520,20 @@ app.post('/crear-reporte', upload.array('fotos_reporte[]', 3), (req, res) => {
         correo_usuario
     } = req.body;
 
+    console.log("📥 Datos recibidos en /crear-reporte:", { id_tipo_reporte, Descripcion, Ubicacion, correo_usuario });
+    console.log("📸 Archivos recibidos por Multer:", req.files ? req.files.length : 0);
+
     if (!id_tipo_reporte || !Descripcion || !Ubicacion || !correo_usuario) {
         return res.status(400).json({ error: "Faltan campos obligatorios para el reporte." });
     }
 
     let imagenesArray = [];
     if (req.files && req.files.length > 0) {
-        // Convertimos cada archivo en su formato Base64 limpio
         imagenesArray = req.files.map(file => `data:${file.mimetype};base64,${file.buffer.toString('base64')}`);
-    } // ✅ Eliminado el punto y coma erróneo de aquí
+    }
 
-    // Convertimos el arreglo completo a un JSON string para guardarlo en el LONGTEXT
     const img_reporte = imagenesArray.length > 0 ? JSON.stringify(imagenesArray) : null;
+    console.log("🖼️ Cadena Base64 generada para la BD (longitud):", img_reporte ? img_reporte.length : 'NULL');
 
     db.query("SELECT id_usuarios FROM usuarios WHERE correo_usuario = ?", [correo_usuario], (err, results) => {
         if (err || results.length === 0) {
@@ -540,58 +544,45 @@ app.post('/crear-reporte', upload.array('fotos_reporte[]', 3), (req, res) => {
         const id_usuarios = results[0].id_usuarios;
         const Fecha_reporte = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
-        const queryVerificarDuplicado = `
-            SELECT id_reporte FROM reportes
-            WHERE id_usuarios = ? AND Descripcion = ? AND Ubicacion = ?
-            AND Fecha_reporte = ?
+        const queryInsertReporte = `
+            INSERT INTO reportes
+            (id_tipo_reporte, Descripcion, Ubicacion, telefono_contacto, correo_contacto, Fecha_reporte, img_reporte, id_usuarios)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
-        db.query(queryVerificarDuplicado, [id_usuarios, Descripcion, Ubicacion, Fecha_reporte], (errDup, dupResults) => {
-            if (!errDup && dupResults.length > 0) {
-                return res.status(400).json({ error: "Ya has enviado este reporte recientemente. Evita duplicados." });
+        const valores = [
+            id_tipo_reporte,
+            Descripcion,
+            Ubicacion,
+            telefono_contacto || null,
+            correo_contacto || null,
+            Fecha_reporte,
+            img_reporte,
+            id_usuarios
+        ];
+
+        db.query(queryInsertReporte, valores, (errResult, result) => {
+            if (errResult) {
+                console.error("❌ ERROR AL GUARDAR REPORTE EN MYSQL:", errResult.message);
+                return res.status(500).json({ error: "Error al guardar en la base de datos: " + errResult.message });
             }
 
-            const queryInsertReporte = `
-                INSERT INTO reportes
-                (id_tipo_reporte, Descripcion, Ubicacion, telefono_contacto, correo_contacto, Fecha_reporte, img_reporte, id_usuarios)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            `;
+            const idReporteNuevo = result.insertId;
+            const queryInsertPublicacion = `INSERT INTO publicaciones (id_reporte) VALUES (?)`;
 
-            const valores = [
-                id_tipo_reporte,
-                Descripcion,
-                Ubicacion,
-                telefono_contacto || null,
-                correo_contacto || null,
-                Fecha_reporte,
-                img_reporte, // ✅ Aquí viaja la cadena JSON con los Base64 hacia el LONGTEXT
-                id_usuarios
-            ];
-
-            db.query(queryInsertReporte, valores, (errResult, result) => {
-                if (errResult) {
-                    console.error("❌ ERROR AL GUARDAR REPORTE:", errResult.message);
-                    return res.status(500).json({ error: "Error al guardar en la base de datos: " + errResult.message });
+            db.query(queryInsertPublicacion, [idReporteNuevo], (errPub) => {
+                if (errPub) {
+                    console.error("⚠️ Advertencia: El reporte se creó pero falló al registrarse en publicaciones:", errPub.message);
                 }
 
-                const idReporteNuevo = result.insertId;
-                const queryInsertPublicacion = `INSERT INTO publicaciones (id_reporte) VALUES (?)`;
-
-                db.query(queryInsertPublicacion, [idReporteNuevo], (errPub) => {
-                    if (errPub) {
-                        console.error("⚠️ Advertencia: El reporte se creó pero falló al registrarse en publicaciones:", errPub.message);
-                    }
-
-                    res.status(201).json({
-                        mensaje: "Reporte creado exitosamente",
-                        id_reporte: idReporteNuevo
-                    });
+                res.status(201).json({
+                    mensaje: "Reporte creado exitosamente",
+                    id_reporte: idReporteNuevo
                 });
             });
         });
     });
 });
-
 app.get('/reportes/balance-reportes', (req, res) => {
     const sql = `
         SELECT

@@ -273,10 +273,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 formData.append('correo_contacto', correoContacto);
                 formData.append('correo_usuario', correoUsuarioLogueado);
 
-                // Asegurar que se envíen los archivos sincronizados
+                // AHORA:
                 if (inputArchivo && inputArchivo.files.length > 0) {
                     for (let i = 0; i < inputArchivo.files.length; i++) {
-                        formData.append('fotos_reporte[]', inputArchivo.files[i]);
+                        formData.append('fotos_reporte', inputArchivo.files[i]);
                     }
                 }
 
