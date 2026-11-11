@@ -521,20 +521,23 @@ app.post('/crear-reporte', upload.array('fotos_reporte[]', 3), (req, res) => {
         return res.status(400).json({ error: "Faltan campos obligatorios para el reporte." });
     }
 
-let imagenesArray = [];
+    let imagenesArray = [];
     if (req.files && req.files.length > 0) {
+        // Convertimos cada archivo en su formato Base64 limpio
         imagenesArray = req.files.map(file => `data:${file.mimetype};base64,${file.buffer.toString('base64')}`);
-    };
+    } // ✅ Eliminado el punto y coma erróneo de aquí
+
+    // Convertimos el arreglo completo a un JSON string para guardarlo en el LONGTEXT
     const img_reporte = imagenesArray.length > 0 ? JSON.stringify(imagenesArray) : null;
 
-        db.query("SELECT id_usuarios FROM usuarios WHERE correo_usuario = ?", [correo_usuario], (err, results) => {
+    db.query("SELECT id_usuarios FROM usuarios WHERE correo_usuario = ?", [correo_usuario], (err, results) => {
         if (err || results.length === 0) {
             console.error("Error al buscar ID del usuario:", err);
             return res.status(500).json({ error: "No se pudo asociar el usuario al reporte." });
         }
 
-       const id_usuarios = results[0].id_usuarios;
-       const Fecha_reporte = new Date().toISOString().slice(0, 19).replace('T', ' ');
+        const id_usuarios = results[0].id_usuarios;
+        const Fecha_reporte = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
         const queryVerificarDuplicado = `
             SELECT id_reporte FROM reportes
@@ -560,7 +563,7 @@ let imagenesArray = [];
                 telefono_contacto || null,
                 correo_contacto || null,
                 Fecha_reporte,
-                img_reporte, 
+                img_reporte, // ✅ Aquí viaja la cadena JSON con los Base64 hacia el LONGTEXT
                 id_usuarios
             ];
 
