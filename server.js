@@ -1195,7 +1195,7 @@ app.get('/api/reportes/:id', (req, res) => {
     });
 });
 
-app.put('/api/reportes/:id', (req, res) => {
+app.put('/api/reportes/:id', upload.any(), (req, res) => {
     const idReporte = req.params.id;
     const {
         id_tipo_reporte,
@@ -1205,11 +1205,30 @@ app.put('/api/reportes/:id', (req, res) => {
         Ubicacion,
         telefono_contacto,
         correo_contacto,
-        img_reporte
+        img_reporte_existente
     } = req.body;
 
     const descFinal = descripcion_reporte || Descripcion;
     const ubiFinal = direccion_reporte || Ubicacion;
+
+    let imagenesFinales = [];
+
+    // 1. Recuperar las imágenes que ya estaban y el usuario decidió conservar
+    if (img_reporte_existente) {
+        try {
+            const parsed = JSON.parse(img_reporte_existente);
+            if (Array.isArray(parsed)) imagenesFinales = parsed;
+        } catch(e) {}
+    }
+
+    // 2. Agregar las nuevas fotos que haya subido el usuario en la edición
+    if (req.files && req.files.length > 0) {
+        req.files.forEach(file => {
+            imagenesFinales.push(`data:${file.mimetype};base64,${file.buffer.toString('base64')}`);
+        });
+    }
+
+    const imgReporteFinalStr = imagenesFinales.length > 0 ? JSON.stringify(imagenesFinales) : null;
 
     const sql = `
         UPDATE reportes
@@ -1228,7 +1247,7 @@ app.put('/api/reportes/:id', (req, res) => {
         ubiFinal,
         telefono_contacto || null,
         correo_contacto || null,
-        img_reporte || null,
+        imgReporteFinalStr,
         idReporte
     ];
 
@@ -1245,7 +1264,6 @@ app.put('/api/reportes/:id', (req, res) => {
         res.json({ mensaje: "¡Reporte actualizado con éxito!" });
     });
 });
-
 // ==========================================
 // MÓDULO CREACIÓN DE ADOPCIONES
 // ==========================================
