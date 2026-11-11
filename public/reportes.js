@@ -262,7 +262,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const usuarioAuth = typeof firebase !== 'undefined' && firebase.auth().currentUser ? firebase.auth().currentUser : null;
                 const correoUsuarioLogueado = (usuarioAuth && usuarioAuth.email) ? usuarioAuth.email : (localStorage.getItem('correo_usuario') || correoContacto);
 
-                const formData = new FormData();
+               const formData = new FormData();
                 formData.append('id_tipo_reporte', idTipoReporte);
                 formData.append('Descripcion', descripcion);
                 formData.append('Ubicacion', direccion);
@@ -270,10 +270,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 formData.append('correo_contacto', correoContacto);
                 formData.append('correo_usuario', correoUsuarioLogueado);
 
-                // Adjuntamos directamente desde nuestro array de archivos seleccionados
+                // Forzamos el envío de cada archivo seleccionado en el array visual
                 if (archivosSeleccionados && archivosSeleccionados.length > 0) {
-                    archivosSeleccionados.forEach(file => {
-                        formData.append('fotos_reporte', file);
+                    archivosSeleccionados.forEach((file, index) => {
+                        formData.append('fotos_reporte', file, file.name);
                     });
                 }
 

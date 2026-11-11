@@ -507,10 +507,12 @@ const upload = multer({
         files: 3 // 👈 ¡ESTO ES LO QUE FALTABA! Permite exactamente hasta 3 archivos
     }
 });
-// Aceptamos cualquier variante de nombre con la que el navegador envíe las fotos (hasta 3 archivos)
-const uploadReporteMiddleware = upload.any();
+app.post('/crear-reporte', upload.any(), (req, res) => {
+    console.log("========================================");
+    console.log("📥 REQ.BODY RECIBIDO:", req.body);
+    console.log("📸 REQ.FILES RECIBIDOS:", req.files);
+    console.log("========================================");
 
-app.post('/crear-reporte', uploadReporteMiddleware, (req, res) => {
     const {
         id_tipo_reporte,
         Descripcion,
@@ -519,9 +521,6 @@ app.post('/crear-reporte', uploadReporteMiddleware, (req, res) => {
         correo_contacto,
         correo_usuario
     } = req.body;
-
-    console.log("📥 Datos recibidos en /crear-reporte:", { id_tipo_reporte, Descripcion, Ubicacion, correo_usuario });
-    console.log("📸 Archivos recibidos por Multer:", req.files ? req.files.length : 0);
 
     if (!id_tipo_reporte || !Descripcion || !Ubicacion || !correo_usuario) {
         return res.status(400).json({ error: "Faltan campos obligatorios para el reporte." });
@@ -533,7 +532,6 @@ app.post('/crear-reporte', uploadReporteMiddleware, (req, res) => {
     }
 
     const img_reporte = imagenesArray.length > 0 ? JSON.stringify(imagenesArray) : null;
-    console.log("🖼️ Cadena Base64 generada para la BD (longitud):", img_reporte ? img_reporte.length : 'NULL');
 
     db.query("SELECT id_usuarios FROM usuarios WHERE correo_usuario = ?", [correo_usuario], (err, results) => {
         if (err || results.length === 0) {
