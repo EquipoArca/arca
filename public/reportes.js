@@ -9,7 +9,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputArchivo = document.getElementById('input-archivo-oculto');
     const btnSubirArchivo = document.getElementById('btn-subir-archivo');
     const btnCirculo = document.getElementById('btn-circulo');
-    const zonaDrop = document.querySelector('.zona-drop');
+    const zonaDrop = document.querySelector('.zona-drop') || document.getElementById('zona-arrastre');
+
+    const MAXIMO_FOTOS = 3;
+    let archivosSeleccionados = [];
 
     // 1. Cargar datos del usuario desde Firebase/MySQL
     if (typeof firebase !== 'undefined' && firebase.auth) {
@@ -21,10 +24,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (respuesta.ok) {
                         const usuario = await respuesta.json();
 
-                        if (inputCorreo) {
+                        if (inputCorreo && !inputCorreo.value) {
                             inputCorreo.value = user.email;
                         }
-                        if (inputTel) {
+                        if (inputTel && !inputTel.value) {
                             inputTel.value = usuario.Telefono_usuario || usuario.telefono_usuario || usuario.telefono || '';
                         }
                     }
@@ -35,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-   // 2. Geolocalización con indicador de carga
+    // 2. Geolocalización con indicador de carga
     if (btnUbicacion && inputDireccion) {
         btnUbicacion.addEventListener('click', () => {
             if (navigator.geolocation) {
@@ -72,7 +75,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 3. Selección y Arrastre de Archivos (Drag & Drop + Previsualización)
+    // 3. Sincronización clave para el FormData
+    function sincronizarInputFiles() {
+        if (!inputArchivo) return;
+        const dataTransfer = new DataTransfer();
+        archivosSeleccionados.forEach(file => dataTransfer.items.add(file));
+        inputArchivo.files = dataTransfer.files; // Asigna los archivos reales al input oculto
+    }
+
+    // 4. Selección y Arrastre de Archivos (Drag & Drop + Previsualización unificada)
     const activarInputArchivo = (e) => {
         e.preventDefault();
         if (inputArchivo) inputArchivo.click();
@@ -81,14 +92,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnSubirArchivo) btnSubirArchivo.addEventListener('click', activarInputArchivo);
     if (btnCirculo) btnCirculo.addEventListener('click', activarInputArchivo);
 
-    if (zonaDrop) {
-        // Prevenir eventos de arrastre por defecto para que no abran la imagen en el navegador
+    if (zonaDrop && inputArchivo) {
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             zonaDrop.addEventListener(eventName, (e) => e.preventDefault(), false);
             document.body.addEventListener(eventName, (e) => e.preventDefault(), false);
         });
 
-        // Feedback visual al arrastrar un archivo encima
         ['dragenter', 'dragover'].forEach(eventName => {
             zonaDrop.addEventListener(eventName, () => zonaDrop.classList.add('highlight'), false);
         });
@@ -97,34 +106,77 @@ document.addEventListener('DOMContentLoaded', () => {
             zonaDrop.addEventListener(eventName, () => zonaDrop.classList.remove('highlight'), false);
         });
 
-        
         zonaDrop.addEventListener('drop', (e) => {
             const dt = e.dataTransfer;
-            if (dt.files && dt.files.length > 0 && inputArchivo) {
-                const dataTransfer = new DataTransfer();
-                Array.from(dt.files).forEach(file => dataTransfer.items.add(file));
-                inputArchivo.files = dataTransfer.files; // ✅ Ahora sí se asignan correctamente
-                procesarPrevisualizacion(dt.files);
+            if (dt.files && dt.files.length > 0) {
+                procesarNuevosArchivos(dt.files);
+            }
+        });
+
+        inputArchivo.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                procesarNuevosArchivos(e.target.files);
             }
         });
     }
 
-    if (inputArchivo) {
-        inputArchivo.addEventListener('change', () => {
-            if (inputArchivo.files.length > 0) {
-                procesarPrevisualizacion(inputArchivo.files);
+    function procesarNuevosArchivos(nuevosArchivos) {
+        let excedioLimite = false;
+        let duplicadosIgnorados = false;
+
+        Array.from(nuevosArchivos).forEach(nuevoArchivo => {
+            if (!nuevoArchivo.type.startsWith('image/')) return;
+
+            const yaExiste = archivosSeleccionados.some(
+                arc => arc.name === nuevoArchivo.name && 
+                       arc.size === nuevoArchivo.size && 
+                       arc.lastModified === nuevoArchivo.lastModified
+            );
+            
+            if (yaExiste) {
+                duplicadosIgnorados = true;
+                return;
             }
+
+            if (archivosSeleccionados.length >= MAXIMO_FOTOS) {
+                excedioLimite = true;
+                return;
+            }
+
+            archivosSeleccionados.push(nuevoArchivo);
         });
+
+        sincronizarInputFiles();
+        renderizarMiniaturas();
+
+        if (excedioLimite) {
+            mostrarAlertaArca(
+                "¡Ey, no puedes hacer eso! 🌸",
+                "No puedes cargar más de tres imágenes. El máximo que puedes adjuntar son tres.",
+                { tipo: "aviso" }
+            );
+        } else if (duplicadosIgnorados) {
+            mostrarAlertaArca(
+                "¡Fotografía repetida! 🌸",
+                "Ya habías seleccionado esta imagen antes.",
+                { tipo: "aviso" }
+            );
+        }
     }
 
-    function procesarPrevisualizacion(archivos) {
-        const cantidad = archivos.length;
-        const textoArrastra = document.getElementById('texo-arrastra');
+    function renderizarMiniaturas() {
+        const textoArrastra = document.getElementById('texto-arrastra') || document.getElementById('texo-arrastra');
         if (textoArrastra) {
-            textoArrastra.textContent = `📷 ${cantidad} foto(s) seleccionada(s)`;
+            if (archivosSeleccionados.length > 0) {
+                textoArrastra.textContent = `${archivosSeleccionados.length} de 3 fotos seleccionadas`;
+                textoArrastra.style.color = "#4caf50";
+            } else {
+                textoArrastra.textContent = "o arrastra una imagen aquí";
+                textoArrastra.style.color = "";
+            }
         }
 
-        let contenedorPreview = document.getElementById('preview-container');
+        let contenedorPreview = document.getElementById('preview-container') || document.getElementById('contenedor-previsualizacion');
         if (!contenedorPreview && zonaDrop) {
             contenedorPreview = document.createElement('div');
             contenedorPreview.id = 'preview-container';
@@ -137,250 +189,197 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (contenedorPreview) {
-            contenedorPreview.innerHTML = ''; // Limpiar miniaturas anteriores
+            contenedorPreview.innerHTML = ''; 
 
-            Array.from(archivos).forEach((file) => {
-                if (file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.readAsDataURL(file);
-                    reader.onload = (e) => {
-                        const wrapper = document.createElement('div');
-                        wrapper.style.position = 'relative';
+            archivosSeleccionados.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (e) => {
+                    const wrapper = document.createElement('div');
+                    wrapper.style.position = 'relative';
+                    wrapper.style.display = 'inline-block';
+                    wrapper.style.margin = '4px';
 
-                        const img = document.createElement('img');
-                        img.src = e.target.result;
-                        img.style.width = '70px';
-                        img.style.height = '70px';
-                        img.style.objectFit = 'cover';
-                        img.style.borderRadius = '8px';
-                        img.style.border = '1px solid rgba(255, 255, 255, 0.3)';
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.style.width = '70px';
+                    img.style.height = '70px';
+                    img.style.objectFit = 'cover';
+                    img.style.borderRadius = '8px';
+                    img.style.border = '1px solid rgba(255, 255, 255, 0.3)';
+                    img.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
 
-                        const btnBorrar = document.createElement('button');
-                        btnBorrar.innerHTML = '&times;';
-                        btnBorrar.type = 'button';
-                        btnBorrar.style.position = 'absolute';
-                        btnBorrar.style.top = '-5px';
-                        btnBorrar.style.right = '-5px';
-                        btnBorrar.style.background = '#ff4d4d';
-                        btnBorrar.style.color = '#fff';
-                        btnBorrar.style.border = 'none';
-                        btnBorrar.style.borderRadius = '50%';
-                        btnBorrar.style.width = '20px';
-                        btnBorrar.style.height = '20px';
-                        btnBorrar.style.cursor = 'pointer';
-                        btnBorrar.style.fontSize = '12px';
+                    const btnBorrar = document.createElement('button');
+                    btnBorrar.innerHTML = '&times;';
+                    btnBorrar.type = 'button';
+                    btnBorrar.style.position = 'absolute';
+                    btnBorrar.style.top = '-5px';
+                    btnBorrar.style.right = '-5px';
+                    btnBorrar.style.background = '#ff4d4d';
+                    btnBorrar.style.color = '#fff';
+                    btnBorrar.style.border = 'none';
+                    btnBorrar.style.borderRadius = '50%';
+                    btnBorrar.style.width = '20px';
+                    btnBorrar.style.height = '20px';
+                    btnBorrar.style.cursor = 'pointer';
+                    btnBorrar.style.fontSize = '12px';
+                    btnBorrar.style.display = 'flex';
+                    btnBorrar.style.alignItems = 'center';
+                    btnBorrar.style.justifyContent = 'center';
 
-                        btnBorrar.addEventListener('click', (evt) => {
-                            evt.stopPropagation();
-                            if (inputArchivo) inputArchivo.value = '';
-                            wrapper.remove();
-                            if (textoArrastra) {
-                                textoArrastra.textContent = "Arrastra tu imagen aquí o haz clic para buscar";
-                            }
-                        });
+                    btnBorrar.addEventListener('click', (evt) => {
+                        evt.stopPropagation();
+                        archivosSeleccionados.splice(index, 1);
+                        sincronizarInputFiles();
+                        renderizarMiniaturas();
+                    });
 
-                        wrapper.appendChild(img);
-                        wrapper.appendChild(btnBorrar);
-                        contenedorPreview.appendChild(wrapper);
-                    };
-                }
+                    wrapper.appendChild(img);
+                    wrapper.appendChild(btnBorrar);
+                    contenedorPreview.appendChild(wrapper);
+                };
             });
         }
     }
 
-    // 4. Conversión y compresión a Base64
-    const convertirABase64 = (archivo) => {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(archivo);
-            
-            reader.onload = (event) => {
-                const img = new Image();
-                img.src = event.target.result;
+    // 5. Envío del Formulario
+    if (formReporte) {
+        formReporte.addEventListener('submit', async (e) => {
+            e.preventDefault();
 
-                img.onload = () => {
-                    const MAX_ANCHO = 800;
-                    const MAX_ALTO = 800;
-                    let ancho = img.width;
-                    let alto = img.height;
-
-                    if (ancho > alto) {
-                        if (ancho > MAX_ANCHO) {
-                            alto = Math.round((alto * MAX_ANCHO) / ancho);
-                            ancho = MAX_ANCHO;
-                        }
-                    } else {
-                        if (alto > MAX_ALTO) {
-                            ancho = Math.round((ancho * MAX_ALTO) / alto);
-                            alto = MAX_ALTO;
-                        }
-                    }
-
-                    const canvas = document.createElement('canvas');
-                    canvas.width = ancho;
-                    canvas.height = alto;
-
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, ancho, alto);
-
-                    const base64Comprimido = canvas.toDataURL('image/jpeg', 0.7);
-                    resolve(base64Comprimido);
-                };
-
-                img.onerror = (error) => reject(error);
-            };
-
-            reader.onerror = (error) => reject(error);
-        });
-    };
-// 5. Envío del Formulario
-if (formReporte) {
-    formReporte.addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        const btnSubmit = formReporte.querySelector('button[type="submit"]');
-        if (btnSubmit) {
-            btnSubmit.disabled = true;
-            btnSubmit.textContent = "Guardando reporte...";
-        }
-
-        try {
-            const radioSeleccionado = document.querySelector('input[name="tipo_reporte"]:checked');
-            const idTipoReporte = radioSeleccionado ? radioSeleccionado.value : '1';
-
-            const descripcion = document.getElementById('descripcion-reporte')?.value || '';
-            const direccion = inputDireccion?.value || '';
-            const telefono = inputTel ? inputTel.value : '';
-            const correoContacto = inputCorreo ? inputCorreo.value : '';
-
-            const usuarioAuth = typeof firebase !== 'undefined' && firebase.auth().currentUser ? firebase.auth().currentUser : null;
-            const correoUsuarioLogueado = (usuarioAuth && usuarioAuth.email) ? usuarioAuth.email : (localStorage.getItem('correo_usuario') || correoContacto);
-
-            const formData = new FormData();
-            formData.append('id_tipo_reporte', idTipoReporte);
-            formData.append('Descripcion', descripcion);
-            formData.append('Ubicacion', direccion);
-            formData.append('telefono_contacto', telefono);
-            formData.append('correo_contacto', correoContacto);
-            formData.append('correo_usuario', correoUsuarioLogueado);
-
-            if (inputArchivo && inputArchivo.files.length > 0) {
-                for (let i = 0; i < inputArchivo.files.length; i++) {
-                    formData.append('fotos_reporte[]', inputArchivo.files[i]);
-                }
-            }
-
-            // DETECCIÓN SEGURA DEL MODO EDICIÓN
-            const urlParamsSubmit = new URLSearchParams(window.location.search);
-            const idEditar = urlParamsSubmit.get('editar');
-
-            let urlFetch = '/crear-reporte';
-            let metodoFetch = 'POST';
-
-            if (idEditar && idEditar !== '') {
-                urlFetch = `/api/reportes/${idEditar}`;
-                metodoFetch = 'PUT'; // Forzamos PUT para evitar que caiga en la validación de duplicados POST
-            }
-
-            const respuesta = await fetch(urlFetch, {
-                method: metodoFetch,
-                body: formData 
-            });
-
-            const resultado = await respuesta.json();
-
-            if (respuesta.ok) {
-                mostrarAlertaArca(
-                    "¡Reporte guardado!",
-                    "Tu reporte ha sido guardado exitosamente. 🌸",
-                    {
-                        tipo: "aviso",
-                        alCerrar: () => {
-                            formReporte.reset();
-                            window.location.href = 'mis_publicaciones.html';
-                        }
-                    }
-                );
-            } else {
-                mostrarAlertaArca(
-                    "Error en el servidor",
-                    resultado.error || "No se pudo guardar el reporte, inténtalo más tarde. ♡",
-                    { tipo: "error" }
-                );
-            }
-
-        } catch (error) {
-            console.error("Error al enviar el reporte:", error);
-            mostrarAlertaArca(
-                "Sin conexión con el servidor",
-                "No se pudo conectar con el servidor. Inténtalo nuevamente más tarde.",
-                { tipo: "conexion" }
-            );
-        } finally {
+            const btnSubmit = formReporte.querySelector('button[type="submit"]');
             if (btnSubmit) {
-                btnSubmit.disabled = false;
-                btnSubmit.textContent = "Enviar Reporte";
+                btnSubmit.disabled = true;
+                btnSubmit.textContent = "Guardando reporte...";
             }
-        }
-    });
-}
-    // ==========================================
-// MODO EDICIÓN: Cargar datos si viene ?editar=ID
-// ==========================================
-const urlParams = new URLSearchParams(window.location.search);
-const idReporteEditar = urlParams.get('editar');
 
-if (idReporteEditar) {
-    const tituloPagina = document.querySelector('.page-title');
-    if (tituloPagina) tituloPagina.textContent = "Editar Reporte";
+            try {
+                const radioSeleccionado = document.querySelector('input[name="tipo_reporte"]:checked');
+                const idTipoReporte = radioSeleccionado ? radioSeleccionado.value : '1';
 
-    const btnEnviar = document.querySelector('.btn-enviar-reporte'); 
-    if (btnEnviar) btnEnviar.textContent = "Guardar Cambios";
+                const descripcion = document.getElementById('descripcion-reporte')?.value || '';
+                const direccion = inputDireccion?.value || '';
+                const telefono = inputTel ? inputTel.value : '';
+                const correoContacto = inputCorreo ? inputCorreo.value : '';
 
-    fetch(`/api/reportes/${idReporteEditar}`)
-        .then(res => {
-            if (!res.ok) throw new Error("No se pudo cargar la información del reporte");
-            return res.json();
-        })
-        .then(reporte => {
-            if (reporte) {
-                // 1. Seleccionar el tipo de reporte (radio button)
-                if (reporte.id_tipo_reporte) {
-                    const radio = document.getElementById(`reporte-opcion-${reporte.id_tipo_reporte}`);
-                    if (radio) radio.checked = true;
-                }
+                const usuarioAuth = typeof firebase !== 'undefined' && firebase.auth().currentUser ? firebase.auth().currentUser : null;
+                const correoUsuarioLogueado = (usuarioAuth && usuarioAuth.email) ? usuarioAuth.email : (localStorage.getItem('correo_usuario') || correoContacto);
 
-                // 2. Rellenar campos de texto
-                const inputDesc = document.querySelector('#descripcion-reporte');
-                if (inputDesc) inputDesc.value = reporte.Descripcion || '';
+                const formData = new FormData();
+                formData.append('id_tipo_reporte', idTipoReporte);
+                formData.append('Descripcion', descripcion);
+                formData.append('Ubicacion', direccion);
+                formData.append('telefono_contacto', telefono);
+                formData.append('correo_contacto', correoContacto);
+                formData.append('correo_usuario', correoUsuarioLogueado);
 
-                const inputDir = document.querySelector('#input-direccion');
-                if (inputDir) inputDir.value = reporte.Ubicacion || '';
-
-                const inputTel = document.querySelector('#contacto-telefono');
-                if (inputTel) inputTel.value = reporte.telefono_contacto || '';
-
-                const inputCorreo = document.querySelector('#contacto-correo');
-                if (inputCorreo) inputCorreo.value = reporte.correo_contacto || '';
-
-                // 3. Mostrar la imagen actual si ya existe
-                if (reporte.img_reporte) {
-                    const imgPreview = document.querySelector('#preview-img-reporte');
-                    if (imgPreview) {
-                        imgPreview.src = reporte.img_reporte;
-                        imgPreview.style.display = 'block';
-                        window.imagenBase64Actual = reporte.img_reporte;
-                    }
-                    const textoArrastra = document.getElementById('texo-arrastra');
-                    if (textoArrastra) {
-                        textoArrastra.textContent = "Imagen actual cargada (puedes subir otra para reemplazarla)";
+                // Asegurar que se envíen los archivos sincronizados
+                if (inputArchivo && inputArchivo.files.length > 0) {
+                    for (let i = 0; i < inputArchivo.files.length; i++) {
+                        formData.append('fotos_reporte[]', inputArchivo.files[i]);
                     }
                 }
-            }
-        })
-        .catch(error => console.error("Error al cargar datos para edición:", error));
-}
 
+                // DETECCIÓN SEGURA DEL MODO EDICIÓN
+                const urlParamsSubmit = new URLSearchParams(window.location.search);
+                const idEditar = urlParamsSubmit.get('editar');
+
+                let urlFetch = '/crear-reporte';
+                let metodoFetch = 'POST';
+
+                if (idEditar && idEditar !== '') {
+                    urlFetch = `/api/reportes/${idEditar}`;
+                    metodoFetch = 'PUT'; 
+                }
+
+                const respuesta = await fetch(urlFetch, {
+                    method: metodoFetch,
+                    body: formData 
+                });
+
+                const resultado = await respuesta.json();
+
+                if (respuesta.ok) {
+                    mostrarAlertaArca(
+                        "¡Reporte guardado!",
+                        "Tu reporte ha sido guardado exitosamente. 🌸",
+                        {
+                            tipo: "aviso",
+                            alCerrar: () => {
+                                formReporte.reset();
+                                window.location.href = 'mis_publicaciones.html';
+                            }
+                        }
+                    );
+                } else {
+                    mostrarAlertaArca(
+                        "Error en el servidor",
+                        resultado.error || "No se pudo guardar el reporte, inténtalo más tarde. ♡",
+                        { tipo: "error" }
+                    );
+                }
+
+            } catch (error) {
+                console.error("Error al enviar el reporte:", error);
+                mostrarAlertaArca(
+                    "Sin conexión con el servidor",
+                    "No se pudo conectar con el servidor. Inténtalo nuevamente más tarde.",
+                    { tipo: "conexion" }
+                );
+            } finally {
+                if (btnSubmit) {
+                    btnSubmit.disabled = false;
+                    btnSubmit.textContent = "Enviar Reporte";
+                }
+            }
+        });
+    }
+
+    // 6. MODO EDICIÓN: Cargar datos si viene ?editar=ID
+    const urlParams = new URLSearchParams(window.location.search);
+    const idReporteEditar = urlParams.get('editar');
+
+    if (idReporteEditar) {
+        const tituloPagina = document.querySelector('.page-title');
+        if (tituloPagina) tituloPagina.textContent = "Editar Reporte";
+
+        const btnEnviar = document.querySelector('.btn-enviar-reporte'); 
+        if (btnEnviar) btnEnviar.textContent = "Guardar Cambios";
+
+        fetch(`/api/reportes/${idReporteEditar}`)
+            .then(res => {
+                if (!res.ok) throw new Error("No se pudo cargar la información del reporte");
+                return res.json();
+            })
+            .then(reporte => {
+                if (reporte) {
+                    if (reporte.id_tipo_reporte) {
+                        const radio = document.getElementById(`reporte-opcion-${reporte.id_tipo_reporte}`);
+                        if (radio) radio.checked = true;
+                    }
+
+                    const inputDesc = document.querySelector('#descripcion-reporte');
+                    if (inputDesc) inputDesc.value = reporte.Descripcion || '';
+
+                    const inputDir = document.querySelector('#input-direccion');
+                    if (inputDir) inputDir.value = reporte.Ubicacion || '';
+
+                    const inputTel = document.querySelector('#contacto-telefono');
+                    if (inputTel) inputTel.value = reporte.telefono_contacto || '';
+
+                    const inputCorreo = document.querySelector('#contacto-correo');
+                    if (inputCorreo) inputCorreo.value = reporte.correo_contacto || '';
+
+                    if (reporte.img_reporte) {
+                        const textoArrastra = document.getElementById('texto-arrastra') || document.getElementById('texo-arrastra');
+                        if (textoArrastra) {
+                            textoArrastra.textContent = "Imagen actual cargada (puedes subir otra para reemplazarla)";
+                        }
+                    }
+                }
+            })
+            .catch(error => console.error("Error al cargar datos para edición:", error));
+    }
 });
 
 // ==========================================
@@ -399,7 +398,6 @@ function mostrarAlertaArca(titulo, mensaje, opciones = {}) {
         const estilos = document.createElement("style");
         estilos.id = "estilos-alerta-arca";
         estilos.textContent = `
-            /* Estilos generales para error y aviso */
             .arca-alerta-overlay {
                 position: fixed;
                 inset: 0;
@@ -452,11 +450,11 @@ function mostrarAlertaArca(titulo, mensaje, opciones = {}) {
                 overflow-wrap: anywhere;
             }
 
-           .arca-alerta-boton {
+            .arca-alerta-boton {
                 width: 100%;
                 padding: 12px 18px;
                 border: 0;
-                outline: none; /* <-- Añade esto */
+                outline: none;
                 border-radius: 18px;
                 background: #E985A0;
                 color: white;
@@ -471,7 +469,6 @@ function mostrarAlertaArca(titulo, mensaje, opciones = {}) {
                 transform: translateY(-2px);
             }
 
-            /* CSS EXCLUSIVO PARA EL TIPO "CONEXION" */
             .custom-alert-overlay {
                 position: fixed;
                 top: 0;
@@ -540,11 +537,11 @@ function mostrarAlertaArca(titulo, mensaje, opciones = {}) {
                 margin-bottom: 24px;
             }
 
-          .custom-alert-btn {
+            .custom-alert-btn {
                 background-color: #ffffff;
                 color: #e57373;
                 border: 2px solid #ffffff;
-                outline: none; /* <-- Y esto aquí también */
+                outline: none;
                 border-radius: 26px;
                 padding: 12px 0;
                 width: 100%;
@@ -597,11 +594,8 @@ function mostrarAlertaArca(titulo, mensaje, opciones = {}) {
         overlay.className = "custom-alert-overlay";
         overlay.setAttribute("role", "alertdialog");
         overlay.setAttribute("aria-modal", "true");
-
         tarjeta.className = "custom-alert-card";
-
         icono.className = "alert-icon-circle";
-        // Aquí incorporamos el icono SVG exacto con el círculo oscuro y el signo de exclamación (!)
         icono.innerHTML = `
             <svg class="alert-icon" viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="10" fill="#4a4a4a"/>
@@ -609,28 +603,20 @@ function mostrarAlertaArca(titulo, mensaje, opciones = {}) {
                 <circle cx="12" cy="16" r="1.2" fill="white"/>
             </svg>
         `;
-
         encabezado.className = "custom-alert-title";
         encabezado.textContent = titulo;
-
         texto.className = "custom-alert-message";
         texto.textContent = mensaje;
-
         boton.type = "button";
         boton.className = "custom-alert-btn";
         boton.textContent = textoBoton;
-
     } else {
         overlay.className = "arca-alerta-overlay";
         overlay.setAttribute("role", "alertdialog");
         overlay.setAttribute("aria-modal", "true");
-
         tarjeta.className = "arca-alerta-tarjeta";
 
-        const iconos = {
-            error: "♡",
-            aviso: "🌸"
-        };
+        const iconos = { error: "♡", aviso: "🌸" };
         icono.className = "arca-alerta-icono";
         icono.textContent = iconos[tipo] || "♡";
 
@@ -658,4 +644,3 @@ function mostrarAlertaArca(titulo, mensaje, opciones = {}) {
 
     boton.focus();
 }
-
