@@ -2422,7 +2422,7 @@ app.get('/api/novedades', (req, res) => {
         res.json(rows);
     });
 });
-app.post('/api/enviar-reporte-error', uploadSoporte.single('imagen_error'), (req, res) => {
+app.post('/api/enviar-reporte-error', upload.single('imagen_error'), (req, res) => {
     try {
         const { lugar_error, descripcion, nombre_usuario, correo_usuario } = req.body;
 
@@ -2435,7 +2435,11 @@ app.post('/api/enviar-reporte-error', uploadSoporte.single('imagen_error'), (req
         console.log(`- Lugar del error: ${lugar_error || 'No especificado'}`);
         console.log(`- Descripción: ${descripcion}`);
 
-        // Respuesta exitosa al cliente
+        // Si se subió imagen de soporte opcional:
+        if (req.file) {
+            console.log(`- Imagen de error adjunta: ${req.file.originalname} (${req.file.size} bytes)`);
+        }
+
         return res.status(200).json({
             exito: true,
             mensaje: "Reporte de error recibido y registrado con éxito."
