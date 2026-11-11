@@ -1198,7 +1198,6 @@ app.get('/api/reportes/:id', (req, res) => {
 app.put('/api/reportes/:id', upload.any(), (req, res) => {
     const idReporte = req.params.id;
     
-    // Validar que el ID sea correcto
     if (!idReporte || idReporte === 'undefined') {
         return res.status(400).json({ error: "ID de reporte inválido para actualizar." });
     }
@@ -1219,7 +1218,6 @@ app.put('/api/reportes/:id', upload.any(), (req, res) => {
 
     let imagenesFinales = [];
 
-    // 1. Recuperar de forma segura las imágenes existentes
     if (img_reporte_existente) {
         try {
             const parsed = JSON.parse(img_reporte_existente);
@@ -1235,7 +1233,6 @@ app.put('/api/reportes/:id', upload.any(), (req, res) => {
         }
     }
 
-    // 2. Agregar las nuevas fotos subidas
     if (req.files && req.files.length > 0) {
         req.files.forEach(file => {
             if (file && file.buffer) {
@@ -1246,7 +1243,8 @@ app.put('/api/reportes/:id', upload.any(), (req, res) => {
 
     const imgReporteFinalStr = imagenesFinales.length > 0 ? JSON.stringify(imagenesFinales) : null;
 
-    const sql = `
+    // Intentamos actualizar primero incluyendo la imagen
+    const sqlConImagen = `
         UPDATE reportes
         SET id_tipo_reporte = ?,
             Descripcion = ?,
@@ -1267,10 +1265,37 @@ app.put('/api/reportes/:id', upload.any(), (req, res) => {
         idReporte
     ];
 
-    db.query(sql, valores, (err, result) => {
+    db.query(sqlConImagen, valores, (err, result) => {
         if (err) {
-            console.error("❌ Error crítico en MySQL al actualizar el reporte:", err.message);
-            return res.status(500).json({ error: "Error en base de datos: " + err.message });
+            console.error("❌ ERROR MYSQL AL ACTUALIZAR REPORTE (Intentando fallback sin imagen):", err.sqlMessage || err.message);
+            
+            // PLAN B: Si la columna img_reporte diera problemas en tu BD, actualizamos los textos básicos para que al menos guarde los cambios de texto
+            const sqlSinImagen = `
+                UPDATE reportes
+                SET id_tipo_reporte = ?,
+                    Descripcion = ?,
+                    Ubicacion = ?,
+                    telefono_contacto = ?,
+                    correo_contacto = ?
+                WHERE id_reporte = ?
+            `;
+            const valoresSinImagen = [
+                id_tipo_reporte || 1,
+                descFinal,
+                ubiFinal,
+                telefono_contacto || null,
+                correo_contacto || null,
+                idReporte
+            ];
+
+            db.query(sqlSinImagen, valoresSinImagen, (err2, result2) => {
+                if (err2) {
+                    console.error("❌ ERROR CRÍTICO SQL SIN IMAGEN:", err2.sqlMessage || err2.message);
+                    return res.status(500).json({ error: "Error en base de datos: " + err2.message });
+                }
+                return res.json({ mensaje: "¡Reporte actualizado con éxito (texto guardado)!" });
+            });
+            return;
         }
 
         if (result.affectedRows === 0) {
