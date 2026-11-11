@@ -1197,6 +1197,12 @@ app.get('/api/reportes/:id', (req, res) => {
 
 app.put('/api/reportes/:id', upload.any(), (req, res) => {
     const idReporte = req.params.id;
+    
+    // Validar que el ID sea correcto
+    if (!idReporte || idReporte === 'undefined') {
+        return res.status(400).json({ error: "ID de reporte inválido para actualizar." });
+    }
+
     const {
         id_tipo_reporte,
         descripcion_reporte,
@@ -1208,32 +1214,33 @@ app.put('/api/reportes/:id', upload.any(), (req, res) => {
         img_reporte_existente
     } = req.body;
 
-    const descFinal = descripcion_reporte || Descripcion;
-    const ubiFinal = direccion_reporte || Ubicacion;
+    const descFinal = descripcion_reporte || Descripcion || '';
+    const ubiFinal = direccion_reporte || Ubicacion || '';
 
     let imagenesFinales = [];
 
-    // 1. Recuperar de forma segura las imágenes existentes que el usuario decidió conservar
+    // 1. Recuperar de forma segura las imágenes existentes
     if (img_reporte_existente) {
         try {
             const parsed = JSON.parse(img_reporte_existente);
             if (Array.isArray(parsed)) {
                 imagenesFinales = parsed;
-            } else if (typeof parsed === 'string') {
+            } else if (typeof parsed === 'string' && parsed.trim() !== '') {
                 imagenesFinales.push(parsed);
             }
         } catch (e) {
-            // Si no era un JSON válido pero viene como string plano, lo agregamos directo
             if (typeof img_reporte_existente === 'string' && img_reporte_existente.trim() !== '') {
                 imagenesFinales.push(img_reporte_existente);
             }
         }
     }
 
-    // 2. Agregar las nuevas fotos que haya subido el usuario en la edición
+    // 2. Agregar las nuevas fotos subidas
     if (req.files && req.files.length > 0) {
         req.files.forEach(file => {
-            imagenesFinales.push(`data:${file.mimetype};base64,${file.buffer.toString('base64')}`);
+            if (file && file.buffer) {
+                imagenesFinales.push(`data:${file.mimetype};base64,${file.buffer.toString('base64')}`);
+            }
         });
     }
 
@@ -1252,8 +1259,8 @@ app.put('/api/reportes/:id', upload.any(), (req, res) => {
 
     const valores = [
         id_tipo_reporte || 1,
-        descFinal || '',
-        ubiFinal || '',
+        descFinal,
+        ubiFinal,
         telefono_contacto || null,
         correo_contacto || null,
         imgReporteFinalStr,
@@ -1262,15 +1269,15 @@ app.put('/api/reportes/:id', upload.any(), (req, res) => {
 
     db.query(sql, valores, (err, result) => {
         if (err) {
-            console.error("❌ Error al actualizar el reporte en MySQL:", err.message);
-            return res.status(500).json({ error: "Error al actualizar en la base de datos: " + err.message });
+            console.error("❌ Error crítico en MySQL al actualizar el reporte:", err.message);
+            return res.status(500).json({ error: "Error en base de datos: " + err.message });
         }
 
         if (result.affectedRows === 0) {
-            return res.status(404).json({ error: "Reporte no encontrado" });
+            return res.status(404).json({ error: "No se encontró el reporte en la base de datos." });
         }
 
-        res.json({ mensaje: "¡Reporte actualizado con éxito!" });
+        return res.json({ mensaje: "¡Reporte actualizado con éxito!" });
     });
 });
 // ==========================================

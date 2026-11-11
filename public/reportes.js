@@ -270,15 +270,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 const usuarioAuth = typeof firebase !== 'undefined' && firebase.auth().currentUser ? firebase.auth().currentUser : null;
                 const correoUsuarioLogueado = (usuarioAuth && usuarioAuth.email) ? usuarioAuth.email : (localStorage.getItem('correo_usuario') || correoContacto);
 
-                const formData = new FormData();
-                formData.append('id_tipo_reporte', idTipoReporte);
-                formData.append('Descripcion', descripcion);
-                formData.append('Ubicacion', direccion);
-                formData.append('telefono_contacto', telefono);
-                formData.append('correo_contacto', correoContacto);
-                formData.append('correo_usuario', correoUsuarioLogueado);
+               const formData = new FormData();
+                formData.append('id_tipo_reporte', idTipoReporte || '1');
+                formData.append('Descripcion', descripcion || '');
+                formData.append('Ubicacion', direccion || '');
+                formData.append('telefono_contacto', telefono || '');
+                formData.append('correo_contacto', correoContacto || '');
+                formData.append('correo_usuario', correoUsuarioLogueado || '');
 
-                // Separar archivos nuevos y URLs que se mantienen en modo edición
+                // Separar archivos nuevos y URLs existentes
                 const archivosNuevos = archivosSeleccionados.filter(item => item instanceof File);
                 const urlsExistentes = archivosSeleccionados.filter(item => typeof item === 'string');
 
@@ -286,7 +286,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     formData.append('fotos_reporte', file, file.name);
                 });
 
-                // Enviar también las imágenes existentes que el usuario no borró
                 formData.append('img_reporte_existente', JSON.stringify(urlsExistentes));
 
                 const urlParamsSubmit = new URLSearchParams(window.location.search);
