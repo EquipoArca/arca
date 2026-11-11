@@ -131,11 +131,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function procesarNuevosArchivos(nuevosArchivos) {
+        console.log("📂 Archivos nuevos detectados por el navegador:", nuevosArchivos);
         let excedioLimite = false;
         let duplicadosIgnorados = false;
 
         Array.from(nuevosArchivos).forEach(nuevoArchivo => {
-            if (!nuevoArchivo.type.startsWith('image/')) return;
+            console.log("🔍 Evaluando archivo:", nuevoArchivo.name, "Tipo:", nuevoArchivo.type);
+            
+            if (!nuevoArchivo.type.startsWith('image/')) {
+                console.warn("⚠️ El archivo rechazado porque no es una imagen válida:", nuevoArchivo.type);
+                return;
+            }
 
             const yaExiste = archivosSeleccionados.some(
                 arc => arc.name === nuevoArchivo.name && 
@@ -154,6 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             archivosSeleccionados.push(nuevoArchivo);
+            console.log("✅ ¡Archivo agregado con éxito al array! Total actual:", archivosSeleccionados.length);
         });
 
         sincronizarInputFiles();
@@ -173,7 +180,6 @@ document.addEventListener('DOMContentLoaded', () => {
             );
         }
     }
-
     function renderizarMiniaturas() {
         const textoArrastra = document.getElementById('texto-arrastra') || document.getElementById('texo-arrastra') || document.querySelector('.texto-arrastra');
         if (textoArrastra) {
