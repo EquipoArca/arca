@@ -685,9 +685,8 @@ async function cargarMisPublicaciones(correo) {
                                 ${textoBadge}
                             </span>
                         </div>
-
-                        ${arrayFotos.length > 0 ? `
-                            <div style="display: grid; grid-template-columns: ${arrayFotos.length === 1 ? '1fr' : arrayFotos.length === 2 ? '1fr 1fr' : '2fr 1fr'}; gap: 6px; width: 100%; height: 180px; border-radius: 22px; overflow: hidden; border: 2px solid rgba(255, 255, 255, 0.9);">
+${arrayFotos.length > 0 ? `
+                            <div style="display: grid; grid-template-columns: ${arrayFotos.length === 1 ? '1fr' : '1fr 1fr'}; gap: 6px; width: 100%; height: 180px; border-radius: 22px; overflow: hidden; border: 2px solid rgba(255, 255, 255, 0.9);">
                                 ${arrayFotos.length === 3 ? `
                                     <div style="width: 100%; height: 100%; overflow: hidden;">
                                         <img src="${arrayFotos[0]}" alt="Fotografía" style="width: 100%; height: 100%; object-fit: cover;">
@@ -700,7 +699,7 @@ async function cargarMisPublicaciones(correo) {
                                             <img src="${arrayFotos[2]}" alt="Fotografía" style="width: 100%; height: 100%; object-fit: cover;">
                                         </div>
                                     </div>
-                                ` : arrayFotos.slice(0, 2).map(foto => `
+                                ` : arrayFotos.map(foto => `
                                     <div style="width: 100%; height: 100%; overflow: hidden;">
                                         <img src="${foto}" alt="Fotografía" style="width: 100%; height: 100%; object-fit: cover;">
                                     </div>
