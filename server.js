@@ -500,13 +500,7 @@ app.delete('/api/eliminar-adoptante/:id_usuarios', (req, res) => {
 });
 
 
-const upload = multer({
-    storage: multer.memoryStorage(),
-    limits: { 
-        fileSize: 5 * 1024 * 1024, // 5MB por foto
-        files: 3 // 👈 ¡ESTO ES LO QUE FALTABA! Permite exactamente hasta 3 archivos
-    }
-});
+
 app.post('/crear-reporte', upload.any(), (req, res) => {
     console.log("========================================");
     console.log("📥 REQ.BODY RECIBIDO:", req.body);
@@ -1219,10 +1213,8 @@ app.put('/api/reportes/:id', uploadMiddleware, (req, res) => {
 
         let imagenesFinales = [];
 
-        // 1. Manejo ultra seguro de las imágenes existentes (las que se quedaron tras borrar alguna)
         if (img_reporte_existente) {
             try {
-                // Si viene como string JSON (ej: '["url1","url2"]')
                 const parsed = JSON.parse(img_reporte_existente);
                 if (Array.isArray(parsed)) {
                     imagenesFinales = parsed;
@@ -1230,14 +1222,12 @@ app.put('/api/reportes/:id', uploadMiddleware, (req, res) => {
                     imagenesFinales.push(parsed);
                 }
             } catch (e) {
-                // Si viene como texto plano o URL directa
                 if (typeof img_reporte_existente === 'string' && img_reporte_existente.trim() !== '' && img_reporte_existente !== '[]') {
                     imagenesFinales.push(img_reporte_existente);
                 }
             }
         }
 
-        // 2. Si el usuario decidió subir fotos NUEVAS además de las que dejó
         if (req.files && Array.isArray(req.files) && req.files.length > 0) {
             req.files.forEach(file => {
                 if (file && file.buffer) {
@@ -1246,7 +1236,6 @@ app.put('/api/reportes/:id', uploadMiddleware, (req, res) => {
             });
         }
 
-        // Si el usuario eliminó TODAS las fotos, esto quedará vacío y guardará NULL en la BD
         const imgReporteFinalStr = imagenesFinales.length > 0 ? JSON.stringify(imagenesFinales) : null;
 
         const sql = `
@@ -2399,14 +2388,37 @@ app.get('/api/novedades', (req, res) => {
     });
 });
 
-// ==========================================
-// MÓDULO DE SOPORTE TÉCNICO (REPORTE DE ERRORES)
-// ==========================================
-const uploadSoporte = multer({ 
+const upload = multer({
     storage: multer.memoryStorage(),
-    limits: { fileSize: 5 * 1024 * 1024 } // Límite de 5MB por imagen
+    limits: { 
+        fileSize: 5 * 1024 * 1024,      // 5MB máximo por cada foto individual
+        files: 3,                       // 👈 Limita estrictamente a máximo 3 archivos subidos
+        fieldSize: 10 * 1024 * 1024     // 👈 Amplía el límite de texto para campos largos como los JSONs de imágenes existentes
+    }
 });
 
+// Middleware seguro para atrapar errores de Multer y devolverlos en JSON limpio
+const uploadMiddleware = (req, res, next) => {
+    upload.any()(req, res, function (err) {
+        if (err instanceof multer.MulterError) {
+            console.error("❌ Error de Multer:", err.message);
+            if (err.code === 'LIMIT_FILE_COUNT') {
+                return res.status(400).json({ error: "Solo puedes subir un máximo de 3 imágenes. 🌸" });
+            }
+            if (err.code === 'LIMIT_FIELD_VALUE') {
+                return res.status(400).json({ error: "El contenido enviado es demasiado largo para el servidor." });
+            }
+            if (err.code === 'LIMIT_FILE_SIZE') {
+                return res.status(400).json({ error: "Una de las imágenes pesa más de 5MB. 🌸" });
+            }
+            return res.status(400).json({ error: "Error al procesar los archivos: " + err.message });
+        } else if (err) {
+            console.error("❌ Error desconocido en subida:", err.message);
+            return res.status(400).json({ error: "Error al procesar la solicitud." });
+        }
+        next();
+    });
+};
 app.post('/api/enviar-reporte-error', uploadSoporte.single('imagen_error'), (req, res) => {
     try {
         const { lugar_error, descripcion, nombre_usuario, correo_usuario } = req.body;
