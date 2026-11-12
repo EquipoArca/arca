@@ -63,15 +63,14 @@ body {
     color: #000;
 }
 
-/* --- Contenedor Rosado Semitransparente (Igual a la foto) --- */
 .info-box {
-    background-color: rgba(255, 185, 172, 0.48); /* Color salmón pastel translúcido de la imagen */
-    border: 1.5px solid rgba(230, 140, 125, 0.35); /* Borde suave en tono salmón */
+    background-color: rgba(255, 185, 172, 0.48); 
+    border: 1.5px solid rgba(230, 140, 125, 0.35); 
     padding: 25px 35px;
     border-radius: 26px;
     max-width: 850px;
     text-align: center;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04); /* Sombra muy tenue */
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04); 
     margin-bottom: 40px;
 }
 
@@ -88,23 +87,23 @@ body {
 }
 
 
-/* --- Botón Flecha (.next-button) estilo Imagen --- */
-/* --- Botón Flecha (.next-button) idéntico a .home-button --- */
 .next-button {
-    background-color: #d16161 !important; /* Rojo idéntico a Inicio */
-    width: 130px; /* Tamaño adaptado para guardar la misma proporción */
+    background-color: #d16161 !important;
+    width: 130px;
     height: 48px;
     border-radius: 25px;
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
+    display: grid !important;
+    place-items: center !important;
+    
     text-decoration: none;
     border: none;
     outline: none;
-    color: #f0eeee !important; /* Fuerza color blanco para el texto o icono */
-    box-shadow: 0 4px 10px #d16161; /* Sombra idéntica a home-button */
+    color: #f0eeee !important;
+    box-shadow: 0 4px 10px #d16161;
     transition: transform 0.2s, background-color 0.2s;
     cursor: pointer;
+    padding: 0 !important;
+    margin: 0 !important;
 }
 
 .next-button:hover {
@@ -112,11 +111,22 @@ body {
     background-color: #d16161 !important;
 }
 
-/* Forzar color blanco a cualquier elemento dentro del botón (flecha, SVG o span) */
-.next-button, 
 .next-button span, 
-.next-button i, 
+.next-button i {
+    color: #f0eeee !important;
+    font-size: 2.5rem;
+    line-height: 0 !important; 
+    display: inline-block;
+    margin: 0 !important;
+    padding: 0 !important;
+    text-align: center;
+}
+
 .next-button svg {
     color: #f0eeee !important;
-    fill: #f0eeee !important;
+    fill: currentColor !important;
+    width: 36px;
+    height: 36px;
+    display: block;
+    margin: 0 auto !important;
 }

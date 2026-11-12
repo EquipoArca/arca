@@ -58,7 +58,6 @@
   <div class="top-right">
     <div class="user-header-info">
 
-        <!-- 1. PERFIL Y MINI MENÚ (A LA IZQUIERDA DE LA CAMPANA) -->
         <div class="user-profile-menu" id="user-profile-menu" style="display: none;">
             <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
                 <img src="logo.png" id="user-avatar-img" alt="Perfil">
@@ -92,44 +91,39 @@
 </div>
 </nav>
 
-<main class="main-content">
-    <section class="feed-notificaciones" id="contenedorNotificaciones">
-        <svg class="svg-perrito-vacio" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <!-- Césped suave -->
-    <path d="M15 82C25 80 35 83 45 81C55 83 65 80 85 82" stroke="#A8E6CF" stroke-width="4" stroke-linecap="round"/>
-    <path d="M22 81L20 75M26 81L28 74M68 81L66 74M72 81L75 75" stroke="#A8E6CF" stroke-width="3" stroke-linecap="round"/>
-    
-    <!-- Cuerpo, Cabeza y Orejas unidas (Una sola forma gordita) -->
-    <!-- Oreja izquierda unida -->
-    <path d="M35 32C22 32 18 48 24 60C28 68 36 68 38 60C40 52 38 42 35 32Z" fill="#E8A598"/>
-    <!-- Oreja derecha unida -->
-    <path d="M65 32C78 32 82 48 76 60C72 68 64 68 62 60C60 52 62 42 65 32Z" fill="#E8A598"/>
-    
-    <!-- Base de la cabeza y cuerpo redondito -->
-    <circle cx="50" cy="46" r="20" fill="#FCEADE"/>
-    <ellipse cx="50" cy="64" rx="21" ry="17" fill="#FCEADE"/>
-    
-    <!-- Patitas delanteras pegaditas -->
-    <rect x="39" y="66" width="9" height="15" rx="4.5" fill="#FCEADE" stroke="#E8A598" stroke-width="1.5"/>
-    <rect x="52" y="66" width="9" height="15" rx="4.5" fill="#FCEADE" stroke="#E8A598" stroke-width="1.5"/>
+<main class="main-content-notificaciones">
+  <section class="feed-notificaciones" id="contenedor-notificaciones">
+    <div class="estado-vacio">
+      
+      <!-- Ilustración de Cielo Despejado Kawaii -->
+      <div class="escena-cielo-kawaii">
+        
+        <!-- Nube izquierda flotando -->
+        <div class="nube-kawaii nube-izq"></div>
+        
+        <!-- Sol sonriente centrado -->
+        <div class="sol-kawaii">
+          <div class="ojo-sol izq"></div>
+          <div class="ojo-sol der"></div>
+          <div class="boca-sol"></div>
+          <div class="rubor-sol izq"></div>
+          <div class="rubor-sol der"></div>
+        </div>
 
-    <!-- Detalle de la cara (Ojos, hocico, carita confundida) -->
-    <circle cx="42" cy="44" r="2.5" fill="#4A3E3D"/>
-    <circle cx="58" cy="44" r="2.5" fill="#4A3E3D"/>
-    <ellipse cx="50" cy="49" rx="3.5" ry="2.2" fill="#4A3E3D"/>
-    <path d="M46 52C48 54 52 54 54 52" stroke="#4A3E3D" stroke-width="1.5" stroke-linecap="round"/>
-    
-    <!-- Cachetitos rosados -->
-    <circle cx="38" cy="48" r="3.5" fill="#FFB7B2" opacity="0.6"/>
-    <circle cx="62" cy="48" r="3.5" fill="#FFB7B2" opacity="0.6"/>
+        <!-- Nube derecha flotando -->
+        <div class="nube-kawaii nube-der"></div>
+        
+        <!-- Destello brillante -->
+        <span class="destello d1">✦</span>
+        <span class="destello d2">✦</span>
 
-    <!-- Signo de interrogación tiernito flotando -->
-    <path d="M68 26C68 21 74 21 74 26C74 29 70 29 70 33" stroke="#F2A4AD" stroke-width="2.5" stroke-linecap="round"/>
-    <circle cx="70" cy="37" r="1.5" fill="#F2A4AD"/>
-</svg>
-    </section>
+      </div>
+
+      <h2>¡Aún no hay notificaciones!</h2>
+      <p> &lt;3 </p>
+    </div>
+  </section>
 </main>
-
 
 <aside class="sidebar" id="sidebar">
     <div class="side-icons">
@@ -257,3 +251,4 @@
 
 
 </body>
+</html>

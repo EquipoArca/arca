@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro Fundación - Paso 1 - ARCA</title>
+    <link rel="stylesheet" href="style_home.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="dark-mode.css">
+    <script>
+    if (localStorage.getItem("modo_oscuro") === "true") {
+        document.body.classList.add("dark-mode");
+    }
+    </script>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 40px;
+        }
+
+        .header-registro {
+            width: 100%;
+            height: 60px;
+            background-color: #ffd6d8c5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .badge-arca-logo {
+            width: 45px;
+            height: 45px;
+            background-color: #e57373;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+        }
+
+        .badge-arca-logo img { width: 80%; }
+
+        .titulo-header {
+            font-size: 2.2rem;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .contenedor-form-paso1 {
+            width: 94%;
+            max-width: 1200px;
+            background-color: rgba(255, 240, 243, 0.75);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            border-radius: 25px;
+            padding: 30px 40px;
+            margin-top: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+        }
+
+        .grid-tres-columnas {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 25px;
+        }
+
+        .capsula-categoria {
+            background-color: #fcae9e;
+            color: #2b2b2b;
+            font-size: 1.4rem;
+            font-weight: 500;
+            padding: 6px 22px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 18px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .campo-bloque {
+            margin-bottom: 14px;
+        }
+
+        .label-obligatorio {
+            font-size: 0.95rem;
+            color: #333;
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .label-obligatorio::before {
+            content: "* ";
+            color: #e57373;
+        }
+
+        .label-normal {
+            font-size: 0.95rem;
+            color: #333;
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .input-paso1 {
+            width: 100%;
+            height: 38px;
+            background-color: #ffffff;
+            border: 1px solid #e2c0c0;
+            border-radius: 12px;
+            padding: 0 12px;
+            font-family: 'Itim', sans-serif;
+            font-size: 0.95rem;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        .input-paso1:focus {
+            border-color: #e57373;
+        }
+
+        /* Subida de Archivos PDF */
+        .fila-subir-archivo {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            background-color: #ffffff;
+            border: 1px solid #e2c0c0;
+            border-radius: 12px;
+            padding: 4px 8px 4px 12px;
+        }
+
+        .btn-subir-pdf {
+            background-color: #e2e2e2;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 4px 12px;
+            font-family: 'Itim', sans-serif;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .btn-continuar-paso1 {
+            background-color: #fbc2c4;
+            color: #2b2b2b;
+            border: none;
+            padding: 14px 45px;
+            font-family: 'Itim', sans-serif;
+            font-size: 1.5rem;
+            border-radius: 30px;
+            cursor: pointer;
+            display: block;
+            margin: 25px 0 0 auto;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: transform 0.2s ease;
+        }
+
+        .btn-continuar-paso1:hover {
+            transform: scale(1.03);
+            background-color: #f9a3a6;
+        }
+
+        @media (max-width: 900px) {
+            .grid-tres-columnas { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header-registro">
+        <div class="badge-arca-logo"><img src="logo.png" alt="ARCA"></div>
+        <span class="titulo-header">Registro</span>
+    </header>
+
+    <main class="contenedor-form-paso1">
+        <form id="form-paso1">
+            <div class="grid-tres-columnas">
+                
+                <!-- COLUMNA 1: DATOS BÁSICOS -->
+                <div>
+                    <div class="capsula-categoria">Datos básicos</div>
+
+                    <div class="campo-bloque">
+                        <label class="label-obligatorio">Nombre legal de la fundación / Refugio:</label>
+                        <input type="text" id="nombre-legal" class="input-paso1" required>
+                    </div>
+
+                    <div class="campo-bloque">
+                        <label class="label-obligatorio">Nombre comercial:</label>
+                        <input type="text" id="nombre-comercial" class="input-paso1" required>
+                    </div>
+
+                    <div class="campo-bloque">
+                        <label class="label-obligatorio">Número de identificación legal (NIT/RUT):</label>
+                        <input type="text" id="nit-rut" class="input-paso1" required>
+                    </div>
+
+                    <div class="campo-bloque">
+                        <label class="label-obligatorio">País y ciudad:</label>
+                        <input type="text" id="pais-ciudad" class="input-paso1" placeholder="Colombia, Medellín" required>
+                    </div>
+
+                    <div class="campo-bloque">
+                        <label class="label-obligatorio">Dirección física:</label>
+                        <input type="text" id="direccion-fisica" class="input-paso1" required>
+                    </div>
+
+                    <div class="campo-bloque">
+                        <label class="label-obligatorio">Teléfono principal:</label>
+                        <input type="tel" id="telefono-principal" class="input-paso1" required>
+                    </div>
+
+                    <div class="campo-bloque">
+                        <label class="label-obligatorio">Correo electrónico oficial:</label>
+                        <input type="email" id="correo-oficial" class="input-paso1" required>
+                    </div>
+                </div>
+
+                <!-- COLUMNA 2: REPRESENTANTE LEGAL -->
+                <div>
+                    <div class="campo-bloque" style="margin-bottom: 25px;">
+                        <label class="label-normal">Página web:</label>
+                        <input type="url" id="pagina-web" class="input-paso1">
+                    </div>
+
+                    <div class="capsula-categoria">Representante legal</div>
+
+                    <div class="campo-bloque">
+                        <label class="label-obligatorio">Nombre completo:</label>
+                        <input type="text" id="rep-nombre" class="input-paso1" required>
+                    </div>
+
+                    <div class="campo-bloque">
+                        <label class="label-obligatorio">Documento de identidad (C.C/PAS)</label>
+                        <input type="text" id="rep-documento" class="input-paso1" required>
+                    </div>
+
+                    <div class="campo-bloque">
+                        <label class="label-obligatorio">Cargo en la fundación/Refugio:</label>
+                        <input type="text" id="rep-cargo" class="input-paso1" required>
+                    </div>
+
+                    <div class="campo-bloque">
+                        <label class="label-obligatorio">Teléfono de contacto:</label>
+                        <input type="tel" id="rep-telefono" class="input-paso1" required>
+                    </div>
+
+                    <div class="campo-bloque">
+                        <label class="label-obligatorio">Correo electrónico principal:</label>
+                        <input type="email" id="rep-correo" class="input-paso1" required>
+                    </div>
+                </div>
+
+                <!-- COLUMNA 3: DOCUMENTACIÓN LEGAL Y DONACIONES -->
+                <div>
+                    <div class="capsula-categoria">Documentación legal</div>
+
+                    <div class="campo-bloque">
+                        <label class="label-obligatorio">Certificado de existencia y representación legal (escaneado en PDF):</label>
+                        <div class="fila-subir-archivo">
+                            <span style="font-size: 0.8rem; color: #777;" id="nom-cert">Ningún archivo</span>
+                            <button type="button" class="btn-subir-pdf" onclick="document.getElementById('file-cert').click()">Subir archivo</button>
+                            <input type="file" id="file-cert" accept=".pdf" style="display:none;" onchange="actualizarNombre(this, 'nom-cert')">
+                        </div>
+                    </div>
+
+                    <div class="campo-bloque">
+                        <label class="label-obligatorio">Estatutos de la fundación:</label>
+                        <div class="fila-subir-archivo">
+                            <span style="font-size: 0.8rem; color: #777;" id="nom-estatutos">Ningún archivo</span>
+                            <button type="button" class="btn-subir-pdf" onclick="document.getElementById('file-estatutos').click()">Subir archivo</button>
+                            <input type="file" id="file-estatutos" accept=".pdf" style="display:none;" onchange="actualizarNombre(this, 'nom-estatutos')">
+                        </div>
+                    </div>
+
+                    <div class="campo-bloque">
+                        <label class="label-obligatorio">Registro oficial ante la autoridad competente:</label>
+                        <div class="fila-subir-archivo">
+                            <span style="font-size: 0.8rem; color: #777;" id="nom-registro">Ningún archivo</span>
+                            <button type="button" class="btn-subir-pdf" onclick="document.getElementById('file-registro').click()">Subir archivo</button>
+                            <input type="file" id="file-registro" accept=".pdf" style="display:none;" onchange="actualizarNombre(this, 'nom-registro')">
+                        </div>
+                    </div>
+
+                    <div class="campo-bloque">
+                        <label class="label-obligatorio">Estado financiero reciente (para transparencia):</label>
+                        <div class="fila-subir-archivo">
+                            <span style="font-size: 0.8rem; color: #777;" id="nom-financiero">Ningún archivo</span>
+                            <button type="button" class="btn-subir-pdf" onclick="document.getElementById('file-financiero').click()">Subir archivo</button>
+                            <input type="file" id="file-financiero" accept=".pdf" style="display:none;" onchange="actualizarNombre(this, 'nom-financiero')">
+                        </div>
+                    </div>
+
+                    <div class="capsula-categoria" style="margin-top: 15px;">Donaciones</div>
+
+                    <div class="campo-bloque">
+                        <label class="label-obligatorio">Métodos de donación aceptados (transferencia, etc.):</label>
+                        <input type="text" id="metodos-donacion" class="input-paso1" placeholder="Ej. Nequi, Bancolombia, PayPal" required>
+                    </div>
+
+                    <p style="color: #e57373; font-size: 0.85rem; margin-top: 10px;">*Los campos marcados con rojo son obligatorios</p>
+                </div>
+
+            </div>
+
+            <button type="button" class="btn-continuar-paso1" onclick="guardarPaso1YContinuar()">Continuación de registro</button>
+        </form>
+    </main>
+
+ <script>
+        // Objeto global para almacenar temporalmente los archivos PDF en memoria (sin saturar el sessionStorage)
+        window.archivosTemporalesPDF = {
+            cert: null,
+            estatuto: null,
+            registro: null,
+            financiero: null
+        };
+
+        function actualizarNombre(input, elemId, tipoPdf) {
+            if (input.files.length > 0) {
+                const archivo = input.files[0];
+                document.getElementById(elemId).textContent = archivo.name;
+                // Guardamos el objeto File directamente en memoria
+                window.archivosTemporalesPDF[tipoPdf] = archivo;
+            }
+        }
+
+function guardarPaso1YContinuar() {
+            // Verificamos directamente desde los inputs del formulario si los archivos fueron seleccionados
+            const fileCert = document.getElementById('file-cert').files[0];
+            const fileEstatutos = document.getElementById('file-estatutos').files[0];
+            const fileRegistro = document.getElementById('file-registro').files[0];
+            const fileFinanciero = document.getElementById('file-financiero').files[0];
+
+            if (!fileCert || !fileEstatutos || !fileRegistro || !fileFinanciero) {
+                alert("Por favor, sube todos los documentos PDF obligatorios antes de continuar.");
+                return;
+            }
+
+            // Función interna para convertir los archivos a Base64 de forma síncrona/promesa antes de avanzar
+            const convertirArchivosYContinuar = async () => {
+                const toBase64 = file => new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = error => reject(error);
+                });
+
+                try {
+                    // Convertimos los 4 PDFs a Base64 y los guardamos asegurando que existan
+                    sessionStorage.setItem('pdf_cert', await toBase64(fileCert));
+                    sessionStorage.setItem('pdf_estatuto', await toBase64(fileEstatutos));
+                    sessionStorage.setItem('pdf_registro', await toBase64(fileRegistro));
+                    sessionStorage.setItem('pdf_financiero', await toBase64(fileFinanciero));
+
+                    // Guardamos los datos de texto del formulario
+                    const datosPaso1 = {
+                        nombreLegal: document.getElementById('nombre-legal').value,
+                        nombreComercial: document.getElementById('nombre-comercial').value,
+                        nitRut: document.getElementById('nit-rut').value,
+                        paisCiudad: document.getElementById('pais-ciudad').value,
+                        direccionFisica: document.getElementById('direccion-fisica').value,
+                        telefonoPrincipal: document.getElementById('telefono-principal').value,
+                        correoOficial: document.getElementById('correo-oficial').value,
+                        paginaWeb: document.getElementById('pagina-web').value,
+                        repNombre: document.getElementById('rep-nombre').value,
+                        repDocumento: document.getElementById('rep-documento').value,
+                        repCargo: document.getElementById('rep-cargo').value,
+                        repTelefono: document.getElementById('rep-telefono').value,
+                        repCorreo: document.getElementById('rep-correo').value,
+                        metodosDonacion: document.getElementById('metodos-donacion').value
+                    };
+
+                    sessionStorage.setItem('datos_fundacion_p1', JSON.stringify(datosPaso1));
+                    
+                    // Saltamos al paso 2 con todo listo
+                    window.location.href = "registro_fundacion_paso2.html";
+
+                } catch (error) {
+                    console.error("Error al procesar los PDFs:", error);
+                    alert("Hubo un error al procesar los archivos PDF. Inténtalo de nuevo.");
+                }
+            };
+
+            convertirArchivosYContinuar();
+        }
+    </script>   
+</body>
+</html>

@@ -56,40 +56,39 @@
     </div>
 
     <div class="top-right">
-        <div class="user-header-info">
+    <div class="user-header-info">
 
-            <!-- 1. PERFIL Y MINI MENÚ (Avatar con menú desplegable) -->
-            <div class="user-profile-menu" id="user-profile-menu">
-                <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
-                    <img src="logo.png" id="user-avatar-img" alt="Perfil">
-                </div>
-
-                <div class="mini-menu-card" id="mini-menu-card">
-                    <div class="mini-menu-header">
-                        <span id="mini-menu-username">Usuario</span>
-                    </div>
-                    
-                    <hr class="mini-menu-divider">
-                    
-                    <a href="javascript:void(0)" onclick="mostrarSeccion('configuracion')" class="mini-menu-item btn-ajustes">
-                        <i class="fa-solid fa-gear"></i>
-                        <span>Ajustes</span>
-                    </a>
-                    
-                    <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini">
-                        <i class="fa-solid fa-right-from-bracket"></i>
-                        <span>Cerrar sesión</span>
-                    </a>
-                </div>
+        <div class="user-profile-menu" id="user-profile-menu" style="display: none;">
+            <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
+                <img src="logo.png" id="user-avatar-img" alt="Perfil">
             </div>
 
-            <!-- 2. CAMPANA DE NOTIFICACIONES -->
-            <div class="notif-circle">
-                <a href="notificaciones.html" aria-label="Notificaciones"><i class="fa-solid fa-bell"></i></a>
+            <div class="mini-menu-card" id="mini-menu-card">
+                <div class="mini-menu-header">
+                    <span id="mini-menu-username">Usuario</span>
+                </div>
+                
+                <hr class="mini-menu-divider">
+                
+                <a href="javascript:void(0)" onclick="mostrarSeccion('configuracion')" class="mini-menu-item btn-ajustes">
+                    <i class="fa-solid fa-gear"></i>
+                    <span>Ajustes</span>
+                </a>
+                
+                <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>Cerrar sesión</span>
+                </a>
             </div>
-
         </div>
+
+        <!-- 2. CAMPANA DE NOTIFICACIONES (A LA DERECHA) -->
+        <div class="notif-circle">
+            <a href="#" onclick="abrirBloqueo()"><i class="fa-solid fa-bell"></i></a>
+        </div>
+
     </div>
+</div>
   </nav>
     
     <aside class="sidebar" id="sidebar">
@@ -125,26 +124,35 @@
 
     <main class="main-content">
         
-        <div id="pantalla-inicio" class="seccion-arca">
-            <div class="brand-title">ARCA</div>
+ <div id="pantalla-inicio" class="seccion-arca">
+            <!-- Título del Logo que cambiará dinámicamente -->
+            <div class="brand-title" id="brand-title-container">
+                ARCA
+            </div>
 
+            <!-- Contenedor de Tarjetas -->
             <section class="cards-container">
-                <a href="#" class="card report" onclick="abrirBloqueo()">
-                    <h2>Reportar</h2>
-                    <div class="report-logo"><img src="rlogo.png" alt="Logor"></div>
+                <!-- Tarjeta 1 (Reportar / Reportes) -->
+                <a href="#" class="card report" id="card-reportar-home" onclick="abrirBloqueo()">
+                    <h2 id="titulo-card-1">Reportar</h2>
+                    <div class="report-logo" id="logo-card-1"><img src="rlogo.png" alt="Logor"></div>
                 </a>
-                <a href="#" class="card adopt" onclick="abrirBloqueo()">
+
+                <!-- Tarjeta 2 (Adopciones) -->
+                <a href="#" class="card adopt" id="card-adopciones-home" onclick="abrirBloqueo()">
                     <h2>Adopciones</h2>
                     <div class="adopt-logo"><img src="hlogo.png" alt="Logoh"></div>
                 </a>
-                <a href="#" class="card donate" onclick="abrirBloqueo()">
+
+                <!-- Tarjeta 3 (Donaciones) -->
+                <a href="#" class="card donate" id="card-donaciones-home" onclick="abrirBloqueo()">
                     <h2>Donaciones</h2>
                     <div class="donate-logo"><img src="dlogo.png" alt="Logod"></div>
                 </a>
             </section>
 
             <a href="novedades.html" class="news-button">
-                <span class="plus">+</span> Ultimas Novedades
+                <span class="plus">Ultimas Novedades</span>
             </a>
         </div>
 
@@ -241,7 +249,7 @@
                     <button class="btn-social email" onclick="mostrarFormularioCorreo()">
                         <img src="https://cdn-icons-png.flaticon.com/512/542/542689.png" alt="E"> Continuar con Correo
                     </button>
-                    <button class="btn-fundacion">Soy Fundación</button>
+                    <button class="btn-fundacion" onclick="prepararModoFundacion()">Soy Fundación</button>
                     <button class="btn-volver" onclick="volverAlPaso1()">← Volver</button>
                 </div>
             </div>
@@ -258,6 +266,54 @@
                     <div class="botones-registro">
                         <button class="btn-login" onclick="ejecutarLoginEmail()">Entrar</button>
                         <button class="btn-cerrar" onclick="volverAlPaso2()">Atrás</button>
+                    </div>
+                </div>
+            </div>
+            <!-- PASO 3: Correo (Ya lo tienes) -->
+            <div id="paso3" style="display: none;">
+                <p class="texto-registro"><strong>Ingresa tus datos</strong></p>
+                <div class="formulario-correo">
+                    <input type="email" id="email-input" placeholder="Correo electrónico" class="input-arca">
+                    <div class="botones-registro">
+                        <button class="btn-login" onclick="ejecutarLoginEmail()">Siguiente</button>
+                        <button class="btn-cerrar" onclick="volverAlPaso2()">Atrás</button>
+                    </div>
+                </div>
+            </div>
+
+           
+            <div id="paso4" style="display: none;">
+                <p class="texto-registro"><strong>Crea una contraseña segura</strong></p>
+                <div class="formulario-correo">
+                    <div style="position: relative; width: 90%; margin: 0 auto;">
+                        <input type="password" id="password-fundacion-modal" placeholder="Mínimo 8 carac., una mayúscula y número" class="input-arca" style="width: 100%;">
+                        <button type="button" id="togglePassModal" style="position: absolute; right: 15px; top: 12px; background: none; border: none; cursor: pointer; color: #777;">
+                            <i class="fa-solid fa-eye" id="iconoOjitoModal"></i>
+                        </button>
+                    </div>
+                    <p id="mensaje-estado-pass-modal" style="font-size: 0.8rem; text-align: left; width: 90%; margin: 5px auto 10px auto;"></p>
+                    
+                    <div class="botones-registro">
+                        <button class="btn-login" onclick="enviarCodigoOtpFundacion()">Enviar código</button>
+                        <button class="btn-cerrar" onclick="atrasPaso3()">Atrás</button>
+                    </div>
+                </div>
+            </div>
+
+            
+            <div id="paso5" style="display: none;">
+                <p class="texto-registro"><strong>Verificación de Correo</strong></p>
+                <p style="font-size: 0.85rem; color: #555; margin-bottom: 10px;">Ingresa el código de 4 dígitos enviado a tu correo.</p>
+                <div class="formulario-correo" style="align-items: center;">
+                    <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 15px;">
+                        <input type="text" maxlength="1" class="otp-input-modal input-arca" style="width: 45px; text-align: center; font-size: 1.2rem;" />
+                        <input type="text" maxlength="1" class="otp-input-modal input-arca" style="width: 45px; text-align: center; font-size: 1.2rem;" />
+                        <input type="text" maxlength="1" class="otp-input-modal input-arca" style="width: 45px; text-align: center; font-size: 1.2rem;" />
+                        <input type="text" maxlength="1" class="otp-input-modal input-arca" style="width: 45px; text-align: center; font-size: 1.2rem;" />
+                    </div>
+                    <div class="botones-registro">
+                        <button class="btn-login" onclick="verificarOtpYIrAlRegistro()">Verificar y Continuar</button>
+                        <button class="btn-cerrar" onclick="atrasPaso4()">Atrás</button>
                     </div>
                 </div>
             </div>

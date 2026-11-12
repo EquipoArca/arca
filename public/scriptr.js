@@ -18,9 +18,163 @@ if (!firebase.apps.length) {
 
 const auth = firebase.auth();
 
-// Obtener parámetros de la URL
+// Obtener parámetros de la URL e inyectarlo en el input oculto
 const urlParams = new URLSearchParams(window.location.search);
 const emailTemporal = urlParams.get('email');
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (emailTemporal) {
+        const inputEmailOculto = document.getElementById('emailRegistro');
+        if (inputEmailOculto) {
+            inputEmailOculto.value = emailTemporal;
+        }
+    }
+});
+
+// ==========================================
+// ALERTA PERSONALIZADA ARCA
+// ==========================================
+function mostrarAlertaArca(titulo, mensaje, opciones = {}) {
+    const {
+        tipo = "error",
+        textoBoton = "Entendido ♡",
+        alCerrar = null
+    } = opciones;
+
+    document.getElementById("alerta-arca-personalizada")?.remove();
+
+    if (!document.getElementById("estilos-alerta-arca")) {
+        const estilos = document.createElement("style");
+        estilos.id = "estilos-alerta-arca";
+        estilos.textContent = `
+            .arca-alerta-overlay {
+                position: fixed;
+                inset: 0;
+                z-index: 999999;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 20px;
+                background: rgba(40, 25, 35, 0.38);
+                backdrop-filter: blur(5px);
+                animation: arcaAparecer .22s ease;
+            }
+
+            .arca-alerta-tarjeta {
+                width: min(100%, 360px);
+                padding: 30px 25px 25px;
+                border: 2px solid #fff;
+                border-radius: 28px;
+                background: #FFF1F2;
+                box-shadow: 0 15px 45px rgba(120, 60, 80, .20);
+                text-align: center;
+                font-family: 'Itim', sans-serif;
+                animation: arcaSaltar .28s ease;
+            }
+
+            .arca-alerta-icono {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                width: 76px;
+                height: 76px;
+                margin: 0 auto 17px;
+                border: 3px solid white;
+                border-radius: 50%;
+                background: #FAD4DE;
+                font-size: 36px;
+            }
+
+            .arca-alerta-titulo {
+                margin: 0 0 10px;
+                color: #704653;
+                font-size: 25px;
+            }
+
+            .arca-alerta-mensaje {
+                margin: 0 0 23px;
+                color: #795F68;
+                font-size: 17px;
+                line-height: 1.5;
+                overflow-wrap: anywhere;
+            }
+
+            .arca-alerta-boton {
+                width: 100%;
+                padding: 12px 18px;
+                border: 0;
+                border-radius: 18px;
+                background: #E985A0;
+                color: white;
+                font: inherit;
+                font-size: 17px;
+                cursor: pointer;
+                transition: transform .2s, background .2s;
+            }
+
+            .arca-alerta-boton:hover {
+                background: #D96F8D;
+                transform: translateY(-2px);
+            }
+
+            @keyframes arcaAparecer {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+
+            @keyframes arcaSaltar {
+                from { opacity: 0; transform: scale(.92) translateY(8px); }
+                to { opacity: 1; transform: scale(1) translateY(0); }
+            }
+        `;
+        document.head.appendChild(estilos);
+    }
+
+    const iconos = {
+        error: "♡",
+        aviso: "🌸",
+        conexion: "☁️"
+    };
+
+    const overlay = document.createElement("div");
+    overlay.id = "alerta-arca-personalizada";
+    overlay.className = "arca-alerta-overlay";
+    overlay.setAttribute("role", "alertdialog");
+    overlay.setAttribute("aria-modal", "true");
+
+    const tarjeta = document.createElement("div");
+    tarjeta.className = "arca-alerta-tarjeta";
+
+    const icono = document.createElement("div");
+    icono.className = "arca-alerta-icono";
+    icono.textContent = iconos[tipo] || "♡";
+
+    const encabezado = document.createElement("h2");
+    encabezado.className = "arca-alerta-titulo";
+    encabezado.textContent = titulo;
+
+    const texto = document.createElement("p");
+    texto.className = "arca-alerta-mensaje";
+    texto.textContent = mensaje;
+
+    const boton = document.createElement("button");
+    boton.type = "button";
+    boton.className = "arca-alerta-boton";
+    boton.textContent = textoBoton;
+
+    boton.addEventListener("click", () => {
+        overlay.remove();
+        if (typeof alCerrar === "function") {
+            alCerrar();
+        }
+    });
+
+    tarjeta.append(icono, encabezado, texto, boton);
+    overlay.appendChild(tarjeta);
+    document.body.appendChild(overlay);
+
+    boton.focus();
+}
 
 // ==========================================
 // BANDERAS DE VALIDACIÓN Y ELEMENTOS
@@ -178,52 +332,53 @@ if (formRegistro) {
         e.preventDefault();
 
         if (!esNombreValido) {
-            mensajeEstadoReg.textContent = "Por favor elige un nombre de usuario disponible.";
-            mensajeEstadoReg.className = "mensaje-validacion error";
+            mostrarAlertaArca("¡Nombre no válido! 🌸", "Por favor elige un nombre de usuario disponible antes de continuar.", { tipo: "aviso" });
             inputNombreReg.focus();
             return;
         }
 
         if (!esEdadValida) {
-            mensajeEstadoFecha.textContent = "Debes confirmar que tienes 18 años o más para crear una cuenta.";
-            mensajeEstadoFecha.className = "mensaje-validacion error";
+            mostrarAlertaArca("¡Verificación de edad! 🌸", "Debes confirmar que tienes 18 años o más para crear una cuenta en ARCA.", { tipo: "aviso" });
             if (inputFechaNac) inputFechaNac.focus();
             return;
         }
 
         if (!esPasswordValida) {
-            mensajeEstadoPass.textContent = "La contraseña no cumple con los requisitos de seguridad.";
-            mensajeEstadoPass.className = "mensaje-validacion error";
+            mostrarAlertaArca("¡Contraseña insegura! ♡", "La contraseña no cumple con los requisitos de seguridad mínimos.", { tipo: "error" });
             inputPassReg.focus();
             return;
         }
 
         if (!emailTemporal) {
-            alert("No se detectó un correo válido. Por favor inicia desde la pantalla principal.");
-            window.location.href = "home.html";
+            mostrarAlertaArca("¡Correo no detectado! ☁️", "No se detectó un correo válido. Te llevaremos a la pantalla principal.", {
+                tipo: "conexion",
+                alCerrar: () => { window.location.href = "home.html"; }
+            });
             return;
         }
 
         try {
-            // Solicitar al backend que envíe el código OTP al correo
-            const resOtp = await fetch('/enviar-codigo-otp', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ correo: emailTemporal })
-            });
+            // 1. Generar código OTP de 4 dígitos en el navegador
+            const codigoGenerado = Math.floor(1000 + Math.random() * 9000).toString();
+            sessionStorage.setItem('otp_temporal', codigoGenerado);
 
-            const dataOtp = await resOtp.json();
+            // 2. Parámetros que irán a tu plantilla de EmailJS
+            const templateParams = {
+                to_email: emailTemporal,
+                email: emailTemporal,
+                to_name: emailTemporal,
+                passcode: codigoGenerado
+            };
 
-            if (resOtp.ok) {
-                // Abrir modal si el correo fue enviado exitosamente
-                if (modalOtp) modalOtp.classList.remove('hidden');
-            } else {
-                alert(dataOtp.error || "Error al enviar el código de verificación.");
-            }
+            // 3. Enviar correo directo con EmailJS
+            await emailjs.send('service_93j9cwn', 'template_bqczg41', templateParams);
+
+            // 4. Si todo sale bien, abrir el modal de OTP
+            if (modalOtp) modalOtp.classList.remove('hidden');
 
         } catch (error) {
-            console.error("Error al solicitar OTP:", error);
-            alert("Hubo un problema de conexión con el servidor.");
+            console.error("Error al enviar con EmailJS:", error);
+            mostrarAlertaArca("¡Hubo un problema! ☁️", "Hubo un problema al enviar el código de verificación por correo.", { tipo: "conexion" });
         }
     });
 }
@@ -275,22 +430,16 @@ if (formOtp) {
         const codigoCompleto = Array.from(otpInputs).map(i => i.value).join("");
 
         if (codigoCompleto.length !== 4) {
-            alert("Por favor ingresa los 4 dígitos del código.");
+            mostrarAlertaArca("¡Faltan dígitos! ♡", "Por favor ingresa los 4 dígitos completos del código de verificación.", { tipo: "aviso" });
             return;
         }
 
         try {
-            // 1. Validar código con el servidor
-            const resVerif = await fetch('/verificar-otp', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ correo: emailTemporal, codigo: codigoCompleto })
-            });
+            // 1. Validar el código localmente comparándolo con el guardado
+            const codigoGuardado = sessionStorage.getItem('otp_temporal');
 
-            const dataVerif = await resVerif.json();
-
-            if (!resVerif.ok) {
-                alert(dataVerif.error || "Código incorrecto.");
+            if (codigoCompleto !== codigoGuardado) {
+                mostrarAlertaArca("¡Código incorrecto! ♡", "El código de verificación ingresado no coincide. Inténtalo de nuevo.", { tipo: "error" });
                 return;
             }
 
@@ -315,18 +464,20 @@ if (formOtp) {
             });
 
             if (resMySQL.ok) {
-                alert("¡Cuenta verificada y creada con éxito! Bienvenido a ARCA.");
-                window.location.href = "home.html?modo=full";
+                mostrarAlertaArca("¡Bienvenida a ARCA! 🌸", "¡Cuenta verificada y creada con éxito!", {
+                    tipo: "aviso",
+                    textoBoton: "Empezar ♡",
+                    alCerrar: () => { window.location.href = "home.html?modo=full"; }
+                });
             } else {
-                alert("Error al guardar la información en la base de datos.");
+                mostrarAlertaArca("¡Error de base de datos! ☁️", "Ocurrió un error al guardar la información en la base de datos.", { tipo: "error" });
             }
-
         } catch (error) {
             console.error("Error en la verificación/registro:", error);
             if (error.code === 'auth/email-already-in-use') {
-                alert("Este correo ya tiene una cuenta activa.");
+                mostrarAlertaArca("¡Cuenta existente! 🌸", "Este correo ya tiene una cuenta activa en ARCA.", { tipo: "aviso" });
             } else {
-                alert("Ocurrió un error al procesar el registro.");
+                mostrarAlertaArca("¡Error en el registro! ☁️", "Ocurrió un error inesperado al procesar tu registro.", { tipo: "error" });
             }
         }
     });

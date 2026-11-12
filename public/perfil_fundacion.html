@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil de Fundación - ARCA</title>
+    <link rel="stylesheet" href="style_home.css">
+    <link rel="stylesheet" href="perfil.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="dark-mode.css">
+    <script>
+        if (localStorage.getItem("modo_oscuro") === "true") {
+            document.body.classList.add("dark-mode");
+        }
+    </script>
+    <style>
+        /* MANTENEMOS EL FONDO ORIGINAL Y FLUIDO DE TU APP */
+        body {
+            margin: 0;
+            font-family: 'Itim', cursive, sans-serif;
+            background-color: #fce8e6;
+            overflow-x: hidden;
+        }
+
+        .main-content {
+            padding: 25px 30px;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        /* CONTENEDOR ANCHO CON ANIMACIÓN ESTRAMBÓTICA DE ENTRADA Y GLASSMORPHISM MELOCOTÓN */
+        .perfil-fundacion-container {
+            max-width: 1350px;
+            width: 100%;
+            background: rgba(255, 235, 230, 0.65);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 3px solid rgba(255, 255, 255, 0.95);
+            border-radius: 35px;
+            padding: 35px 50px;
+            box-shadow: 0 20px 50px rgba(240, 150, 130, 0.25), inset 0 0 25px rgba(255, 255, 255, 0.7);
+            box-sizing: border-box;
+            animation: entradaEstrambotica 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes entradaEstrambotica {
+            0% { opacity: 0; transform: translateY(40px) scale(0.92) rotate(-1deg); }
+            100% { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); }
+        }
+
+        /* PORTADA PANORÁMICA CON BRILLO DINÁMICO */
+        .pf-portada-contenedor {
+            position: relative;
+            width: 100%;
+            height: 320px;
+            border-radius: 26px;
+            overflow: visible; /* Clave para que la foto flote sin recortarse */
+            border: 4px solid rgba(255, 255, 255, 0.9);
+            background: #ffd8d0;
+            box-shadow: 0 12px 35px rgba(220, 130, 110, 0.25);
+            animation: brilloPortada 4s ease-in-out infinite alternate;
+        }
+
+        @keyframes brilloPortada {
+            0% { box-shadow: 0 12px 35px rgba(220, 130, 110, 0.25), 0 0 15px rgba(255, 180, 160, 0.4); }
+            100% { box-shadow: 0 15px 45px rgba(245, 150, 130, 0.4), 0 0 30px rgba(255, 210, 190, 0.8); }
+        }
+
+        .pf-portada-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 22px;
+        }
+
+        /* FOTO OFICIAL GIGANTE, FLOTANTE Y CON ANIMACIÓN DE PULSO Y FLOTACIÓN */
+        .pf-avatar-flotante {
+            position: absolute;
+            bottom: -55px;
+            left: 50px;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 6px solid #ffffff;
+            background: #fff;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22), 0 0 20px rgba(252, 163, 141, 0.6);
+            animation: flotarYBrillar 3s ease-in-out infinite;
+            z-index: 10;
+        }
+
+        @keyframes flotarYBrillar {
+            0%, 100% { transform: translateY(0) scale(1); box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22), 0 0 15px rgba(252, 163, 141, 0.5); }
+            50% { transform: translateY(-8px) scale(1.02); box-shadow: 0 18px 35px rgba(0, 0, 0, 0.28), 0 0 30px rgba(252, 163, 141, 0.9); }
+        }
+
+        /* CABECERA ESTILO RED SOCIAL MODERNA */
+        .pf-header-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: 75px;
+            margin-bottom: 30px;
+            border-bottom: 3px dashed rgba(220, 140, 120, 0.35);
+            padding-bottom: 18px;
+        }
+
+        .pf-nombre-titulo {
+            margin: 0;
+            color: #3b2b25;
+            font-size: 2.6rem;
+            font-weight: 500;
+            text-shadow: 0 3px 12px rgba(220, 140, 120, 0.35);
+        }
+
+        /* BOTÓN EDITAR CON GRADIENTE VIBRANTE Y EFECTO HOVER */
+        .btn-editar-perfil-fundacion {
+            background: linear-gradient(135deg, #fca38d 0%, #e87a69 100%);
+            color: #fff;
+            border: none;
+            padding: 14px 36px;
+            font-family: 'Itim', cursive;
+            font-size: 1.3rem;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 8px 22px rgba(252, 163, 141, 0.45);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-editar-perfil-fundacion:hover {
+            transform: translateY(-4px) scale(1.05);
+            background: linear-gradient(135deg, #f4978e 0%, #d86857 100%);
+            box-shadow: 0 12px 30px rgba(244, 151, 142, 0.6);
+        }
+
+        /* GRID AMPLIO DE 3 COLUMNAS CON TARJETAS DINÁMICAS */
+        .pf-grid-amplio {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 22px;
+        }
+
+        .pf-card-seccion {
+            background: rgba(255, 255, 255, 0.78);
+            backdrop-filter: blur(15px);
+            border-radius: 25px;
+            padding: 24px;
+            border: 2px solid rgba(255, 255, 255, 0.95);
+            box-shadow: 0 10px 28px rgba(210, 130, 110, 0.12);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .pf-card-seccion:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(210, 130, 110, 0.22);
+            background: rgba(255, 255, 255, 0.92);
+            border-color: #fca38d;
+        }
+
+        /* CÁPSULAS CON TONOS MELOCOTÓN Y VERDE OLIVA PASTEL */
+        .pf-label-capsula {
+            background-color: #d8e2dc; /* Verde oliva pastel */
+            color: #2e4332;
+            font-size: 1rem;
+            font-weight: 500;
+            padding: 6px 16px;
+            border-radius: 16px;
+            display: inline-block;
+            margin-bottom: 14px;
+            box-shadow: 0 3px 8px rgba(216, 226, 220, 0.6);
+            text-shadow: 0 1px 3px rgba(255, 255, 255, 0.5);
+        }
+
+        .pf-label-capsula.melocoton {
+            background-color: #ffcad4; /* Melocotón pastel */
+            color: #5c3a41;
+            box-shadow: 0 3px 8px rgba(255, 202, 212, 0.6);
+        }
+
+        .pf-texto-info {
+            color: #4a403b;
+            font-size: 1.05rem;
+            line-height: 1.6;
+            margin: 0;
+            font-weight: 400;
+        }
+
+        .pf-redes-fila {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 12px;
+            font-size: 1rem;
+            color: #4a403b;
+            text-decoration: none;
+            background: rgba(255, 255, 255, 0.6);
+            padding: 10px 14px;
+            border-radius: 14px;
+            transition: all 0.2s ease;
+            border: 1px solid rgba(252, 163, 141, 0.2);
+        }
+
+        .pf-redes-fila:hover {
+            background: rgba(255, 255, 255, 0.95);
+            transform: translateX(4px);
+            border-color: #fca38d;
+        }
+
+        .pf-redes-fila i {
+            color: #d87c6b;
+            width: 24px;
+            text-align: center;
+            font-size: 1.2rem;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 1100px) {
+            .pf-grid-amplio {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        @media (max-width: 768px) {
+            .pf-grid-amplio {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAV SUPERIOR -->
+    <nav class="top-nav">
+        <div class="top-left">
+            <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu"></i>
+            <div class="mini-logo-circle"><img src="logo.png" alt="Logo ARCA"></div>
+            <span class="page-title">Perfil de Fundación</span>
+        </div>
+        <div class="search-bar">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Busca algo">
+            <i class="fa-solid fa-microphone"></i>
+        </div>
+        <div class="top-right">
+            <div class="user-header-info">
+                <div class="user-profile-menu" id="user-profile-menu">
+                    <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
+                        <img src="logo.png" id="user-avatar-img" alt="Perfil">
+                    </div>
+                    <div class="mini-menu-card" id="mini-menu-card">
+                        <div class="mini-menu-header"><span id="mini-menu-username">Fundación</span></div>
+                        <hr class="mini-menu-divider">
+                        <a href="configuracion.html" class="mini-menu-item btn-ajustes"><i class="fa-solid fa-gear"></i><span>Ajustes</span></a>
+                        <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini"><i class="fa-solid fa-right-from-bracket"></i><span>Cerrar sesión</span></a>
+                    </div>
+                </div>
+                <div class="notif-circle"><a href="notificaciones.html"><i class="fa-solid fa-bell"></i></a></div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+        <div class="side-icons">
+            <a href="home.html" class="menu-fila"><i class="fa-solid fa-house"></i><span class="menu-text">Inicio</span></a>
+            <a href="perfil_fundacion.html" class="menu-fila activa"><i class="fa-solid fa-circle-user"></i><span class="menu-text">Perfil</span></a>
+            <a href="guardados_usuario.html" class="menu-fila"><i class="fa-solid fa-bookmark"></i><span class="menu-text">Guardado</span></a>
+            <a href="mapa.html" class="menu-fila"><i class="fa-solid fa-location-dot"></i><span class="menu-text">Mapa</span></a>
+            <a href="configuracion.html" class="menu-fila"><i class="fa-solid fa-gear"></i><span class="menu-text">Ajustes</span></a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="perfil-fundacion-container">
+            
+            <!-- PORTADA PANORÁMICA CON FOTO OFICIAL FLOTANTE GIGANTE Y ANIMADA -->
+            <div class="pf-portada-contenedor">
+                <img id="pf-portada" src="logo.png" alt="Portada" class="pf-portada-preview">
+                <img id="pf-avatar" src="logo.png" alt="Foto Oficial" class="pf-avatar-flotante">
+            </div>
+
+            <!-- CABECERA CON NOMBRE, CHULITO VERIFICADO Y BOTÓN EDITAR -->
+            <!-- CABECERA CON NOMBRE, CHULITO VERIFICADO Y BOTONES DE ACCIÓN -->
+            <div class="pf-header-info">
+                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                    <h2 id="pf-nombre-fundacion" class="pf-nombre-titulo" style="margin: 0;">Cargando fundación...</h2>
+                    <span class="badge-fundacion-lila" id="badge-verificacion-oficial" style="display: inline-flex; align-items: center; gap: 5px; background: #e8dff5; border: 1px solid #d4c5f0; color: #5e4b8b; padding: 4px 12px; border-radius: 50px; font-size: 0.95rem; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
+                        <i class="fa-solid fa-circle-check" style="color: #9b7ede;"></i> Fundación Verificada
+                    </span>
+                </div>
+                <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                    <a href="mis_publicaciones.html" class="btn-editar-perfil-fundacion btn-arca-animado" style="background: linear-gradient(135deg, #e8a87c 0%, #d9966c 100%);">
+                        <i class="fa-solid fa-layer-group"></i> Mis publicaciones
+                    </a>
+                    <a href="editar_perfil_fundacion.html" class="btn-editar-perfil-fundacion btn-arca-animado">
+                        <i class="fa-solid fa-pen-to-square"></i> Editar perfil
+                    </a>
+                </div>
+            </div>
+
+            <!-- GRID AMPLIO DE 3 COLUMNAS -->
+            <div class="pf-grid-amplio">
+                
+                <!-- TARJETA 1: MISIÓN -->
+                <div class="pf-card-seccion">
+                    <div>
+                        <div class="pf-label-capsula melocoton">Misión</div>
+                        <p id="pf-mision" class="pf-texto-info">Cargando misión...</p>
+                    </div>
+                </div>
+
+                <!-- TARJETA 2: VISIÓN -->
+                <div class="pf-card-seccion">
+                    <div>
+                        <div class="pf-label-capsula melocoton">Visión</div>
+                        <p id="pf-vision" class="pf-texto-info">Cargando visión...</p>
+                    </div>
+                </div>
+
+                <!-- TARJETA 3: ENFOQUE PRINCIPAL -->
+                <div class="pf-card-seccion">
+                    <div>
+                        <div class="pf-label-capsula">Enfoque principal</div>
+                        <p id="pf-enfoque" class="pf-texto-info">Cargando enfoques...</p>
+                    </div>
+                </div>
+
+                <!-- TARJETA 4: PROGRAMAS Y PROYECTOS -->
+                <div class="pf-card-seccion">
+                    <div>
+                        <div class="pf-label-capsula">Programas / Proyectos actuales</div>
+                        <p id="pf-programas" class="pf-texto-info">Cargando proyectos...</p>
+                    </div>
+                </div>
+
+                <!-- TARJETA 5: REDES Y CONTACTO (OCUPA 2 COLUMNAS) -->
+                <div class="pf-card-seccion" style="grid-column: span 2;">
+                    <div>
+                        <div class="pf-label-capsula melocoton">Contáctanos y Redes</div>
+                        <div id="pf-redes-container" style="margin-top: 12px;">
+                            <!-- Se inyectan dinámicamente -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="script.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const btnToggleMenu = document.getElementById('btn-toggle-menu');
+        const sidebar = document.getElementById('sidebar');
+
+        if (btnToggleMenu && sidebar) {
+            btnToggleMenu.addEventListener('click', (e) => {
+                e.stopPropagation(); // Evita interferencias con otros clics
+                
+                // Cambia 'sidebar-abierta' por la clase que use tu CSS (por ejemplo: 'collapsed' o 'active')
+                sidebar.classList.toggle('sidebar-abierta'); 
+            });
+        }
+    });
+</script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            firebase.auth().onAuthStateChanged(async (user) => {
+                if (!user) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                try {
+                    const res = await fetch(`/api/obtener-fundacion?correo=${encodeURIComponent(user.email)}`);
+                    if (!res.ok) throw new Error("No se pudo cargar la información de la fundación.");
+                    
+                    const data = await res.json();
+
+                    const nombreMostrado = data.Nombre_Comercial || data.Nombre_Legal || 'Fundación ARCA';
+                    document.getElementById('pf-nombre-fundacion').textContent = nombreMostrado;
+                    
+                    document.getElementById('pf-mision').textContent = data.Descripcion_mision || 'Sin misión registrada.';
+                    document.getElementById('pf-vision').textContent = data.Descripcion_vision || 'Sin visión registrada.';
+                    document.getElementById('pf-enfoque').textContent = data.enfoque_otro || 'Rescate y adopción';
+                    document.getElementById('pf-programas').textContent = data.Programas_Proyectos_Actuales || 'Sin proyectos actuales.';
+
+                    if (data.Foto_Portada && data.Foto_Portada.trim() !== '') {
+                        document.getElementById('pf-portada').src = data.Foto_Portada;
+                    }
+                    if (data.PFP_Fundacion && data.PFP_Fundacion.trim() !== '') {
+                        document.getElementById('pf-avatar').src = data.PFP_Fundacion;
+                    }
+
+                    // Renderizar redes y contacto con estilo interactivo
+                    const redesContainer = document.getElementById('pf-redes-container');
+                    let htmlRedes = `
+                        <div class="pf-redes-fila"><i class="fa-solid fa-envelope"></i> <span>${data.Correo_fundacion || user.email}</span></div>
+                        <div class="pf-redes-fila"><i class="fa-solid fa-phone"></i> <span>${data.Telefono_fundacion || 'No registrado'}</span></div>
+                    `;
+
+                    if (data.Instagram && data.Instagram.trim() !== '') {
+                        htmlRedes += `<div class="pf-redes-fila"><i class="fa-brands fa-instagram" style="color: #e1306c;"></i> <a href="${data.Instagram}" target="_blank" style="color: #d87c6b; text-decoration: none; font-weight: bold;">Instagram oficial</a></div>`;
+                    }
+                    if (data.Facebook && data.Facebook.trim() !== '') {
+                        htmlRedes += `<div class="pf-redes-fila"><i class="fa-brands fa-facebook" style="color: #1877f2;"></i> <a href="${data.Facebook}" target="_blank" style="color: #d87c6b; text-decoration: none; font-weight: bold;">Facebook oficial</a></div>`;
+                    }
+                    if (data.TikTok && data.TikTok.trim() !== '') {
+                        htmlRedes += `<div class="pf-redes-fila"><i class="fa-brands fa-tiktok" style="color: #000000;"></i> <a href="${data.TikTok}" target="_blank" style="color: #d87c6b; text-decoration: none; font-weight: bold;">TikTok oficial</a></div>`;
+                    }
+                    if (data.Pagina_web && data.Pagina_web.trim() !== '') {
+                        htmlRedes += `<div class="pf-redes-fila"><i class="fa-solid fa-globe"></i> <a href="${data.Pagina_web}" target="_blank" style="color: #d87c6b; text-decoration: none; font-weight: bold;">${data.Pagina_web}</a></div>`;
+                    }
+                    
+                    redesContainer.innerHTML = htmlRedes;
+
+                } catch (error) {
+                    console.error("Error al cargar perfil de fundación:", error);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

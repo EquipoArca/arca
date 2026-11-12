@@ -150,24 +150,23 @@
                     <input type="text" id="input-direccion" name="direccion_reporte" class="input-direccion" placeholder="Ingresa una dirección" required>
                 </div>
 
-                <div class="foto-opcional">
-                    <div class="titulo-foto-capsula">Agregar fotos (recomendado)</div>
-                    
-                    <!-- Contenedor para previsualizar imagen actual (del código 2) -->
-                    <div class="contenedor-foto-actual" style="margin-bottom: 15px;">
-                        <label style="font-size: 14px; color: #666; display: block;">Imagen actual del reporte:</label>
-                        <img id="preview-img-reporte" src="" alt="Foto del reporte" style="max-width: 200px; display: none; border-radius: 8px; margin-top: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);" />
-                    </div>
+     <div class="foto-opcional">
+    <div class="titulo-foto-capsula">Agregar fotos</div>
 
-                    <div class="zona-drop" id="zona-arrastre">
-                        <input type="file" id="input-archivo-oculto" name="fotos_reporte" accept="image/*" style="display: none;" multiple>
-                        <div class="circulo-upload" id="btn-circulo">
-                            <i class="fa-solid fa-plus"></i>
-                        </div>
-                        <button type="button" class="btn-subir-archivo" id="btn-subir-archivo">Sube un archivo</button>
-                        <span class="texto-arrastra" id="texo-arrastra">o arrastra una imagen aquí</span>
-                    </div>
-                </div>
+    <div class="zona-drop" id="zona-arrastre">
+        <!-- Input múltiple -->
+        <input type="file" id="input-archivo-oculto" name="fotos_reporte[]" accept="image/*" style="display: none;" multiple>
+        
+        <div class="circulo-upload" id="btn-circulo">
+            <i class="fa-solid fa-plus"></i>
+        </div>
+        <button type="button" class="btn-subir-archivo" id="btn-subir-archivo">Sube un archivo</button>
+        <span class="texto-arrastra" id="texto-arrastra">o arrastra una imagen aquí</span>
+        
+        <!-- Único contenedor para las miniaturas -->
+        <div id="contenedor-previsualizacion" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 15px;"></div>
+    </div>
+</div>
 
                 <div class="contacto-seccion">
                     <div class="titulo-capsula">Deja un medio de contacto</div>

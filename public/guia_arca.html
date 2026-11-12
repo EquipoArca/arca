@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía rápida para usar Arca - ARCA</title>
+    <link rel="stylesheet" href="style_home.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="dark-mode.css">
+    <script>
+    if (localStorage.getItem("modo_oscuro") === "true") {
+        document.body.classList.add("dark-mode");
+    }
+    </script>
+    <style>
+        body {
+            font-family: 'Itim', cursive, sans-serif;
+            background-color: #fff0f7;
+            overflow-x: hidden;
+        }
+
+        .top-nav {
+            position: fixed !important;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 999 !important;
+            background-color: #ffd6d8 !important;
+        }
+
+        /* Contenido Principal */
+        .main-content-guia {
+            margin-top: 80px;
+            margin-left: 60px;
+            padding: 30px 40px 60px 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: calc(100vh - 80px);
+            box-sizing: border-box;
+        }
+
+        /* Tarjeta Principal Tipo Guardados */
+        .card-guia-principal {
+            width: 100%;
+            max-width: 850px;
+            background-color: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(14px);
+            border: 2px dashed rgba(229, 115, 115, 0.5);
+            border-radius: 38px;
+            padding: 40px 45px;
+            box-shadow: 0 20px 45px rgba(92, 64, 51, 0.08);
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        /* Título Centrado Adentro */
+        .guia-titulo-principal {
+            font-size: 2.4rem;
+            color: #442c20;
+            font-weight: 400;
+            text-align: center;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .guia-titulo-principal i {
+            color: #e57373;
+        }
+
+        .lista-guia-estilizada {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .item-guia-tarjeta {
+            display: flex;
+            align-items: flex-start;
+            gap: 18px;
+            background-color: rgba(255, 238, 239, 0.5);
+            padding: 20px 24px;
+            border-radius: 26px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+
+        .item-guia-tarjeta:hover {
+            transform: translateY(-2px);
+            background-color: rgba(255, 226, 228, 0.75);
+        }
+
+        .icono-item-guia {
+            width: 42px;
+            height: 42px;
+            background-color: #ffd6d8;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #e57373;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+            box-shadow: 0 4px 10px rgba(229, 115, 115, 0.2);
+        }
+
+        .texto-item-contenedor {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            width: 100%;
+        }
+
+        /* Texto Justificado */
+        .texto-item-guia {
+            font-size: 1.1rem;
+            line-height: 1.5;
+            color: #442c20;
+            margin: 0;
+            text-align: justify;
+        }
+
+        .texto-rosa {
+            color: #d87070;
+            font-weight: 600;
+        }
+
+        .btn-volver-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background-color: rgba(251, 194, 196, 0.85);
+            backdrop-filter: blur(8px);
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            color: #442c20;
+            padding: 10px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(229, 115, 115, 0.15);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .btn-volver-pill:hover {
+            transform: scale(1.05) translateY(-2px);
+            background-color: rgba(251, 194, 196, 1);
+            box-shadow: 0 6px 18px rgba(229, 115, 115, 0.25);
+        }
+    </style>
+</head>
+<body>
+
+  <!-- Barra de Navegación Superior Fija -->
+  <nav class="top-nav">
+    <div class="top-left">
+        <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu"></i>
+        
+        <div class="mini-logo-circle">
+            <img src="logo.png" alt="Logo">
+        </div>
+        <span class="page-title" id="titulo-pagina">Ayuda y soporte técnico</span>
+    </div>
+
+    <div class="search-bar">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="input-busqueda-nav" name="busqueda" placeholder="Busca algo" aria-label="Buscar en la aplicación">
+        <i class="fa-solid fa-microphone"></i>
+    </div>
+
+    <div class="top-right">
+        <div class="user-header-info">
+            <div class="user-profile-menu" id="user-profile-menu">
+                <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
+                    <img src="logo.png" id="user-avatar-img" alt="Perfil">
+                </div>
+
+                <div class="mini-menu-card" id="mini-menu-card">
+                    <div class="mini-menu-header">
+                        <span id="mini-menu-username">Usuario</span>
+                    </div>
+                    
+                    <hr class="mini-menu-divider">
+                    
+                    <a href="javascript:void(0)" onclick="mostrarSeccion('configuracion')" class="mini-menu-item btn-ajustes">
+                        <i class="fa-solid fa-gear"></i>
+                        <span>Ajustes</span>
+                    </a>
+                    
+                    <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Cerrar sesión</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="notif-circle">
+                <a href="notificaciones.html" aria-label="Notificaciones"><i class="fa-solid fa-bell"></i></a>
+            </div>
+        </div>
+    </div>
+  </nav>
+
+    <!-- Barra Lateral (Sidebar) -->
+    <aside class="sidebar" id="sidebar">
+        <div class="side-icons">
+            <a href="home.html" class="menu-fila">
+                <i class="fa-solid fa-house"></i>
+                <span class="menu-text">Inicio</span>
+            </a>
+            <a href="perfil_usuario.html" class="menu-fila">
+                <i class="fa-solid fa-circle-user"></i>
+                <span class="menu-text">Perfil</span>
+            </a>
+            <a href="guardados_usuario.html" class="menu-fila">
+                <i class="fa-solid fa-bookmark"></i>
+                <span class="menu-text">Guardado</span>
+            </a>
+            <a href="mapa.html" class="menu-fila">
+                <i class="fa-solid fa-location-dot"></i>
+                <span class="menu-text">Mapa</span>
+            </a>
+            <a href="configuracion.html" class="menu-fila">
+                <i class="fa-solid fa-gear"></i>
+                <span class="menu-text">Ajustes</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Contenido Principal -->
+    <main class="main-content-guia">
+        <!-- Tarjeta Principal con Título Centrado y Botón abajo -->
+        <div class="card-guia-principal">
+            <h1 class="guia-titulo-principal">
+                <i class="fa-solid fa-book-open"></i> Guía rápida para usar Arca
+            </h1>
+
+            <ul class="lista-guia-estilizada">
+                <li class="item-guia-tarjeta">
+                    <div class="icono-item-guia"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                    <div class="texto-item-contenedor">
+                        <p class="texto-item-guia">
+                            <span class="texto-rosa">Para reportar un animal</span>, desde la pantalla principal haz clic en el botón “Reportar” y llena el formulario con los datos del caso (ubicación, fotos, descripción). Una vez enviado, tu reporte se mostrará a usuarios y fundaciones cercanas (según tus preferencias de privacidad).
+                        </p>
+                    </div>
+                </li>
+
+                <li class="item-guia-tarjeta">
+                    <div class="icono-item-guia"><i class="fa-solid fa-hand-holding-heart"></i></div>
+                    <div class="texto-item-contenedor">
+                        <p class="texto-item-guia">
+                            <span class="texto-rosa">Para donar a una fundación</span>, en la pantalla principal haz clic en “Donaciones”. Completa el formulario indicando si donarás dinero, comida, juguetes, ropa u otro tipo de apoyo. La información llegará directamente a la fundación que elijas.
+                        </p>
+                    </div>
+                </li>
+
+                <li class="item-guia-tarjeta">
+                    <div class="icono-item-guia"><i class="fa-solid fa-location-dot"></i></div>
+                    <div class="texto-item-contenedor">
+                        <p class="texto-item-guia">
+                            <span class="texto-rosa">Para aprovechar al máximo la app</span>, recuerda activar la ubicación en tu navegador. Así podrás ver reportes, refugios, fundaciones y eventos cercanos con más precisión.
+                        </p>
+                    </div>
+                </li>
+
+                <li class="item-guia-tarjeta">
+                    <div class="icono-item-guia"><i class="fa-solid fa-paw"></i></div>
+                    <div class="texto-item-contenedor">
+                        <p class="texto-item-guia">
+                            <span class="texto-rosa">Para adoptar un animal</span>, desde la pantalla principal selecciona “Adopciones”. Cuando un animal te interese, haz clic en “Mostrar interés” y asegúrate de haber creado tu perfil de adoptante. El responsable de la publicación podrá pedir permiso para ver tu perfil antes de avanzar en el proceso.
+                        </p>
+                    </div>
+                </li>
+            </ul>
+
+            <!-- Botón de Volver Abajo -->
+            <div class="guia-footer-card">
+                <a href="soporte.html" class="btn-volver-pill">
+                    <i class="fa-solid fa-arrow-left"></i> Volver
+                </a>
+            </div>
+        </div>
+    </main>
+
+
+    <!-- Firebase v8 Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+
+    <script src="script.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btnToggleMenu = document.getElementById('btn-toggle-menu');
+            const sidebar = document.getElementById('sidebar');
+
+            if (btnToggleMenu && sidebar) {
+                btnToggleMenu.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    sidebar.classList.toggle('sidebar-abierta');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

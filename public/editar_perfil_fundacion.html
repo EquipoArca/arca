@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Perfil de Fundación - ARCA</title>
+    <link rel="stylesheet" href="style_home.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="dark-mode.css">
+    <script>
+    if (localStorage.getItem("modo_oscuro") === "true") {
+        document.body.classList.add("dark-mode");
+    }
+    </script>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 50px;
+            font-family: 'Itim', cursive, sans-serif;
+            background-color: #fce8e6;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .header-registro {
+            width: 100%;
+            height: 65px;
+            background-color: rgba(255, 214, 216, 0.85);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 25px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.8);
+            box-sizing: border-box;
+        }
+
+        .badge-arca-logo {
+            width: 45px;
+            height: 45px;
+            background-color: #fca38d;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            box-shadow: 0 4px 12px rgba(252, 163, 141, 0.4);
+        }
+
+        .badge-arca-logo img { width: 80%; }
+
+        .titulo-header { font-size: 1.8rem; font-weight: 400; color: #3b2b25; }
+
+        .btn-volver-perfil {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #fca38d;
+            padding: 8px 18px;
+            border-radius: 20px;
+            color: #d87c6b;
+            font-weight: 500;
+            font-size: 0.95rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(220, 130, 110, 0.1);
+            transition: all 0.2s ease;
+        }
+
+        .btn-volver-perfil:hover {
+            background: #fff;
+            transform: scale(1.03);
+            box-shadow: 0 6px 16px rgba(220, 130, 110, 0.2);
+        }
+
+        .contenedor-form-paso2 {
+            width: 92%;
+            max-width: 1250px;
+            background-color: rgba(255, 235, 230, 0.7);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 3px solid rgba(255, 255, 255, 0.95);
+            border-radius: 32px;
+            padding: 35px 45px;
+            margin-top: 30px;
+            box-shadow: 0 15px 40px rgba(220, 150, 130, 0.2), inset 0 0 20px rgba(255, 255, 255, 0.6);
+            box-sizing: border-box;
+            animation: fadeInScale 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: translateY(20px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .capsula-categoria-larga {
+            background-color: #ffcad4;
+            color: #5c3a41;
+            font-size: 1.3rem;
+            font-weight: 500;
+            padding: 8px 26px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 12px rgba(255, 202, 212, 0.4);
+        }
+
+        .grid-dos-columnas {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 35px;
+        }
+
+        .sub-capsula {
+            background-color: #d8e2dc;
+            color: #2e4332;
+            font-size: 1.05rem;
+            padding: 5px 16px;
+            border-radius: 14px;
+            display: inline-block;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 6px rgba(216, 226, 220, 0.5);
+        }
+
+        .input-paso2 {
+            width: 100%;
+            height: 42px;
+            background-color: rgba(255, 255, 255, 0.85);
+            border: 2px solid rgba(240, 160, 140, 0.3);
+            border-radius: 14px;
+            padding: 0 14px;
+            font-family: 'Itim', sans-serif;
+            font-size: 1rem;
+            outline: none;
+            box-sizing: border-box;
+            color: #3b2b25;
+            transition: all 0.2s ease;
+        }
+
+        .input-paso2:focus {
+            border-color: #fca38d;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(252, 163, 141, 0.3);
+        }
+
+        textarea.input-paso2 {
+            height: 105px;
+            padding: 12px;
+            resize: none;
+        }
+
+        .zona-subida-foto {
+            width: 100%;
+            height: 120px;
+            background-color: rgba(255, 255, 255, 0.6);
+            border: 2px dashed #fca38d;
+            border-radius: 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .zona-subida-foto:hover {
+            background-color: rgba(255, 255, 255, 0.9);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(252, 163, 141, 0.2);
+        }
+
+        /* BOTONES FLOTANTES ANIMADOS (LÁPIZ Y BASURA) */
+        .pf-btn-accion-foto {
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid #fca38d;
+            color: #d87c6b;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .pf-btn-accion-foto:hover {
+            transform: scale(1.15) rotate(8deg);
+            background: #fff;
+            color: #e06d53;
+            box-shadow: 0 6px 15px rgba(220, 100, 80, 0.3);
+        }
+
+        .pf-btn-accion-foto.basura:hover {
+            color: #d9534f;
+            border-color: #d9534f;
+        }
+
+        .checkbox-enfoque {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+            font-size: 1.05rem;
+            color: #4a403b;
+        }
+
+        .input-redes-container {
+            display: flex;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.85);
+            border: 2px solid rgba(240, 160, 140, 0.3);
+            border-radius: 14px;
+            padding: 0 14px;
+            margin-bottom: 12px;
+            height: 42px;
+            transition: all 0.2s ease;
+        }
+
+        .input-redes-container:focus-within {
+            border-color: #fca38d;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(252, 163, 141, 0.3);
+        }
+
+        .input-redes-container i {
+            color: #d87c6b;
+            margin-right: 12px;
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .input-redes-container input {
+            border: none;
+            outline: none;
+            width: 100%;
+            font-family: 'Itim', sans-serif;
+            font-size: 1rem;
+            background: transparent;
+            color: #3b2b25;
+        }
+
+        .btn-finalizar-paso2 {
+            background: linear-gradient(135deg, #fca38d 0%, #e87a69 100%);
+            color: #fff;
+            border: none;
+            padding: 14px 45px;
+            font-family: 'Itim', cursive;
+            font-size: 1.4rem;
+            border-radius: 25px;
+            cursor: pointer;
+            display: block;
+            margin: 35px 0 0 auto;
+            box-shadow: 0 8px 22px rgba(252, 163, 141, 0.45);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .btn-finalizar-paso2:hover {
+            transform: translateY(-3px) scale(1.03);
+            background: linear-gradient(135deg, #f4978e 0%, #d86857 100%);
+            box-shadow: 0 12px 28px rgba(244, 151, 142, 0.6);
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header-registro">
+        <div style="display: flex; align-items: center;">
+            <div class="badge-arca-logo"><img src="logo.png" alt="ARCA"></div>
+            <span class="titulo-header">Editar Perfil de Fundación</span>
+        </div>
+        <a href="perfil_fundacion.html" class="btn-volver-perfil"><i class="fa-solid fa-arrow-left"></i> Volver al perfil</a>
+    </header>
+
+    <main class="contenedor-form-paso2">
+        <div class="capsula-categoria-larga">Actualiza tu información pública</div>
+
+        <form id="form-editar-fundacion">
+            <div class="grid-dos-columnas">
+                
+                <!-- COLUMNA IZQUIERDA -->
+                <div>
+                    <div style="display: flex; gap: 20px; margin-bottom: 20px;">
+                        
+                        <!-- PORTADA CON LÁPIZ Y BASURA -->
+                        <div style="flex: 1; position: relative;">
+                            <div class="sub-capsula">Portada</div>
+                            <div class="zona-subida-foto" onclick="document.getElementById('input-foto-portada').click()">
+                                <img id="preview-portada" src="" style="position: absolute; top:0; left:0; width: 100%; height: 100%; object-fit: cover; border-radius: 18px; display: none; z-index: 2;">
+                                <div id="placeholder-portada-iconos" style="display: flex; flex-direction: column; align-items: center; z-index: 1;">
+                                    <i class="fa-solid fa-image" style="font-size: 1.6rem; color: #d87c6b;"></i>
+                                    <span style="font-size: 0.85rem; color: #665; margin-top: 6px;">Cambiar portada</span>
+                                </div>
+                                <input type="file" id="input-foto-portada" accept="image/*" style="display:none;" onchange="previsualizarImagen(event, 'preview-portada', 'placeholder-portada-iconos')">
+                            </div>
+
+                            <div style="position: absolute; top: 38px; right: 8px; display: flex; gap: 6px; z-index: 10;">
+                                <button type="button" class="pf-btn-accion-foto" onclick="document.getElementById('input-foto-portada').click()" title="Cambiar portada">
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                                <button type="button" class="pf-btn-accion-foto basura" onclick="borrarImagenForm('preview-portada', 'placeholder-portada-iconos', 'input-foto-portada')" title="Borrar portada">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- FOTO OFICIAL CON LÁPIZ Y BASURA -->
+                        <div style="flex: 1; position: relative;">
+                            <div class="sub-capsula">Foto oficial</div>
+                            <div class="zona-subida-foto" onclick="document.getElementById('input-foto-oficial').click()">
+                                <img id="preview-oficial" src="" style="position: absolute; top:0; left:0; width: 100%; height: 100%; object-fit: cover; border-radius: 18px; display: none; z-index: 2;">
+                                <div id="placeholder-oficial-iconos" style="display: flex; flex-direction: column; align-items: center; z-index: 1;">
+                                    <i class="fa-solid fa-image-portrait" style="font-size: 1.6rem; color: #d87c6b;"></i>
+                                    <span style="font-size: 0.85rem; color: #665; margin-top: 6px;">Cambiar logo</span>
+                                </div>
+                                <input type="file" id="input-foto-oficial" accept="image/*" style="display:none;" onchange="previsualizarImagen(event, 'preview-oficial', 'placeholder-oficial-iconos')">
+                            </div>
+
+                            <div style="position: absolute; top: 38px; right: 8px; display: flex; gap: 6px; z-index: 10;">
+                                <button type="button" class="pf-btn-accion-foto" onclick="document.getElementById('input-foto-oficial').click()" title="Cambiar logo">
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                                <button type="button" class="pf-btn-accion-foto basura" onclick="borrarImagenForm('preview-oficial', 'placeholder-oficial-iconos', 'input-foto-oficial')" title="Borrar logo">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <div class="sub-capsula">Nombre de la fundación</div>
+                        <input type="text" id="nombre-publico-fundacion" class="input-paso2" placeholder="Huellitas de amor">
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <div class="sub-capsula">Descripción general (misión)</div>
+                        <textarea id="mision-publica" class="input-paso2" placeholder="Rescatar, proteger y brindar una segunda oportunidad..."></textarea>
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <div class="sub-capsula">Descripción general (visión)</div>
+                        <textarea id="vision-publica" class="input-paso2" placeholder="Ser la fundación líder en..."></textarea>
+                    </div>
+
+                    <div>
+                        <div class="sub-capsula">Enfoque principal</div>
+                        <div class="checkbox-enfoque"><input type="checkbox" id="ef1"> Rescate adopción</div>
+                        <div class="checkbox-enfoque"><input type="checkbox" id="ef2"> Esterilización y control poblacional</div>
+                        <div class="checkbox-enfoque"><input type="checkbox" id="ef3"> Rehabilitación de animales maltratados</div>
+                        <div class="checkbox-enfoque"><input type="checkbox" id="ef4"> Otro: <input type="text" class="input-paso2" id="ef4-texto" style="height: 32px; width: 180px; display: inline-block;" placeholder="Especificar"></div>
+                    </div>
+                </div>
+
+                <!-- COLUMNA DERECHA -->
+                <div>
+                    <div style="margin-bottom: 20px;">
+                        <div class="sub-capsula">Programas / Proyectos actuales</div>
+                        <textarea id="programas-publicos" class="input-paso2" style="height: 120px;" placeholder="Proyecto actual dentro del programa..."></textarea>
+                    </div>
+
+                    <div>
+                        <div class="sub-capsula">Enlaces a redes sociales y contacto</div>
+                        <div style="margin-top: 10px;">
+                            <div class="input-redes-container">
+                                <i class="fa-solid fa-envelope"></i>
+                                <input type="email" id="red-correo" placeholder="Correo de contacto oficial">
+                            </div>
+                            <div class="input-redes-container">
+                                <i class="fa-solid fa-phone"></i>
+                                <input type="text" id="red-telefono" placeholder="Teléfono de contacto">
+                            </div>
+                            <div class="input-redes-container">
+                                <i class="fa-brands fa-instagram"></i>
+                                <input type="text" id="red-instagram" placeholder="Enlace de Instagram">
+                            </div>
+                            <div class="input-redes-container">
+                                <i class="fa-brands fa-facebook"></i>
+                                <input type="text" id="red-facebook" placeholder="Enlace de Facebook">
+                            </div>
+                            <div class="input-redes-container">
+                                <i class="fa-brands fa-tiktok"></i>
+                                <input type="text" id="red-tiktok" placeholder="Enlace de TikTok">
+                            </div>
+                            <div class="input-redes-container">
+                                <i class="fa-solid fa-globe"></i>
+                                <input type="text" id="red-web" placeholder="Sitio web u otro enlace general">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <button type="button" class="btn-finalizar-paso2" onclick="guardarCambiosFundacion()">Guardar cambios</button>
+        </form>
+    </main>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="script.js"></script>
+    <script>
+        function previsualizarImagen(event, previewId, placeholderId) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.getElementById(previewId);
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+
+                    const placeholder = document.getElementById(placeholderId);
+                    if (placeholder) placeholder.style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function borrarImagenForm(previewId, placeholderId, inputId) {
+            const img = document.getElementById(previewId);
+            img.src = '';
+            img.style.display = 'none';
+
+            const placeholder = document.getElementById(placeholderId);
+            if (placeholder) placeholder.style.display = 'flex';
+
+            const input = document.getElementById(inputId);
+            if (input) input.value = '';
+        }
+
+        // Cargar datos actuales de la fundación al abrir la vista de edición
+        document.addEventListener('DOMContentLoaded', async () => {
+            firebase.auth().onAuthStateChanged(async (user) => {
+                if (!user) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                try {
+                    const res = await fetch(`/api/obtener-fundacion?correo=${encodeURIComponent(user.email)}`);
+                    if (!res.ok) throw new Error("No se pudo cargar la información.");
+                    
+                    const data = await res.json();
+
+                    // Rellenamos los inputs con los datos exactos de la BD
+                    document.getElementById('nombre-publico-fundacion').value = data.Nombre_Comercial || data.Nombre_Legal || '';
+                    document.getElementById('mision-publica').value = data.Descripcion_mision || '';
+                    document.getElementById('vision-publica').value = data.Descripcion_vision || '';
+                    document.getElementById('programas-publicos').value = data.Programas_Proyectos_Actuales || '';
+                    document.getElementById('red-correo').value = data.Correo_fundacion || user.email;
+                    document.getElementById('red-telefono').value = data.Telefono_fundacion || '';
+                    document.getElementById('red-web').value = data.Pagina_web || '';
+
+                    if (data.Foto_Portada && data.Foto_Portada.trim() !== '') {
+                        const imgPortada = document.getElementById('preview-portada');
+                        imgPortada.src = data.Foto_Portada;
+                        imgPortada.style.display = 'block';
+                        document.getElementById('placeholder-portada-iconos').style.display = 'none';
+                    }
+                    if (data.PFP_Fundacion && data.PFP_Fundacion.trim() !== '') {
+                        const imgOficial = document.getElementById('preview-oficial');
+                        imgOficial.src = data.PFP_Fundacion;
+                        imgOficial.style.display = 'block';
+                        document.getElementById('placeholder-oficial-iconos').style.display = 'none';
+                    }
+
+                } catch (error) {
+                    console.error("Error al cargar datos para editar:", error);
+                }
+            });
+        });
+
+        // Enviar cambios actualizados al servidor mediante PUT
+        async function guardarCambiosFundacion() {
+            const user = firebase.auth().currentUser;
+            if (!user) return;
+
+            const imgPortadaElement = document.getElementById('preview-portada');
+            const imgOficialElement = document.getElementById('preview-oficial');
+
+            const portadaImg = imgPortadaElement.style.display !== 'none' ? imgPortadaElement.src : '';
+            const oficialImg = imgOficialElement.style.display !== 'none' ? imgOficialElement.src : '';
+
+            const payload = {
+                correo_fundacion: user.email,
+                nombre_comercial: document.getElementById('nombre-publico-fundacion').value,
+                descripcion_mision: document.getElementById('mision-publica').value,
+                descripcion_vision: document.getElementById('vision-publica').value,
+                programas_proyectos: document.getElementById('programas-publicos').value,
+                telefono_fundacion: document.getElementById('red-telefono').value,
+                instagram: document.getElementById('red-instagram').value,
+                facebook: document.getElementById('red-facebook').value,
+                tiktok: document.getElementById('red-tiktok').value,
+                pagina_web: document.getElementById('red-web').value,
+                foto_portada: portadaImg,
+                pfp_fundacion: oficialImg
+            };
+
+            try {
+                const respuesta = await fetch('/api/actualizar-fundacion', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const resultado = await respuesta.json();
+                if (resultado.exito) {
+                    alert("¡Perfil actualizado con éxito!");
+                    window.location.href = "perfil_fundacion.html";
+                } else {
+                    alert("No se pudo actualizar: " + resultado.mensaje);
+                }
+            } catch (error) {
+                console.error("Error al actualizar:", error);
+                alert("Ocurrió un error al guardar los cambios.");
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,2 +1,6 @@
 .env 
- clave-firebase.json
+clave-firebase.json
+node_modules
+
+node_modules
+clave-firebase.json

@@ -1,16 +1,85 @@
-/* --- Estilos específicos para la vista de Publicaciones Guardadas --- */
+/* --- Estilos específicos para la vista de Publicaciones Guardadas (ARCA) --- */
 
-.main-container {
-    width: 100%;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-    box-sizing: border-box;
+html, body {
+    font-family: 'Itim', cursive, sans-serif;
+    color: #000000;
+    margin: 0;
+    overflow-x: hidden;
 }
 
-/* Contenedor de Estado Vacío / Invitado */
+/* --- ANIMACIONES Y EFECTOS SUPER WOW ARCA --- */
+@keyframes arcaEntrada {
+    from { opacity: 0; transform: translateY(16px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes flotarSoft {
+    0% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-6px) rotate(2deg); }
+    100% { transform: translateY(0px) rotate(0deg); }
+}
+
+@keyframes arcaEntradaPop {
+    0% { opacity: 0; transform: scale(0.85) translateY(24px) rotate(-1.5deg); }
+    65% { opacity: 1; transform: scale(1.03) translateY(-4px) rotate(0.5deg); }
+    100% { opacity: 1; transform: scale(1) translateY(0) rotate(0deg); }
+}
+
+.main-content {
+    min-height: calc(100vh - 70px);
+    display: flex;
+    flex-direction: column;
+    padding: 25px 35px;
+    box-sizing: border-box;
+    animation: arcaEntrada 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    overflow-y: auto;
+}
+
+/* BOTONES INTERACTIVOS CON ANIMACIÓN FLUIDA */
+.btn-arca-animado {
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+.btn-arca-animado:hover {
+    transform: translateY(-3px) scale(1.03) !important;
+    box-shadow: 0 10px 22px rgba(92, 64, 51, 0.15) !important;
+}
+.btn-arca-animado:active {
+    transform: translateY(1px) scale(0.97) !important;
+}
+
+/* --- CONTENEDOR PRINCIPAL FLUIDO SIN BLOQUES RIGIDOS --- */
+.feed-guardados {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 10px 0;
+    width: 100%;
+    max-width: 1050px;
+    margin: 0 auto;
+    box-sizing: border-box;
+    animation: arcaEntrada 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.header-guardados {
+    margin-bottom: 25px;
+    text-align: left;
+}
+
+.header-guardados h2 {
+    color: #5c4033;
+    font-size: 28px;
+    font-weight: 400;
+    margin-bottom: 6px;
+    letter-spacing: 0.3px;
+}
+
+.subtitulo-guardados {
+    color: #775a4c;
+    font-size: 16px;
+    font-weight: 400;
+}
+
+/* --- ESTADO VACÍO ORGÁNICO --- */
 .seccion-invitado {
     display: flex;
     justify-content: center;
@@ -18,133 +87,219 @@
     width: 100%;
 }
 
-.empty-state-container {
-    background: rgba(255, 255, 255, 0.75);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.9);
-    border-radius: 30px;
-    padding: 40px 30px;
+.empty-state-container, .estado-vacio-guardados {
+    background: rgba(255, 248, 235, 0.65);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 2px dashed rgba(232, 168, 124, 0.7);  
+    border-radius: 38px;
+    padding: 50px 30px;
     text-align: center;
-    max-width: 420px;
+    max-width: 750px;
     width: 100%;
-    box-shadow: 0 15px 35px rgba(229, 115, 115, 0.12);
+    margin: 20px auto;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 15px;
+    box-sizing: border-box;
+    box-shadow: 0 16px 40px rgba(92, 64, 51, 0.08);
+    animation: arcaEntradaPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.ilustracion-guardados, .box-icon-wrapper {
+    width: 84px;
+    height: 84px;
+    margin: 0 auto 10px;
+    background: rgba(250, 212, 222, 0.85);
+    border: 3px solid rgba(255, 255, 255, 0.95);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 25px rgba(233, 133, 160, 0.3);
+    animation: flotarSoft 3.5s ease-in-out infinite;
+}
+
+.estado-vacio-guardados h3, .main-title {
+    color: #5c4033;
+    font-size: 22px;
+    font-weight: 400;
+    margin-bottom: 6px;
+}
+
+.estado-vacio-guardados p, .sub-title {
+    color: #775a4c;
+    font-size: 15.5px;
+    max-width: 460px;
+    margin: 0 auto;
+    line-height: 1.5;
+    font-weight: 400;
 }
 
 .brand-arca {
-    font-family: 'Itim', sans-serif;
+    font-family: 'Itim', cursive, sans-serif;
     font-size: 2.5rem;
-    color: #e57373; /* Tono característico de acento */
+    color: #d97736;
     margin: 0;
-}
-
-.box-icon-wrapper {
-    width: 80px;
-    height: 80px;
-    background: rgba(229, 115, 115, 0.1);
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 10px 0;
+    font-weight: 400;
 }
 
 .empty-box-svg {
-    width: 45px;
-    height: 45px;
-    fill: #e57373;
-}
-
-.main-title {
-    font-family: 'Itim', sans-serif;
-    font-size: 1.4rem;
-    color: #4a3e3d;
-    margin: 0;
-}
-
-.sub-title {
-    font-family: 'Itim', sans-serif;
-    font-size: 0.95rem;
-    color: #777;
-    margin: 0 0 10px 0;
+    width: 42px;
+    height: 42px;
+    fill: #e8a87c;
 }
 
 .btn-login-main {
-    background-color: #e57373;
+    background-color: #e8a87c;
     color: white;
-    border: none;
-    border-radius: 25px;
-    padding: 12px 25px;
-    font-family: 'Itim', sans-serif;
-    font-size: 1rem;
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    border-radius: 9999px;
+    padding: 12px 30px;
+    font-family: 'Itim', cursive, sans-serif;
+    font-size: 1.1rem;
+    font-weight: 400;
     cursor: pointer;
-    transition: background-color 0.2s ease, transform 0.2s ease;
-    width: 100%;
-    box-shadow: 0 5px 15px rgba(229, 115, 115, 0.3);
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 6px 16px rgba(232, 168, 124, 0.35);
 }
 
 .btn-login-main:hover {
-    background-color: #d65f5f;
-    transform: translateY(-2px);
+    background-color: #d97736;
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 10px 22px rgba(232, 168, 124, 0.45);
 }
 
-/* Contenedor de Usuario con Publicaciones */
+/* --- GRID Y TARJETAS GUARDADAS (CON TRANSPARENCIA Y GLASSMORPHISM) --- */
 .saved-posts-container {
     width: 100%;
-    max-width: 900px;
     display: flex;
     flex-direction: column;
     gap: 25px;
 }
 
 .saved-section-title {
-    font-family: 'Itim', sans-serif;
+    font-family: 'Itim', cursive, sans-serif;
     font-size: 2rem;
-    color: #4a3e3d;
+    color: #5c4033;
     text-align: center;
     margin: 0;
+    font-weight: 400;
 }
 
-.posts-grid {
+.posts-grid, .zona-guardados-dinamica {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+    gap: 24px;
     width: 100%;
 }
 
 .saved-post-card {
-    background: rgba(255, 255, 255, 0.65);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.8);
-    border-radius: 20px;
-    padding: 15px;
+    background: rgba(255, 248, 235, 0.55);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 2px solid rgba(255, 255, 255, 0.85);
+    border-radius: 32px;
+    padding: 20px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+    gap: 12px;
+    box-shadow: 0 10px 28px rgba(92, 64, 51, 0.06);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: arcaEntradaPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.saved-post-card:hover {
+    background: rgba(255, 248, 235, 0.72);
+    transform: translateY(-5px) scale(1.01);
+    box-shadow: 0 16px 36px rgba(92, 64, 51, 0.12);
+    border-color: #e8a87c;
 }
 
 .saved-post-img-placeholder {
     width: 100%;
-    height: 140px;
-    background-color: rgba(229, 115, 115, 0.15);
-    border-radius: 12px;
+    height: 170px;
+    background: rgba(232, 168, 124, 0.15);
+    border-radius: 24px;
+    border: 2px dashed rgba(232, 168, 124, 0.4);
+    object-fit: cover;
 }
 
 .saved-post-title {
-    font-family: 'Itim', sans-serif;
-    font-size: 1.2rem;
-    color: #4a3e3d;
+    font-family: 'Itim', cursive, sans-serif;
+    font-size: 1.35rem;
+    color: #5c4033;
     margin: 0;
+    font-weight: 400;
 }
 
 .saved-post-desc {
-    font-family: 'Itim', sans-serif;
-    font-size: 0.9rem;
-    color: #666;
+    font-family: 'Itim', cursive, sans-serif;
+    font-size: 1rem;
+    color: #775a4c;
     margin: 0;
+    font-weight: 400;
+    line-height: 1.45;
+}
+
+/* --- MODAL DE DETALLES DEL REPORTE CON EFECTO POP --- */
+.modal-foto-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(92, 64, 51, 0.45);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    animation: arcaEntrada 0.25s ease;
+}
+
+.modal-foto-contenido {
+    background: rgba(255, 248, 235, 0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 2px solid rgba(255, 255, 255, 0.95);
+    border-radius: 38px;
+    padding: 38px;
+    position: relative;
+    box-shadow: 0 24px 50px rgba(92, 64, 51, 0.22);
+    width: 750px;
+    max-width: 95%;
+    max-height: 90vh;
+    overflow-y: auto;
+    text-align: left;
+    animation: arcaEntradaPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.btn-cerrar-modal {
+    position: absolute;
+    top: 18px;
+    right: 22px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid rgba(232, 168, 124, 0.4);
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    font-size: 20px;
+    cursor: pointer;
+    color: #775a4c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Itim', cursive, sans-serif;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 4px 12px rgba(92, 64, 51, 0.08);
+}
+.btn-cerrar-modal:hover { 
+    background: #e57373; 
+    color: white; 
+    border-color: white;
+    transform: scale(1.12) rotate(90deg); 
+    box-shadow: 0 6px 16px rgba(229, 115, 115, 0.35);
 }

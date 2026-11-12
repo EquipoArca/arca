@@ -1,6 +1,3 @@
-// ==========================================
-// FUNCIÓN PARA COMPRIMIR Y CONVERTIR A BASE64
-// ==========================================
 const convertirFotoPerfilBase64 = (archivo) => {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -152,29 +149,31 @@ async function procesarNuevaFoto(event) {
         }
     }
 }
+
 // ==========================================
 // CARGAR DATOS DEL PERFIL AL INICIAR LA PÁGINA
 // ==========================================
 firebase.auth().onAuthStateChanged(async (user) => {
     if (user) {
         try {
-            // Hacemos la petición a tu servidor para obtener los datos del usuario
-            const respuesta = await fetch(`/obtener-usuario?correo=${encodeURIComponent(user.email)}`);
+            const respuesta = await fetch(`/api/obtener-usuario?correo=${encodeURIComponent(user.email)}`);
             const data = await respuesta.json();
 
             if (respuesta.ok) {
-                // 1. Cargar el nombre de usuario si existe el elemento
+                // 🐾 NUEVO: Si es fundación y está en el perfil normal, lo redirigimos a su perfil de fundación
+                if (data.tipo_usuario === 'fundacion' && window.location.pathname.includes('perfil_usuario.html')) {
+                    window.location.href = 'perfil_fundacion.html';
+                    return; // Detenemos la ejecución aquí
+                }
+
                 const elemNombre = document.getElementById('mostrar-nombre-usuario');
                 if (elemNombre && data.nombre_usuario) {
                     elemNombre.textContent = `@${data.nombre_usuario}`;
                 }
 
-                // 2. Cargar la foto de perfil si está guardada en la base de datos
                 if (data.foto_perfil) {
-                    // Usamos la función que ya tienes creada para mostrar la foto
                     mostrarFotoUsuario(data.foto_perfil);
                 } else {
-                    // Si no tiene foto, aseguramos que se vea la silueta por defecto
                     mostrarSiluetaDefault();
                 }
             }
@@ -183,7 +182,6 @@ firebase.auth().onAuthStateChanged(async (user) => {
         }
     }
 });
-
 function ejecutarBorrarFoto() {
     const user = firebase.auth().currentUser;
     if (!user) return;
@@ -217,12 +215,17 @@ function abrirModalNombre() {
     const msgError = document.getElementById('mensaje-estado-nombre');
 
     if (elemActual) elemActual.textContent = nombreActual;
-    if (inputNuevo) inputNuevo.value = '';
-    if (msgError) msgError.textContent = '';
+    
+    // 👇 ESTO ES LO CLAVE: Forzamos a que el input empiece vacío siempre
+    if (inputNuevo) inputNuevo.value = ''; 
+    
+    if (msgError) {
+        msgError.textContent = '';
+        msgError.className = 'mensaje-validacion';
+    }
 
     if (modal) modal.classList.add('activo');
 }
-
 function cerrarModalNombre() {
     const modal = document.getElementById('modal-cambiar-nombre');
     if (modal) modal.classList.remove('activo');
@@ -281,7 +284,7 @@ function abrirModalTelefono() {
     const user = firebase.auth().currentUser;
     
     if (user) {
-        fetch(`/obtener-usuario?correo=${encodeURIComponent(user.email)}`)
+        fetch(`/api/obtener-usuario?correo=${encodeURIComponent(user.email)}`)
             .then(res => res.json())
             .then(data => {
                 const elemTelActual = document.getElementById('modal-telefono-actual');
@@ -333,14 +336,17 @@ if (btnGuardarTel) {
     btnGuardarTel.onclick = async () => {
         const user = firebase.auth().currentUser;
         if (!user) {
-            alert("No hay una sesión activa.");
+            mostrarAlertaArca(
+                "¡Acción no permitida!",
+                "No hay una sesión activa. ♡",
+                { tipo: "error" }
+            );
             return;
         }
 
         let nuevoTel = document.getElementById('input-nuevo-telefono').value.trim();
         const errorElem = document.getElementById('mensaje-error-telefono');
 
-        // Restricciones básicas: longitud mínima
         if (!nuevoTel || nuevoTel.length < 7) {
             errorElem.textContent = "Ingresa un número de celular válido.";
             errorElem.style.display = 'block';
@@ -350,7 +356,6 @@ if (btnGuardarTel) {
         try {
             errorElem.style.display = 'none';
 
-            // Petición directa a tu servidor para actualizar en la base de datos
             const respuesta = await fetch('/actualizar-telefono-usuario', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -364,9 +369,17 @@ if (btnGuardarTel) {
             const resultado = await respuesta.json();
 
             if (respuesta.ok) {
-                alert("¡Número de celular actualizado con éxito!");
-                cerrarModalTelefono();
-                window.location.reload();
+                mostrarAlertaArca(
+                    "¡Número de celular actualizado con éxito!",
+                    "Tu número de celular ha sido actualizado correctamente. 🌸",
+                    { 
+                        tipo: "aviso",
+                        alCerrar: () => {
+                            cerrarModalTelefono();
+                            window.location.reload();
+                        }
+                    }
+                );
             } else {
                 throw new Error(resultado.mensaje || "No se pudo actualizar el teléfono.");
             }
@@ -423,3 +436,722 @@ if (inputNombre && mensajeEstado) {
         }, 500);
     });
 }
+
+// ==========================================
+// GUARDAR CAMBIO DE NOMBRE DE USUARIO
+// ==========================================
+const btnGuardarNombre = document.getElementById('btn-guardar-nuevo-nombre');
+if (btnGuardarNombre) {
+    btnGuardarNombre.onclick = async () => {
+        const user = firebase.auth().currentUser;
+        const nuevoNombre = document.getElementById('input-nuevo-nombre').value.trim();
+        const mensajeEstado = document.getElementById('mensaje-estado-nombre');
+
+        if (!user) {
+            mostrarAlertaArca(
+                "No hay una sesión activa.",
+                "Por favor, inicia sesión para realizar esta acción. ♡",
+                { tipo: "error" }
+            );
+            return;
+        }
+
+        if (!nuevoNombre || nuevoNombre.length < 3) {
+            mensajeEstado.textContent = "El nombre debe tener al menos 3 caracteres.";
+            mensajeEstado.className = "mensaje-validacion error";
+            return;
+        }
+
+        try {
+            const respuesta = await fetch('/cambiar-nombre-usuario', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    correo_usuario: user.email,
+                    nuevo_nombre: nuevoNombre
+                })
+            });
+
+            const resultado = await respuesta.json();
+
+            if (respuesta.ok) {
+                mostrarAlertaArca(
+                    "¡Nombre de usuario actualizado con éxito!",
+                    "Tu nombre de usuario ha sido actualizado correctamente. 🌸",
+                    { tipo: "aviso",
+                        alCerrar: () => {
+                cerrarModalNombre();
+                window.location.reload();
+                    }
+                  }
+                );
+
+            } else {
+                mensajeEstado.textContent = resultado.mensaje || "Error al actualizar el nombre.";
+                mensajeEstado.className = "mensaje-validacion error";
+            }
+        } catch (err) {
+            console.error("Error al actualizar nombre:", err);
+            mensajeEstado.textContent = "Error de conexión con el servidor.";
+            mensajeEstado.className = "mensaje-validacion error";
+        }
+    };
+}
+
+// ==========================================
+// FUNCIÓN AUXILIAR PARA CARGAR EMAILJS AL VUELO
+// ==========================================
+function cargarEmailJS() {
+    return new Promise((resolve, reject) => {
+        if (window.emailjs) {
+            resolve(window.emailjs);
+            return;
+        }
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js";
+        script.onload = () => {
+            emailjs.init("AVpXUrYdpwa9oh438");
+            resolve(window.emailjs);
+        };
+        script.onerror = (err) => reject(err);
+        document.head.appendChild(script);
+    });
+}
+
+// ==========================================
+// ENVÍO DE CÓDIGO OTP PARA CAMBIAR CORREO (CON EMAILJS)
+// ==========================================
+const btnEnviarCodigoCorreo = document.getElementById('btn-enviar-codigo-correo');
+if (btnEnviarCodigoCorreo) {
+    btnEnviarCodigoCorreo.onclick = async () => {
+        const user = firebase.auth().currentUser;
+        const nuevoCorreoInput = document.getElementById('input-nuevo-correo');
+        const nuevoCorreo = nuevoCorreoInput ? nuevoCorreoInput.value.trim() : '';
+        const errorCorreo = document.getElementById('mensaje-error-correo');
+
+        if (!user) {
+            mostrarAlertaArca(
+                "No hay sesión activa.",
+                "Por favor, inicia sesión para realizar esta acción. ♡",
+                { tipo: "error" }
+            );
+            return;
+        }
+
+        if (!nuevoCorreo || !nuevoCorreo.includes('@')) {
+            if (errorCorreo) {
+                errorCorreo.textContent = "Ingresa un correo electrónico válido.";
+                errorCorreo.style.display = 'block';
+            }
+            return;
+        }
+
+        if (errorCorreo) errorCorreo.style.display = 'none';
+        btnEnviarCodigoCorreo.textContent = "Enviando código...";
+        btnEnviarCodigoCorreo.disabled = true;
+
+        try {
+            // 1. Asegurarnos de que EmailJS esté cargado en el navegador
+            const emailjsLib = await cargarEmailJS();
+
+            // 2. Generar código OTP de 4 dígitos
+            const codigoGenerado = Math.floor(1000 + Math.random() * 9000).toString();
+            sessionStorage.setItem('otp_cambio_correo', codigoGenerado);
+            sessionStorage.setItem('nuevo_correo_temporal', nuevoCorreo);
+
+            // 3. Parámetros para tu plantilla de EmailJS
+            const templateParams = {
+                to_email: nuevoCorreo,
+                email: nuevoCorreo,
+                to_name: user.email,
+                passcode: codigoGenerado
+            };
+
+            // 4. Envío mediante la librería asegurada
+            await emailjsLib.send('service_93j9cwn', 'template_bqczg41', templateParams);
+
+            // 5. Cambiar de vista en el modal hacia los inputs OTP
+            const pasoCorreo = document.getElementById('paso-nuevo-correo');
+            const pasoOtp = document.getElementById('paso-codigo-otp');
+            if (pasoCorreo) pasoCorreo.style.display = 'none';
+            if (pasoOtp) pasoOtp.style.display = 'block';
+
+        } catch (err) {
+            console.error("Error al enviar código con EmailJS:", err);
+            if (errorCorreo) {
+                errorCorreo.textContent = "Hubo un problema al enviar el código de verificación.";
+                errorCorreo.style.display = 'block';
+            }
+        } finally {
+            btnEnviarCodigoCorreo.textContent = "Enviar código de verificación";
+            btnEnviarCodigoCorreo.disabled = false;
+        }
+    };
+}
+// ==========================================
+// VERIFICAR EL CÓDIGO OTP E INSERTAR EL CAMBIO
+// ==========================================
+const btnVerificarCorreo = document.getElementById('btn-verificar-cambio-correo');
+if (btnVerificarCorreo) {
+    btnVerificarCorreo.onclick = async () => {
+        const otpInputs = document.querySelectorAll('.otp-correo-input');
+        const codigoIngresado = Array.from(otpInputs).map(i => i.value).join('');
+        const codigoGuardado = sessionStorage.getItem('otp_cambio_correo');
+        const nuevoCorreoDestino = sessionStorage.getItem('nuevo_correo_temporal');
+        const errorOtp = document.getElementById('mensaje-error-otp-correo');
+        const user = firebase.auth().currentUser;
+
+        if (codigoIngresado.length !== 4) {
+            if (errorOtp) {
+                errorOtp.textContent = "Por favor ingresa los 4 dígitos completos.";
+                errorOtp.style.display = 'block';
+            }
+            return;
+        }
+
+        if (codigoIngresado !== codigoGuardado) {
+            if (errorOtp) {
+                errorOtp.textContent = "El código de verificación es incorrecto.";
+                errorOtp.style.display = 'block';
+            }
+            return;
+        }
+
+        if (!user) {
+            if (errorOtp) {
+                errorOtp.textContent = "No hay una sesión activa en Firebase.";
+                errorOtp.style.display = 'block';
+            }
+            return;
+        }
+
+        btnVerificarCorreo.disabled = true;
+        btnVerificarCorreo.textContent = "Actualizando...";
+
+try {
+            const correoAnterior = user.email;
+
+            // 1. PRIMERO actualizamos MySQL a través de la API
+            const respuesta = await fetch('/actualizar-correo-usuario', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    correo_actual: correoAnterior,
+                    nuevo_correo: nuevoCorreoDestino
+                })
+            });
+
+            const resultado = await respuesta.json();
+
+            if (!respuesta.ok || !resultado.success) {
+                throw new Error(resultado.mensaje || "No se pudo actualizar el correo en la base de datos.");
+            }
+
+            // 2. SEGUNDO, si MySQL se actualizó bien, procedemos a cambiar en Firebase
+            try {
+                await user.updateEmail(nuevoCorreoDestino);
+            } catch (errorFirebase) {
+                // 3. TERCERO (Rollback): Si Firebase falla, revertimos el cambio en MySQL
+                await fetch('/actualizar-correo-usuario', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        correo_actual: nuevoCorreoDestino,
+                        nuevo_correo: correoAnterior
+                    })
+                });
+                throw errorFirebase;
+            }
+
+            // Si todo salió perfecto en ambos lados:
+            mostrarAlertaArca(
+                "¡Correo electrónico actualizado!",
+                "Tu correo electrónico ha sido actualizado correctamente. 🌸",
+                {tipo: "aviso",
+                    alCerrar: () => {
+           
+            sessionStorage.removeItem('otp_cambio_correo');
+            sessionStorage.removeItem('nuevo_correo_temporal');
+            window.location.reload();
+        }
+    }
+         );
+
+        } catch (error) {
+            console.error("Error al actualizar correo:", error);
+            if (errorOtp) {
+                if (error.code === 'auth/requires-recent-login') {
+                    errorOtp.textContent = "Por seguridad, debes cerrar sesión e iniciarla nuevamente para hacer este cambio.";
+                } else {
+                    errorOtp.textContent = error.message || "Error al procesar el cambio.";
+                }
+                errorOtp.style.display = 'block';
+        }
+        
+        } finally {
+            btnVerificarCorreo.disabled = false;
+            btnVerificarCorreo.textContent = "Verificar y cambiar correo";
+        }
+    };
+}
+
+// ==========================================
+// RENDERIZAR NOTIFICACIONES CON TARJETAS
+// ==========================================
+function renderizarNotificaciones(lista) {
+    const contenedor = obtenerContenedor();
+    if (!contenedor) return;
+    
+    contenedor.innerHTML = '';
+
+    if (!lista || lista.length === 0) {
+        contenedor.innerHTML = `
+            <div class="estado-vacio">
+                <div class="escena-cielo-kawaii">
+                    <div class="nube-kawaii nube-izq"></div>
+                    <div class="sol-kawaii">
+                        <div class="ojo-sol izq"></div>
+                        <div class="ojo-sol der"></div>
+                        <div class="boca-sol"></div>
+                        <div class="rubor-sol izq"></div>
+                        <div class="rubor-sol der"></div>
+                    </div>
+                    <div class="nube-kawaii nube-der"></div>
+                    <span class="destello d1">✦</span>
+                    <span class="destello d2">✦</span>
+                </div>
+                <h2>¡Aún no hay notificaciones!</h2>
+                <p>&lt;3</p>
+            </div>
+        `;
+        return;
+    }
+
+    lista.forEach(notif => {
+        const tarjeta = document.createElement('article');
+        tarjeta.classList.add('tarjeta-notificacion');
+        tarjeta.style.background = 'rgba(255, 255, 255, 0.7)';
+        tarjeta.style.borderRadius = '20px';
+        tarjeta.style.padding = '18px 24px';
+        tarjeta.style.marginBottom = '15px';
+        tarjeta.style.border = '2px solid #f9d5d3';
+        tarjeta.style.display = 'flex';
+        tarjeta.style.justifyContent = 'space-between';
+        tarjeta.style.alignItems = 'center';
+
+        const fechaStr = notif.fecha_notificacion ? notif.fecha_notificacion.split('T')[0] : 'Reciente';
+        
+        const autorNombre = notif.origen_nombre 
+            ? `<a href="perfil_publico.html?user=${encodeURIComponent(notif.origen_nombre)}" style="color: #e06d53; font-weight: bold; text-decoration: none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">@${notif.origen_nombre}</a>` 
+            : 'Sistema ARCA';
+
+        let htmlAccion = '';
+        if (notif.tipo === 'solicitud_adoptante' && notif.estado_solicitud === 'pendiente') {
+            htmlAccion = `
+                <div style="display: flex; gap: 8px; margin-top: 8px;">
+                    <button onclick="responderSolicitud(${notif.id_solicitud}, 'aceptar')" style="background: #25d366; color: white; border: none; padding: 6px 14px; border-radius: 12px; cursor: pointer; font-weight: bold; font-family: 'Itim';">Aceptar</button>
+                    <button onclick="responderSolicitud(${notif.id_solicitud}, 'rechazar')" style="background: #d9534f; color: white; border: none; padding: 6px 14px; border-radius: 12px; cursor: pointer; font-weight: bold; font-family: 'Itim';">Rechazar</button>
+                </div>
+            `;
+        } else if (notif.tipo === 'solicitud_adoptante' && notif.estado_solicitud === 'aceptada') {
+            htmlAccion = `<span style="color: #25d366; font-weight: bold; font-size: 13.5px;"> Solicitud aceptada ✓</span>`;
+        } else {
+            htmlAccion = `<button onclick="window.location.href='perfil_publico.html?user=${notif.origen_nombre}'" style="background: #fffde8; border: 1px solid #f0e6b8; padding: 6px 14px; border-radius: 12px; cursor: pointer; font-weight: bold; font-family: 'Itim'; margin-top: 6px;">Ver perfil</button>`;
+        }
+
+        tarjeta.innerHTML = `
+            <div class="info-notif-izq" style="display: flex; flex-direction: column; gap: 4px;">
+                <div style="font-weight: bold; font-size: 16px; color: #2b2b2b;">
+                    ${autorNombre} ${notif.mensaje}
+                </div>
+                <span style="font-size: 12px; color: #777;">${fechaStr}</span>
+                <div>${htmlAccion}</div>
+            </div>
+            <button onclick="eliminarNotificacionBd(${notif.id_notificacion})" title="Borrar notificación" style="background: none; border: none; color: #d9534f; cursor: pointer; font-size: 18px;">
+                <i class="fa-solid fa-trash-can"></i>
+            </button>
+        `;
+
+        contenedor.appendChild(tarjeta);
+    });
+}
+
+// ==========================================
+// ALERTA PERSONALIZADA ARCA
+// ==========================================
+function mostrarAlertaArca(titulo, mensaje, opciones = {}) {
+    const {
+        tipo = "error",
+        textoBoton = "Entendido",
+        alCerrar = null
+    } = opciones;
+
+    document.getElementById("alerta-arca-personalizada")?.remove();
+
+    if (!document.getElementById("estilos-alerta-arca")) {
+        const estilos = document.createElement("style");
+        estilos.id = "estilos-alerta-arca";
+        estilos.textContent = `
+            /* Estilos generales para error y aviso */
+            .arca-alerta-overlay {
+                position: fixed;
+                inset: 0;
+                z-index: 999999;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 20px;
+                background: rgba(40, 25, 35, 0.38);
+                backdrop-filter: blur(5px);
+                animation: arcaAparecer .22s ease;
+            }
+
+            .arca-alerta-tarjeta {
+                width: min(100%, 360px);
+                padding: 30px 25px 25px;
+                border: 2px solid #fff;
+                border-radius: 28px;
+                background: #FFF1F2;
+                box-shadow: 0 15px 45px rgba(120, 60, 80, .20);
+                text-align: center;
+                font-family: 'Itim', sans-serif;
+                animation: arcaSaltar .28s ease;
+            }
+
+            .arca-alerta-icono {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                width: 76px;
+                height: 76px;
+                margin: 0 auto 17px;
+                border: 3px solid white;
+                border-radius: 50%;
+                background: #FAD4DE;
+                font-size: 36px;
+            }
+
+            .arca-alerta-titulo {
+                margin: 0 0 10px;
+                color: #704653;
+                font-size: 25px;
+            }
+
+            .arca-alerta-mensaje {
+                margin: 0 0 23px;
+                color: #795F68;
+                font-size: 17px;
+                line-height: 1.5;
+                overflow-wrap: anywhere;
+            }
+
+           .arca-alerta-boton {
+                width: 100%;
+                padding: 12px 18px;
+                border: 0;
+                outline: none; /* <-- Añade esto */
+                border-radius: 18px;
+                background: #E985A0;
+                color: white;
+                font: inherit;
+                font-size: 17px;
+                cursor: pointer;
+                transition: transform .2s, background .2s;
+            }
+
+            .arca-alerta-boton:hover {
+                background: #D96F8D;
+                transform: translateY(-2px);
+            }
+
+            /* CSS EXCLUSIVO PARA EL TIPO "CONEXION" */
+            .custom-alert-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background-color: rgba(92, 64, 51, 0.45);
+                backdrop-filter: blur(8px);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 999999;
+                animation: arcaAparecer .22s ease;
+            }
+
+            .custom-alert-card {
+                position: relative;
+                background-color: rgba(235, 224, 223, 0.94);
+                backdrop-filter: blur(16px);
+                color: #333333;
+                padding: 32px 24px 28px 24px;
+                border-radius: 38px;
+                max-width: 380px;
+                width: 88%;
+                text-align: center;
+                box-shadow: 0 24px 50px rgba(92, 64, 51, 0.18);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                border: 2px solid rgba(255, 255, 255, 0.9);
+                font-family: 'Itim', sans-serif;
+                animation: entradaEscalonada 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            }
+
+            .alert-icon-circle {
+                width: 90px;
+                height: 90px;
+                background-color: #f7cac9;
+                border-radius: 50%;
+                border: 4px solid #ffffff;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-bottom: 20px;
+                box-shadow: 0 8px 20px rgba(247, 202, 201, 0.7);
+                animation: latidoSuave 2s ease-in-out infinite;
+            }
+
+            .alert-icon {
+                width: 44px;
+                height: 44px;
+            }
+
+            .custom-alert-title {
+                font-size: 1.25rem;
+                font-weight: 400;
+                color: #2b2b2b;
+                margin-bottom: 10px;
+                letter-spacing: 0.3px;
+            }
+
+            .custom-alert-message {
+                font-size: 0.9rem;
+                color: #666666;
+                line-height: 1.45;
+                margin-bottom: 24px;
+            }
+
+          .custom-alert-btn {
+                background-color: #ffffff;
+                color: #e57373;
+                border: 2px solid #ffffff;
+                outline: none; /* <-- Y esto aquí también */
+                border-radius: 26px;
+                padding: 12px 0;
+                width: 100%;
+                font-size: 0.95rem;
+                font-weight: 400;
+                cursor: pointer;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+                transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            }
+
+            .custom-alert-btn:hover {
+                background-color: #f9f9f9;
+                transform: scale(1.04) translateY(-2px);
+                box-shadow: 0 8px 20px rgba(229, 115, 115, 0.2);
+            }
+
+            @keyframes arcaAparecer {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+
+            @keyframes arcaSaltar {
+                from { opacity: 0; transform: scale(.92) translateY(8px); }
+                to { opacity: 1; transform: scale(1) translateY(0); }
+            }
+
+            @keyframes entradaEscalonada {
+                from { opacity: 0; transform: scale(0.92) translateY(8px); }
+                to { opacity: 1; transform: scale(1) translateY(0); }
+            }
+
+            @keyframes latidoSuave {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.05); }
+            }
+        `;
+        document.head.appendChild(estilos);
+    }
+
+    const overlay = document.createElement("div");
+    overlay.id = "alerta-arca-personalizada";
+
+    const tarjeta = document.createElement("div");
+    const icono = document.createElement("div");
+    const encabezado = document.createElement("h2");
+    const texto = document.createElement("p");
+    const boton = document.createElement("button");
+
+    if (tipo === "conexion") {
+        overlay.className = "custom-alert-overlay";
+        overlay.setAttribute("role", "alertdialog");
+        overlay.setAttribute("aria-modal", "true");
+
+        tarjeta.className = "custom-alert-card";
+
+        icono.className = "alert-icon-circle";
+        // Aquí incorporamos el icono SVG exacto con el círculo oscuro y el signo de exclamación (!)
+        icono.innerHTML = `
+            <svg class="alert-icon" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" fill="#4a4a4a"/>
+                <path d="M12 7v5" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                <circle cx="12" cy="16" r="1.2" fill="white"/>
+            </svg>
+        `;
+
+        encabezado.className = "custom-alert-title";
+        encabezado.textContent = titulo;
+
+        texto.className = "custom-alert-message";
+        texto.textContent = mensaje;
+
+        boton.type = "button";
+        boton.className = "custom-alert-btn";
+        boton.textContent = textoBoton;
+
+    } else {
+        overlay.className = "arca-alerta-overlay";
+        overlay.setAttribute("role", "alertdialog");
+        overlay.setAttribute("aria-modal", "true");
+
+        tarjeta.className = "arca-alerta-tarjeta";
+
+        const iconos = {
+            error: "♡",
+            aviso: "🌸"
+        };
+        icono.className = "arca-alerta-icono";
+        icono.textContent = iconos[tipo] || "♡";
+
+        encabezado.className = "arca-alerta-titulo";
+        encabezado.textContent = titulo;
+
+        texto.className = "arca-alerta-mensaje";
+        texto.textContent = mensaje;
+
+        boton.type = "button";
+        boton.className = "arca-alerta-boton";
+        boton.textContent = textoBoton;
+    }
+
+    boton.addEventListener("click", () => {
+        overlay.remove();
+        if (typeof alCerrar === "function") {
+            alCerrar();
+        }
+    });
+
+    tarjeta.append(icono, encabezado, texto, boton);
+    overlay.appendChild(tarjeta);
+    document.body.appendChild(overlay);
+
+    boton.focus();
+}
+// ==========================================
+// GESTIÓN DE MIS DONACIONES (VISTA USUARIO)
+// ==========================================
+window.abrirModalMisDonaciones = async function() {
+    const modal = document.getElementById('modal-mis-donaciones');
+    if (modal) {
+        modal.style.display = 'flex';
+        await cargarMisDonacionesUsuario();
+    }
+};
+
+window.cerrarModalMisDonaciones = function() {
+    const modal = document.getElementById('modal-mis-donaciones');
+    if (modal) modal.style.display = 'none';
+};
+
+window.cerrarModalDonacionesOverlay = function(event) {
+    if (event.target.id === 'modal-mis-donaciones') {
+        window.cerrarModalMisDonaciones();
+    }
+};
+
+async function cargarMisDonacionesUsuario() {
+    const contenedor = document.getElementById('lista-donaciones-usuario-container');
+    if (!contenedor) return;
+
+    contenedor.innerHTML = '<p style="text-align: center; color: #666; font-style: italic;">Cargando tus donaciones...</p>';
+
+    const user = firebase.auth().currentUser;
+    if (!user || !user.email) {
+        contenedor.innerHTML = '<p style="text-align: center; color: #d9534f;">Inicia sesión para ver tus donaciones.</p>';
+        return;
+    }
+
+    try {
+        const res = await fetch(`/api/donaciones/usuario?correo_usuario=${encodeURIComponent(user.email)}`);
+        const donaciones = await res.json();
+
+        if (Array.isArray(donaciones) && donaciones.length > 0) {
+            contenedor.innerHTML = '';
+            donaciones.forEach(donacion => {
+                const fecha = donacion.fecha_donacion ? donacion.fecha_donacion.split('T')[0] : 'Reciente';
+                const avatarFundacion = donacion.foto_fundacion || 'logo.png';
+                
+                // Estilo dinámico según estado
+                const esRecogida = donacion.estado === 'recogida';
+                const estiloEstado = esRecogida 
+                    ? 'background: #e2fcd9; color: #2e7d32; border: 1px solid #c8e6c9;' 
+                    : 'background: #fff8e1; color: #f57f17; border: 1px solid #ffe0b2;';
+                const textoEstado = esRecogida ? 'Recogida ✓' : 'Pendiente ⏳';
+
+                const tarjeta = document.createElement('div');
+                tarjeta.style.cssText = 'display: flex; flex-direction: column; gap: 8px; background: #fffde8; padding: 15px; border-radius: 16px; border: 1px solid #f0e6b8; box-shadow: 0 4px 10px rgba(0,0,0,0.03);';
+
+                tarjeta.innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <img src="${avatarFundacion}" alt="Fundación" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 2px solid #fca38d;">
+                            <div>
+                                <span style="font-weight: bold; color: #2b2b2b; display: block; font-size: 15px;">${donacion.nombre_fundacion || 'Fundación'}</span>
+                                <span style="font-size: 12px; color: #777;">${fecha}</span>
+                            </div>
+                        </div>
+                        <span style="padding: 4px 10px; border-radius: 10px; font-size: 12px; font-weight: bold; ${estiloEstado}">${textoEstado}</span>
+                    </div>
+                    <div style="font-size: 14px; color: #444; background: #ffffff; padding: 10px; border-radius: 10px; border: 1px solid #fce4ec;">
+                        <strong>Tipo:</strong> ${donacion.tipo_donacion}<br>
+                        <strong>Detalle:</strong> ${donacion.descripcion_donacion || 'Sin especificación'}
+                    </div>
+                    <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px;">
+                        <button onclick="eliminarDonacionUsuario(${donacion.id_donacion})" style="background: #d9534f; color: white; border: none; padding: 6px 14px; border-radius: 12px; cursor: pointer; font-family: 'Itim'; font-size: 13px; font-weight: bold;">
+                            <i class="fa-solid fa-trash-can" style="margin-right: 4px;"></i> Eliminar
+                        </button>
+                    </div>
+                `;
+                contenedor.appendChild(tarjeta);
+            });
+        } else {
+            contenedor.innerHTML = `<p style="text-align: center; color: #666; font-style: italic; padding: 20px 0;">No has realizado ninguna donación todavía.</p>`;
+        }
+    } catch (e) {
+        console.error("Error al cargar donaciones:", e);
+        contenedor.innerHTML = `<p style="text-align: center; color: #d9534f;">Error al conectar con el servidor.</p>`;
+    }
+}
+
+window.eliminarDonacionUsuario = async function(idDonacion) {
+    if (!confirm("¿Estás seguro de que deseas eliminar esta donación del sistema?")) return;
+
+    try {
+        const res = await fetch(`/api/donaciones/${idDonacion}`, { method: 'DELETE' });
+        const data = await res.json();
+
+        if (res.ok) {
+            mostrarAlertaArca("¡Eliminado!", "La donación ha sido borrada con éxito. 🌸", { tipo: "aviso" });
+            cargarMisDonacionesUsuario(); // Recargar lista
+        } else {
+            throw new Error(data.error || "No se pudo eliminar");
+        }
+    } catch (e) {
+        console.error("Error al eliminar donación:", e);
+        mostrarAlertaArca("Error", "No se pudo eliminar la donación.", { tipo: "error" });
+    }
+};

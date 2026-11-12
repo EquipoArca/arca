@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donaciones - ARCA</title>
+    <link rel="stylesheet" href="style_home.css">
+    <link rel="stylesheet" href="style_donacion.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="dark-mode.css">
+
+    <script>
+        (function () {
+            const temaGuardado = localStorage.getItem('darkMode');
+            const esOscuro = temaGuardado !== null
+                ? temaGuardado === 'true'
+                : localStorage.getItem('modo_oscuro') === 'true';
+
+            document.documentElement.classList.toggle('dark-mode', esOscuro);
+
+            document.addEventListener('DOMContentLoaded', function () {
+                document.body.classList.toggle('dark-mode', esOscuro);
+            });
+        })();
+    </script>
+
+    <style>
+        /* Aplicación general de fuente Itim y eliminación de negritas artificiales */
+        body, button, input, textarea, span, h1, h2, h3, p {
+            font-family: 'Itim', cursive, sans-serif !important;
+            font-weight: 400 !important;
+        }
+
+        /* Animaciones fluidas globales */
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.96) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        @keyframes latidoLento {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+
+        .main-content {
+            animation: fadeInScale 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* Banner de ancho completo (100% de lado a lado) con Glassmorphism suave */
+        .banner-donaciones {
+            width: 100%;
+            margin: 0;
+            padding: 45px 20px 35px 20px;
+            box-sizing: border-box;
+            background: rgba(237, 228, 202, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            text-align: center;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+            border-radius: 0;
+        }
+
+        /* Asegurar que la pantalla principal no le meta padding superior ni lateral al banner */
+        .main-content {
+            padding-top: 0 !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+            overflow-x: hidden;
+        }
+
+        .banner-donaciones h1 {
+            margin: 0;
+            font-size: 2.6rem;
+            color: #4a3b32;
+            letter-spacing: 0.5px;
+        }
+
+        .corazon-icon {
+            font-size: 3rem;
+            color: #ffffff;
+            margin-top: 8px;
+            filter: drop-shadow(0 4px 8px rgba(233, 133, 160, 0.3));
+            animation: latidoLento 2.5s ease-in-out infinite;
+        }
+
+        /* Contenedor de Botones de Filtro */
+        .contenedor-botones-filtros {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+            margin: 25px auto;
+            max-width: 360px;
+            padding: 0 20px;
+        }
+
+        .btn-filtro {
+            width: 100%;
+            padding: 13px 24px;
+            border-radius: 50px;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            background: rgba(252, 213, 206, 0.85);
+            backdrop-filter: blur(8px);
+            color: #5c4033;
+            font-size: 1.15rem;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(252, 213, 206, 0.35);
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .btn-filtro:hover {
+            background: rgba(247, 178, 173, 0.95);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 25px rgba(247, 178, 173, 0.5);
+        }
+
+        .btn-filtro.activo {
+            background: #e985a0;
+            color: white;
+            border-color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 22px rgba(233, 133, 160, 0.45);
+        }
+
+        .btn-filtro.blanco {
+            background: rgba(255, 255, 255, 0.75);
+        }
+
+        .btn-filtro.blanco:hover {
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        /* Contenedor de Listado */
+        .contenedor-lista-donaciones {
+            max-width: 640px;
+            margin: 0 auto 60px auto;
+            padding: 0 20px;
+        }
+
+        /* Tarjeta de Donación con Glassmorphism */
+        .tarjeta-donacion {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            border-radius: 28px;
+            padding: 22px 26px;
+            margin-bottom: 22px;
+            box-shadow: 0 15px 35px rgba(120, 60, 80, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: fadeInScale 0.5s ease backwards;
+        }
+
+        .tarjeta-donacion:hover {
+            transform: translateY(-4px);
+            background: rgba(255, 255, 255, 0.82);
+            box-shadow: 0 20px 40px rgba(120, 60, 80, 0.12);
+        }
+
+        .cabecera-donacion {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .info-donante {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .foto-donante {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #ffffff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
+        }
+
+        .tarjeta-donacion:hover .foto-donante {
+            transform: scale(1.06);
+        }
+
+        .nombre-donante {
+            font-size: 1.2rem;
+            color: #4a3b32;
+        }
+
+        /* Badges de Estado */
+        .badge-estado {
+            padding: 7px 16px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            letter-spacing: 0.2px;
+            box-shadow: inset 0 2px 4px rgba(255,255,255,0.6);
+        }
+
+        .estado-pendiente { 
+            background: rgba(255, 243, 205, 0.85); 
+            color: #8c6d1f; 
+            border: 1px solid rgba(255, 235, 150, 0.5);
+        }
+        
+        .estado-recogida { 
+            background: rgba(212, 237, 218, 0.85); 
+            color: #236c33; 
+            border: 1px solid rgba(180, 225, 190, 0.5);
+        }
+
+        .detalle-donacion {
+            font-size: 1.05rem;
+            color: #555555;
+            line-height: 1.5;
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            padding: 15px 18px;
+            border-radius: 20px;
+        }
+
+        .acciones-donacion {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .btn-cambiar-estado {
+            background: #e985a0;
+            color: white;
+            border: 2px solid rgba(255,255,255,0.8);
+            padding: 10px 22px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            box-shadow: 0 6px 18px rgba(233, 133, 160, 0.35);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .btn-cambiar-estado:hover {
+            background: #d96f8d;
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 10px 22px rgba(217, 111, 141, 0.45);
+        }
+
+        /* Modo Oscuro */
+        body.dark-mode .banner-donaciones {
+            background: rgba(45, 38, 42, 0.75);
+            border-bottom-color: rgba(255, 255, 255, 0.08);
+        }
+        body.dark-mode .banner-donaciones h1 {
+            color: #f7d6d9;
+        }
+        body.dark-mode .tarjeta-donacion {
+            background: rgba(45, 38, 42, 0.65);
+            border-color: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+        body.dark-mode .nombre-donante, 
+        body.dark-mode .detalle-donacion {
+            color: #e6deda;
+        }
+        body.dark-mode .detalle-donacion {
+            background: rgba(30, 25, 28, 0.4);
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+        body.dark-mode .btn-filtro {
+            background: rgba(90, 65, 72, 0.6);
+            color: #f7d6d9;
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+        body.dark-mode .btn-filtro.blanco {
+            background: rgba(60, 50, 55, 0.7);
+            color: #f7d6d9;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Barra Superior -->
+    <nav class="top-nav">
+        <div class="top-left">
+            <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu" onclick="toggleSidebar()"></i>
+            <div class="mini-logo-circle">
+                <img src="logo.png" alt="Logo">
+            </div>
+            <span class="page-title" id="titulo-pagina">Donaciones</span>
+        </div>
+
+        <div class="search-bar">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Busca algo">
+            <i class="fa-solid fa-microphone"></i>
+        </div>
+
+        <div class="top-right">
+            <div class="user-header-info">
+                <div class="user-profile-menu" id="user-profile-menu">
+                    <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
+                        <img src="logo.png" id="user-avatar-img" alt="Perfil">
+                    </div>
+                    <div class="mini-menu-card" id="mini-menu-card">
+                        <div class="mini-menu-header">
+                            <span id="mini-menu-username">Usuario</span>
+                        </div>
+                        <hr class="mini-menu-divider">
+                        <a href="configuracion.html" class="mini-menu-item btn-ajustes">
+                            <i class="fa-solid fa-gear"></i>
+                            <span>Ajustes</span>
+                        </a>
+                        <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                            <span>Cerrar sesión</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="notif-circle">
+                    <a href="notificaciones.html" aria-label="Notificaciones"><i class="fa-solid fa-bell"></i></a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Barra Lateral -->
+    <aside class="sidebar" id="sidebar">
+        <div class="side-icons">
+            <a href="home.html" class="menu-fila">
+                <i class="fa-solid fa-house"></i>
+                <span class="menu-text">Inicio</span>
+            </a>
+            <a href="perfil_usuario.html" class="menu-fila">
+                <i class="fa-solid fa-circle-user"></i>
+                <span class="menu-text">Perfil</span>
+            </a>
+            <a href="publicaciones_fundacion.html" class="menu-fila">
+                <i class="fa-solid fa-layer-group"></i>
+                <span class="menu-text">Publicaciones</span>
+            </a>
+            <a href="mapa.html" class="menu-fila">
+                <i class="fa-solid fa-location-dot"></i>
+                <span class="menu-text">Mapa</span>
+            </a>
+            <a href="configuracion.html" class="menu-fila">
+                <i class="fa-solid fa-gear"></i>
+                <span class="menu-text">Ajustes</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Contenido Principal -->
+    <main class="main-content" style="opacity: 1; visibility: visible;">
+        <header class="banner-donaciones">
+            <h1>Gestión de Donaciones</h1>
+            <div class="corazon-icon">♥</div>
+        </header>
+
+        <section class="contenedor-botones-filtros">
+            <button class="btn-filtro activo" onclick="filtrarDonaciones('todas', this)">Ver todas</button>
+            <button class="btn-filtro" onclick="filtrarDonaciones('pendiente', this)">Pendientes</button>
+            <button class="btn-filtro blanco" onclick="filtrarDonaciones('recogida', this)">Recogidas</button>
+        </section>
+
+        <main class="contenedor-lista-donaciones" id="contenedor-donaciones">
+            <div style="text-align:center; color: #777; font-size: 1.2rem; margin-top: 30px;">Cargando donaciones recibidas... 🐾</div>
+        </main>
+    </main>
+
+<!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    
+    <!-- Scripts -->
+    <script src="script.js"></script>
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar) sidebar.classList.toggle('sidebar-abierta');
+        }
+
+        function toggleMiniMenu() {
+            const menu = document.getElementById('mini-menu-card');
+            if (menu) menu.classList.toggle('show');
+        }
+
+        let donacionesGlobales = [];
+
+        async function cargarDonacionesFundacion() {
+            const contenedor = document.getElementById('contenedor-donaciones');
+            const user = firebase.auth().currentUser;
+            const correo = user ? user.email : localStorage.getItem('correo_usuario');
+
+            if (!correo) return;
+
+            try {
+                const res = await fetch(`/api/donaciones/fundacion?correo_fundacion=${encodeURIComponent(correo)}`);
+                if (!res.ok) throw new Error("Error al obtener donaciones");
+
+                let listaDonaciones = await res.json();
+                donacionesGlobales = listaDonaciones; // Guardamos todas para los filtros de botones
+
+                // Verificamos si en la URL viene un id_donacion específico desde la notificación
+                const urlParams = new URLSearchParams(window.location.search);
+                const idDonacionBuscada = urlParams.get('id_donacion');
+
+                if (idDonacionBuscada) {
+                    // Filtramos estrictamente para quedarnos solo con la donación de la notificación
+                    listaDonaciones = listaDonaciones.filter(d => String(d.id_donacion) === String(idDonacionBuscada));
+                    
+                    const banner = document.querySelector('.banner-donaciones h1');
+                    if (banner) banner.textContent = "Detalle de Donación";
+                }
+
+                renderizarListaDonaciones(listaDonaciones);
+
+            } catch (err) {
+                console.error(err);
+                contenedor.innerHTML = `<p style="text-align:center; color: #d9534f;">No se pudieron cargar las donaciones.</p>`;
+            }
+        }
+
+        function renderizarListaDonaciones(lista) {
+            const contenedor = document.getElementById('contenedor-donaciones');
+            contenedor.innerHTML = '';
+
+            if (!lista || lista.length === 0) {
+                contenedor.innerHTML = `<div style="text-align:center; color: #888; padding: 40px 0;"><h2>No hay donaciones en esta categoría</h2></div>`;
+                return;
+            }
+
+            lista.forEach((donacion, index) => {
+                const tarjeta = document.createElement('article');
+                tarjeta.className = 'tarjeta-donacion';
+                tarjeta.style.animationDelay = `${index * 0.08}s`;
+
+                // Resaltamos con un borde y brillo especial si es la donación que vino por la URL
+                const urlParams = new URLSearchParams(window.location.search);
+                if (String(donacion.id_donacion) === String(urlParams.get('id_donacion'))) {
+                    tarjeta.style.borderColor = '#e985a0';
+                    tarjeta.style.boxShadow = '0 0 25px rgba(233, 133, 160, 0.4)';
+                }
+
+                const fecha = donacion.fecha_donacion ? donacion.fecha_donacion.split('T')[0] : 'Reciente';
+                const estadoBadge = donacion.estado === 'recogida' 
+                    ? `<span class="badge-estado estado-recogida">Recogida ✓</span>`
+                    : `<span class="badge-estado estado-pendiente">Pendiente ⏳</span>`;
+
+                let botonAccion = donacion.estado === 'pendiente' 
+                    ? `<button class="btn-cambiar-estado" onclick="actualizarEstado(${donacion.id_donacion}, 'recogida')">Marcar como recogida</button>` 
+                    : '';
+
+                tarjeta.innerHTML = `
+                    <div class="cabecera-donacion">
+                        <div class="info-donante">
+                            <img src="${donacion.foto_donante || 'logo.png'}" alt="Donante" class="foto-donante">
+                            <div>
+                                <div class="nombre-donante">@${donacion.nombre_donante || 'Usuario'}</div>
+                                <span style="font-size: 0.85rem; color: #888;">${fecha}</span>
+                            </div>
+                        </div>
+                        ${estadoBadge}
+                    </div>
+                    <div class="detalle-donacion">
+                        Tipo: ${donacion.tipo_donacion}<br>
+                        Detalles: ${donacion.descripcion_donacion || 'Sin especificación'}<br>
+                        ${donacion.telefono_donante ? `Contacto: ${donacion.telefono_donante}` : ''}
+                    </div>
+                    <div class="acciones-donacion">${botonAccion}</div>
+                `;
+                contenedor.appendChild(tarjeta);
+            });
+        }
+
+        function filtrarDonaciones(filtro, btn) {
+            document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('activo'));
+            if (btn) btn.classList.add('activo');
+
+            if (filtro === 'todas') {
+                renderizarListaDonaciones(donacionesGlobales);
+            } else {
+                renderizarListaDonaciones(donacionesGlobales.filter(d => d.estado === filtro));
+            }
+        }
+
+        async function actualizarEstado(id, nuevoEstado) {
+            try {
+                const res = await fetch(`/api/donaciones/${id}/estado`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ estado: nuevoEstado })
+                });
+                if (res.ok) cargarDonacionesFundacion();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        firebase.auth().onAuthStateChanged(user => {
+            if (user) cargarDonacionesFundacion();
+        });
+    </script>
+</body>
+</html>
