@@ -98,20 +98,13 @@ db.connect((err) => {
     console.log('✅ Conectado exitosamente a la base de datos MySQL en Aiven!');
 });
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false,
-=======
+
 // Configuración de Nodemailer corregida para Render
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 587,
     secure: false, // true para 465, false para 587
     family: 4,     // Fuerza el uso de IPv4 para evitar bloqueos de red en Render
->>>>>>> a9d52162dc37bdf504d3a2b838d3f9ab8eb92710
     auth: {
         user: process.env.EMAIL_USER || 'arcaoficial0@gmail.com',
         pass: process.env.EMAIL_PASS || 'darl pzpf sjgz aggx'
@@ -121,8 +114,7 @@ const transporter = nodemailer.createTransport({
     },
     family: 4 // <-- ¡Esta línea es la clave para evitar el error ENETUNREACH!
 });
-=======
->>>>>>> 325dcfaa3230245edf83b991adc78f8c23fa3585
+
 const codigosOTP = {};
 
 // ==========================================
