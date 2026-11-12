@@ -695,6 +695,11 @@ async function obtenerNombreUbicacionGlobal(textoUbicacionOriginal) {
     
     return textoUbicacionOriginal;
 }
+document.addEventListener("DOMContentLoaded", () => {
+    if (localStorage.getItem("modo_oscuro") === "true") {
+        document.body.classList.add("dark-mode");
+    }
+});
 
 // Muestra el modal de alerta offline o lanza un alert si no existe en el HTML
 function mostrarAlertaOffline() {

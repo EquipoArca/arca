@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preguntas Frecuentes - ARCA</title>
+    <link rel="stylesheet" href="style_faq.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="dark-mode.css">
+    <script>
+    if (localStorage.getItem("modo_oscuro") === "true") {
+        document.body.classList.add("dark-mode");
+    }
+    </script>
+</head>
+<body>
+
+    <!-- Alerta Offline -->
+    <div id="offline-alert-overlay" class="custom-alert-overlay d-none">
+      <div class="custom-alert-card">
+        <button type="button" class="close-x-btn" id="close-x-btn">&times;</button>
+        <div class="alert-icon-circle">
+          <svg viewBox="0 0 24 24" class="alert-icon">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+          </svg>
+        </div>
+        <h3 class="custom-alert-title">¡Sin conexión a internet!</h3>
+        <p class="custom-alert-message">
+          No se pudo verificar tu cuenta. Revisa tu conexión a internet e inténtalo más tarde.
+        </p>
+        <button type="button" id="close-offline-alert" class="custom-alert-btn">
+          Aceptar
+        </button>
+      </div>
+    </div>
+
+    <!-- Barra Superior -->
+    <nav class="top-nav">
+        <div class="top-left">
+            <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu" onclick="toggleSidebar()"></i>
+            <div class="mini-logo-circle">
+                <img src="logo.png" alt="Logo">
+            </div>
+            <span class="page-title" id="titulo-pagina">Ayuda y soporte técnico</span>
+        </div>
+
+        <div class="search-bar">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Busca algo">
+            <i class="fa-solid fa-microphone"></i>
+        </div>
+
+        <div class="top-right">
+            <div class="user-header-info">
+                <!-- Perfil y Mini Menú -->
+                <div class="user-profile-menu" id="user-profile-menu">
+                    <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
+                        <img src="logo.png" id="user-avatar-img" alt="Perfil">
+                    </div>
+                    <div class="mini-menu-card" id="mini-menu-card">
+                        <div class="mini-menu-header">
+                            <span id="mini-menu-username">Usuario</span>
+                        </div>
+                        <hr class="mini-menu-divider">
+                        <a href="configuracion.html" class="mini-menu-item btn-ajustes">
+                            <i class="fa-solid fa-gear"></i>
+                            <span>Ajustes</span>
+                        </a>
+                        <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                            <span>Cerrar sesión</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Notificaciones -->
+                <div class="notif-circle">
+                    <a href="notificaciones.html" aria-label="Notificaciones"><i class="fa-solid fa-bell"></i></a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Barra Lateral -->
+    <aside class="sidebar" id="sidebar">
+        <div class="side-icons">
+            <a href="home.html" class="menu-fila">
+                <i class="fa-solid fa-house"></i>
+                <span class="menu-text">Inicio</span>
+            </a>
+            <a href="perfil_usuario.html" class="menu-fila">
+                <i class="fa-solid fa-circle-user"></i>
+                <span class="menu-text">Perfil</span>
+            </a>
+            <a href="guardados_usuario.html" class="menu-fila">
+                <i class="fa-solid fa-bookmark"></i>
+                <span class="menu-text">Guardado</span>
+            </a>
+            <a href="mapa.html" class="menu-fila">
+                <i class="fa-solid fa-location-dot"></i>
+                <span class="menu-text">Mapa</span>
+            </a>
+            <a href="configuracion.html" class="menu-fila">
+                <i class="fa-solid fa-gear"></i>
+                <span class="menu-text">Ajustes</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Contenido Principal -->
+    <main class="main-content">
+        <!-- Banner de Encabezado -->
+        <div class="faq-banner">
+            <h1>Preguntas Frecuentes <i class="fa-regular fa-circle-question faq-title-icon"></i></h1>
+        </div>
+
+        <div class="faq-container">
+            <!-- Barra de Búsqueda de Preguntas -->
+            <div class="faq-search-box">
+                <input type="text" placeholder="Ingresa palabras clave...">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </div>
+
+            <!-- Lista de Acordeones -->
+            <div class="faq-list">
+                <div class="faq-dropdown-card">
+                    <span>¿Cómo reporto un animal?</span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </div>
+
+                <div class="faq-dropdown-card">
+                    <span>¿Qué pasa con los reportes que haga?</span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </div>
+
+                <div class="faq-dropdown-card">
+                    <span>¿Cómo adopto a un animal?</span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </div>
+
+                <div class="faq-dropdown-card">
+                    <span>¿Qué puedo donar?</span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </div>
+            </div>
+
+            <!-- Botón de Regresar Flotante -->
+            <a href="home.html" class="back-floating-btn" aria-label="Volver">
+                <i class="fa-solid fa-arrow-left"></i>
+            </a>
+        </div>
+
+        <!-- Pie de página (Footer) -->
+        <footer class="faq-footer">
+            <div class="footer-left">
+                <div class="footer-info-item">
+                    <i class="fa-solid fa-envelope"></i>
+                    <span>equipoarca0@gmail.com</span>
+                </div>
+                <div class="footer-info-item">
+                    <i class="fa-solid fa-phone"></i>
+                    <span>578-0318</span>
+                </div>
+            </div>
+            
+            <div class="footer-center">
+                <span class="footer-contact-title">CONTÁCTANOS:</span>
+                <div class="social-icons">
+                    <a href="#"><i class="fa-brands fa-tiktok"></i></a>
+                    <a href="#"><i class="fa-brands fa-facebook"></i></a>
+                    <a href="#"><i class="fa-brands fa-x-twitter"></i></a>
+                    <a href="#"><i class="fa-brands fa-instagram"></i></a>
+                </div>
+            </div>
+
+            <div class="footer-right">
+                <a href="sobre_nosotros.html" class="about-us-btn">Sobre nosotros</a>
+            </div>
+        </footer>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

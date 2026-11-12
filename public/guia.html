@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía Rápida - ARCA</title>
+    <link rel="stylesheet" href="style_guia.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- BARRA SUPERIOR -->
+    <nav class="top-nav">
+        <div class="top-left">
+            <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu" onclick="toggleSidebar()"></i>
+            
+            <div class="mini-logo-circle">
+                <img src="logo.png" alt="Logo">
+            </div>
+            <span class="page-title" id="titulo-pagina">Ayuda y soporte técnico</span>
+        </div>
+
+        <div class="search-bar">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Busca algo">
+            <i class="fa-solid fa-microphone"></i>
+        </div>
+
+        <div class="top-right">
+            <div class="user-header-info">
+                <div class="notif-circle">
+                    <a href="notificaciones.html" aria-label="Notificaciones"><i class="fa-solid fa-bell"></i></a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- BARRA LATERAL -->
+    <aside class="sidebar" id="sidebar">
+        <div class="side-icons">
+            <a href="javascript:void(0)" class="menu-fila">
+                <i class="fa-solid fa-house"></i>
+                <span class="menu-text">Inicio</span>
+            </a>
+            <a href="javascript:void(0)" class="menu-fila">
+                <i class="fa-solid fa-circle-user"></i>
+                <span class="menu-text">Perfil</span>
+            </a>
+            <a href="javascript:void(0)" class="menu-fila">
+                <i class="fa-solid fa-bookmark"></i>
+                <span class="menu-text">Guardado</span>
+            </a>
+            <a href="javascript:void(0)" class="menu-fila">
+                <i class="fa-solid fa-location-dot"></i>
+                <span class="menu-text">Mapa</span>
+            </a>
+            <a href="javascript:void(0)" class="menu-fila">
+                <i class="fa-solid fa-gear"></i>
+                <span class="menu-text">Ajustes</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="main-content">
+        <div class="guia-container">
+            
+            <!-- TÍTULO DE LA GUÍA -->
+            <div class="guia-header-title">
+                <h1>Guía rápida para usar Arca <i class="fa-solid fa-book-open"></i></h1>
+            </div>
+
+            <!-- TARJETA CONTENEDORA DE TEXTO -->
+            <div class="guia-card-content">
+                <button class="btn-volver-guia" aria-label="Volver">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+
+                <p>
+                    <span class="bullet-title">• Para reportar un animal,</span> desde la pantalla principal haz clic en el botón “Reportar” y llena el formulario con los datos del caso (ubicación, fotos, descripción). Una vez enviado, tu reporte se mostrará a usuarios y fundaciones cercanas (según tus preferencias de privacidad).
+                </p>
+                <p>
+                    <span class="bullet-title">• Para donar a una fundación,</span> en la pantalla principal haz clic en “Donaciones”. Completa el formulario indicando si donarás dinero, comida, juguetes, ropa u otro tipo de apoyo. La información llegará directamente a la fundación que elijas.
+                </p>
+                <p>
+                    <span class="bullet-title">• Para aprovechar al máximo la app,</span> recuerda activar la ubicación en tu navegador. Así podrás ver refugios, fundaciones y eventos cercanos con más precisión.
+                </p>
+                <p>
+                    <span class="bullet-title">• Para adoptar un animal,</span> desde la pantalla principal selecciona “Adopciones”. Cuando un animal te interese, haz clic en “Mostrar interés” y asegúrate de haber creado tu perfil de adoptante. El responsable de la publicación podrá pedir permiso para ver tu perfil antes de avanzar en el proceso.
+                </p>
+            </div>
+
+            <!-- PIE DE PÁGINA / CONTACTO -->
+            <footer class="guia-footer">
+                <div class="contacto-info">
+                    <div class="contacto-item">
+                        <i class="fa-solid fa-envelope"></i>
+                        <span>equipoarca0@gmail.com</span>
+                    </div>
+                    <div class="contacto-item">
+                        <i class="fa-solid fa-phone"></i>
+                        <span>578-0318</span>
+                    </div>
+                </div>
+
+                <div class="redes-sociales">
+                    <span class="ctc-text">CONTÁCTANOS:</span>
+                    <div class="iconos-redes">
+                        <a href="#" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+                        <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+                        <a href="#" aria-label="X"><i class="fa-brands fa-x-twitter"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                    </div>
+                </div>
+
+                <div class="btn-sobre-nosotros-container">
+                    <button class="btn-sobre-nosotros">Sobre nosotros</button>
+                </div>
+            </footer>
+
+        </div>
+    </main>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar) {
+                sidebar.classList.toggle('sidebar-abierta');
+            }
+        }
+    </script>
+</body>
+</html>

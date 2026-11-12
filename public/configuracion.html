@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración - ARCA</title>
+    <link rel="stylesheet" href="style_home.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="dark-mode.css">
+    
+    <!-- Script inicial para evitar parpadeo de modo oscuro -->
+    <script>
+    if (localStorage.getItem("modo_oscuro") === "true") {
+        document.body.classList.add("dark-mode");
+    }
+    </script>
+    
+    <style>
+        /* --- CORRECCIÓN DE DISEÑO Y DESPLAZAMIENTO (SCROLL) --- */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            overflow-y: auto !important; /* Fuerza el scroll vertical global */
+        }
+
+        .main-content {
+            min-height: calc(100vh - 70px);
+            padding-top: 90px !important; /* Espacio para que la barra superior no tape el contenido */
+            padding-bottom: 40px;
+            box-sizing: border-box;
+            overflow: visible !important;
+        }
+
+        body.dark-mode {
+            background-color: #2b1d16 !important; /* Color base oscuro consistente para ARCA */
+            color: #f4ebd0 !important;
+        }
+        
+        body.dark-mode .config-card, 
+        body.dark-mode .card {
+            background-color: #3b281e !important;
+            color: #f4ebd0 !important;
+            border-color: #4f392d !important;
+        }
+
+        body.dark-mode #customLanguageSelect {
+            background-color: #3b281e !important;
+            color: #f4ebd0 !important;
+            border-color: #4f392d !important;
+        }
+
+        .grid-configuracion {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+
+        .columna-config-izq, .columna-config-der {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .config-card {
+            background-color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            border: 1px solid #fae1dd;
+            box-sizing: border-box;
+        }
+
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Interruptor (Switch) personalizado */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+            flex-shrink: 0;
+        }
+
+        .switch input { 
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--accent-pink, #e8a598);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
+        .radio-group-config {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .opcion-radio-config {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .opcion-radio-config input {
+            margin-top: 3px;
+            accent-color: var(--accent-pink, #e8a598);
+        }
+
+        .btn-accion-config {
+            background-color: white;
+            border: 1px solid var(--accent-pink, #e8a598);
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            color: #5c4033;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-decoration: none;
+            box-sizing: border-box;
+        }
+
+        body.dark-mode .btn-accion-config {
+            background-color: #3b281e;
+            color: #f4ebd0;
+            border-color: #4f392d;
+        }
+
+        .btn-accion-config:hover {
+            background-color: #f7d6d0;
+        }
+
+        body.dark-mode .btn-accion-config:hover {
+            background-color: #4f392d;
+        }
+
+        .btn-danger-config {
+            background-color: #fdf0ee;
+            border-color: #e76f51;
+            color: #e76f51;
+        }
+
+        body.dark-mode .btn-danger-config {
+            background-color: #452420;
+            color: #f28482;
+            border-color: #d90429;
+        }
+
+        .btn-danger-config:hover {
+            background-color: #e76f51;
+            color: white;
+        }
+
+        /* --- ESTILOS PARA MODALES ESTILO ARCA --- */
+        .arca-modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(92, 64, 51, 0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+            opacity: 0;
+            animation: fadeInModal 0.3s forwards;
+        }
+
+        .arca-modal-card {
+            background-color: #ffffff;
+            border: 2px solid #f7d6d0;
+            padding: 30px;
+            border-radius: 24px;
+            width: 90%;
+            max-width: 420px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            transform: scale(0.9);
+            animation: scaleInModal 0.3s forwards;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        body.dark-mode .arca-modal-card {
+            background-color: #3b281e;
+            border-color: #4f392d;
+            color: #f4ebd0;
+        }
+
+        .arca-modal-icon {
+            font-size: 28px;
+            color: #5c4033;
+            background-color: #f7d6d0;
+            width: 60px; height: 60px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .arca-modal-text {
+            font-size: 16px;
+            color: #5c4033;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        body.dark-mode .arca-modal-text {
+            color: #f4ebd0;
+        }
+
+        .arca-modal-buttons {
+            display: flex;
+            gap: 12px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .arca-btn-modal {
+            flex: 1;
+            padding: 10px 15px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid var(--accent-pink, #e8a598);
+            transition: all 0.2s;
+        }
+
+        .arca-btn-primary {
+            background-color: var(--accent-pink, #e8a598);
+            color: white;
+            border: none;
+        }
+        .arca-btn-primary:hover {
+            background-color: #d1887b;
+        }
+
+        .arca-btn-secondary {
+            background-color: white;
+            color: #5c4033;
+        }
+        body.dark-mode .arca-btn-secondary {
+            background-color: #2b1d16;
+            color: #f4ebd0;
+            border-color: #4f392d;
+        }
+
+        .arca-btn-secondary:hover {
+            background-color: #fcf9f5;
+        }
+
+        .arca-btn-danger {
+            background-color: #e76f51;
+            color: white;
+            border: none;
+        }
+        .arca-btn-danger:hover {
+            background-color: #c85a3d;
+        }
+
+        @keyframes fadeInModal { to { opacity: 1; } }
+        @keyframes scaleInModal { to { transform: scale(1); } }
+
+        @media (max-width: 768px) {
+            .grid-configuracion {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+  <!-- Barra de Navegación Superior -->
+  <nav class="top-nav">
+    <div class="top-left">
+        <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu"></i>
+        
+        <div class="mini-logo-circle">
+            <img src="logo.png" alt="Logo">
+        </div>
+        <span class="page-title" id="titulo-pagina">Ajustes</span>
+    </div>
+
+    <div class="search-bar">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="input-busqueda-nav" name="busqueda" placeholder="Busca algo" aria-label="Buscar en la aplicación">
+        <i class="fa-solid fa-microphone"></i>
+    </div>
+
+    <div class="top-right">
+        <div class="user-header-info">
+            <div class="user-profile-menu" id="user-profile-menu">
+                <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
+                    <img src="logo.png" id="user-avatar-img" alt="Perfil">
+                </div>
+                <div class="mini-menu-card" id="mini-menu-card">
+                    <div class="mini-menu-header">
+                        <span id="mini-menu-username">Usuario</span>
+                    </div>
+                    <hr class="mini-menu-divider">
+                    <a href="configuracion.html" class="mini-menu-item btn-ajustes">
+                        <i class="fa-solid fa-gear"></i>
+                        <span>Ajustes</span>
+                    </a>
+                    <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Cerrar sesión</span>
+                    </a>
+                </div>
+            </div>
+            <div class="notif-circle">
+                <a href="notificaciones.html" aria-label="Notificaciones"><i class="fa-solid fa-bell"></i></a>
+            </div>
+        </div>
+    </div>
+  </nav>
+
+    <!-- Barra Lateral (Sidebar) -->
+    <aside class="sidebar" id="sidebar">
+        <div class="side-icons">
+            <a href="home.html" class="menu-fila">
+                <i class="fa-solid fa-house"></i>
+                <span class="menu-text">Inicio</span>
+            </a>
+            <a href="perfil_usuario.html" class="menu-fila">
+                <i class="fa-solid fa-circle-user"></i>
+                <span class="menu-text">Perfil</span>
+            </a>
+            <a href="guardados_usuario.html" class="menu-fila">
+                <i class="fa-solid fa-bookmark"></i>
+                <span class="menu-text">Guardado</span>
+            </a>
+            <a href="mapa.html" class="menu-fila">
+                <i class="fa-solid fa-location-dot"></i>
+                <span class="menu-text">Mapa</span>
+            </a>
+            <a href="configuracion.html" class="menu-fila active">
+                <i class="fa-solid fa-gear"></i>
+                <span class="menu-text">Ajustes</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Contenido Principal -->
+    <main class="main-content">
+        <div class="grid-configuracion">
+            
+            <!-- Columna Izquierda: Preferencias y Privacidad -->
+            <div class="columna-config-izq">
+                <div class="titulo-capsula">Preferencias</div>
+                
+                <div class="config-card">
+                    <div class="setting-row">
+                        <span>Recibir notificaciones en tu navegador</span>
+                        <label class="switch">
+                            <input type="checkbox" id="notifSwitch">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Tarjeta de Modo Oscuro -->
+                <div class="config-card">
+                    <div class="setting-row">
+                        <span>Modo oscuro (Apariencia) 🌙</span>
+                        <label class="switch">
+                            <input type="checkbox" id="darkModeSwitch">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Tarjeta de Selección de Idioma -->
+                <div class="config-card">
+                    <div class="setting-row">
+                        <span>Idioma de la aplicación 🌍</span>
+                        <select id="customLanguageSelect" style="padding: 8px 12px; border-radius: 8px; border: 1px solid var(--accent-pink, #e8a598); background-color: white; color: #5c4033; font-weight: 500; cursor: pointer; outline: none;">
+                            <option value="es">Español 🇨🇴</option>
+                            <option value="en">English 🇺🇸</option>
+                            <option value="fr">Français 🇫🇷</option>
+                            <option value="pt">Português 🇧🇷</option>
+                            <option value="de">Deutsch 🇩🇪</option>
+                            <option value="it">Italiano 🇮🇹</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- Contenedor oculto obligatorio para el motor de traducción de Google -->
+                <div id="google_translate_element" style="display:none;"></div>
+
+                <div class="titulo-capsula">Privacidad</div>
+                
+                <div class="config-card">
+                    <p style="font-weight: 600; font-size: 14px; margin-bottom: 5px;">Privacidad de reportes</p>
+                    <div class="radio-group-config">
+                        <label class="opcion-radio-config">
+                            <input type="radio" name="privacidad" value="publico" checked>
+                            <span><strong>Público:</strong> Todos los usuarios pueden ver la ubicación y tus datos de contacto.</span>
+                        </label>
+                        <label class="opcion-radio-config">
+                            <input type="radio" name="privacidad" value="fundaciones">
+                            <span><strong>Solo fundaciones:</strong> Solo organizaciones registradas podrán ver tu información para ayudarte.</span>
+                        </label>
+                        <label class="opcion-radio-config">
+                            <input type="radio" name="privacidad" value="privado">
+                            <span><strong>Privado:</strong> Nadie verá tus datos, solo la información del animal y ubicación aproximada.</span>
+                        </label>
+                    </div>
+                    <hr style="border: 0; border-top: 1px solid #fae1dd; margin: 5px 0;">
+                    <a href="terminos_privacidad.html" class="btn-accion-config">
+                        Ver términos y políticas <i class="fa-solid fa-file-lines"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Columna Derecha: Permisos, Cuenta y Soporte -->
+            <div class="columna-config-der">
+                <div class="titulo-capsula">Permisos y Cuenta</div>
+                
+                <div class="config-card">
+                    <div class="setting-row">
+                        <div>
+                            <p style="font-weight: 600;">Permisos de ubicación</p>
+                            <p id="texto-estado-ubicacion" style="font-size: 12px; color: #8c7365; margin-top: 3px;">Comprobando estado...</p>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="ubicacionSwitch">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <a href="javascript:void(0)" class="btn-accion-config" onclick="abrirSeccionBloqueados()">
+                        Bloqueados <i class="fa-solid fa-users-slash"></i>
+                    </a>
+                </div>
+
+                <div class="config-card">
+                    <a href="perfil_usuario.html" class="btn-accion-config">
+                        Cuenta <i class="fa-solid fa-user-gear"></i>
+                    </a>
+                    <button type="button" class="btn-accion-config btn-danger-config" onclick="confirmarEliminarCuenta()">
+                        Eliminar cuenta <i class="fa-solid fa-triangle-exclamation"></i>
+                    </button>
+                </div>
+
+                <div class="titulo-capsula">Soporte</div>
+                
+                <div class="config-card">
+                    <a href="soporte.html" class="btn-accion-config">
+                        Ayuda y soporte técnico <i class="fa-solid fa-headset"></i>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Firebase v8 Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+
+    <!-- Scripts globales -->
+    <script src="script.js"></script>
+
+    <!-- Script del motor gratuito de traducción de Google -->
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'es',
+                autoDisplay: false
+            }, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    
+    <!-- Script de lógica interactiva y controles -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- GESTIÓN DE IDIOMA ---
+            const customSelect = document.getElementById('customLanguageSelect');
+            const savedLang = localStorage.getItem('app_selected_lang');
+            
+            if (savedLang && customSelect) {
+                customSelect.value = savedLang;
+            }
+
+            if (customSelect) {
+                customSelect.addEventListener('change', (e) => {
+                    const targetLang = e.target.value;
+                    localStorage.setItem('app_selected_lang', targetLang);
+                    
+                    const googleCombo = document.querySelector('.goog-te-combo');
+                    if (googleCombo) {
+                        googleCombo.value = targetLang;
+                        googleCombo.dispatchEvent(new Event('change'));
+                        mostrarToast("¡Idioma cambiado con éxito! 🌍", "success");
+                    } else {
+                        location.reload();
+                    }
+                });
+            }
+
+            if (savedLang && savedLang !== 'es') {
+                const interval = setInterval(() => {
+                    const googleCombo = document.querySelector('.goog-te-combo');
+                    if (googleCombo) {
+                        googleCombo.value = savedLang;
+                        googleCombo.dispatchEvent(new Event('change'));
+                        clearInterval(interval);
+                    }
+                }, 200);
+            }
+
+            // Control del Sidebar
+            const btnToggleMenu = document.getElementById('btn-toggle-menu');
+            const sidebar = document.getElementById('sidebar');
+
+            if (btnToggleMenu && sidebar) {
+                btnToggleMenu.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    sidebar.classList.toggle('sidebar-abierta');
+                });
+            }
+
+            // --- GESTIÓN DE MODO OSCURO ---
+            const darkModeSwitch = document.getElementById("darkModeSwitch");
+            if (darkModeSwitch) {
+                const isDarkMode = localStorage.getItem("modo_oscuro") === "true";
+                darkModeSwitch.checked = isDarkMode;
+
+                darkModeSwitch.addEventListener("change", () => {
+                    if (darkModeSwitch.checked) {
+                        document.body.classList.add("dark-mode");
+                        localStorage.setItem("modo_oscuro", "true");
+                        mostrarToast("Modo oscuro activado 🌙", "success");
+                    } else {
+                        document.body.classList.remove("dark-mode");
+                        localStorage.setItem("modo_oscuro", "false");
+                        mostrarToast("Modo claro activado ☀️", "info");
+                    }
+                });
+            }
+
+            // --- NOTIFICACIONES ---
+            const notifSwitch = document.getElementById("notifSwitch");
+            if (window.Notification) {
+                notifSwitch.checked = (Notification.permission === "granted");
+            }
+
+            notifSwitch.addEventListener("change", async () => {
+                if (notifSwitch.checked) {
+                    if (window.Notification) {
+                        if (Notification.permission === "denied") {
+                            notifSwitch.checked = false;
+                            mostrarModalInformativo("Notificaciones Bloqueadas", "Tienes las notificaciones bloqueadas en tu navegador. Habilítalas desde los ajustes de seguridad de la barra de direcciones.");
+                            return;
+                        }
+                        const permission = await Notification.requestPermission();
+                        if (permission === "granted") {
+                            mostrarToast("¡Notificaciones activadas! 🔔", "success");
+                            localStorage.setItem("notificaciones", "true");
+                        } else {
+                            notifSwitch.checked = false;
+                        }
+                    }
+                } else {
+                    localStorage.setItem("notificaciones", "false");
+                    mostrarToast("Notificaciones desactivadas. 🔕", "info");
+                }
+            });
+
+            // --- UBICACIÓN ---
+            const ubicacionSwitch = document.getElementById("ubicacionSwitch");
+            const textoEstadoUbicacion = document.getElementById("texto-estado-ubicacion");
+
+            if (navigator.permissions) {
+                navigator.permissions.query({ name: 'geolocation' }).then((permissionStatus) => {
+                    actualizarEstadoUbicacionUI(permissionStatus.state);
+                    permissionStatus.onchange = () => actualizarEstadoUbicacionUI(permissionStatus.state);
+                });
+            }
+
+            function actualizarEstadoUbicacionUI(state) {
+                if (state === 'granted') {
+                    ubicacionSwitch.checked = true;
+                    textoEstadoUbicacion.textContent = "Actualmente: Permitido y activo";
+                    textoEstadoUbicacion.style.color = "#2a9d8f";
+                } else if (state === 'denied') {
+                    ubicacionSwitch.checked = false;
+                    textoEstadoUbicacion.textContent = "Actualmente: Bloqueado por el navegador";
+                    textoEstadoUbicacion.style.color = "#e76f51";
+                } else {
+                    ubicacionSwitch.checked = false;
+                    textoEstadoUbicacion.textContent = "Actualmente: Desactivado";
+                    textoEstadoUbicacion.style.color = "#8c7365";
+                }
+            }
+
+            ubicacionSwitch.addEventListener("change", () => {
+                if (ubicacionSwitch.checked) {
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(
+                            () => {
+                                mostrarToast("¡Permiso de ubicación concedido! 📍", "success");
+                                textoEstadoUbicacion.textContent = "Actualmente: Permitido y activo";
+                                textoEstadoUbicacion.style.color = "#2a9d8f";
+                            },
+                            () => {
+                                ubicacionSwitch.checked = false;
+                                mostrarModalInformativo("Ubicación Bloqueada", "Debes permitir el acceso a la ubicación en tu navegador.");
+                            }
+                        );
+                    }
+                } else {
+                    localStorage.setItem("ubicacion_permitida", "false");
+                    textoEstadoUbicacion.textContent = "Actualmente: Desactivado";
+                    mostrarToast("Ubicación desactivada.", "info");
+                }
+            });
+
+            // --- PRIVACIDAD ---
+            const savedPrivacidad = localStorage.getItem("privacidad_reportes");
+            if (savedPrivacidad) {
+                const radioOption = document.querySelector(`input[name="privacidad"][value="${savedPrivacidad}"]`);
+                if (radioOption) radioOption.checked = true;
+            }
+
+            document.querySelectorAll('input[name="privacidad"]').forEach(radio => {
+                radio.addEventListener("change", (e) => {
+                    localStorage.setItem("privacidad_reportes", e.target.value);
+                    mostrarToast(`Privacidad guardada: ${e.target.value.toUpperCase()} 🔒`, "success");
+                });
+            });
+        });
+
+        // --- MODALES Y TOASTS ---
+        function mostrarModalInformativo(titulo, mensaje) {
+            const overlay = document.createElement("div");
+            overlay.className = "arca-modal-overlay";
+            overlay.innerHTML = `
+                <div class="arca-modal-card">
+                    <div class="arca-modal-icon"><i class="fa-solid fa-circle-info"></i></div>
+                    <h3 style="margin: 0;">${titulo}</h3>
+                    <p class="arca-modal-text">${mensaje}</p>
+                    <div class="arca-modal-buttons">
+                        <button class="arca-btn-modal arca-btn-primary" style="width: 100%;" id="modal-btn-cerrar">Entendido</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+            document.getElementById("modal-btn-cerrar").onclick = () => overlay.remove();
+        }
+
+        function confirmarEliminarCuenta() {
+            const overlay = document.createElement("div");
+            overlay.className = "arca-modal-overlay";
+            overlay.innerHTML = `
+                <div class="arca-modal-card">
+                    <div class="arca-modal-icon" style="background-color: #fdf0ee; color: #e76f51;"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                    <h3 style="color: #e76f51; margin: 0;">¿Eliminar cuenta?</h3>
+                    <p class="arca-modal-text">¿Estás completamente segura? Esta acción borrará tus datos y no se puede deshacer.</p>
+                    <div class="arca-modal-buttons">
+                        <button class="arca-btn-modal arca-btn-secondary" id="modal-btn-cancelar">Cancelar</button>
+                        <button class="arca-btn-modal arca-btn-danger" id="modal-btn-eliminar">Sí, eliminar</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+
+            document.getElementById("modal-btn-cancelar").onclick = () => overlay.remove();
+            document.getElementById("modal-btn-eliminar").onclick = () => {
+                overlay.remove();
+                localStorage.clear();
+                window.location.href = "index.html";
+            };
+        }
+
+        function abrirSeccionBloqueados() {
+            mostrarModalInformativo("Usuarios Bloqueados", "No tienes ningún usuario bloqueado en este momento.");
+        }
+
+        function mostrarToast(mensaje, tipo = "success") {
+            const alertaVieja = document.getElementById("toast-arca");
+            if (alertaVieja) alertaVieja.remove();
+
+            const toast = document.createElement("div");
+            toast.id = "toast-arca";
+            toast.textContent = mensaje;
+            toast.style.position = "fixed";
+            toast.style.bottom = "30px";
+            toast.style.right = "30px";
+            toast.style.backgroundColor = tipo === "error" ? "#e76f51" : "#5c4033";
+            toast.style.color = "#fff";
+            toast.style.padding = "12px 20px";
+            toast.style.borderRadius = "12px";
+            toast.style.boxShadow = "0 4px 12px rgba(0,0,0,0.15)";
+            toast.style.zIndex = "100000";
+            toast.style.opacity = "0";
+            toast.style.transition = "all 0.3s ease";
+
+            document.body.appendChild(toast);
+            setTimeout(() => toast.style.opacity = "1", 50);
+            setTimeout(() => {
+                toast.style.opacity = "0";
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+    </script>
+
+    <!-- Limpieza de marcos molestos de Google Translate -->
+    <style>
+        .goog-te-banner-frame { display: none !important; }
+        body { top: 0 !important; }
+        .skiptranslate { display: none !important; }
+    </style>
+</body>
+</html>

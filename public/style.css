@@ -1,0 +1,396 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #fceceb; /* Tono rosado base de la app */
+    font-family: 'Itim', cursive, sans-serif;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+}
+
+/* --- MARCAS DE AGUA DE FONDO (Huellas y Corazones) --- */
+body::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(#f5d5d3 15%, transparent 16%),
+        radial-gradient(#f5d5d3 15%, transparent 16%);
+    background-size: 120px 120px;
+    background-position: 0 0, 60px 60px;
+    opacity: 0.4;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* --- BARRA SUPERIOR --- */
+.top-nav {
+    position: relative;
+    z-index: 10;
+    height: 65px;
+    background-color: #f7cac9;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    border-bottom: 2px solid #ecd0ce;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+}
+
+.top-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.menu-icon-top {
+    font-size: 1.3rem;
+    color: #333;
+    cursor: pointer;
+}
+
+.arcapill-logo {
+    background-color: #e57373;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.8rem;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.page-title {
+    font-size: 1.25rem;
+    color: #2b2b2b;
+    font-weight: bold;
+}
+
+.search-bar {
+    position: relative;
+    width: 450px;
+    background-color: #ffffff;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    padding: 6px 15px;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.search-bar i {
+    color: #888;
+    font-size: 0.95rem;
+}
+
+.search-bar input {
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    padding-left: 10px;
+    font-family: 'Itim', cursive;
+    font-size: 0.95rem;
+    color: #444;
+}
+
+.fa-microphone {
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+.notif-bell {
+    background-color: #ffffff;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #333;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* --- CONTENEDOR PRINCIPAL Y SIDEBAR --- */
+.app-container {
+    display: flex;
+    flex: 1;
+    position: relative;
+    z-index: 5;
+    overflow: hidden;
+}
+
+/* Menú Lateral Izquierdo exacto a la imagen */
+.sidebar {
+    width: 200px;
+    background-color: #fceceb;
+    display: flex;
+    flex-direction: column;
+    padding-top: 20px;
+    border-right: 1px solid rgba(0,0,0,0.03);
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px 25px;
+    color: #2b2b2b;
+    text-decoration: none;
+    font-size: 1.05rem;
+    transition: background 0.2s;
+}
+
+.menu-item:hover {
+    background-color: rgba(255,255,255,0.4);
+}
+
+.menu-item i {
+    font-size: 1.1rem;
+    color: #333;
+    width: 20px;
+    text-align: center;
+}
+
+/* --- CENTRO DE TRABAJO (ÁREA DE FORMULARIO) --- */
+.main-workspace {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 15px 30px;
+    overflow-y: auto;
+}
+
+.error-card-container {
+    background-color: rgba(255, 255, 255, 0.85);
+    border-radius: 20px;
+    padding: 25px 35px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+    margin-bottom: auto;
+}
+
+/* Cabecera interior: Reportar un error técnico con icono de llave inglesa */
+.error-header-bar {
+    background-color: #e8dedc;
+    border-radius: 12px;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 25px;
+}
+
+.error-header-bar h1 {
+    font-size: 1.6rem;
+    color: #2b2b2b;
+    font-weight: normal;
+}
+
+.error-header-bar i {
+    font-size: 1.3rem;
+    color: #444;
+}
+
+/* Estructura en 3 columnas del formulario */
+.error-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 30px;
+    align-items: start;
+}
+
+.form-column h3 {
+    font-size: 1.15rem;
+    color: #2b2b2b;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+/* Columna 1: Textarea y botón volver */
+.textarea-box {
+    width: 100%;
+    height: 130px;
+    background: #ffffff;
+    border: 1px solid #d1c7c5;
+    border-radius: 15px;
+    padding: 12px;
+    font-family: 'Itim', cursive;
+    resize: none;
+    outline: none;
+}
+
+.btn-volver {
+    width: 40px;
+    height: 40px;
+    background: #ffffff;
+    border: 1px solid #d1c7c5;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin-top: 15px;
+    color: #333;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+    text-decoration: none;
+}
+
+/* Columna 2: Checkboxes */
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1rem;
+    color: #333;
+    cursor: pointer;
+}
+
+.checkbox-label input {
+    accent-color: #e57373;
+    width: 18px;
+    height: 18px;
+}
+
+/* Columna 3: Capturas y contacto */
+.upload-box {
+    border: 2px dashed #d1c7c5;
+    border-radius: 15px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.5);
+    margin-bottom: 15px;
+}
+
+.upload-icon-circle {
+    width: 40px;
+    height: 40px;
+    background-color: #f7cac9;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #444;
+}
+
+.upload-box span {
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.btn-subir {
+    background: #ffffff;
+    border: 1px solid #d1c7c5;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-family: 'Itim', cursive;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.contact-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.contact-fields input {
+    width: 100%;
+    padding: 8px 12px;
+    background: #ffffff;
+    border: 1px solid #d1c7c5;
+    border-radius: 12px;
+    font-family: 'Itim', cursive;
+    font-size: 0.9rem;
+    outline: none;
+}
+
+.privacy-note {
+    font-size: 0.65rem;
+    color: #777;
+    text-align: center;
+    line-height: 1.1;
+    margin-bottom: 10px;
+}
+
+.btn-enviar {
+    width: 100%;
+    background-color: #f2d6c9;
+    border: none;
+    padding: 10px;
+    border-radius: 15px;
+    font-family: 'Itim', cursive;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+}
+
+/* --- PIE DE PÁGINA (FOOTER) --- */
+.bottom-footer {
+    height: 50px;
+    background-color: rgba(252, 236, 235, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 25px;
+    border-top: 1px solid rgba(0,0,0,0.05);
+    font-size: 0.9rem;
+    color: #333;
+}
+
+.footer-left {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.footer-center {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.footer-center span {
+    font-weight: bold;
+}
+
+.footer-center a {
+    color: #333;
+    font-size: 1rem;
+    text-decoration: none;
+}
+
+.btn-sobre {
+    background-color: #f7cac9;
+    border: none;
+    padding: 6px 18px;
+    border-radius: 15px;
+    font-family: 'Itim', cursive;
+    font-size: 0.9rem;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+}

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donación - ARCA</title>
+    <link rel="stylesheet" href="style_home.css">
+    <link rel="stylesheet" href="style_donacion.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Barra de Navegación Superior -->
+  <nav class="top-nav">
+    <div class="top-left">
+        <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu"></i>
+        
+        <div class="mini-logo-circle">
+            <img src="logo.png" alt="Logo ARCA">
+        </div>
+        <span class="page-title" id="titulo-pagina">Donación</span>
+    </div>
+
+    <div class="search-bar">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="input-busqueda-nav" name="busqueda" placeholder="Busca algo" aria-label="Buscar en la aplicación">
+        <i class="fa-solid fa-microphone"></i>
+    </div>
+
+    <div class="top-right">
+        <div class="user-header-info">
+
+            <!-- PERFIL Y MINI MENÚ -->
+            <div class="user-profile-menu" id="user-profile-menu">
+                <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
+                    <img src="logo.png" id="user-avatar-img" alt="Perfil">
+                </div>
+
+                <div class="mini-menu-card" id="mini-menu-card">
+                    <div class="mini-menu-header">
+                        <span id="mini-menu-username">Usuario</span>
+                    </div>
+                    
+                    <hr class="mini-menu-divider">
+                    
+                    <a href="configuracion_usuario.html" class="mini-menu-item btn-ajustes">
+                        <i class="fa-solid fa-gear"></i>
+                        <span>Ajustes</span>
+                    </a>
+                    
+                    <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Cerrar sesión</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- CAMPANA DE NOTIFICACIONES -->
+            <div class="notif-circle">
+                <a href="notificaciones.html" aria-label="Notificaciones"><i class="fa-solid fa-bell"></i></a>
+            </div>
+
+        </div>
+    </div>
+  </nav>
+
+    <!-- Barra Lateral (Sidebar) -->
+    <aside class="sidebar" id="sidebar">
+        <div class="side-icons">
+            <a href="home.html" class="menu-fila">
+                <i class="fa-solid fa-house"></i>
+                <span class="menu-text">Inicio</span>
+            </a>
+            <a href="perfil_usuario.html" class="menu-fila">
+                <i class="fa-solid fa-circle-user"></i>
+                <span class="menu-text">Perfil</span>
+            </a>
+            <a href="guardados_usuario.html" class="menu-fila">
+                <i class="fa-solid fa-bookmark"></i>
+                <span class="menu-text">Guardado</span>
+            </a>
+            <a href="mapa.html" class="menu-fila">
+                <i class="fa-solid fa-location-dot"></i>
+                <span class="menu-text">Mapa</span>
+            </a>
+            <a href="configuracion_usuario.html" class="menu-fila">
+                <i class="fa-solid fa-gear"></i>
+                <span class="menu-text">Ajustes</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Contenido Principal -->
+    <main class="main-content">
+        <form id="formDonacionArca" class="grid-reporte" onsubmit="event.preventDefault();">
+            
+            <!-- Columna Izquierda -->
+            <div class="columna-reporte-izq">
+                <div class="titulo-capsula">Tipo de donación</div>
+                
+                <div class="grupo-checkboxes">
+                    <label class="opcion-check-unica">
+                        <input type="checkbox" name="tipo_donacion" value="dinero">
+                        <span class="check-box-custom"></span>
+                        <span class="pill-text-container">Dinero</span>
+                    </label>
+                    
+                    <label class="opcion-check-unica">
+                        <input type="checkbox" name="tipo_donacion" value="juguetes">
+                        <span class="check-box-custom"></span>
+                        <span class="pill-text-container">Juguetes</span>
+                    </label>
+
+                    <label class="opcion-check-unica">
+                        <input type="checkbox" name="tipo_donacion" value="comida">
+                        <span class="check-box-custom"></span>
+                        <span class="pill-text-container">Comida</span>
+                    </label>
+
+                    <label class="opcion-check-unica">
+                        <input type="checkbox" name="tipo_donacion" value="ropa">
+                        <span class="check-box-custom"></span>
+                        <span class="pill-text-container">Ropa</span>
+                    </label>
+
+                    <label class="opcion-check-unica">
+                        <input type="checkbox" name="tipo_donacion" value="otro">
+                        <span class="check-box-custom"></span>
+                        <span class="pill-text-container">Otro</span>
+                    </label>
+                </div>
+
+                <div class="descripcion-container">
+                    <label for="descripcion-donativo" class="subtitulo-reporte bold-title">Cantidad o descripción del donativo</label>
+                    <textarea id="descripcion-donativo" name="descripcion_donativo" placeholder="Descripción..."></textarea>
+                </div>
+            </div>
+
+            <!-- Columna Derecha -->
+            <div class="columna-reporte-der">
+                <div class="titulo-capsula">¿A qué fundación desea donar?</div>
+                
+                <div class="fila-ubicacion">
+                    <button type="button" class="btn-ubicacion-actual btn-rosa-soft" id="btn-mapa-fundacion">Seleccione una fundación en el mapa</button>
+                    <span class="separador-o">o</span>
+                    <input type="text" id="input-fundacion" name="nombre_fundacion" class="input-direccion input-verde-soft" placeholder="Ingresa el nombre de la fundación">
+                </div>
+
+                <div class="titulo-capsula">Forma de entrega</div>
+
+                <div class="grupo-checkboxes">
+                    <label class="opcion-check-unica simple">
+                        <input type="checkbox" name="forma_entrega" value="personalmente">
+                        <span class="check-box-custom"></span>
+                        <span class="texto-simple">Llevar personalmente al refugio</span>
+                    </label>
+                    
+                    <label class="opcion-check-unica simple">
+                        <input type="checkbox" name="forma_entrega" value="domicilio">
+                        <span class="check-box-custom"></span>
+                        <span class="texto-simple">Solicitar recogida a domicilio</span>
+                    </label>
+                </div>
+
+                <div class="contacto-seccion">
+                    <div class="titulo-capsula">Información del donante</div>
+                    <div class="input-contacto-wrapper medio-ancho">
+                        <i class="fa-regular fa-user"></i>
+                        <input type="text" id="donante-nombre" name="nombre_donante" placeholder="Nombre">
+                    </div>
+                    <div class="input-contacto-wrapper medio-ancho">
+                        <i class="fa-solid fa-phone"></i>
+                        <input type="tel" id="donante-telefono" name="telefono_donante" placeholder="Teléfono">
+                    </div>
+                    <div class="input-contacto-wrapper medio-ancho">
+                        <i class="fa-regular fa-envelope"></i>
+                        <input type="email" id="donante-correo" name="correo_donante" placeholder="Correo">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-enviar-reporte btn-submit-gris">Enviar Donación</button>
+            </div>
+
+        </form>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btnToggleMenu = document.getElementById('btn-toggle-menu');
+            const sidebar = document.getElementById('sidebar');
+
+            if (btnToggleMenu && sidebar) {
+                btnToggleMenu.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    sidebar.classList.toggle('sidebar-abierta');
+                });
+            }
+        });
+
+        function toggleMiniMenu() {
+            const miniMenu = document.getElementById('mini-menu-card');
+            if (miniMenu) {
+                miniMenu.classList.toggle('show');
+            }
+        }
+    </script>
+    <!-- Modal Emergente -->
+<div id="modalExito" class="modal-overlay">
+  <div class="modal-contenido">
+    <div class="modal-icono">✓</div>
+    <h2>Formulario de donación enviado</h2>
+    <p>¡Gracias por tu apoyo! Nos pondremos en contacto contigo pronto.</p>
+    <button id="btnCerrarModal" class="btn-modal">Aceptar</button>
+  </div>
+</div>
+</body>
+</html>

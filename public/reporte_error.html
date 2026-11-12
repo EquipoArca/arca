@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportar un error técnico - ARCA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- BARRA SUPERIOR -->
+    <header class="top-nav">
+        <div class="top-left">
+            <i class="fa-solid fa-bars menu-icon-top"></i>
+            <div class="arcapill-logo">ARCA</div>
+            <span class="page-title">Ayuda y soporte técnico</span>
+        </div>
+        <div class="search-bar">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Busca algo">
+            <i class="fa-solid fa-microphone"></i>
+        </div>
+        <div class="notif-bell">
+            <i class="fa-solid fa-bell"></i>
+        </div>
+    </header>
+
+    <div class="app-container">
+        <!-- MENÚ LATERAL IZQUIERDO -->
+        <aside class="sidebar">
+            <a href="#" class="menu-item"><i class="fa-solid fa-house"></i> Inicio</a>
+            <a href="#" class="menu-item"><i class="fa-solid fa-circle-user"></i> Perfil</a>
+            <a href="#" class="menu-item"><i class="fa-solid fa-bookmark"></i> Guardado</a>
+            <a href="#" class="menu-item"><i class="fa-solid fa-location-dot"></i> Mapa</a>
+            <a href="#" class="menu-item"><i class="fa-solid fa-gear"></i> Ajustes</a>
+        </aside>
+
+        <!-- ESPACIO DE TRABAJO CON EL FORMULARIO DE REPORTE -->
+        <main class="main-workspace">
+            <div class="error-card-container">
+                
+                <div class="error-header-bar">
+                    <h1>Reportar un error técnico</h1>
+                    <i class="fa-solid fa-wrench"></i>
+                </div>
+
+                <form class="error-form-grid">
+                    <!-- Columna 1 -->
+                    <div class="form-column">
+                        <h3>¿Qué ocurrió?</h3>
+                        <textarea class="textarea-box"></textarea>
+                        <a href="#" class="btn-volver"><i class="fa-solid fa-arrow-left"></i></a>
+                    </div>
+
+                    <!-- Columna 2 -->
+                    <div class="form-column">
+                        <h3>¿Dónde ocurrió?</h3>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label"><input type="checkbox"> Reportes</label>
+                            <label class="checkbox-label"><input type="checkbox"> Donaciones</label>
+                            <label class="checkbox-label"><input type="checkbox"> Perfil</label>
+                            <label class="checkbox-label"><input type="checkbox"> Otro</label>
+                        </div>
+                    </div>
+
+                    <!-- Columna 3 -->
+                    <div class="form-column">
+                        <h3>¿Tienes capturas del error?</h3>
+                        <div class="upload-box">
+                            <div class="upload-icon-circle"><i class="fa-solid fa-image"></i></div>
+                            <span>O arrastra una imagen aquí</span>
+                            <button type="button" class="btn-subir">Sube un archivo</button>
+                        </div>
+                        <div class="contact-fields">
+                            <input type="text" placeholder="NOMBRE:">
+                            <input type="email" placeholder="CORREO:">
+                        </div>
+                        <p class="privacy-note">Usaremos esta información para ponernos en contacto contigo en cuanto al error</p>
+                        <button type="submit" class="btn-enviar">ENVIAR</button>
+                    </div>
+                </form>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- PIE DE PÁGINA INFERIOR -->
+    <footer class="bottom-footer">
+        <div class="footer-left">
+            <span><i class="fa-solid fa-envelope"></i> equipoarca0@gmail.com</span>
+            <span><i class="fa-solid fa-phone"></i> 578-0318</span>
+        </div>
+        <div class="footer-center">
+            <span>CONTÁCTANOS:</span>
+            <a href="#"><i class="fa-brands fa-tiktok"></i></a>
+            <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
+            <a href="#"><i class="fa-solid fa-x-twitter"></i></a>
+            <a href="#"><i class="fa-brands fa-instagram"></i></a>
+        </div>
+        <div>
+            <button class="btn-sobre">Sobre nosotros</button>
+        </div>
+    </footer>
+
+</body>
+</html>
