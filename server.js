@@ -1,9 +1,12 @@
 require('dotenv').config();
+
 const mysql = require('mysql2');
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const multer = require('multer');
+const nodemailer = require('nodemailer');
+
 const { initializeApp, cert } = require('firebase-admin/app');
 const { getAuth } = require('firebase-admin/auth');
 const fs = require('fs');
