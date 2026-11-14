@@ -1646,13 +1646,15 @@
     function copiarAlPortapapeles(texto) {
     navigator.clipboard.writeText(texto).then(() => {
         mostrarAlertaArca(
-            "¡Copiado con éxito! 🌸",
+            "¡Copiado con éxito! ",
+            "🌸",
             { tipo: "aviso" }
         );
     }).catch(err => {
         console.error('Error al copiar: ', err);
         mostrarAlertaArca(
-            "¡Algo falló! ♡",
+            "¡Algo falló!",
+            "♡",
             { tipo: "error" }
         );
     });
@@ -1901,13 +1903,14 @@
                                         const idAResolver = reporteData.id_reporte || reporteId;
                                         const resDel = await fetch(`/api/reportes/${idAResolver}`, { method: 'DELETE' });
                                         if (resDel.ok) {
-                                            mostrarAlertaArca("Reporte eliminado correctamente. 🌸",
+                                            mostrarAlertaArca("Reporte eliminado correctamente.",
+                                            "🌸",
                                                 {tipo: "aviso"}
                                             );
                                             window.location.href = 'novedades.html';
                                         } else {
                                             mostrarAlertaArca("Error al eliminar el reporte.", 
-                                            "Por favor, inténtalo de nuevo. ♡", { tipo: "error" });
+                                            "♡", { tipo: "error" });
                                         }
                                     } catch (err) {
                                         console.error("Error al eliminar:", err);
@@ -1942,7 +1945,8 @@
                                             body: JSON.stringify({ correo: correoLogueado, id_publicacion: Number(idPublicacionGlobal) })
                                         });
                                         if (quitRes.ok) {
-                                            mostrarAlertaArca("Publicación eliminada de guardados. 🌸",
+                                            mostrarAlertaArca("Publicación eliminada de guardados.",
+                                            " 🌸",
                                              { tipo: "aviso" });
                                             location.reload();
                                         }
@@ -1961,7 +1965,8 @@
                                         body: JSON.stringify({ correo: correoLogueado, id_publicacion: Number(idPublicacionGlobal) })
                                     });
                                     if (saveRes.ok) {
-                                        mostrarAlertaArca("Publicación guardada con éxito. 🌸",
+                                        mostrarAlertaArca("Publicación guardada con éxito.",
+                                        "🌸",
                                          { tipo: "aviso" });
                                         location.reload();
                                     }
