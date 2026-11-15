@@ -865,7 +865,7 @@ function confirmarEliminarCuenta() {
                             await firebase.auth().signOut().catch(() => {});
                         }
                         localStorage.clear();
-                        window.location.href = "index.html";
+                        window.location.href = "home.html";
                     } else {
                         alert("⚠️ Error al eliminar cuenta: " + (data.error || data.mensaje || "Desconocido"));
                         overlay.remove();
