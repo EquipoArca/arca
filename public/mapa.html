@@ -813,12 +813,12 @@
                       const urlMapsReporte = `https://www.google.com/maps/search/?api=1&query=${item.lat},${item.lng}`;
                       const idReal = item.id_origen || item.id_publicacion || '';
                       
-                      let paginaDetalle = `detalle_reporte.html?id=${idReal}`;
-                      if (item.tipo_publicacion === 'adopcion') {
-                          paginaDetalle = `detalle_adopcion.html?id=${idReal}`;
-                      } else if (item.tipo_publicacion === 'evento') {
-                          paginaDetalle = `detalle_evento.html?id=${idReal}`;
-                      }
+                     let paginaDetalle = `detalle_reporte.html?id=${idReal}&origen=mapa`;
+      if (item.tipo_publicacion === 'adopcion') {
+          paginaDetalle = `detalle_adopcion.html?id=${idReal}&origen=mapa`;
+      } else if (item.tipo_publicacion === 'evento') {
+          paginaDetalle = `detalle_evento.html?id=${idReal}&origen=mapa`;
+      }
 
                       // Procesar la imagen de forma segura extrayéndola del array JSON
                       const fotoUrl = obtenerImagenSegura(item.img_reporte);
