@@ -21,6 +21,8 @@
             flex-direction: column;
             align-items: center;
             padding-bottom: 40px;
+            font-family: 'Itim', sans-serif;
+            margin: 0;
         }
 
         .header-registro {
@@ -51,25 +53,27 @@
         .contenedor-form-paso2 {
             width: 94%;
             max-width: 1200px;
-            background-color: rgba(255, 240, 243, 0.75);
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.8);
-            border-radius: 25px;
+            background-color: rgba(255, 240, 243, 0.82);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1.5px solid rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
             padding: 30px 40px;
             margin-top: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.05);
             box-sizing: border-box;
         }
 
         .capsula-categoria-larga {
             background-color: #fcae9e;
             color: #2b2b2b;
-            font-size: 1.4rem;
-            font-weight: 500;
-            padding: 6px 25px;
-            border-radius: 20px;
+            font-size: 1.25rem;
+            font-weight: 400;
+            padding: 6px 22px;
+            border-radius: 14px;
             display: inline-block;
             margin-bottom: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
         }
 
         .grid-dos-columnas {
@@ -81,28 +85,36 @@
         .sub-capsula {
             background-color: #fcae9e;
             color: #2b2b2b;
-            font-size: 1.1rem;
-            padding: 4px 18px;
-            border-radius: 15px;
+            font-size: 1.05rem;
+            font-weight: 400;
+            padding: 4px 16px;
+            border-radius: 12px;
             display: inline-block;
             margin-bottom: 8px;
         }
 
         .input-paso2 {
             width: 100%;
-            height: 38px;
+            height: 39px;
             background-color: #ffffff;
             border: 1px solid #e2c0c0;
-            border-radius: 12px;
+            border-radius: 10px;
             padding: 0 12px;
             font-family: 'Itim', sans-serif;
             font-size: 0.95rem;
+            color: #333333;
             outline: none;
             box-sizing: border-box;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .input-paso2:focus {
+            border-color: #e57373;
+            box-shadow: 0 0 0 2px rgba(229, 115, 115, 0.12);
         }
 
         textarea.input-paso2 {
-            height: 90px;
+            height: 85px;
             padding: 10px;
             resize: none;
         }
@@ -112,7 +124,7 @@
             height: 110px;
             background-color: #fce4e4;
             border: 2px dashed #e2a0a0;
-            border-radius: 15px;
+            border-radius: 12px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -131,7 +143,7 @@
             width: 100%;
             height: 110px;
             object-fit: cover;
-            border-radius: 15px;
+            border-radius: 12px;
             border: 2px solid #e2a0a0;
             display: none;
             margin-top: -110px;
@@ -145,7 +157,9 @@
             align-items: center;
             gap: 10px;
             margin-bottom: 8px;
-            font-size: 1.05rem;
+            font-size: 0.98rem;
+            color: #333333;
+            font-weight: 400;
         }
 
         .input-redes-container {
@@ -153,10 +167,10 @@
             align-items: center;
             background-color: #ffffff;
             border: 1px solid #e2c0c0;
-            border-radius: 12px;
+            border-radius: 10px;
             padding: 0 10px;
             margin-bottom: 10px;
-            height: 38px;
+            height: 39px;
         }
 
         .input-redes-container i {
@@ -174,26 +188,32 @@
             font-family: 'Itim', sans-serif;
             font-size: 0.95rem;
             background: transparent;
+            color: #333333;
         }
 
         .btn-finalizar-paso2 {
             background-color: #fbc2c4;
             color: #2b2b2b;
             border: none;
-            padding: 14px 50px;
+            padding: 12px 42px;
             font-family: 'Itim', sans-serif;
-            font-size: 1.6rem;
-            border-radius: 30px;
+            font-size: 1.3rem;
+            font-weight: 400;
+            border-radius: 18px;
             cursor: pointer;
             display: block;
-            margin: 30px 0 0 auto;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            transition: transform 0.2s ease;
+            margin: 28px 0 0 auto;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            transition: transform 0.2s ease, background-color 0.2s ease;
         }
 
         .btn-finalizar-paso2:hover {
-            transform: scale(1.03);
+            transform: scale(1.02);
             background-color: #f9a3a6;
+        }
+
+        @media (max-width: 900px) {
+            .grid-dos-columnas { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -295,7 +315,6 @@
     </main>
 
     <script>
-    // Función para mostrar la miniatura de las imágenes subidas
     function previsualizarImagen(event, previewId) {
         const archivo = event.target.files[0];
         if (archivo) {
@@ -314,8 +333,14 @@
         const password = sessionStorage.getItem('pass_fundacion_temp');
 
         if (!correo || !password) {
-            alert("La sesión de credenciales expiró. Por favor, inicia el registro de nuevo.");
-            window.location.href = "home.html";
+            mostrarAlertaArca(
+                "Sesión expirada",
+                "La sesión de credenciales expiró. Por favor, inicia el registro de nuevo. ♡",
+                {
+                    tipo: "error",
+                    alCerrar: () => { window.location.href = "home.html"; }
+                }
+            );
             return;
         }
 
@@ -336,7 +361,6 @@
             ciudadVal = partes[1].trim();
         }
 
-        // Obtenemos las imágenes solo si fueron cargadas (evitando enviar la URL de la página actual si src está vacío)
         const previewOficial = document.getElementById('preview-oficial');
         const previewPortada = document.getElementById('preview-portada');
         const fotoOficialBase64 = (previewOficial && previewOficial.style.display === 'block') ? previewOficial.src : '';
@@ -368,7 +392,6 @@
             foto_portada: fotoPortadaBase64,
             enfoque_otro: enfoques.join(', '),
 
-            // Recuperamos los 4 PDFs guardados en el Paso 1
             certificado_existencia: sessionStorage.getItem('pdf_cert') || null,
             estatuto: sessionStorage.getItem('pdf_estatuto') || null,
             registro_oficial: sessionStorage.getItem('pdf_registro') || null,
@@ -385,22 +408,36 @@
             const resultado = await respuesta.json();
 
             if (!resultado.exito) {
-                alert("No se pudo registrar: " + resultado.mensaje);
+                mostrarAlertaArca(
+                    "Error en el registro",
+                    "No se pudo registrar: " + resultado.mensaje,
+                    { tipo: "error" }
+                );
                 return;
             }
 
-            alert(resultado.mensaje);
-            sessionStorage.clear();
-            
-            if (typeof auth !== 'undefined') {
-                await auth.signOut();
-            }
-
-            window.location.href = "home.html";
+            mostrarAlertaArca(
+                "¡Registro exitoso! 🌸",
+                resultado.mensaje,
+                {
+                    tipo: "aviso",
+                    alCerrar: async () => {
+                        sessionStorage.clear();
+                        if (typeof auth !== 'undefined') {
+                            await auth.signOut();
+                        }
+                        window.location.href = "home.html";
+                    }
+                }
+            );
 
         } catch (error) {
             console.error("Error crítico durante el registro final:", error);
-            alert("Ocurrió un error inesperado al procesar el registro: " + error.message);
+            mostrarAlertaArca(
+                "Error inesperado",
+                "Ocurrió un error al procesar el registro: " + error.message,
+                { tipo: "error" }
+            );
         }
     }
     </script>

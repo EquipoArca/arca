@@ -16,11 +16,14 @@
     }
     </script>
     <style>
+        /* Topnav y fondo originales preservados */
         body {
             display: flex;
             flex-direction: column;
             align-items: center;
             padding-bottom: 40px;
+            font-family: 'Itim', sans-serif;
+            margin: 0;
         }
 
         .header-registro {
@@ -53,45 +56,54 @@
             color: #333;
         }
 
+        /* Contenedor del formulario con Glassmorphism elegante, limpio y profesional */
         .contenedor-form-paso1 {
             width: 94%;
-            max-width: 1200px;
-            background-color: rgba(255, 240, 243, 0.75);
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.8);
-            border-radius: 25px;
-            padding: 30px 40px;
+            max-width: 1250px;
+            background-color: rgba(255, 240, 243, 0.82);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1.5px solid rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 32px 38px;
             margin-top: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.05);
             box-sizing: border-box;
+            animation: fadeInRegistro 0.35s ease-out;
+        }
+
+        @keyframes fadeInRegistro {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .grid-tres-columnas {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 25px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 26px;
         }
 
         .capsula-categoria {
             background-color: #fcae9e;
             color: #2b2b2b;
-            font-size: 1.4rem;
-            font-weight: 500;
-            padding: 6px 22px;
-            border-radius: 20px;
+            font-size: 1.15rem;
+            font-weight: 400;
+            padding: 5px 18px;
+            border-radius: 14px;
             display: inline-block;
-            margin-bottom: 18px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            margin-bottom: 16px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
         }
 
         .campo-bloque {
-            margin-bottom: 14px;
+            margin-bottom: 13px;
         }
 
-        .label-obligatorio {
-            font-size: 0.95rem;
-            color: #333;
-            font-weight: bold;
+        /* Etiquetas limpias sin negritas pesadas de IA */
+        .label-obligatorio, .label-normal {
+            font-size: 0.92rem;
+            color: #333333;
+            font-weight: 400;
             margin-bottom: 5px;
             display: block;
         }
@@ -101,32 +113,28 @@
             color: #e57373;
         }
 
-        .label-normal {
-            font-size: 0.95rem;
-            color: #333;
-            font-weight: bold;
-            margin-bottom: 5px;
-            display: block;
-        }
-
+        /* Inputs limpios, profesionales y con radios sutiles */
         .input-paso1 {
             width: 100%;
-            height: 38px;
+            height: 39px;
             background-color: #ffffff;
             border: 1px solid #e2c0c0;
-            border-radius: 12px;
+            border-radius: 10px;
             padding: 0 12px;
             font-family: 'Itim', sans-serif;
-            font-size: 0.95rem;
+            font-size: 0.93rem;
+            color: #333333;
             outline: none;
             box-sizing: border-box;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
 
         .input-paso1:focus {
             border-color: #e57373;
+            box-shadow: 0 0 0 2px rgba(229, 115, 115, 0.12);
         }
 
-        /* Subida de Archivos PDF */
+        /* Subida de Archivos PDF refinada */
         .fila-subir-archivo {
             display: flex;
             align-items: center;
@@ -134,41 +142,48 @@
             gap: 10px;
             background-color: #ffffff;
             border: 1px solid #e2c0c0;
-            border-radius: 12px;
+            border-radius: 10px;
             padding: 4px 8px 4px 12px;
         }
 
         .btn-subir-pdf {
-            background-color: #e2e2e2;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            padding: 4px 12px;
+            background-color: #f2e2e2;
+            color: #333;
+            border: 1px solid #d8b4b4;
+            border-radius: 8px;
+            padding: 5px 12px;
             font-family: 'Itim', sans-serif;
-            font-size: 0.85rem;
+            font-size: 0.82rem;
             cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-subir-pdf:hover {
+            background-color: #e8d0d0;
         }
 
         .btn-continuar-paso1 {
             background-color: #fbc2c4;
             color: #2b2b2b;
             border: none;
-            padding: 14px 45px;
+            padding: 12px 36px;
             font-family: 'Itim', sans-serif;
-            font-size: 1.5rem;
-            border-radius: 30px;
+            font-size: 1.3rem;
+            font-weight: 400;
+            border-radius: 18px;
             cursor: pointer;
             display: block;
-            margin: 25px 0 0 auto;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            transition: transform 0.2s ease;
+            margin: 28px 0 0 auto;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            transition: transform 0.2s ease, background-color 0.2s ease;
         }
 
         .btn-continuar-paso1:hover {
-            transform: scale(1.03);
+            transform: scale(1.02);
             background-color: #f9a3a6;
         }
 
-        @media (max-width: 900px) {
+        @media (max-width: 950px) {
             .grid-tres-columnas { grid-template-columns: 1fr; }
         }
     </style>
@@ -189,52 +204,52 @@
                     <div class="capsula-categoria">Datos básicos</div>
 
                     <div class="campo-bloque">
-                        <label class="label-obligatorio">Nombre legal de la fundación / Refugio:</label>
+                        <label class="label-obligatorio">Nombre legal de la fundación / Refugio</label>
                         <input type="text" id="nombre-legal" class="input-paso1" required>
                     </div>
 
                     <div class="campo-bloque">
-                        <label class="label-obligatorio">Nombre comercial:</label>
+                        <label class="label-obligatorio">Nombre comercial</label>
                         <input type="text" id="nombre-comercial" class="input-paso1" required>
                     </div>
 
                     <div class="campo-bloque">
-                        <label class="label-obligatorio">Número de identificación legal (NIT/RUT):</label>
+                        <label class="label-obligatorio">Número de identificación legal (NIT/RUT)</label>
                         <input type="text" id="nit-rut" class="input-paso1" required>
                     </div>
 
                     <div class="campo-bloque">
-                        <label class="label-obligatorio">País y ciudad:</label>
+                        <label class="label-obligatorio">País y ciudad</label>
                         <input type="text" id="pais-ciudad" class="input-paso1" placeholder="Colombia, Medellín" required>
                     </div>
 
                     <div class="campo-bloque">
-                        <label class="label-obligatorio">Dirección física:</label>
+                        <label class="label-obligatorio">Dirección física</label>
                         <input type="text" id="direccion-fisica" class="input-paso1" required>
                     </div>
 
                     <div class="campo-bloque">
-                        <label class="label-obligatorio">Teléfono principal:</label>
+                        <label class="label-obligatorio">Teléfono principal</label>
                         <input type="tel" id="telefono-principal" class="input-paso1" required>
                     </div>
 
                     <div class="campo-bloque">
-                        <label class="label-obligatorio">Correo electrónico oficial:</label>
+                        <label class="label-obligatorio">Correo electrónico oficial</label>
                         <input type="email" id="correo-oficial" class="input-paso1" required>
                     </div>
                 </div>
 
                 <!-- COLUMNA 2: REPRESENTANTE LEGAL -->
                 <div>
-                    <div class="campo-bloque" style="margin-bottom: 25px;">
-                        <label class="label-normal">Página web:</label>
-                        <input type="url" id="pagina-web" class="input-paso1">
+                    <div class="campo-bloque" style="margin-bottom: 22px;">
+                        <label class="label-normal">Página web</label>
+                        <input type="url" id="pagina-web" class="input-paso1" placeholder="https://...">
                     </div>
 
                     <div class="capsula-categoria">Representante legal</div>
 
                     <div class="campo-bloque">
-                        <label class="label-obligatorio">Nombre completo:</label>
+                        <label class="label-obligatorio">Nombre completo</label>
                         <input type="text" id="rep-nombre" class="input-paso1" required>
                     </div>
 
@@ -244,17 +259,17 @@
                     </div>
 
                     <div class="campo-bloque">
-                        <label class="label-obligatorio">Cargo en la fundación/Refugio:</label>
+                        <label class="label-obligatorio">Cargo en la fundación/Refugio</label>
                         <input type="text" id="rep-cargo" class="input-paso1" required>
                     </div>
 
                     <div class="campo-bloque">
-                        <label class="label-obligatorio">Teléfono de contacto:</label>
+                        <label class="label-obligatorio">Teléfono de contacto</label>
                         <input type="tel" id="rep-telefono" class="input-paso1" required>
                     </div>
 
                     <div class="campo-bloque">
-                        <label class="label-obligatorio">Correo electrónico principal:</label>
+                        <label class="label-obligatorio">Correo electrónico principal</label>
                         <input type="email" id="rep-correo" class="input-paso1" required>
                     </div>
                 </div>
@@ -264,49 +279,49 @@
                     <div class="capsula-categoria">Documentación legal</div>
 
                     <div class="campo-bloque">
-                        <label class="label-obligatorio">Certificado de existencia y representación legal (escaneado en PDF):</label>
+                        <label class="label-obligatorio">Certificado de existencia y representación legal (PDF)</label>
                         <div class="fila-subir-archivo">
                             <span style="font-size: 0.8rem; color: #777;" id="nom-cert">Ningún archivo</span>
                             <button type="button" class="btn-subir-pdf" onclick="document.getElementById('file-cert').click()">Subir archivo</button>
-                            <input type="file" id="file-cert" accept=".pdf" style="display:none;" onchange="actualizarNombre(this, 'nom-cert')">
+                            <input type="file" id="file-cert" accept=".pdf" style="display:none;" onchange="actualizarNombre(this, 'nom-cert', 'cert')">
                         </div>
                     </div>
 
                     <div class="campo-bloque">
-                        <label class="label-obligatorio">Estatutos de la fundación:</label>
+                        <label class="label-obligatorio">Estatutos de la fundación</label>
                         <div class="fila-subir-archivo">
                             <span style="font-size: 0.8rem; color: #777;" id="nom-estatutos">Ningún archivo</span>
                             <button type="button" class="btn-subir-pdf" onclick="document.getElementById('file-estatutos').click()">Subir archivo</button>
-                            <input type="file" id="file-estatutos" accept=".pdf" style="display:none;" onchange="actualizarNombre(this, 'nom-estatutos')">
+                            <input type="file" id="file-estatutos" accept=".pdf" style="display:none;" onchange="actualizarNombre(this, 'nom-estatutos', 'estatuto')">
                         </div>
                     </div>
 
                     <div class="campo-bloque">
-                        <label class="label-obligatorio">Registro oficial ante la autoridad competente:</label>
+                        <label class="label-obligatorio">Registro oficial ante la autoridad competente</label>
                         <div class="fila-subir-archivo">
                             <span style="font-size: 0.8rem; color: #777;" id="nom-registro">Ningún archivo</span>
                             <button type="button" class="btn-subir-pdf" onclick="document.getElementById('file-registro').click()">Subir archivo</button>
-                            <input type="file" id="file-registro" accept=".pdf" style="display:none;" onchange="actualizarNombre(this, 'nom-registro')">
+                            <input type="file" id="file-registro" accept=".pdf" style="display:none;" onchange="actualizarNombre(this, 'nom-registro', 'registro')">
                         </div>
                     </div>
 
                     <div class="campo-bloque">
-                        <label class="label-obligatorio">Estado financiero reciente (para transparencia):</label>
+                        <label class="label-obligatorio">Estado financiero reciente (para transparencia)</label>
                         <div class="fila-subir-archivo">
                             <span style="font-size: 0.8rem; color: #777;" id="nom-financiero">Ningún archivo</span>
                             <button type="button" class="btn-subir-pdf" onclick="document.getElementById('file-financiero').click()">Subir archivo</button>
-                            <input type="file" id="file-financiero" accept=".pdf" style="display:none;" onchange="actualizarNombre(this, 'nom-financiero')">
+                            <input type="file" id="file-financiero" accept=".pdf" style="display:none;" onchange="actualizarNombre(this, 'nom-financiero', 'financiero')">
                         </div>
                     </div>
 
                     <div class="capsula-categoria" style="margin-top: 15px;">Donaciones</div>
 
                     <div class="campo-bloque">
-                        <label class="label-obligatorio">Métodos de donación aceptados (transferencia, etc.):</label>
+                        <label class="label-obligatorio">Métodos de donación aceptados</label>
                         <input type="text" id="metodos-donacion" class="input-paso1" placeholder="Ej. Nequi, Bancolombia, PayPal" required>
                     </div>
 
-                    <p style="color: #e57373; font-size: 0.85rem; margin-top: 10px;">*Los campos marcados con rojo son obligatorios</p>
+                    <p style="color: #e57373; font-size: 0.82rem; margin-top: 10px;">* Los campos marcados en rojo son obligatorios</p>
                 </div>
 
             </div>
@@ -315,8 +330,7 @@
         </form>
     </main>
 
- <script>
-        // Objeto global para almacenar temporalmente los archivos PDF en memoria (sin saturar el sessionStorage)
+    <script>
         window.archivosTemporalesPDF = {
             cert: null,
             estatuto: null,
@@ -328,24 +342,29 @@
             if (input.files.length > 0) {
                 const archivo = input.files[0];
                 document.getElementById(elemId).textContent = archivo.name;
-                // Guardamos el objeto File directamente en memoria
                 window.archivosTemporalesPDF[tipoPdf] = archivo;
             }
         }
 
-function guardarPaso1YContinuar() {
-            // Verificamos directamente desde los inputs del formulario si los archivos fueron seleccionados
+        function guardarPaso1YContinuar() {
             const fileCert = document.getElementById('file-cert').files[0];
             const fileEstatutos = document.getElementById('file-estatutos').files[0];
             const fileRegistro = document.getElementById('file-registro').files[0];
             const fileFinanciero = document.getElementById('file-financiero').files[0];
 
             if (!fileCert || !fileEstatutos || !fileRegistro || !fileFinanciero) {
-                alert("Por favor, sube todos los documentos PDF obligatorios antes de continuar.");
+                if (typeof mostrarAlertaArca === 'function') {
+                    mostrarAlertaArca(
+                        "¡Faltan documentos! 🌸",
+                        "Por favor, sube todos los documentos PDF obligatorios antes de continuar.",
+                        { tipo: "aviso" }
+                    );
+                } else {
+                    alert("Por favor, sube todos los documentos PDF obligatorios antes de continuar.");
+                }
                 return;
             }
 
-            // Función interna para convertir los archivos a Base64 de forma síncrona/promesa antes de avanzar
             const convertirArchivosYContinuar = async () => {
                 const toBase64 = file => new Promise((resolve, reject) => {
                     const reader = new FileReader();
@@ -355,13 +374,11 @@ function guardarPaso1YContinuar() {
                 });
 
                 try {
-                    // Convertimos los 4 PDFs a Base64 y los guardamos asegurando que existan
                     sessionStorage.setItem('pdf_cert', await toBase64(fileCert));
                     sessionStorage.setItem('pdf_estatuto', await toBase64(fileEstatutos));
                     sessionStorage.setItem('pdf_registro', await toBase64(fileRegistro));
                     sessionStorage.setItem('pdf_financiero', await toBase64(fileFinanciero));
 
-                    // Guardamos los datos de texto del formulario
                     const datosPaso1 = {
                         nombreLegal: document.getElementById('nombre-legal').value,
                         nombreComercial: document.getElementById('nombre-comercial').value,
@@ -380,13 +397,19 @@ function guardarPaso1YContinuar() {
                     };
 
                     sessionStorage.setItem('datos_fundacion_p1', JSON.stringify(datosPaso1));
-                    
-                    // Saltamos al paso 2 con todo listo
                     window.location.href = "registro_fundacion_paso2.html";
 
                 } catch (error) {
                     console.error("Error al procesar los PDFs:", error);
-                    alert("Hubo un error al procesar los archivos PDF. Inténtalo de nuevo.");
+                    if (typeof mostrarAlertaArca === 'function') {
+                        mostrarAlertaArca(
+                            "¡Hubo un error!",
+                            "No se pudieron procesar los archivos PDF. Inténtalo de nuevo.",
+                            { tipo: "error" }
+                        );
+                    } else {
+                        alert("Hubo un error al procesar los archivos PDF. Inténtalo de nuevo.");
+                    }
                 }
             };
 
