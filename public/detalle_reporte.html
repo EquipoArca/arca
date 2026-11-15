@@ -622,13 +622,13 @@ document.addEventListener('DOMContentLoaded', () => {
                   destinoUrl = 'guardados_usuario.html';
                   textoBoton = 'Volver a guardados';
               } else if (origen === 'mis-reportes') {
-                  destinoUrl = 'mis_reportes.html';
-                  textoBoton = 'Volver a mis reportes';
+                  destinoUrl = 'mis_publicaciones.html';
+                  textoBoton = 'Volver a mis publicaciones';
               } else if (origen === 'mapa') {
                   destinoUrl = 'mapa.html';
                   textoBoton = 'Volver al mapa';
               } else if (origen === 'fundacion' || origen === 'panel-fundacion') {
-                  destinoUrl = 'home_fundacion.html'; // O la ruta de la home de fundaciones que utilices
+                  destinoUrl = 'home.html'; // O la ruta de la home de fundaciones que utilices
                   textoBoton = 'Volver al panel';
               } else {
                   // Si no hay parámetro de origen explícito, revisamos de dónde vino el navegador o el rol
@@ -636,11 +636,11 @@ document.addEventListener('DOMContentLoaded', () => {
                   const referrer = document.referrer;
 
                   if (tipoUsuarioLocal === 'fundacion' || (referrer && referrer.includes('fundacion'))) {
-                      destinoUrl = 'home_fundacion.html';
+                      destinoUrl = 'home.html';
                       textoBoton = 'Volver al panel';
                   } else if (referrer && referrer.includes('mis_reportes')) {
-                      destinoUrl = 'mis_reportes.html';
-                      textoBoton = 'Volver a mis reportes';
+                      destinoUrl = 'reportes_fundacion.html';
+                      textoBoton = 'Volver a los    reportes';
                   } else if (referrer && referrer.includes('guardados')) {
                       destinoUrl = 'guardados_usuario.html';
                       textoBoton = 'Volver a guardados';
