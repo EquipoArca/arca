@@ -416,9 +416,10 @@
                 return;
             }
 
+            // AQUI ACTUALIZAMOS EL MENSAJE CLARO DE PROCESO DE APROBACIÓN
             mostrarAlertaArca(
-                "¡Registro exitoso! 🌸",
-                resultado.mensaje,
+                "¡Registro enviado con éxito! 🐾",
+                "El equipo de ARCA está revisando toda la información y los documentos legales que enviaste. Tu cuenta se encuentra actualmente en proceso de aprobación. Te enviaremos un correo electrónico en cuanto sea aprobada o si necesitamos comunicarnos contigo. ♡",
                 {
                     tipo: "aviso",
                     alCerrar: async () => {
@@ -474,7 +475,7 @@
                 }
 
                 .arca-alerta-tarjeta {
-                    width: min(100%, 360px);
+                    width: min(100%, 380px);
                     padding: 30px 25px 25px;
                     border: 2px solid #fff;
                     border-radius: 28px;
@@ -501,13 +502,13 @@
                 .arca-alerta-titulo {
                     margin: 0 0 10px;
                     color: #704653;
-                    font-size: 25px;
+                    font-size: 24px;
                 }
 
                 .arca-alerta-mensaje {
                     margin: 0 0 23px;
                     color: #795F68;
-                    font-size: 17px;
+                    font-size: 16px;
                     line-height: 1.5;
                     overflow-wrap: anywhere;
                 }

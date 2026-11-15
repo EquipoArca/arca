@@ -425,11 +425,13 @@
                         botonesDocs = `<span class="sin-docs">Esta solicitud no tiene documentos PDF adjuntos.</span>`;
                     }
 
-                    // Enlace mailto para enviar correo rápido de observaciones
+                    // Enlace directo a Gmail web para redactar correo con los datos precargados
                     const nombreComercialEscapado = f.Nombre_Comercial || 'Fundación';
+                    const correoDestino = f.Correo_fundacion || '';
                     const asunto = encodeURIComponent("Observación sobre tus documentos en ARCA");
                     const cuerpo = encodeURIComponent(`Hola, equipo de ${nombreComercialEscapado}.\n\nNos comunicamos desde el equipo de administración de ARCA respecto a tu solicitud de registro. Encontramos algunos detalles a revisar en la documentación:\n\n- \n\nPor favor, responde a este mensaje con la corrección necesaria.\n\nSaludos cordiales,\nEquipo ARCA 🐾`);
-                    const mailtoUrl = `mailto:${f.Correo_fundacion || ''}?subject=${asunto}&body=${cuerpo}`;
+                    
+                    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${correoDestino}&su=${asunto}&body=${cuerpo}`;
 
                     tarjeta.innerHTML = `
                         <div class="tarjeta-header">
@@ -480,8 +482,8 @@
                         </div>
 
                         <div class="tarjeta-footer">
-                            <a href="${mailtoUrl}" class="btn-mensaje" target="_blank">
-                                <i class="fa-solid fa-envelope"></i> Enviar Mensaje
+                            <a href="${gmailUrl}" class="btn-mensaje" target="_blank">
+                                <i class="fa-solid fa-envelope"></i> Enviar Mensaje (Gmail)
                             </a>
                             <button class="btn-rechazar" id="btn-rechazar-${f.id_fundacion}" onclick="rechazar(${f.id_fundacion}, '${f.Correo_fundacion}', '${(f.Nombre_Comercial || '').replace(/'/g, "\\'")}')">
                                 <i class="fa-solid fa-trash-can"></i> Rechazar y Borrar
