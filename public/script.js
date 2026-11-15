@@ -1109,7 +1109,7 @@ async function enviarCodigoOtpFundacion() {
 
     try {
         // Se envían tanto 'passcode' (que espera tu plantilla template_arca) como 'codigo'
-        await emailjs.send("service_arca", "template_arca", {
+        await emailjs.send("service_93j9cwn", "template_bqczg41", {
             to_email: correoValidado,
             passcode: codigoOtpGenerado,
             codigo: codigoOtpGenerado,
