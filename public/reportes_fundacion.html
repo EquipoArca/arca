@@ -17,13 +17,16 @@
     }
     </script>
     <style>
-        .main-content {
-            margin-top: 70px; /* 👈 Esto evita que la barra de arriba tape el contenido */
-            height: calc(100vh - 70px);
+       .main-content {
+            position: absolute;
+            top: 85px; /* Altura exacta para quedar debajo de la barra de navegación */
+            left: 0;
+            right: 0;
+            bottom: 0;
             overflow-y: auto;
             display: flex;
             justify-content: center;
-            padding: 30px 20px;
+            padding: 25px 20px;
             box-sizing: border-box;
         }
 
