@@ -1,5 +1,7 @@
 require('dotenv').config();
 
+
+
 const mysql = require('mysql2');
 const express = require('express');
 const cors = require('cors');
@@ -12,17 +14,25 @@ const { getAuth } = require('firebase-admin/auth');
 const fs = require('fs');
 
 // ==========================================
-// INICIALIZACIÓN DE FIREBASE CON ARCHIVO LOCAL
+// INICIALIZACIÓN DE FIREBASE
 // ==========================================
 let credentialCert;
 
 if (process.env.FIREBASE_SERVICE_ACCOUNT) {
     try {
         const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+
+        serviceAccount.private_key = serviceAccount.private_key
+            .replace(/\\n/g, '\n')
+            .replace(/\r\n/g, '\n')
+            .trim() + '\n';
+
         credentialCert = cert(serviceAccount);
-        console.log("✅ Credenciales de Firebase cargadas correctamente desde la variable JSON de Render.");
+
+        console.log("✅ Credenciales de Firebase cargadas correctamente.");
+
     } catch (e) {
-        console.error("❌ ERROR: No se pudo parsear el FIREBASE_SERVICE_ACCOUNT de Render.", e.message);
+        console.error("❌ ERROR al cargar FIREBASE_SERVICE_ACCOUNT:", e.message);
     }
 } else {
     try {
@@ -33,9 +43,14 @@ if (process.env.FIREBASE_SERVICE_ACCOUNT) {
     }
 }
 
+if (!credentialCert) {
+    throw new Error("No se pudieron cargar las credenciales de Firebase.");
+}
+
 initializeApp({
     credential: credentialCert
 });
+
 const app = express();
 
 app.use(express.json({ limit: '10mb' }));
@@ -1081,6 +1096,7 @@ app.get('/api/publicaciones-globales', (req, res) => {
         SELECT
             p.id_publicacion,
             'reporte' AS tipo_publicacion,
+            r.id_reporte AS id_reporte,
             r.id_reporte AS id_origen,
             r.Descripcion,
             r.Ubicacion,
@@ -1099,11 +1115,11 @@ app.get('/api/publicaciones-globales', (req, res) => {
         INNER JOIN usuarios u ON r.id_usuarios = u.id_usuarios
         LEFT JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
         WHERE r.id_usuarios NOT IN (
-            SELECT ub.id_usuario_bloqueado FROM usuarios_bloqueados ub
+            SELECT COALESCE(ub.id_usuario_bloqueado, 0) FROM usuarios_bloqueados ub
             INNER JOIN usuarios u_bloq ON ub.id_usuario_bloqueador = u_bloq.id_usuarios
             WHERE LOWER(TRIM(u_bloq.correo_usuario)) = LOWER(TRIM(?))
             UNION
-            SELECT ub.id_usuario_bloqueador FROM usuarios_bloqueados ub
+            SELECT COALESCE(ub.id_usuario_bloqueador, 0) FROM usuarios_bloqueados ub
             INNER JOIN usuarios u_bloq ON ub.id_usuario_bloqueado = u_bloq.id_usuarios
             WHERE LOWER(TRIM(u_bloq.correo_usuario)) = LOWER(TRIM(?))
         )
@@ -1113,6 +1129,7 @@ app.get('/api/publicaciones-globales', (req, res) => {
         SELECT
             p.id_publicacion,
             'adopcion' AS tipo_publicacion,
+            pa.id_publicaciones_adopcion AS id_reporte,
             pa.id_publicaciones_adopcion AS id_origen,
             a.descripcion_animal AS Descripcion,
             CONCAT(a.ciudad, ', ', a.barrio) AS Ubicacion,
@@ -1131,11 +1148,11 @@ app.get('/api/publicaciones-globales', (req, res) => {
         INNER JOIN animal a ON pa.id_animal = a.id_animal
         INNER JOIN usuarios u ON pa.id_usuarios = u.id_usuarios
         WHERE pa.id_usuarios NOT IN (
-            SELECT ub.id_usuario_bloqueado FROM usuarios_bloqueados ub
+            SELECT COALESCE(ub.id_usuario_bloqueado, 0) FROM usuarios_bloqueados ub
             INNER JOIN usuarios u_bloq ON ub.id_usuario_bloqueador = u_bloq.id_usuarios
             WHERE LOWER(TRIM(u_bloq.correo_usuario)) = LOWER(TRIM(?))
             UNION
-            SELECT ub.id_usuario_bloqueador FROM usuarios_bloqueados ub
+            SELECT COALESCE(ub.id_usuario_bloqueador, 0) FROM usuarios_bloqueados ub
             INNER JOIN usuarios u_bloq ON ub.id_usuario_bloqueado = u_bloq.id_usuarios
             WHERE LOWER(TRIM(u_bloq.correo_usuario)) = LOWER(TRIM(?))
         )
@@ -1145,6 +1162,7 @@ app.get('/api/publicaciones-globales', (req, res) => {
         SELECT
             p.id_publicacion,
             'evento' AS tipo_publicacion,
+            e.id_evento AS id_reporte,
             e.id_evento AS id_origen,
             e.detalles_adicionales AS Descripcion,
             e.ubicacion AS Ubicacion,
@@ -1220,29 +1238,57 @@ app.delete('/api/adopciones/:id', (req, res) => {
     });
 });
 
+
 app.get('/api/reportes/:id', (req, res) => {
-    const idReporte = req.params.id;
+    const idReporte = Number(req.params.id);
+
+    if (!Number.isInteger(idReporte) || idReporte <= 0) {
+        return res.status(400).json({
+            error: "ID de reporte inválido."
+        });
+    }
 
     const query = `
-        SELECT r.*, tr.Nombre_tipo_reporte
+        SELECT
+            r.*,
+            tr.Nombre_tipo_reporte,
+            u.nombre_usuario,
+            u.correo_usuario,
+            u.tipo_usuario,
+            p.id_publicacion
         FROM reportes r
-        LEFT JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
+        INNER JOIN usuarios u
+            ON r.id_usuarios = u.id_usuarios
+        LEFT JOIN tipo_reporte tr
+            ON r.id_tipo_reporte = tr.id_tipo_reporte
+        LEFT JOIN publicaciones p
+            ON p.id_reporte = r.id_reporte
         WHERE r.id_reporte = ?
+        LIMIT 1
     `;
 
     db.query(query, [idReporte], (err, results) => {
         if (err) {
-            console.error("❌ Error al consultar el reporte:", err);
-            return res.status(500).json({ error: "Error en el servidor" });
+            console.error(
+                "❌ Error al consultar el reporte:",
+                err.message
+            );
+
+            return res.status(500).json({
+                error: "Error en el servidor"
+            });
         }
 
         if (results.length === 0) {
-            return res.status(404).json({ error: "Reporte no encontrado" });
+            return res.status(404).json({
+                error: "Reporte no encontrado"
+            });
         }
 
         res.json(results[0]);
     });
 });
+
 
 app.put('/api/reportes/:id', uploadMiddleware, (req, res) => {
     try {
