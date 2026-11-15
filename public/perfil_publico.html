@@ -464,19 +464,24 @@
             // ==========================================
             const esMiPerfil = (correoReal.toLowerCase().trim() === correoLogueado.toLowerCase().trim());
 
-            if (esMiPerfil) {
-                // Si es tu perfil, ocultamos o transformamos los botones de interacción ajena
-                const btnSeguir = document.getElementById('btn-seguir');
-                if (btnSeguir) btnSeguir.style.display = 'none'; // No te puedes seguir a ti mismo
+          if (esMiPerfil) {
+        // Si es tu perfil, ocultamos o transformamos los botones de interacción ajena
+        const btnSeguir = document.getElementById('btn-seguir');
+        if (btnSeguir) btnSeguir.style.display = 'none'; // No te puedes seguir a ti mismo
 
-                const btnAdoptante = document.getElementById('btn-solicitud-adoptante');
-                if (btnAdoptante) {
-                    btnAdoptante.textContent = "Editar mi perfil ⚙️";
-                    btnAdoptante.style.background = "#e8a87c";
-                    btnAdoptante.onclick = () => {
-                        window.location.href = 'perfil_usuario.html';
-                    };
-                }
+        // NUEVA LÍNEA PARA OCULTAR DENUNCIAR Y BLOQUEAR:
+        const contenedorAccionesAjena = document.getElementById('acciones-perfil-ajeno');
+        if (contenedorAccionesAjena) contenedorAccionesAjena.style.display = 'none';
+
+        const btnAdoptante = document.getElementById('btn-solicitud-adoptante');
+        if (btnAdoptante) {
+            btnAdoptante.textContent = "Editar mi perfil ⚙️";
+            btnAdoptante.style.background = "#e8a87c";
+            btnAdoptante.onclick = () => {
+                window.location.href = 'perfil_usuario.html';
+            };
+        }
+    
             } else {
                 // Si es el perfil de otro usuario, mostramos todo normal
                 actualizarBotonSeguirUI(usuarioSeguidoActual);
