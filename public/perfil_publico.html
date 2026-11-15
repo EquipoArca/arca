@@ -355,9 +355,8 @@
                       </div>
                   </div>
 
-                  <!-- ENVUELVE LOS BOTONES AQUÍ -->
                   <div id="seccion-denuncia-bloqueo">
-                      <button class="btn-accion-peligro" onclick="alert('Funcionalidad de denuncia enviada.')">Denunciar perfil</button>
+                      <button class="btn-accion-peligro" onclick="mostrarAlertaArca('¡Denuncia enviada! 🌸', 'La funcionalidad de denuncia ha sido registrada correctamente.', { tipo: 'aviso' })">Denunciar perfil</button>
                       <button class="btn-accion-peligro" onclick="bloquearUsuarioActual()">Bloquear usuario</button>
                   </div>
               </div>
@@ -420,15 +419,22 @@
         const correoLogueado = obtenerCorreoSesion();
 
         if (!usernamePerfil || usernamePerfil === 'null' || usernamePerfil === 'undefined') {
-            alert("No se especificó un usuario válido.");
-            window.location.href = 'home.html';
+            mostrarAlertaArca(
+                "¡Ups! ♡",
+                "No se especificó un usuario válido.",
+                {
+                    tipo: "error",
+                    alCerrar: () => {
+                        window.location.href = 'home.html';
+                    }
+                }
+            );
             return;
         }
 
         try {
             const res = await fetch(`/api/perfil-publico/${encodeURIComponent(usernamePerfil)}?correo_visitante=${encodeURIComponent(correoLogueado)}`);
             if (!res.ok) {
-                // Si hay bloqueo o no existe, mostramos el mensaje de perfil no disponible
                 document.querySelector('.main-content').innerHTML = `
                     <div style="text-align: center; padding: 60px 20px; font-family: 'Itim', cursive;">
                         <i class="fa-solid fa-user-slash" style="font-size: 55px; color: #d9534f; margin-bottom: 15px;"></i>
@@ -462,36 +468,29 @@
             document.getElementById('contacto-tel').innerHTML = `<i class="fa-brands fa-whatsapp" style="color: #25d366; font-size: 16px;"></i> <span>${telefonoReal}</span>`;
             document.getElementById('contacto-correo').innerHTML = `<i class="fa-solid fa-envelope" style="color: #007bff; font-size: 16px;"></i> <span>${correoReal}</span>`;
 
-            // ==========================================
-            // DETECTAR SI ES TU PROPIO PERFIL
-            // ==========================================
+            const esMiPerfil = (correoReal.toLowerCase().trim() === correoLogueado.toLowerCase().trim());
 
-const esMiPerfil = (correoReal.toLowerCase().trim() === correoLogueado.toLowerCase().trim());
+            const seccionDenunciaBloqueo = document.getElementById('seccion-denuncia-bloqueo');
+            if (seccionDenunciaBloqueo) {
+                seccionDenunciaBloqueo.style.display = esMiPerfil ? 'none' : 'block';
+            }
 
-    // Ocultar o mostrar el bloque de denunciar/bloquear según si es tu perfil
-    const seccionDenunciaBloqueo = document.getElementById('seccion-denuncia-bloqueo');
-    if (seccionDenunciaBloqueo) {
-        seccionDenunciaBloqueo.style.display = esMiPerfil ? 'none' : 'block';
-    }
+            if (esMiPerfil) {
+                const btnSeguir = document.getElementById('btn-seguir');
+                if (btnSeguir) btnSeguir.style.display = 'none'; 
 
-    if (esMiPerfil) {
-        // Si es tu perfil...
-        const btnSeguir = document.getElementById('btn-seguir');
-        if (btnSeguir) btnSeguir.style.display = 'none'; 
-
-        const btnAdoptante = document.getElementById('btn-solicitud-adoptante');
-        if (btnAdoptante) {
-            btnAdoptante.textContent = "Editar mi perfil ⚙️";
-            btnAdoptante.style.background = "#e8a87c";
-            btnAdoptante.onclick = () => {
-                window.location.href = 'perfil_usuario.html';
-            };
-        }
-    } else {
-        // Si es el perfil de otro usuario...
-        actualizarBotonSeguirUI(usuarioSeguidoActual);
-        actualizarEstadoBotonSolicitud(estadoSolicitudActual);
-    }
+                const btnAdoptante = document.getElementById('btn-solicitud-adoptante');
+                if (btnAdoptante) {
+                    btnAdoptante.textContent = "Editar mi perfil ⚙️";
+                    btnAdoptante.style.background = "#e8a87c";
+                    btnAdoptante.onclick = () => {
+                        window.location.href = 'perfil_usuario.html';
+                    };
+                }
+            } else {
+                actualizarBotonSeguirUI(usuarioSeguidoActual);
+                actualizarEstadoBotonSolicitud(estadoSolicitudActual);
+            }
 
             cargarPublicacionesDeUsuario(usernamePerfil, idUsuarioPerfil);
 
@@ -499,6 +498,7 @@ const esMiPerfil = (correoReal.toLowerCase().trim() === correoLogueado.toLowerCa
             console.error("Error al cargar perfil:", error);
         }
     }
+
       function actualizarEstadoBotonSolicitud(estado) {
           const btnAdoptante = document.getElementById('btn-solicitud-adoptante');
 
@@ -512,7 +512,7 @@ const esMiPerfil = (correoReal.toLowerCase().trim() === correoLogueado.toLowerCa
           } else if (estado === 'pendiente') {
               btnAdoptante.textContent = "Solicitud pendiente...";
               btnAdoptante.style.background = "#ccc";
-              btnAdoptante.disabled = true; // IMPIDE REENVIAR MIENTRAS ESTÉ PENDIENTE
+              btnAdoptante.disabled = true;
               btnAdoptante.onclick = null;
           } else {
               btnAdoptante.textContent = "Solicitar ver perfil de adoptante";
@@ -536,7 +536,11 @@ const esMiPerfil = (correoReal.toLowerCase().trim() === correoLogueado.toLowerCa
       async function alternarSeguir() {
           const correoLogueado = obtenerCorreoSesion();
           if (!correoLogueado) {
-              alert("Debes iniciar sesión para seguir a otros usuarios.");
+              mostrarAlertaArca(
+                  "¡Inicia sesión! ♡",
+                  "Debes iniciar sesión para seguir a otros usuarios.",
+                  { tipo: "aviso" }
+              );
               return;
           }
 
@@ -565,12 +569,20 @@ const esMiPerfil = (correoReal.toLowerCase().trim() === correoLogueado.toLowerCa
       async function solicitarVerAdoptante() {
           const correoLogueado = obtenerCorreoSesion();
           if (!correoLogueado) {
-              alert("Debes iniciar sesión para enviar una solicitud.");
+              mostrarAlertaArca(
+                  "¡Inicia sesión! ♡",
+                  "Debes iniciar sesión para enviar una solicitud.",
+                  { tipo: "aviso" }
+              );
               return;
           }
 
           if (estadoSolicitudActual === 'pendiente') {
-              alert("Ya tienes una solicitud pendiente enviada a este usuario.");
+              mostrarAlertaArca(
+                  "Solicitud pendiente",
+                  "Ya tienes una solicitud pendiente enviada a este usuario.",
+                  { tipo: "aviso" }
+              );
               return;
           }
 
@@ -581,7 +593,12 @@ const esMiPerfil = (correoReal.toLowerCase().trim() === correoLogueado.toLowerCa
                   body: JSON.stringify({ correo_solicitante: correoLogueado, id_propietario: idUsuarioPerfil })
               });
               const data = await res.json();
-              alert(data.mensaje || "Solicitud enviada con éxito");
+              
+              mostrarAlertaArca(
+                  "¡Solicitud enviada! 🌸",
+                  data.mensaje || "Solicitud enviada con éxito",
+                  { tipo: "aviso" }
+              );
 
               if (data.estado) {
                   estadoSolicitudActual = data.estado;
@@ -642,44 +659,83 @@ const esMiPerfil = (correoReal.toLowerCase().trim() === correoLogueado.toLowerCa
               console.error("Error cargando publicaciones del usuario", e);
           }
       }
-    async function bloquearUsuarioActual() {
-    const correoLogueado = obtenerCorreoSesion();
-    if (!correoLogueado) {
-        alert("Debes iniciar sesión para bloquear a un usuario.");
-        window.location.href = 'login.html';
-        return;
-    }
 
-    if (!idUsuarioPerfil) {
-        alert("No se pudo identificar al usuario que deseas bloquear.");
-        return;
-    }
+      async function bloquearUsuarioActual() {
+          const correoLogueado = obtenerCorreoSesion();
+          if (!correoLogueado) {
+              mostrarAlertaArca(
+                  "¡Inicia sesión! ♡",
+                  "Debes iniciar sesión para bloquear a un usuario.",
+                  {
+                      tipo: "aviso",
+                      alCerrar: () => {
+                          window.location.href = 'login.html';
+                      }
+                  }
+              );
+              return;
+          }
 
-    if (confirm("¿Estás seguro de que deseas bloquear a este usuario? Dejarás de ver sus publicaciones y contenido.")) {
-        try {
-            const respuesta = await fetch('/api/bloquear-usuario', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    correo_bloqueador: correoLogueado,
-                    id_usuario_bloqueado: idUsuarioPerfil
-                })
-            });
+          if (!idUsuarioPerfil) {
+              mostrarAlertaArca(
+                  "¡Ups! ♡",
+                  "No se pudo identificar al usuario que deseas bloquear.",
+                  { tipo: "error" }
+              );
+              return;
+          }
 
-            const resultado = await respuesta.json();
-            
-            if (respuesta.ok) {
-                alert("Usuario bloqueado correctamente.");
-                window.location.href = 'home.html'; // Redirigir al inicio después de bloquear
-            } else {
-                alert(resultado.error || "No se pudo bloquear al usuario.");
-            }
-        } catch (error) {
-            console.error("Error en la solicitud de bloqueo:", error);
-            alert("Ocurrió un error al intentar bloquear al usuario.");
-        }
-    }
- }
-</script>
+          mostrarAlertaArca(
+              "¿Bloquear usuario?",
+              "¿Estás seguro de que deseas bloquear a este usuario? Dejarás de ver sus publicaciones y contenido.",
+              {
+                  tipo: "pregunta",
+                  confirmar: true,
+                  textoBoton: "Sí, bloquear",
+                  textoCancelar: "Cancelar",
+                  alConfirmar: async () => {
+                      try {
+                          const respuesta = await fetch('/api/bloquear-usuario', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({
+                                  correo_bloqueador: correoLogueado,
+                                  id_usuario_bloqueado: idUsuarioPerfil
+                              })
+                          });
+
+                          const resultado = await respuesta.json();
+                          
+                          if (respuesta.ok) {
+                              mostrarAlertaArca(
+                                  "¡Usuario bloqueado! 🌸",
+                                  "Usuario bloqueado correctamente.",
+                                  {
+                                      tipo: "aviso",
+                                      alCerrar: () => {
+                                          window.location.href = 'home.html';
+                                      }
+                                  }
+                              );
+                          } else {
+                              mostrarAlertaArca(
+                                  "No se pudo bloquear",
+                                  resultado.error || "No se pudo bloquear al usuario.",
+                                  { tipo: "error" }
+                              );
+                          }
+                      } catch (error) {
+                          console.error("Error en la solicitud de bloqueo:", error);
+                          mostrarAlertaArca(
+                              "Error de conexión ♡",
+                              "Ocurrió un error al intentar bloquear al usuario.",
+                              { tipo: "error" }
+                          );
+                      }
+                  }
+              }
+          );
+      }
+  </script>
 </body>
 </html>
