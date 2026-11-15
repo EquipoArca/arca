@@ -608,7 +608,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="script.js"></script>
-  <script>
+ <script>
       document.addEventListener('DOMContentLoaded', () => {
           const btnToggleMenu = document.getElementById('btn-toggle-menu');
           const sidebar = document.getElementById('sidebar');
@@ -641,61 +641,36 @@
       });
 
       function copiarAlPortapapeles(texto) {
-    navigator.clipboard.writeText(texto).then(() => {
-        mostrarAlertaArca(
-            "¡Copiado al portapapeles!",
-            `Se ha copiado "${texto}" correctamente. 🌸`,
-            { tipo: "aviso" } 
-        );
-    }).catch(err => {
-        console.error('Error al copiar: ', err);
-        mostrarAlertaArca(
-            "No se pudo copiar ",
-            "Inténtalo manualmente ♡.",
-            { tipo: "error" } 
-        );
-    });
-}
+          navigator.clipboard.writeText(texto).then(() => {
+              mostrarAlertaArca("¡Copiado al portapapeles!", `Se ha copiado "${texto}" correctamente. 🌸`, { tipo: "aviso" });
+          }).catch(err => {
+              console.error('Error al copiar: ', err);
+          });
+      }
 
       async function obtenerNombreUbicacion(lat, lon) {
           if (!lat || !lon) return "Ubicación no especificada";
           try {
               const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`;
-              const respuesta = await fetch(url, {
-                  headers: {
-                      'Accept-Language': 'es',
-                      'User-Agent': 'ARCA-App-Mascotas'
-                  }
-              });
-              
-              if (!respuesta.ok) throw new Error("Error en el servidor de mapas");
-              
+              const respuesta = await fetch(url, { headers: { 'Accept-Language': 'es', 'User-Agent': 'ARCA-App-Mascotas' } });
+              if (!respuesta.ok) throw new Error();
               const datos = await respuesta.json();
-              
               if (datos && datos.address) {
                   const addr = datos.address;
-                  const calle = addr.road || addr.pedestrian || addr.footway || "";
+                  const calle = addr.road || addr.pedestrian || "";
                   const numero = addr.house_number || "";
-                  const barrio = addr.neighbourhood || addr.suburb || addr.city_district || "";
-                  const ciudad = addr.town || addr.city || addr.state || "Medellín";
-                  
-                  if (calle) {
-                      let direccionExacta = numero ? `${calle} #${numero}` : calle;
-                      if (barrio && barrio !== calle) {
-                          direccionExacta += `, ${barrio}`;
-                      }
-                      return direccionExacta;
-                  }
-                  
-                  return barrio && barrio !== ciudad ? `${barrio}, ${ciudad}` : ciudad;
+                  const barrio = addr.neighbourhood || addr.suburb || "";
+                  const ciudad = addr.town || addr.city || "Medellín";
+                  if (calle) return numero ? `${calle} #${numero}, ${barrio || ciudad}` : `${calle}, ${barrio || ciudad}`;
+                  return barrio ? `${barrio}, ${ciudad}` : ciudad;
               }
-              return "San Cristóbal, Medellín (Ubicación aproximada)";
+              return "Medellín (Ubicación aproximada)";
           } catch (error) {
-              return "San Cristóbal, Medellín (Ubicación aproximada)";
+              return "Medellín (Ubicación aproximada)";
           }
       }
 
-      let: urlDestinoGlobal = "";
+      let urlDestinoGlobal = "";
 
       function abrirModalArca(titulo, mensaje, url) {
           document.getElementById('modalTitulo').textContent = titulo;
@@ -709,9 +684,7 @@
       }
 
       document.getElementById('modalBtnAceptar').addEventListener('click', () => {
-          if (urlDestinoGlobal) {
-              window.open(urlDestinoGlobal, '_blank');
-          }
+          if (urlDestinoGlobal) window.open(urlDestinoGlobal, '_blank');
           cerrarModalArca();
       });
 
@@ -720,52 +693,52 @@
           const reporteId = params.get('id');
 
           if (!reporteId) {
-              mostrarAlertaArca("No se especificó ningún reporte.",
-                "Te redigiremos a novedades. ♡"
-              );
-              window.location.href = 'novedades.html';
+              mostrarAlertaArca("No se especificó ningún reporte.", "Te redireccionaremos a novedades. ♡", { tipo: "error", alCerrar: () => window.location.href = 'novedades.html' });
               return;
           }
 
           try {
+              // 1. Obtener la lista global de publicaciones para encontrar el reporte al instante
               const respuesta = await fetch(`/api/publicaciones-globales`);
-              if (!respuesta.ok) throw new Error("No se pudo cargar la información.");
+              if (!respuesta.ok) throw new Error("No se pudo cargar la información global.");
               
               const publicaciones = await respuesta.json();
               
-              const reporte = publicaciones.find(r => 
+              let reporteData = publicaciones.find(r => 
                   Number(r.id_reporte) === Number(reporteId) || 
                   Number(r.id_publicacion) === Number(reporteId) || 
                   Number(r.id_origen) === Number(reporteId)
               );
 
-              let datosReporteFinal = reporte;
-              if (!datosReporteFinal) {
-                  try {
-                      const resIndividual = await fetch(`/api/reportes/${reporteId}`);
-                      if (resIndividual.ok) {
-                          datosReporteFinal = await resIndividual.json();
-                      }
-                  } catch (e) {
-                      console.warn("No se pudo obtener por ruta individual, usando lista global.");
+              // Respaldo por ruta individual si no estuviera en la lista global
+              if (!reporteData) {
+                  const resIndividual = await fetch(`/api/reportes/${reporteId}`);
+                  if (resIndividual.ok) {
+                      reporteData = await resIndividual.json();
                   }
               }
 
-              if (!datosReporteFinal) {
-                  throw new Error("Reporte no encontrado.");
+              if (!reporteData) {
+                  throw new Error("Reporte no encontrado en el servidor.");
               }
-              
-              const reporteData = datosReporteFinal;
 
-              document.getElementById('lbl-fecha').textContent = `Publicado el ${reporteData.Fecha_reporte ? reporteData.Fecha_reporte.split('T')[0] : ''}`;
+              // 2. Rellenar datos básicos en la interfaz
+              document.getElementById('lbl-fecha').textContent = `Publicado el ${reporteData.Fecha_reporte ? reporteData.Fecha_reporte.split('T')[0] : 'Reciente'}`;
               document.getElementById('lbl-tipo-reporte').textContent = reporteData.nombre_tipo_reporte || reporteData.Nombre_tipo_reporte || 'Reporte General';
               document.getElementById('lbl-descripcion').textContent = reporteData.Descripcion || 'Sin descripción proporcionada.';
               
+              // 3. Procesar la imagen correctamente (deserializando el array JSON si existe)
               if (reporteData.img_reporte) {
-                  document.getElementById('img-reporte').src = reporteData.img_reporte;
+                  try {
+                      const parsed = JSON.parse(reporteData.img_reporte);
+                      document.getElementById('img-reporte').src = Array.isArray(parsed) ? parsed[0] : reporteData.img_reporte;
+                  } catch (e) {
+                      document.getElementById('img-reporte').src = reporteData.img_reporte;
+                  }
               }
 
-              let textoUbicacionOriginal = reporteData.Ubicacion || reporteData.ubicacion || 'Ubicación no especificada';
+              // 4. Ubicación
+              let textoUbicacionOriginal = reporteData.Ubicacion || 'Ubicación no especificada';
               let textoUbicacionLimpia = textoUbicacionOriginal.replace('Ubicación GPS:', '').trim();
               let textoUbicacionFinal = textoUbicacionOriginal;
 
@@ -773,7 +746,6 @@
                   const partes = textoUbicacionLimpia.split(',');
                   const latPosible = parseFloat(partes[0].trim());
                   const lonPosible = parseFloat(partes[1].trim());
-
                   if (!isNaN(latPosible) && !isNaN(lonPosible)) {
                       textoUbicacionFinal = await obtenerNombreUbicacion(latPosible, lonPosible);
                       reporteData.latitud = latPosible;
@@ -787,219 +759,118 @@
               }
               document.getElementById('lbl-ubicacion').innerHTML = htmlUbicacion;
 
+              // 5. Contactos
               let contactoHTML = "";
               const tel = reporteData.telefono_contacto ? reporteData.telefono_contacto.trim() : "";
               const correo = reporteData.correo_contacto ? reporteData.correo_contacto.trim() : "";
 
-              const urlGmail = correo ? `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(correo)}&su=${encodeURIComponent("Sobre tu reporte en ARCA")}&body=${encodeURIComponent("Hola, vi tu publicación en ARCA y me interesa ayudar con el caso...")}` : "";
-              const urlWhatsapp = tel ? `https://wa.me/${tel.replace(/\D/g,'')}` : "";
-
               if (tel && correo) {
                   contactoHTML = `
                       <div class="contacto-fila-item">
-                          <a href="javascript:void(0)" onclick="abrirModalArca('Abrir WhatsApp', '¿Deseas abrir WhatsApp para escribir al número ${tel}?', '${urlWhatsapp}')" class="btn-contacto-link whatsapp">
-                              <i class="fa-brands fa-whatsapp"></i> ${tel}
-                          </a>
-                          <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${tel}')" title="Copiar teléfono">
-                              <i class="fa-solid fa-copy"></i> Copiar
-                          </button>
+                          <span style="color: #25d366;"><i class="fa-brands fa-whatsapp"></i> ${tel}</span>
+                          <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${tel}')"><i class="fa-solid fa-copy"></i></button>
                       </div>
                       <div class="contacto-fila-item">
-                          <a href="javascript:void(0)" onclick="abrirModalArca('Abrir Gmail', '¿Deseas redactar un correo a ${correo} usando Gmail?', '${urlGmail}')" class="btn-contacto-link correo">
-                              <i class="fa-solid fa-envelope"></i> ${correo}
-                          </a>
-                          <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${correo}')" title="Copiar correo">
-                              <i class="fa-solid fa-copy"></i> Copiar
-                          </button>
+                          <span style="color: #007bff;"><i class="fa-solid fa-envelope"></i> ${correo}</span>
+                          <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${correo}')"><i class="fa-solid fa-copy"></i></button>
                       </div>
                   `;
               } else if (tel) {
-                  contactoHTML = `
-                      <div class="contacto-fila-item">
-                          <a href="javascript:void(0)" onclick="abrirModalArca('Abrir WhatsApp', '¿Deseas abrir WhatsApp para escribir al número ${tel}?', '${urlWhatsapp}')" class="btn-contacto-link whatsapp">
-                              <i class="fa-brands fa-whatsapp"></i> ${tel}
-                          </a>
-                          <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${tel}')" title="Copiar teléfono">
-                              <i class="fa-solid fa-copy"></i> Copiar
-                          </button>
-                      </div>
-                  `;
+                  contactoHTML = `<div class="contacto-fila-item"><span style="color: #25d366;"><i class="fa-brands fa-whatsapp"></i> ${tel}</span></div>`;
               } else if (correo) {
-                  contactoHTML = `
-                      <div class="contacto-fila-item">
-                          <a href="javascript:void(0)" onclick="abrirModalArca('Abrir Gmail', '¿Deseas redactar un correo a ${correo} usando Gmail?', '${urlGmail}')" class="btn-contacto-link correo">
-                              <i class="fa-solid fa-envelope"></i> ${correo}
-                          </a>
-                          <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${correo}')" title="Copiar correo">
-                              <i class="fa-solid fa-copy"></i> Copiar
-                          </button>
-                      </div>
-                  `;
+                  contactoHTML = `<div class="contacto-fila-item"><span style="color: #007bff;"><i class="fa-solid fa-envelope"></i> ${correo}</span></div>`;
               } else {
-                  contactoHTML = `<span style="color: #666; font-style: italic;"><i class="fa-solid fa-comments"></i> Disponible por chat interno de la app</span>`;
+                  contactoHTML = `<span style="color: #666; font-style: italic;">Disponible por chat interno</span>`;
               }
               document.getElementById('lbl-contacto').innerHTML = contactoHTML;
 
+              // 6. Autor
               const nombreUsuario = reporteData.nombre_usuario || 'usuario';
               document.getElementById('nombre-autor-texto').textContent = `@${nombreUsuario}`;
-              
               const linkAutor = document.getElementById('link-autor');
               if (linkAutor) {
                   linkAutor.href = `perfil_publico.html?user=${encodeURIComponent(nombreUsuario)}`;
               }
-// --- VERIFICACIÓN DE AUTOR ROBUSTA POR ID Y CORREO ---
-                const contenedorBoton = document.getElementById('contenedor-novedades') || document.getElementById('contenedor-boton-accion');
 
-                firebase.auth().onAuthStateChanged(async (user) => {
-                    const correoLogueado = user ? user.email : (localStorage.getItem('correo_usuario') || localStorage.getItem('correo'));
-                    
-                    if (!correoLogueado) {
-                        contenedorBoton.innerHTML = `
-                            <a href="login.html" class="detalle-btn-accion">
-                                <i class="fa-regular fa-bookmark"></i> Inicia sesión para guardar
-                            </a>
-                        `;
-                        return;
-                    }
+              // 7. Verificación de sesión y permisos (Dueño vs Guardado) sin dejar el botón congelado
+              const contenedorBoton = document.getElementById('contenedor-boton-accion');
+              
+              firebase.auth().onAuthStateChanged(async (user) => {
+                  const correoLogueado = user ? user.email : (localStorage.getItem('correo_usuario') || localStorage.getItem('correo'));
+                  
+                  if (!correoLogueado) {
+                      contenedorBoton.innerHTML = `<a href="login.html" class="detalle-btn-accion"><i class="fa-regular fa-bookmark"></i> Inicia sesión</a>`;
+                      return;
+                  }
 
-                    try {
-                        // 1. Consultamos el ID del usuario logueado actualmente en la base de datos
-                        const resUser = await fetch(`/api/obtener-usuario?correo=${encodeURIComponent(correoLogueado)}`);
-                        if (!resUser.ok) throw new Error("No se pudo obtener el usuario actual");
-                        const datosUsuarioLogueado = await resUser.json();
-                        const idUsuarioLogueado = Number(datosUsuarioLogueado.id_usuarios);
+                  try {
+                      const resUser = await fetch(`/api/obtener-usuario?correo=${encodeURIComponent(correoLogueado)}`);
+                      const datosUsuarioLogueado = resUser.ok ? await resUser.json() : null;
+                      const idUsuarioLogueado = datosUsuarioLogueado ? Number(datosUsuarioLogueado.id_usuarios) : null;
+                      const idCreadorReporte = Number(reporteData.id_usuarios);
 
-                        // 2. Obtenemos el ID del creador del reporte (viene en reporteData.id_usuarios)
-                        const idCreadorReporte = Number(reporteData.id_usuarios);
+                      const esDueño = (idUsuarioLogueado && idCreadorReporte && idUsuarioLogueado === idCreadorReporte) || 
+                                      (reporteData.correo_usuario && reporteData.correo_usuario.toLowerCase().trim() === correoLogueado.toLowerCase().trim());
 
-                        // Comparamos directamente por ID de base de datos (¡Infalible!)
-                        let esDueño = (idUsuarioLogueado && idCreadorReporte && idUsuarioLogueado === idCreadorReporte);
+                      if (esDueño) {
+                          contenedorBoton.innerHTML = `
+                              <div style="display: flex; gap: 8px;">
+                                  <a href="formularior.html?editar=${reporteData.id_reporte || reporteId}" class="detalle-btn-accion detalle-btn-editar">
+                                      <i class="fa-solid fa-pen-to-square"></i> Editar
+                                  </a>
+                                  <button class="detalle-btn-accion" id="btn-eliminar-reporte" style="background: #ffe5dd; color: #d9534f; border-color: #f4c2c4;">
+                                      <i class="fa-solid fa-trash"></i> Eliminar
+                                  </button>
+                              </div>
+                          `;
+                          document.getElementById('btn-eliminar-reporte').addEventListener('click', async () => {
+                              if (confirm("¿Estás seguro de eliminar este reporte?")) {
+                                  const resDel = await fetch(`/api/reportes/${reporteData.id_reporte || reporteId}`, { method: 'DELETE' });
+                                  if (resDel.ok) window.location.href = 'novedades.html';
+                                  else alert("No se pudo eliminar el reporte.");
+                              }
+                          });
+                      } else {
+                          const idPublicacionGlobal = reporteData.id_publicacion || reporteId;
+                          const resGuards = await fetch(`/api/guardados/ids/${encodeURIComponent(correoLogueado)}`);
+                          const idsGuardados = resGuards.ok ? await resGuards.json() : [];
+                          const estaGuardada = idsGuardados.map(Number).includes(Number(idPublicacionGlobal));
 
-                        // Respaldo por si el reporte no traía el id_usuarios pero sí el correo
-                        if (!esDueño && reporteData.correo_usuario && correoLogueado) {
-                            if (reporteData.correo_usuario.toLowerCase().trim() === correoLogueado.toLowerCase().trim()) {
-                                esDueño = true;
-                            }
-                        }
+                          if (estaGuardada) {
+                              contenedorBoton.innerHTML = `<button class="detalle-btn-accion" id="btn-accion-guardado" style="background: #ffe5dd; color: #d9534f;"><i class="fa-solid fa-bookmark"></i> Guardado</button>`;
+                              document.getElementById('btn-accion-guardado').addEventListener('click', async () => {
+                                  await fetch('/api/quitar-guardado', {
+                                      method: 'POST',
+                                      headers: { 'Content-Type': 'application/json' },
+                                      body: JSON.stringify({ correo: correoLogueado, id_publicacion: Number(idPublicacionGlobal) })
+                                  });
+                                  location.reload();
+                              });
+                          } else {
+                              contenedorBoton.innerHTML = `<button class="detalle-btn-accion" id="btn-accion-guardado"><i class="fa-regular fa-bookmark"></i> Guardar</button>`;
+                              document.getElementById('btn-accion-guardado').addEventListener('click', async () => {
+                                  await fetch('/api/guardar-publicacion', {
+                                      method: 'POST',
+                                      headers: { 'Content-Type': 'application/json' },
+                                      body: JSON.stringify({ correo: correoLogueado, id_publicacion: Number(idPublicacionGlobal) })
+                                  });
+                                  location.reload();
+                              });
+                          }
+                      }
+                  } catch (errAuth) {
+                      console.error("Error al validar permisos de usuario:", errAuth);
+                      contenedorBoton.innerHTML = `<span style="font-size: 13px; color: #775a4c;">Acciones no disponibles</span>`;
+                  }
+              });
 
-                        if (esDueño) {
-                            // SI ES EL DUEÑO: Botones Editar y Eliminar
-                            contenedorBoton.innerHTML = `
-                                <div style="display: flex; gap: 8px;">
-                                    <a href="formularior.html?editar=${reporteData.id_reporte || reporteId}" class="detalle-btn-accion detalle-btn-editar">
-                                        <i class="fa-solid fa-pen-to-square"></i> Editar
-                                    </a>
-                                    <button class="detalle-btn-accion" id="btn-eliminar-reporte" style="background: #ffe5dd; color: #d9534f; border-color: #f4c2c4;">
-                                        <i class="fa-solid fa-trash"></i> Eliminar
-                                    </button>
-                                </div>
-                            `;
-
-                            document.getElementById('btn-eliminar-reporte').addEventListener('click', async () => {
-    if (!confirm("¿Estás seguro de que deseas eliminar este reporte permanentemente?")) {
-        return;
-    }
-
-    try {
-        const idAResolver = reporteData.id_reporte || reporteId;
-        const resDel = await fetch(`/api/reportes/${idAResolver}`, { method: 'DELETE' });
-
-        if (!resDel.ok) {
-            mostrarAlertaArca(
-                "¡Ups, algo salió mal!",
-                "No se pudo eliminar el reporte. Inténtalo de nuevo. 🌸",
-                { tipo: "aviso" }
-            );
-            return;
-        }
-
-        mostrarAlertaArca(
-            "¡Reporte eliminado!",
-            "El reporte se ha borrado correctamente. 🌸",
-            { tipo: "aviso" }
-        );
-        window.location.href = 'novedades.html';
-
-    } catch (err) {
-        console.error("Error al eliminar:", err);
-        mostrarAlertaArca(
-            "Error de conexión",
-            "No pudimos comunicarnos con el servidor. ♡",
-            { tipo: "error" }
-        );
-        return;
-    }
-});
-
-                        } else {
-                            // SI NO ES EL DUEÑO: Lógica de guardado normal
-                            let pubEncontrada = publicaciones.find(p => 
-                                (p.tipo_publicacion === 'reporte' && Number(p.id_origen) === Number(reporteId)) ||
-                                Number(p.id_publicacion) === Number(reporteId) ||
-                                Number(p.id_reporte) === Number(reporteId)
-                            );
-                            
-                            const idPublicacionGlobal = pubEncontrada ? pubEncontrada.id_publicacion : reporteId;
-                            const resGuards = await fetch(`/api/guardados/ids/${encodeURIComponent(correoLogueado)}`);
-                            const idsGuardados = await resGuards.json();
-                            const estaGuardada = idsGuardados.map(Number).includes(Number(idPublicacionGlobal));
-
-                            if (estaGuardada) {
-                                contenedorBoton.innerHTML = `
-                                    <button class="detalle-btn-accion" id="btn-accion-guardado" style="background: #ffe5dd; color: #d9534f; border-color: #f4c2c4;">
-                                        <i class="fa-solid fa-bookmark"></i> Publicación guardada
-                                    </button>
-                                `;
-                                document.getElementById('btn-accion-guardado').addEventListener('click', async () => {
-                                    if (confirm("¿Deseas quitar esta publicación de tus guardados?")) {
-                                        const quitRes = await fetch('/api/quitar-guardado', {
-                                            method: 'POST',
-                                            headers: { 'Content-Type': 'application/json' },
-                                            body: JSON.stringify({ correo: correoLogueado, id_publicacion: Number(idPublicacionGlobal) })
-                                        });
-                                        if (quitRes.ok) {
-                                            mostrarAlertaArca("Publicación eliminada de guardados.",
-                                                "La publicación ya no estará en tu lista de guardados. 🌸",
-                                                { tipo: "aviso" }
-                                            );
-                                            location.reload();
-                                        }
-                                    }
-                                });
-                            } else {
-                                contenedorBoton.innerHTML = `
-                                    <button class="detalle-btn-accion" id="btn-accion-guardado">
-                                        <i class="fa-regular fa-bookmark"></i> Guardar publicación
-                                    </button>
-                                `;
-                                document.getElementById('btn-accion-guardado').addEventListener('click', async () => {
-                                    const saveRes = await fetch('/api/guardar-publicacion', {
-                                        method: 'POST',
-                                        headers: { 'Content-Type': 'application/json' },
-                                        body: JSON.stringify({ correo: correoLogueado, id_publicacion: Number(idPublicacionGlobal) })
-                                    });
-                                    if (saveRes.ok) {
-                                        mostrarAlertaArca("Publicación guardada con éxito.", 
-                                        "La publicación está ahora en tu lista de guardados. 🌸",
-                                         { tipo: "exito" });
-                                        location.reload();
-                                    }
-                                });
-                            }
-                        }
-                    } catch (e) {
-                        console.error("Error al gestionar la validación del propietario:", e);
-                    }
-                });
-
-            } catch (error) {
-                console.error("Error al cargar detalle:", error);
-                mostrarAlertaArca("Hubo un error al cargar los detalles del reporte.", 
-                "Por favor, inténtalo de nuevo. ♡", 
-                { tipo: "error" });
-            }
-        }
+          } catch (error) {
+              console.error("Error al cargar detalle:", error);
+              mostrarAlertaArca("Hubo un error al cargar los detalles del reporte.", "Por favor, inténtalo de nuevo más tarde. ♡", { tipo: "error" });
+          }
+      }
   </script>
+  
 </body>
 </html><!DOCTYPE html>
 <html lang="es">
