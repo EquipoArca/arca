@@ -2192,9 +2192,10 @@ app.get('/api/obtener-fundacion-header', (req, res) => {
     });
 });
 
+// Endpoint para actualizar el estado del reporte con notificación automática al creador
 app.put('/api/reportes/:id/estado', (req, res) => {
     const { id } = req.params;
-    const { estado, detalles_resolucion, id_fundacion_derivada, motivo_derivacion } = req.body;
+    const { estado, detalles_resolucion, id_fundacion_derivada, motivo_derivacion, correo_fundacion_actual } = req.body;
 
     if (!estado) return res.status(400).json({ error: 'El estado es requerido' });
 
@@ -2207,9 +2208,10 @@ app.put('/api/reportes/:id/estado', (req, res) => {
     }
 
     const query = 'UPDATE reportes SET estado = ?, detalles_resolucion = ?, id_fundacion_derivada = ?, motivo_derivacion = ? WHERE id_reporte = ?';
+    
     db.query(query, [estado, detalles_resolucion || null, id_fundacion_derivada || null, motivo_derivacion || null, id], (err, result) => {
         if (err) {
-            console.warn("⚠️ Advertencia: Actualizando estado básico (columnas adicionales pendientes en BD):", err.message);
+            console.warn("⚠️ Advertencia al actualizar columnas avanzadas de estado:", err.message);
             db.query('UPDATE reportes SET estado = ? WHERE id_reporte = ?', [estado, id], (err2, result2) => {
                 if (err2 || result2.affectedRows === 0) {
                     return res.status(500).json({ error: 'Error al actualizar el estado' });
@@ -2222,8 +2224,51 @@ app.put('/api/reportes/:id/estado', (req, res) => {
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: 'Reporte no encontrado' });
         }
-        res.json({ success: true, message: 'Estado actualizado correctamente con derivación/resolución' });
+
+        // Obtener el ID del usuario creador del reporte y el nombre de la fundación para enviarle la notificación
+        const queryInfo = `
+            SELECT r.id_usuarios AS id_creador, f.Nombre_Comercial AS nombre_fundacion
+            FROM reportes r
+            LEFT JOIN fundacion f ON LOWER(TRIM(f.Correo_fundacion)) = LOWER(TRIM(?))
+            WHERE r.id_reporte = ?
+        `;
+
+        db.query(queryInfo, [correo_fundacion_actual || '', id], (errInf, infoRows) => {
+            if (!errInf && infoRows.length > 0) {
+                const idCreador = infoRows[0].id_creador;
+                const nombreFundacion = infoRows[0].nombre_fundacion || 'Una fundación aliada';
+                let mensajeNotif = '';
+
+                if (estado === 'resuelto') {
+                    mensajeNotif = `Tu reporte ha sido marcado como resuelto por ${nombreFundacion}.`;
+                } else if (estado === 'derivado') {
+                    mensajeNotif = `Tu reporte ha sido derivado a otra entidad por ${nombreFundacion}.`;
+                } else if (estado === 'en_proceso') {
+                    mensajeNotif = `Tu reporte se encuentra ahora en proceso con ${nombreFundacion}.`;
+                }
+
+                if (mensajeNotif && idCreador) {
+                    const insertNotif = `
+                        INSERT INTO notificaciones (id_usuario_destino, tipo, mensaje)
+                        VALUES (?, 'cambio_estado_reporte', ?)
+                    `;
+                    db.query(insertNotif, [idCreador, mensajeNotif], (errNotif) => {
+                        if (errNotif) console.error("Error al crear notificación de estado:", errNotif.message);
+                    });
+                }
+            }
+        });
+
+        res.json({ success: true, message: 'Estado actualizado correctamente con notificaciones' });
     });
+});
+
+// Limpieza automática opcional de reportes resueltos con más de 24 horas (se puede ejecutar al iniciar o por intervalo)
+setInterval(() => {
+    const queryLimpieza = "DELETE FROM reportes WHERE estado = 'resuelto' AND Fecha_reporte < NOW() - INTERVAL 1 DAY";
+    db.query(queryLimpieza, (err) => {
+        if (err) console.error("Error en limpieza automática de reportes:", err.message);
+    }, 1000 * 60 * 60); // Revisa cada hora
 });
 // Obtener lista de fundaciones para derivar reportes
 app.get('/api/fundaciones-lista', (req, res) => {
