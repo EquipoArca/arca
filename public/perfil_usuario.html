@@ -383,17 +383,31 @@
             }
         }
 
-        window.eliminarSeguidorIndependiente = async function(idSeguidor, tipo) {
-            if (!confirm("¿Deseas eliminar a este seguidor?")) return;
-            try {
-                const res = await fetch(`/api/remover-seguidor/${idSeguidor}`, { method: 'DELETE' });
-                if (res.ok) {
-                    cargarContenidoSocialIndependiente(tipo);
-                    cargarContadoresPerfil();
+        window.eliminarSeguidorIndependiente = function(idSeguidor, tipo) {
+            mostrarAlertaArca(
+                "¿Eliminar seguidor?",
+                "¿Deseas eliminar a este seguidor?",
+                {
+                    tipo: "pregunta",
+                    confirmar: true,
+                    textoBoton: "Sí, eliminar",
+                    textoCancelar: "Cancelar",
+                    alConfirmar: async () => {
+                        try {
+                            const res = await fetch(`/api/remover-seguidor/${idSeguidor}`, { method: 'DELETE' });
+                            if (res.ok) {
+                                mostrarAlertaArca("¡Listo! 🌸", "Seguidor eliminado con éxito.", { tipo: "aviso" });
+                                cargarContenidoSocialIndependiente(tipo);
+                                cargarContadoresPerfil();
+                            } else {
+                                mostrarAlertaArca("Error", "No se pudo eliminar al seguidor.", { tipo: "error" });
+                            }
+                        } catch (e) {
+                            mostrarAlertaArca("Error de red ♡", "Hubo un error al conectar con el servidor.", { tipo: "error" });
+                        }
+                    }
                 }
-            } catch (e) {
-                alert("Error al eliminar.");
-            }
+            );
         };
 
         // Sincronización automática con Firebase Auth
