@@ -528,7 +528,7 @@
       let fechaEventoGlobal = null;
       let nombreEventoGlobal = "";
 
-      document.addEventListener('DOMContentLoaded', () => {
+     document.addEventListener('DOMContentLoaded', () => {
           const btnToggleMenu = document.getElementById('btn-toggle-menu');
           const sidebar = document.getElementById('sidebar');
 
@@ -537,6 +537,23 @@
                   e.stopPropagation();
                   sidebar.classList.toggle('sidebar-abierta');
               });
+          }
+
+          const urlParams = new URLSearchParams(window.location.search);
+          const origen = urlParams.get('origen');
+          const btnVolver = document.getElementById('btn-volver-dinamico');
+
+          if (btnVolver) {
+              if (origen === 'guardados') {
+                  btnVolver.innerHTML = `<i class="fa-solid fa-arrow-left"></i> Volver a guardados`;
+                  btnVolver.href = 'guardados_usuario.html';
+              } else if (origen === 'mapa') {
+                  btnVolver.innerHTML = `<i class="fa-solid fa-arrow-left"></i> Volver al mapa`;
+                  btnVolver.href = 'mapa.html';
+              } else {
+                  btnVolver.innerHTML = `<i class="fa-solid fa-arrow-left"></i> Volver a eventos`;
+                  btnVolver.href = 'novedades-eventos.html';
+              }
           }
 
           cargarDetalleEvento();
