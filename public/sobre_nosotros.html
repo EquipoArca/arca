@@ -190,115 +190,16 @@
             box-shadow: 0 6px 18px rgba(229, 115, 115, 0.25);
         }
 
-        /* Barra de contacto fija inferior */
-        .footer-contacto-bar {
-            position: fixed;
-            bottom: 0;
-            left: 60px;
-            right: 0;
-            background-color: #ffd6d8e6;
-            backdrop-filter: blur(8px);
-            border-top: 1px solid rgba(0,0,0,0.1);
-            padding: 10px 40px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            z-index: 800;
-        }
-
-        .contacto-info {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            font-size: 1rem;
-            color: #000;
-        }
-
-        .contacto-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-            color: #000;
-            font-weight: 600;
-        }
-
-        .contacto-redes {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .titulo-contactanos {
-            font-weight: 700;
-            font-size: 1rem;
-            letter-spacing: 1px;
-            color: #000;
-            text-transform: uppercase;
-        }
-
-        .redes-iconos {
-            display: flex;
-            gap: 10px;
-        }
-
-        .redes-iconos a {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            text-decoration: none;
-            font-size: 1rem;
-            transition: transform 0.2s ease;
-        }
-
-        .redes-iconos a:hover {
-            transform: scale(1.15);
-        }
-
-        .bg-tiktok { background-color: #000000; }
-        .bg-facebook { background-color: #1877f2; }
-        .bg-x { background-color: #000000; }
-        .bg-instagram { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
-
-        .btn-sobre-nosotros {
-            background-color: #fbc2c4;
-            color: #000;
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            padding: 8px 20px;
-            border-radius: 25px;
-            font-size: 1rem;
-            text-decoration: none;
-            font-weight: 500;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            transition: transform 0.2s ease, background-color 0.2s ease;
-        }
-
-        .btn-sobre-nosotros:hover {
-            transform: scale(1.05);
-            background-color: #f9a3a6;
-        }
-
         @media (max-width: 768px) {
             .main-content-sobre {
                 margin-left: 0;
-                padding: 20px 15px 100px 15px;
+                padding: 20px 15px 45px 15px;
             }
             .card-sobre-principal {
                 padding: 25px 20px;
             }
             .sobre-titulo-principal {
                 font-size: 1.8rem;
-            }
-            .footer-contacto-bar {
-                left: 0;
-                flex-direction: column;
-                gap: 12px;
-                padding: 12px;
             }
         }
     </style>
@@ -408,7 +309,7 @@
                 <li class="item-sobre-tarjeta">
                     <div class="icono-item-sobre"><i class="fa-solid fa-triangle-exclamation"></i></div>
                     <p class="texto-item-sobre">
-                        <span class="texto-rosa"> Podrás reportar animales perdidos, en peligro o en condición de abandono.</span>
+                        <span class="texto-rosa">Podrás reportar animales perdidos, en peligro o en condición de abandono.</span>
                     </p>
                 </li>
 
@@ -455,6 +356,53 @@
                 </li>
             </ul>
 
+            <!-- NUEVA SECCIÓN: CONTÁCTANOS -->
+            <h2 class="subtitulo-seccion" style="margin-top: 20px;">
+                <i class="fa-solid fa-headset" style="color: #e57373; margin-right: 8px;"></i> Contáctanos
+            </h2>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;">
+                
+                <!-- Botón de Gmail -->
+                <a href="https://mail.google.com/mail/?view=cm&fs=1&to=arcaoficial0@gmail.com&su=Consulta%20sobre%20ARCA&body=Hola,%20me%20gustaría%20ponerme%20en%20contacto%20con%20ustedes..." target="_blank" class="item-sobre-tarjeta" style="text-decoration: none; align-items: center; cursor: pointer; margin: 0;">
+                    <div class="icono-item-sobre" style="background-color: #e8f0fe; color: #1a73e8;"><i class="fa-solid fa-envelope"></i></div>
+                    <div>
+                        <div style="font-weight: 600; color: #442c20; font-size: 0.95rem;">Correo Electrónico</div>
+                        <div style="font-size: 0.83rem; color: #666;">arcaoficial0@gmail.com</div>
+                    </div>
+                </a>
+
+                <!-- Botón de Copiar Teléfono -->
+                <div onclick="copiarTelefono('301 734 04 02')" class="item-sobre-tarjeta" style="align-items: center; cursor: pointer; margin: 0;" title="Haz clic para copiar el número">
+                    <div class="icono-item-sobre" style="background-color: #eef9ed; color: #34a853;"><i class="fa-solid fa-phone"></i></div>
+                    <div>
+                        <div style="font-weight: 600; color: #442c20; font-size: 0.95rem;">Teléfono / Llamadas</div>
+                        <div style="font-size: 0.83rem; color: #666;">301 734 04 02 (Clic para copiar)</div>
+                    </div>
+                </div>
+
+                <!-- Botón de WhatsApp con mensaje predeterminado -->
+                <a href="https://wa.me/573017340402?text=Hola,%20me%20gustaría%20obtener%20más%20información%20sobre%20la%20plataforma%20ARCA." target="_blank" class="item-sobre-tarjeta" style="text-decoration: none; align-items: center; cursor: pointer; margin: 0;">
+                    <div class="icono-item-sobre" style="background-color: #e8f8f0; color: #25d366;"><i class="fa-brands fa-whatsapp"></i></div>
+                    <div>
+                        <div style="font-weight: 600; color: #442c20; font-size: 0.95rem;">WhatsApp Directo</div>
+                        <div style="font-size: 0.83rem; color: #666;">Enviar mensaje predeterminado</div>
+                    </div>
+                </a>
+
+            </div>
+
+            <!-- Redes Sociales Provisionales -->
+            <div style="text-align: center; margin-top: 5px;">
+                <p style="font-size: 0.95rem; color: #555; margin-bottom: 12px; font-weight: 500;">Nuestras Redes Sociales (Próximamente)</p>
+                <div style="display: flex; justify-content: center; gap: 12px;">
+                    <a href="javascript:void(0)" onclick="alert('Próximamente disponible en Instagram')" style="width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); text-decoration: none; font-size: 1.1rem; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="javascript:void(0)" onclick="alert('Próximamente disponible en TikTok')" style="width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; background-color: #000; text-decoration: none; font-size: 1.1rem; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"><i class="fa-brands fa-tiktok"></i></a>
+                    <a href="javascript:void(0)" onclick="alert('Próximamente disponible en Facebook')" style="width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; background-color: #1877f2; text-decoration: none; font-size: 1.1rem; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="javascript:void(0)" onclick="alert('Próximamente disponible en X')" style="width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; background-color: #000; text-decoration: none; font-size: 1.1rem; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"><i class="fa-brands fa-x-twitter"></i></a>
+                </div>
+            </div>
+
             <!-- Botón de Volver Abajo -->
             <div class="sobre-footer-card">
                 <a href="soporte.html" class="btn-volver-pill">
@@ -464,6 +412,17 @@
 
         </div>
     </main>
+
+    <!-- Script para copiar teléfono al portapapeles -->
+    <script>
+        function copiarTelefono(texto) {
+            navigator.clipboard.writeText(texto).then(() => {
+                alert("¡Teléfono copiado al portapapeles: " + texto + "!");
+            }).catch(err => {
+                console.error('Error al copiar: ', err);
+            });
+        }
+    </script>
 
     <!-- Firebase v8 Scripts -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
