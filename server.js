@@ -2105,33 +2105,17 @@ app.post('/api/admin/aprobar-fundacion', async (req, res) => {
         WHERE f.id_fundacion = ?
     `;
 
-    db.query(queryUpdate, [id_fundacion], async (err) => {
-        if (err) return res.status(500).json({ exito: false, mensaje: "Error en base de datos" });
-
-        try {
-            const { data, error } = await resend.emails.send({
-                from: 'ARCA - Administración <onboarding@resend.dev>',
-                to: [correo_fundacion],
-                subject: '🎉 ¡Tu cuenta en ARCA ha sido aprobada!',
-                html: `
-                    <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
-                        <h2 style="color: #e57373;">¡Hola, ${nombre_comercial || 'Fundación'}!</h2>
-                        <p>Tu solicitud ha sido revisada y <strong>aprobada</strong> por la administración de ARCA.</p>
-                        <p>Ya puedes iniciar sesión en la plataforma.</p>
-                    </div>
-                `
-            });
-
-            if (error) {
-                console.error("❌ Error de Resend al aprobar fundación:", error);
-                return res.json({ exito: true, mensaje: "Fundación aprobada, pero falló el envío del correo." });
-            }
-
-            res.json({ exito: true, mensaje: "Fundación aprobada y correo enviado." });
-        } catch (mailError) {
-            console.error("❌ Error al enviar correo de aprobación:", mailError);
-            res.json({ exito: true, mensaje: "Fundación aprobada, pero falló el correo." });
+    db.query(queryUpdate, [id_fundacion], (err) => {
+        if (err) {
+            console.error("❌ Error al actualizar fundación en base de datos:", err);
+            return res.status(500).json({ exito: false, mensaje: "Error en base de datos" });
         }
+
+        // Devolvemos el éxito para que admin.html proceda a enviar el correo con EmailJS
+        res.json({ 
+            exito: true, 
+            mensaje: `Fundación "${nombre_comercial || 'Verificada'}" aprobada correctamente.` 
+        });
     });
 });
 

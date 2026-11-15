@@ -14,7 +14,6 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script type="text/javascript">
         (function(){
-            // ⚠️ REEMPLAZA ESTO CON TU PUBLIC KEY REAL DE EMAILJS
             emailjs.init("AVpXUrYdpwa9oh438"); 
         })();
     </script>
@@ -307,20 +306,17 @@
             try {
                 let blob;
 
-                // Si MySQL lo devuelve como un Buffer de Node.js
                 if (typeof base64Data === 'object' && base64Data.type === 'Buffer') {
                     const uint8 = new Uint8Array(base64Data.data);
                     blob = new Blob([uint8], { type: 'application/pdf' });
                 } else {
                     let dataStr = typeof base64Data === 'string' ? base64Data : String(base64Data);
 
-                    // Si es una URL normal (http/https), abrirla directamente
                     if (dataStr.startsWith('http')) {
                         window.open(dataStr, '_blank');
                         return;
                     }
 
-                    // Extraer el contenido Base64 puro de la Data URL
                     const partes = dataStr.split(',');
                     const base64Puro = partes.length > 1 ? partes[1] : partes[0];
                     
@@ -365,7 +361,6 @@
                     const tarjeta = document.createElement('div');
                     tarjeta.className = 'tarjeta-solicitud';
 
-                    // Construimos los botones de PDFs disponibles
                     let botonesDocs = '';
                     if (f.certificado_existencia) {
                         botonesDocs += `<button type="button" class="btn-pdf" data-doc="certificado"><i class="fa-solid fa-file-pdf"></i> Certificado de Existencia</button>`;
@@ -439,7 +434,6 @@
                         </div>
                     `;
 
-                    // Asignamos los eventos de clic de forma segura para abrir cada PDF
                     const btnCert = tarjeta.querySelector('[data-doc="certificado"]');
                     if (btnCert) btnCert.onclick = () => abrirPdfSeguro(f.certificado_existencia, 'Certificado de Existencia');
 
@@ -475,7 +469,7 @@
             }
 
             try {
-                // 1. Aprobar en el servidor / base de datos
+                // 1. Aprobar en la base de datos a través del backend
                 const res = await fetch('/api/admin/aprobar-fundacion', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -492,13 +486,13 @@
                     return;
                 }
 
-               // 2. Enviar correo de confirmación con EmailJS
+                // 2. Enviar correo usando la plantilla nueva 'template_aprobacion'
                 const linkInicioSesion = window.location.origin + "/home.html";
                 try {
-                    await emailjs.send("service_arca", "template_arca", {
+                    await emailjs.send("service_arca", "template_aprobacion", {
                         to_email: correo_fundacion,
                         nombre: nombre_comercial,
-                        codigo: `¡Cuenta aprobada! Ya puedes iniciar sesión aquí: ${linkInicioSesion}`
+                        enlace_login: linkInicioSesion
                     });
                     alert(`¡Fundación "${nombre_comercial}" aprobada y correo enviado con éxito! 🌸`);
                 } catch (emailErr) {
