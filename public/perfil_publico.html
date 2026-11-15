@@ -73,6 +73,12 @@
             object-fit: cover;
             border: 3px solid #fca38d;
             background: #fff;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .avatar-perfil-img:hover {
+            transform: scale(1.03);
         }
 
         .perfil-datos-usuario h2 {
@@ -320,7 +326,8 @@
           
           <div class="perfil-header-card">
               <div class="perfil-info-izquierda">
-                  <img id="usr-foto" src="logo.png" class="avatar-perfil-img" alt="Avatar">
+                  <!-- AÑADIDO: onclick para ampliar la foto -->
+                  <img id="usr-foto" src="logo.png" class="avatar-perfil-img" alt="Avatar" onclick="ampliarFotoPerfilPublico()" title="Haz clic para ver la foto en grande">
                   <div class="perfil-datos-usuario">
                       <h2 id="usr-tag">@cargando</h2>
                       <div class="ubicacion-pill" id="usr-ubicacion"><i class="fa-solid fa-location-dot"></i> Ubicación aproximada: Cargando...</div>
@@ -365,6 +372,14 @@
       </div>
   </main>
 
+  <!-- VISOR DE FOTO DE PERFIL AMPLIADA (ESTILO FACEBOOK) -->
+  <div id="modal-visor-foto-grande" onclick="cerrarVisorFotoGrande(event)" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.85); z-index: 9999999; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
+      <button type="button" onclick="cerrarVisorFotoGrandeDirecto()" style="position: absolute; top: 20px; right: 25px; background: rgba(255,255,255,0.2); border: none; color: #fff; font-size: 30px; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s;">&times;</button>
+      <div style="max-width: 90%; max-height: 90%; display: flex; justify-content: center; align-items: center;">
+          <img id="img-foto-ampliada-pantalla" src="" alt="Foto de perfil en grande" style="max-width: 100%; max-height: 85vh; border-radius: 12px; object-fit: contain; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+      </div>
+  </div>
+
   <div id="toast-seguimiento">
       <h3 id="texto-toast">Ahora sigues a este usuario</h3>
       <i class="fa-solid fa-check" style="color: #25d366; font-size: 38px; margin-top: 5px;"></i>
@@ -405,99 +420,122 @@
           });
       });
 
-    async function inicializarPerfil() {
-        const params = new URLSearchParams(window.location.search);
-        usernamePerfil = params.get('user'); 
+      // Funciones para ampliar la foto de perfil del usuario público
+      function ampliarFotoPerfilPublico() {
+          const imgPerfil = document.getElementById('usr-foto');
+          const visor = document.getElementById('modal-visor-foto-grande');
+          const imgAmpliada = document.getElementById('img-foto-ampliada-pantalla');
 
-        if (!usernamePerfil) {
-            const urlParts = window.location.search.split('=');
-            if (urlParts.length > 1) {
-                usernamePerfil = decodeURIComponent(urlParts[1]);
-            }
-        }
+          if (imgPerfil && imgPerfil.src) {
+              imgAmpliada.src = imgPerfil.src;
+              visor.style.display = 'flex';
+          }
+      }
 
-        const correoLogueado = obtenerCorreoSesion();
+      function cerrarVisorFotoGrandeDirecto() {
+          const visor = document.getElementById('modal-visor-foto-grande');
+          if (visor) visor.style.display = 'none';
+      }
 
-        if (!usernamePerfil || usernamePerfil === 'null' || usernamePerfil === 'undefined') {
-            mostrarAlertaArca(
-                "¡Ups! ♡",
-                "No se especificó un usuario válido.",
-                {
-                    tipo: "error",
-                    alCerrar: () => {
-                        window.location.href = 'home.html';
-                    }
-                }
-            );
-            return;
-        }
+      function cerrarVisorFotoGrande(event) {
+          if (event.target.id === 'modal-visor-foto-grande') {
+              cerrarVisorFotoGrandeDirecto();
+          }
+      }
 
-        try {
-            const res = await fetch(`/api/perfil-publico/${encodeURIComponent(usernamePerfil)}?correo_visitante=${encodeURIComponent(correoLogueado)}`);
-            if (!res.ok) {
-                document.querySelector('.main-content').innerHTML = `
-                    <div style="text-align: center; padding: 60px 20px; font-family: 'Itim', cursive;">
-                        <i class="fa-solid fa-user-slash" style="font-size: 55px; color: #d9534f; margin-bottom: 15px;"></i>
-                        <h2 style="color: #2b2b2b; font-size: 24px;">¡Perfil no encontrado!</h2>
-                        <p style="color: #666; font-size: 15px; margin-bottom: 20px;">Esta cuenta no está disponible o no se puede acceder a ella.</p>
-                        <a href="home.html" style="background: #fca38d; color: #fff; padding: 10px 22px; border-radius: 16px; text-decoration: none; font-weight: bold;">
-                            Volver al inicio
-                        </a>
-                    </div>
-                `;
-                return;
-            }
+      async function inicializarPerfil() {
+          const params = new URLSearchParams(window.location.search);
+          usernamePerfil = params.get('user'); 
 
-            const datos = await res.json();
-            idUsuarioPerfil = datos.id_usuarios;
-            usuarioSeguidoActual = datos.siguiendo;
-            estadoSolicitudActual = datos.estado_solicitud || 'ninguna';
+          if (!usernamePerfil) {
+              const urlParts = window.location.search.split('=');
+              if (urlParts.length > 1) {
+                  usernamePerfil = decodeURIComponent(urlParts[1]);
+              }
+          }
 
-            document.getElementById('usr-tag').textContent = `@${datos.nombre_usuario}`;
-            if (datos.foto_perfil) document.getElementById('usr-foto').src = datos.foto_perfil;
-            
-            if (datos.Ubicacion || datos.ubicacion) {
-                document.getElementById('usr-ubicacion').innerHTML = `<i class="fa-solid fa-location-dot"></i> Ubicación aproximada: ${datos.Ubicacion || datos.ubicacion}`;
-            } else {
-                document.getElementById('usr-ubicacion').innerHTML = `<i class="fa-solid fa-location-dot"></i> Ubicación aproximada: Medellín`;
-            }
+          const correoLogueado = obtenerCorreoSesion();
 
-            const telefonoReal = datos.Telefono_usuario || datos.telefono || 'No registrado';
-            const correoReal = datos.correo_usuario || datos.correo || 'No registrado';
+          if (!usernamePerfil || usernamePerfil === 'null' || usernamePerfil === 'undefined') {
+              mostrarAlertaArca(
+                  "¡Ups! ♡",
+                  "No se especificó un usuario válido.",
+                  {
+                      tipo: "error",
+                      alCerrar: () => {
+                          window.location.href = 'home.html';
+                      }
+                  }
+              );
+              return;
+          }
 
-            document.getElementById('contacto-tel').innerHTML = `<i class="fa-brands fa-whatsapp" style="color: #25d366; font-size: 16px;"></i> <span>${telefonoReal}</span>`;
-            document.getElementById('contacto-correo').innerHTML = `<i class="fa-solid fa-envelope" style="color: #007bff; font-size: 16px;"></i> <span>${correoReal}</span>`;
+          try {
+              const res = await fetch(`/api/perfil-publico/${encodeURIComponent(usernamePerfil)}?correo_visitante=${encodeURIComponent(correoLogueado)}`);
+              if (!res.ok) {
+                  document.querySelector('.main-content').innerHTML = `
+                      <div style="text-align: center; padding: 60px 20px; font-family: 'Itim', cursive;">
+                          <i class="fa-solid fa-user-slash" style="font-size: 55px; color: #d9534f; margin-bottom: 15px;"></i>
+                          <h2 style="color: #2b2b2b; font-size: 24px;">¡Perfil no encontrado!</h2>
+                          <p style="color: #666; font-size: 15px; margin-bottom: 20px;">Esta cuenta no está disponible o no se puede acceder a ella.</p>
+                          <a href="home.html" style="background: #fca38d; color: #fff; padding: 10px 22px; border-radius: 16px; text-decoration: none; font-weight: bold;">
+                              Volver al inicio
+                          </a>
+                      </div>
+                  `;
+                  return;
+              }
 
-            const esMiPerfil = (correoReal.toLowerCase().trim() === correoLogueado.toLowerCase().trim());
+              const datos = await res.json();
+              idUsuarioPerfil = datos.id_usuarios;
+              usuarioSeguidoActual = datos.siguiendo;
+              estadoSolicitudActual = datos.estado_solicitud || 'ninguna';
 
-            const seccionDenunciaBloqueo = document.getElementById('seccion-denuncia-bloqueo');
-            if (seccionDenunciaBloqueo) {
-                seccionDenunciaBloqueo.style.display = esMiPerfil ? 'none' : 'block';
-            }
+              document.getElementById('usr-tag').textContent = `@${datos.nombre_usuario}`;
+              if (datos.foto_perfil) document.getElementById('usr-foto').src = datos.foto_perfil;
+              
+              if (datos.Ubicacion || datos.ubicacion) {
+                  document.getElementById('usr-ubicacion').innerHTML = `<i class="fa-solid fa-location-dot"></i> Ubicación aproximada: ${datos.Ubicacion || datos.ubicacion}`;
+              } else {
+                  document.getElementById('usr-ubicacion').innerHTML = `<i class="fa-solid fa-location-dot"></i> Ubicación aproximada: Medellín`;
+              }
 
-            if (esMiPerfil) {
-                const btnSeguir = document.getElementById('btn-seguir');
-                if (btnSeguir) btnSeguir.style.display = 'none'; 
+              const telefonoReal = datos.Telefono_usuario || datos.telefono || 'No registrado';
+              const correoReal = datos.correo_usuario || datos.correo || 'No registrado';
 
-                const btnAdoptante = document.getElementById('btn-solicitud-adoptante');
-                if (btnAdoptante) {
-                    btnAdoptante.textContent = "Editar mi perfil ⚙️";
-                    btnAdoptante.style.background = "#e8a87c";
-                    btnAdoptante.onclick = () => {
-                        window.location.href = 'perfil_usuario.html';
-                    };
-                }
-            } else {
-                actualizarBotonSeguirUI(usuarioSeguidoActual);
-                actualizarEstadoBotonSolicitud(estadoSolicitudActual);
-            }
+              document.getElementById('contacto-tel').innerHTML = `<i class="fa-brands fa-whatsapp" style="color: #25d366; font-size: 16px;"></i> <span>${telefonoReal}</span>`;
+              document.getElementById('contacto-correo').innerHTML = `<i class="fa-solid fa-envelope" style="color: #007bff; font-size: 16px;"></i> <span>${correoReal}</span>`;
 
-            cargarPublicacionesDeUsuario(usernamePerfil, idUsuarioPerfil);
+              const esMiPerfil = (correoReal.toLowerCase().trim() === correoLogueado.toLowerCase().trim());
 
-        } catch (error) {
-            console.error("Error al cargar perfil:", error);
-        }
-    }
+              const seccionDenunciaBloqueo = document.getElementById('seccion-denuncia-bloqueo');
+              if (seccionDenunciaBloqueo) {
+                  seccionDenunciaBloqueo.style.display = esMiPerfil ? 'none' : 'block';
+              }
+
+              if (esMiPerfil) {
+                  const btnSeguir = document.getElementById('btn-seguir');
+                  if (btnSeguir) btnSeguir.style.display = 'none'; 
+
+                  const btnAdoptante = document.getElementById('btn-solicitud-adoptante');
+                  if (btnAdoptante) {
+                      btnAdoptante.textContent = "Editar mi perfil ⚙️";
+                      btnAdoptante.style.background = "#e8a87c";
+                      btnAdoptante.onclick = () => {
+                          window.location.href = 'perfil_usuario.html';
+                      };
+                  }
+              } else {
+                  actualizarBotonSeguirUI(usuarioSeguidoActual);
+                  actualizarEstadoBotonSolicitud(estadoSolicitudActual);
+              }
+
+              cargarPublicacionesDeUsuario(usernamePerfil, idUsuarioPerfil);
+
+          } catch (error) {
+              console.error("Error al cargar perfil:", error);
+          }
+      }
 
       function actualizarEstadoBotonSolicitud(estado) {
           const btnAdoptante = document.getElementById('btn-solicitud-adoptante');
