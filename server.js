@@ -2935,7 +2935,7 @@ app.post('/api/admin/gestionar-denuncia', (req, res) => {
             const correoUser = userRows[0].correo_usuario;
             console.log(`📧 Correo asociado al usuario a eliminar: ${correoUser}`);
 
-            // 2. Pasos secuenciales con registro en consola
+            // 2. Pasos secuenciales limpios (sin tablas inexistentes)
             const pasos = [
                 { desc: "Desactivar FK Checks", sql: "SET FOREIGN_KEY_CHECKS = 0" },
                 { desc: "Borrar denuncias", sql: `DELETE FROM denuncias_usuarios WHERE id_usuario_denunciado = ${db.escape(id_usuario_denunciado)} OR id_denunciante = ${db.escape(id_usuario_denunciado)}` },
@@ -2952,7 +2952,6 @@ app.post('/api/admin/gestionar-denuncia', (req, res) => {
                 { desc: "Borrar publicaciones_adopcion", sql: `DELETE FROM publicaciones_adopcion WHERE id_usuarios = ${db.escape(id_usuario_denunciado)}` },
                 { desc: "Borrar animal", sql: `DELETE FROM animal WHERE id_usuarios = ${db.escape(id_usuario_denunciado)}` },
                 { desc: "Borrar eventos fundacion", sql: `DELETE FROM eventos WHERE id_fundacion IN (SELECT id_fundacion FROM fundacion WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(${db.escape(correoUser)})))` },
-                { desc: "Borrar representante fundacion", sql: `DELETE FROM representante WHERE id_fundacion IN (SELECT id_fundacion FROM fundacion WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(${db.escape(correoUser)})))` },
                 { desc: "Borrar donaciones fundacion", sql: `DELETE FROM donaciones WHERE id_fundacion IN (SELECT id_fundacion FROM fundacion WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(${db.escape(correoUser)})))` },
                 { desc: "Borrar documentacion fundacion", sql: `DELETE FROM documentacion WHERE id_documentacion IN (SELECT id_documentacion FROM fundacion WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(${db.escape(correoUser)})))` },
                 { desc: "Borrar fundacion", sql: `DELETE FROM fundacion WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(${db.escape(correoUser)}))` },
@@ -2999,6 +2998,7 @@ app.post('/api/admin/gestionar-denuncia', (req, res) => {
 
             ejecutarPaso(0);
         });
+    
     } else {
         if (id_denuncia) {
             db.query("DELETE FROM denuncias_usuarios WHERE id_denuncia = ?", [id_denuncia], () => {
