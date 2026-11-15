@@ -609,6 +609,115 @@
         }
 
         cargarSolicitudes();
+        let pestanaActual = 'fundaciones';
+
+        function cambiarPestanaAdmin(tipo) {
+            pestanaActual = tipo;
+            const btnFund = document.getElementById('tab-fundaciones');
+            const btnDen = document.getElementById('tab-denuncias');
+
+            if (tipo === 'fundaciones') {
+                btnFund.style.background = '#e57373';
+                btnFund.style.color = 'white';
+                btnDen.style.background = '#fff';
+                btnDen.style.color = '#e57373';
+                cargarSolicitudes();
+            } else {
+                btnDen.style.background = '#e57373';
+                btnDen.style.color = 'white';
+                btnFund.style.background = '#fff';
+                btnFund.style.color = '#e57373';
+                cargarDenunciasPerfiles();
+            }
+        }
+
+        async function cargarDenunciasPerfiles() {
+            const contenedor = document.getElementById('lista-solicitudes');
+            contenedor.innerHTML = `<div class="estado-mensaje"><i class="fa-solid fa-spinner fa-spin"></i><p>Cargando denuncias...</p></div>`;
+
+            try {
+                const res = await fetch('/api/admin/denuncias');
+                const data = await res.json();
+
+                contenedor.innerHTML = '';
+                if (!data.exito || data.denuncias.length === 0) {
+                    contenedor.innerHTML = `
+                        <div class="estado-mensaje">
+                            <div style="font-size: 2.5rem; margin-bottom: 10px;">🌸</div>
+                            <p style="margin: 0;">¡Todo limpio! No hay denuncias de perfiles pendientes.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                data.denuncias.forEach(d => {
+                    const tarjeta = document.createElement('div');
+                    tarjeta.className = 'tarjeta-solicitud';
+                    tarjeta.innerHTML = `
+                        <div class="tarjeta-header">
+                            <h2 class="titulo-fundacion">
+                                <img src="${d.foto_denunciado || 'logo.png'}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                                Denuncia a @${d.nombre_denunciado}
+                            </h2>
+                            <span class="badge-pendiente" style="background: #ffebee; color: #c62828; border-color: #ef9a9a;">Denunciado por: @${d.nombre_denunciante}</span>
+                        </div>
+
+                        <div class="info-grid">
+                            <div class="dato-item">
+                                <span class="dato-label"><i class="fa-solid fa-envelope"></i> Correo de la cuenta</span>
+                                <span class="dato-valor">${d.correo_denunciado}</span>
+                            </div>
+                            <div class="dato-item">
+                                <span class="dato-label"><i class="fa-solid fa-circle-exclamation"></i> Motivo de denuncia</span>
+                                <span class="dato-valor" style="color: #d9534f; font-weight: bold;">"${d.motivo}"</span>
+                            </div>
+                        </div>
+
+                        <div class="tarjeta-footer" style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px;">
+                            <a href="perfil_publico.html?user=${encodeURIComponent(d.nombre_denunciado)}" target="_blank" class="btn-mensaje" style="background: #ffb74d;">
+                                <i class="fa-solid fa-eye"></i> Ver Perfil
+                            </a>
+                            <button class="btn-aprobar" style="background: #ff9800;" onclick="gestionarDenuncia(${d.id_denuncia}, ${d.id_denunciado}, 'suspender')">
+                                <i class="fa-solid fa-ban"></i> Poner en Revisión (Suspender)
+                            </button>
+                            <button class="btn-rechazar" onclick="gestionarDenuncia(${d.id_denuncia}, ${d.id_denunciado}, 'eliminar')">
+                                <i class="fa-solid fa-trash"></i> Eliminar Cuenta
+                            </button>
+                        </div>
+                    `;
+                    contenedor.appendChild(tarjeta);
+                });
+            } catch (e) {
+                console.error("Error al cargar denuncias:", e);
+                contenedor.innerHTML = `<div class="estado-mensaje"><p>Error al conectar con el servidor.</p></div>`;
+            }
+        }
+
+        async function gestionarDenuncia(idDenuncia, idDenunciado, accion) {
+            const mensajeConfirm = accion === 'suspender' 
+                ? '¿Deseas poner esta cuenta en revisión (suspender su acceso temporalmente)?' 
+                : '¿Estás completamente segura de ELIMINAR permanentemente esta cuenta de la base de datos?';
+
+            if (!confirm(mensajeConfirm)) return;
+
+            try {
+                const res = await fetch('/api/admin/gestionar-denuncia', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id_denuncia, id_usuario_denunciado: idDenunciado, accion })
+                });
+                const resultado = await res.json();
+
+                if (resultado.exito) {
+                    alert(resultado.mensaje);
+                    cargarDenunciasPerfiles();
+                } else {
+                    alert("Error: " + resultado.error);
+                }
+            } catch (e) {
+                alert("Error de conexión al procesar la acción.");
+            }
+        }
     </script>
 </body>
 </html>

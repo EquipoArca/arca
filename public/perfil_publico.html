@@ -363,7 +363,7 @@
                   </div>
 
                   <div id="seccion-denuncia-bloqueo">
-                      <button class="btn-accion-peligro" onclick="mostrarAlertaArca('¡Denuncia enviada! 🌸', 'La funcionalidad de denuncia ha sido registrada correctamente.', { tipo: 'aviso' })">Denunciar perfil</button>
+                      <button class="btn-accion-peligro" onclick="abrirModalDenuncia()">Denunciar perfil</button>
                       <button class="btn-accion-peligro" onclick="bloquearUsuarioActual()">Bloquear usuario</button>
                   </div>
               </div>
@@ -383,6 +383,21 @@
   <div id="toast-seguimiento">
       <h3 id="texto-toast">Ahora sigues a este usuario</h3>
       <i class="fa-solid fa-check" style="color: #25d366; font-size: 38px; margin-top: 5px;"></i>
+  </div>
+  <!-- MODAL DE DENUNCIA DE PERFIL -->
+  <div id="modal-denuncia-perfil" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 999999; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
+      <div style="background: #fff; padding: 30px; border-radius: 25px; width: 90%; max-width: 450px; position: relative; font-family: 'Itim', cursive; box-shadow: 0 15px 35px rgba(0,0,0,0.2);">
+          <button type="button" onclick="cerrarModalDenuncia()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 22px; cursor: pointer;">&times;</button>
+          <h3 style="margin-top: 0; color: #d9534f; text-align: center;"><i class="fa-solid fa-triangle-exclamation"></i> Denunciar Perfil</h3>
+          <p style="font-size: 14px; color: #666; text-align: center; margin-bottom: 15px;">Por favor, indícanos el motivo por el cual deseas denunciar este perfil:</p>
+          
+          <textarea id="input-motivo-denuncia" placeholder="Escribe aquí el motivo detallado de la denuncia..." style="width: 100%; height: 100px; padding: 12px; border-radius: 12px; border: 1px solid #ccc; font-family: 'Itim', cursive; box-sizing: border-box; resize: none;"></textarea>
+          
+          <div style="display: flex; gap: 10px; margin-top: 20px;">
+              <button type="button" onclick="cerrarModalDenuncia()" style="flex: 1; background: #e0e0e0; border: none; padding: 10px; border-radius: 14px; font-family: 'Itim', cursive; cursor: pointer; font-weight: bold;">Cancelar</button>
+              <button type="button" onclick="enviarDenunciaPerfil()" style="flex: 1; background: #d9534f; color: #fff; border: none; padding: 10px; border-radius: 14px; font-family: 'Itim', cursive; cursor: pointer; font-weight: bold;">Enviar Denuncia</button>
+          </div>
+      </div>
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -557,6 +572,53 @@
               btnAdoptante.style.background = "#fca38d";
               btnAdoptante.disabled = false;
               btnAdoptante.onclick = solicitarVerAdoptante;
+          }
+      }
+      function abrirModalDenuncia() {
+          document.getElementById('modal-denuncia-perfil').style.display = 'flex';
+      }
+
+      function cerrarModalDenuncia() {
+          document.getElementById('modal-denuncia-perfil').style.display = 'none';
+          document.getElementById('input-motivo-denuncia').value = '';
+      }
+
+      async function enviarDenunciaPerfil() {
+          const motivo = document.getElementById('input-motivo-denuncia').value.trim();
+          const correoLogueado = obtenerCorreoSesion();
+
+          if (!motivo) {
+              mostrarAlertaArca("Campo requerido ♡", "Por favor escribe el motivo de la denuncia.", { tipo: "error" });
+              return;
+          }
+
+          if (!correoLogueado) {
+              mostrarAlertaArca("Inicia sesión", "Debes iniciar sesión para realizar una denuncia.", { tipo: "aviso" });
+              return;
+          }
+
+          try {
+              const res = await fetch('/api/denunciar-usuario', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                      correo_denunciante: correoLogueado,
+                      id_usuario_denunciado: idUsuarioPerfil,
+                      username_denunciado: usernamePerfil,
+                      motivo: motivo
+                  })
+              });
+
+              const data = await res.json();
+              if (res.ok) {
+                  cerrarModalDenuncia();
+                  mostrarAlertaArca("¡Denuncia enviada! 🌸", "La denuncia ha sido enviada al panel de administración correctamente.", { tipo: "aviso" });
+              } else {
+                  mostrarAlertaArca("Error", data.error || "No se pudo enviar la denuncia.", { tipo: "error" });
+              }
+          } catch (e) {
+              console.error("Error al enviar denuncia:", e);
+              mostrarAlertaArca("Error de red", "Hubo un problema al conectar con el servidor.", { tipo: "error" });
           }
       }
 

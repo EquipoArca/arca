@@ -99,15 +99,14 @@
     <main class="main-content">
         <div class="perfil-prototipo-container">
             <div class="perfil-header-prototipo">
-                <div class="avatar-wrapper">
-                    <!-- AÑADIDO: Atributo title y cursor pointer para indicar que se puede ampliar -->
-                    <div class="avatar-circulo" id="avatar-contenedor" onclick="ampliarFotoPerfil(event)" title="Haz clic para ver la foto en grande" style="cursor: pointer;">
+                <div class="avatar-wrapper" onclick="abrirModalFoto()">
+                    <div class="avatar-circulo" id="avatar-contenedor">
                         <svg viewBox="0 0 24 24" fill="currentColor" class="icono-silueta" id="svg-silueta">
                             <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                         </svg>
                         <img id="foto-perfil-img" src="" alt="Foto de Perfil" style="display: none;">
                     </div>
-                    <button type="button" class="btn-lapiz-editar" aria-label="Editar foto" onclick="abrirModalFoto()">
+                    <button type="button" class="btn-lapiz-editar" aria-label="Editar foto">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M12 20h9"></path>
                             <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
@@ -150,14 +149,6 @@
             </div>
         </div>
     </main>
-
-    <!-- NUEVO MODAL: VISOR DE FOTO DE PERFIL AMPLIADA (ESTILO FACEBOOK) -->
-    <div id="modal-visor-foto-grande" onclick="cerrarVisorFotoGrande(event)" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.85); z-index: 9999999; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
-        <button type="button" onclick="cerrarVisorFotoGrandeDirecto()" style="position: absolute; top: 20px; right: 25px; background: rgba(255,255,255,0.2); border: none; color: #fff; font-size: 30px; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s;">&times;</button>
-        <div style="max-width: 90%; max-height: 90%; display: flex; justify-content: center; align-items: center;">
-            <img id="img-foto-ampliada-pantalla" src="" alt="Foto de perfil en grande" style="max-width: 100%; max-height: 85vh; border-radius: 12px; object-fit: contain; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-        </div>
-    </div>
 
     <!-- MODAL FOTO DE PERFIL -->
     <div id="modal-foto-perfil" class="modal-foto-overlay" onclick="cerrarModalFoto(event)">
@@ -292,38 +283,8 @@
     <script src="script.js"></script>
     <script src="perfil.js"></script>
 
-    <!-- SCRIPT SOCIAL INDEPENDIENTE Y VISOR DE FOTO -->
+    <!-- SCRIPT SOCIAL INDEPENDIENTE -->
     <script>
-        // Función para abrir la foto de perfil en grande estilo Facebook
-        function ampliarFotoPerfil(event) {
-            // Evitamos que se disparen otros eventos indeseados si los hubiera
-            event.stopPropagation();
-            
-            const imgPerfil = document.getElementById('foto-perfil-img');
-            const visor = document.getElementById('modal-visor-foto-grande');
-            const imgAmpliada = document.getElementById('img-foto-ampliada-pantalla');
-
-            // Solo abrimos si el usuario realmente tiene una foto cargada (si la etiqueta img está visible y tiene src)
-            if (imgPerfil && imgPerfil.style.display !== 'none' && imgPerfil.src && imgPerfil.src.trim() !== "") {
-                imgAmpliada.src = imgPerfil.src;
-                visor.style.display = 'flex';
-            } else {
-                // Si no tiene foto personalizada, opcionalmente podemos avisarle o no hacer nada
-                console.log("El usuario no tiene una foto de perfil personalizada para ampliar.");
-            }
-        }
-
-        function cerrarVisorFotoGrandeDirecto() {
-            const visor = document.getElementById('modal-visor-foto-grande');
-            if (visor) visor.style.display = 'none';
-        }
-
-        function cerrarVisorFotoGrande(event) {
-            if (event.target.id === 'modal-visor-foto-grande') {
-                cerrarVisorFotoGrandeDirecto();
-            }
-        }
-
         window.abrirModalSocialIndependiente = async function(tipo) {
             const modal = document.getElementById('modal-social-unico');
             const titulo = document.getElementById('modal-social-titulo');

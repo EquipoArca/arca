@@ -2825,11 +2825,125 @@ setInterval(() => {
             });
         });
     });
-}, 1000 * 60 * 60); // Se ejecuta cada hora
+}, 1000 * 60 * 60);
+// ==========================================
+// MÓDULO DE DENUNCIAS DE PERFIL
+// ==========================================
 
-// --- Aquí abajo ya debes tener tu app.listen normal ---
-// const PORT = process.env.PORT || 3000;
-// app.listen(PORT, () => { ... });
+// 1. Registrar denuncia de perfil y notificar al admin
+app.post('/api/denunciar-usuario', (req, res) => {
+    const { correo_denunciante, id_usuario_denunciado, username_denunciado, motivo } = req.body;
+
+    if (!correo_denunciante || !id_usuario_denunciado || !motivo) {
+        return res.status(400).json({ error: "Faltan datos requeridos para la denuncia." });
+    }
+
+    // Buscar ID del denunciante
+    db.query("SELECT id_usuarios, nombre_usuario FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))", [correo_denunciante], (err, rows) => {
+        if (err || rows.length === 0) return res.status(404).json({ error: "Usuario denunciante no encontrado." });
+
+        const idDenunciante = rows[0].id_usuarios;
+        const nombreDenunciante = rows[0].nombre_usuario;
+
+        // Guardar la denuncia en base de datos
+        const sqlDenuncia = `
+            INSERT INTO denuncias_usuarios (id_denunciante, id_usuario_denunciado, motivo)
+            VALUES (?, ?, ?)
+        `;
+
+        db.query(sqlDenuncia, [idDenunciante, id_usuario_denunciado, motivo], (errD, resultado) => {
+            if (errD) {
+                console.error("❌ Error al guardar denuncia:", errD.message);
+                return res.status(500).json({ error: "Error al registrar la denuncia en la base de datos." });
+            }
+
+            const idDenuncia = resultado.insertId;
+            const mensajeNotif = `🚨 Nueva denuncia contra @${username_denunciado} por parte de @${nombreDenunciante}. Motivo: "${motivo}"`;
+
+            // Enviar notificación interna a los administradores (o usuarios con rol admin/fundación de control)
+            // Buscamos usuarios administradores o notificamos de forma general en la tabla de notificaciones admin
+            const sqlAdminNotif = `
+                INSERT INTO notificaciones (id_usuario_destino, id_usuario_origen, tipo, mensaje)
+                SELECT id_usuarios, ?, 'denuncia_perfil', ? 
+                FROM usuarios WHERE tipo_usuario = 'admin' OR correo_usuario = 'arcaoficial0@gmail.com'
+            `;
+
+            db.query(sqlAdminNotif, [idDenunciante, mensajeNotif], (errNotif) => {
+                if (errNotif) {
+                    console.error("⚠️ No se pudo notificar al admin internamente:", errNotif.message);
+                }
+            });
+
+            res.status(201).json({ exito: true, mensaje: "Denuncia registrada con éxito.", id_denuncia: idDenuncia });
+        });
+    });
+});
+
+// 2. Obtener lista de denuncias pendientes para el Panel de Administración
+app.get('/api/admin/denuncias', (req, res) => {
+    const sql = `
+        -`;
+    const sqlDenuncias = `
+        SELECT 
+            d.id_denuncia, 
+            d.motivo, 
+            d.fecha_denuncia,
+            u_denunciado.id_usuarios AS id_denunciado,
+            u_denunciado.nombre_usuario AS nombre_denunciado,
+            u_denunciado.correo_usuario AS correo_denunciado,
+            u_denunciado.foto_perfil AS foto_denunciado,
+            u_denunciado.estado_aprobacion AS estado_cuenta,
+            u_den_por.nombre_usuario AS nombre_denunciante
+        FROM denuncias_usuarios d
+        JOIN usuarios u_denunciado ON d.id_usuario_denunciado = u_denunciado.id_usuarios
+        JOIN usuarios u_den_por ON d.id_denunciante = u_den_por.id_usuarios
+        ORDER BY d.fecha_denuncia DESC
+    `;
+
+    db.query(sqlDenuncias, (err, results) => {
+        if (err) {
+            console.error("❌ Error al obtener denuncias:", err.message);
+            return res.status(500).json({ error: "Error al cargar las denuncias." });
+        }
+        res.json({ exito: true, denuncias: results });
+    });
+});
+
+// 3. Acción del Admin: Poner cuenta en revisión (suspender acceso) o eliminarla
+app.post('/api/admin/gestionar-denuncia', (req, res) => {
+    const { id_denuncia, id_usuario_denunciado, accion } = req.body; 
+    // accion puede ser: 'suspender' o 'eliminar'
+
+    if (!id_usuario_denunciado || !accion) {
+        return res.status(400).json({ error: "Faltan datos requeridos." });
+    }
+
+    if (accion === 'suspender') {
+        // Poner estado de aprobación o cuenta en 'revision' o 'suspendido'
+        const sqlSuspender = "UPDATE usuarios SET estado_aprobacion = 'suspendido' WHERE id_usuarios = ?";
+        db.query(sqlSuspender, [id_usuario_denunciado], (err) => {
+            if (err) return res.status(500).json({ error: "Error al suspender la cuenta." });
+            
+            // Borrar la denuncia atendida
+            db.query("DELETE FROM denuncias_usuarios WHERE id_denuncia = ?", [id_denuncia]);
+            res.json({ exito: true, mensaje: "Cuenta puesta en revisión / suspendida con éxito." });
+        });
+    } else if (accion === 'eliminar') {
+        // Eliminar completamente de la base de datos
+        db.query("DELETE FROM usuarios WHERE id_usuarios = ?", [id_usuario_denunciado], (err) => {
+            if (err) return res.status(500).json({ error: "Error al eliminar la cuenta de la base de datos." });
+
+            db.query("DELETE FROM denuncias_usuarios WHERE id_denuncia = ?", [id_denuncia]);
+            res.json({ exito: true, mensaje: "Cuenta eliminada permanentemente con éxito." });
+        });
+    } else {
+        // Si el admin decide descartar la denuncia sin castigar
+        db.query("DELETE FROM denuncias_usuarios WHERE id_denuncia = ?", [id_denuncia], () => {
+            res.json({ exito: true, mensaje: "Denuncia descartada." });
+        });
+    }
+});
+
 // ==========================================
 // INICIALIZACIÓN DEL SERVIDOR
 // ==========================================
