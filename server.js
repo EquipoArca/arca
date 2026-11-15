@@ -1240,9 +1240,9 @@ app.delete('/api/adopciones/:id', (req, res) => {
 
 
 app.get('/api/reportes/:id', (req, res) => {
-    const idReporte = Number(req.params.id);
+    const idParam = Number(req.params.id);
 
-    if (!Number.isInteger(idReporte) || idReporte <= 0) {
+    if (!Number.isInteger(idParam) || idParam <= 0) {
         return res.status(400).json({
             error: "ID de reporte inválido."
         });
@@ -1263,17 +1263,13 @@ app.get('/api/reportes/:id', (req, res) => {
             ON r.id_tipo_reporte = tr.id_tipo_reporte
         LEFT JOIN publicaciones p
             ON p.id_reporte = r.id_reporte
-        WHERE r.id_reporte = ?
+        WHERE r.id_reporte = ? OR p.id_publicacion = ?
         LIMIT 1
     `;
 
-    db.query(query, [idReporte], (err, results) => {
+    db.query(query, [idParam, idParam], (err, results) => {
         if (err) {
-            console.error(
-                "❌ Error al consultar el reporte:",
-                err.message
-            );
-
+            console.error("❌ Error al consultar el reporte:", err.message);
             return res.status(500).json({
                 error: "Error en el servidor"
             });
