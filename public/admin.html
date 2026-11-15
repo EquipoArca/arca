@@ -627,9 +627,12 @@ async function gestionarDenuncia(idDenuncia, idDenunciado, accion) {
                 const res = await fetch('/api/admin/gestionar-denuncia', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id_denuncia, id_usuario_denunciado: idDenunciado, accion })
+                    body: JSON.stringify({ 
+                        id_denuncia: idDenuncia,                  // <-- ¡Aquí estaba el detalle!
+                        id_usuario_denunciado: idDenunciado, 
+                        accion 
+                    })
                 });
-
                 // Leemos la respuesta como texto plano primero para evitar fallos de JSON
                 const textoRespuesta = await res.text();
                 let resultado;
