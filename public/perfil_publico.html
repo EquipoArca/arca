@@ -340,7 +340,7 @@
                   </div>
               </div>
 
-              <div class="columna-lateral-derecha">
+          <div class="columna-lateral-derecha">
                   <button id="btn-solicitud-adoptante" class="btn-solicitar-adoptante" onclick="solicitarVerAdoptante()">
                       Solicitar ver perfil de adoptante
                   </button>
@@ -355,8 +355,11 @@
                       </div>
                   </div>
 
-                  <button class="btn-accion-peligro" onclick="alert('Funcionalidad de denuncia enviada.')">Denunciar perfil</button>
-                  <button class="btn-accion-peligro" onclick="bloquearUsuarioActual()">Bloquear usuario</button>
+                  <!-- ENVUELVE LOS BOTONES AQUÍ -->
+                  <div id="seccion-denuncia-bloqueo">
+                      <button class="btn-accion-peligro" onclick="alert('Funcionalidad de denuncia enviada.')">Denunciar perfil</button>
+                      <button class="btn-accion-peligro" onclick="bloquearUsuarioActual()">Bloquear usuario</button>
+                  </div>
               </div>
 
           </div>
@@ -462,16 +465,19 @@
             // ==========================================
             // DETECTAR SI ES TU PROPIO PERFIL
             // ==========================================
-            const esMiPerfil = (correoReal.toLowerCase().trim() === correoLogueado.toLowerCase().trim());
 
-          if (esMiPerfil) {
-        // Si es tu perfil, ocultamos o transformamos los botones de interacción ajena
+const esMiPerfil = (correoReal.toLowerCase().trim() === correoLogueado.toLowerCase().trim());
+
+    // Ocultar o mostrar el bloque de denunciar/bloquear según si es tu perfil
+    const seccionDenunciaBloqueo = document.getElementById('seccion-denuncia-bloqueo');
+    if (seccionDenunciaBloqueo) {
+        seccionDenunciaBloqueo.style.display = esMiPerfil ? 'none' : 'block';
+    }
+
+    if (esMiPerfil) {
+        // Si es tu perfil...
         const btnSeguir = document.getElementById('btn-seguir');
-        if (btnSeguir) btnSeguir.style.display = 'none'; // No te puedes seguir a ti mismo
-
-        // NUEVA LÍNEA PARA OCULTAR DENUNCIAR Y BLOQUEAR:
-        const contenedorAccionesAjena = document.getElementById('acciones-perfil-ajeno');
-        if (contenedorAccionesAjena) contenedorAccionesAjena.style.display = 'none';
+        if (btnSeguir) btnSeguir.style.display = 'none'; 
 
         const btnAdoptante = document.getElementById('btn-solicitud-adoptante');
         if (btnAdoptante) {
@@ -481,12 +487,11 @@
                 window.location.href = 'perfil_usuario.html';
             };
         }
-    
-            } else {
-                // Si es el perfil de otro usuario, mostramos todo normal
-                actualizarBotonSeguirUI(usuarioSeguidoActual);
-                actualizarEstadoBotonSolicitud(estadoSolicitudActual);
-            }
+    } else {
+        // Si es el perfil de otro usuario...
+        actualizarBotonSeguirUI(usuarioSeguidoActual);
+        actualizarEstadoBotonSolicitud(estadoSolicitudActual);
+    }
 
             cargarPublicacionesDeUsuario(usernamePerfil, idUsuarioPerfil);
 
