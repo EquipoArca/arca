@@ -36,7 +36,7 @@
             padding: 18px 20px;
             text-align: center;
             box-shadow: 0 4px 15px rgba(229, 115, 115, 0.08);
-            margin-bottom: 35px;
+            margin-bottom: 25px;
             box-sizing: border-box;
         }
 
@@ -332,18 +332,50 @@
 <body>
 
     <header class="header-admin">
-        <h1><i class="fa-solid fa-shield-heart"></i> Panel de Verificación de Fundaciones</h1>
-        <p>Revisa la información legal y los documentos adjuntos antes de aprobar el acceso a ARCA.</p>
+        <h1><i class="fa-solid fa-shield-heart"></i> Panel de Administración - ARCA</h1>
+        <p>Gestiona solicitudes de fundaciones y revisa las denuncias de perfiles reportados.</p>
     </header>
+
+    <!-- Pestañas de Navegación del Panel Admin -->
+    <div style="text-align: center; margin-bottom: 25px;">
+        <button onclick="cambiarPestanaAdmin('fundaciones')" id="tab-fundaciones" style="background: #e57373; color: white; border: none; padding: 10px 22px; border-radius: 20px; font-family: 'Itim', sans-serif; font-size: 1.05rem; cursor: pointer; margin-right: 10px; box-shadow: 0 4px 12px rgba(229,115,115,0.3); transition: all 0.2s;">Fundaciones Pendientes</button>
+        <button onclick="cambiarPestanaAdmin('denuncias')" id="tab-denuncias" style="background: #fff; color: #e57373; border: 2px solid #e57373; padding: 10px 22px; border-radius: 20px; font-family: 'Itim', sans-serif; font-size: 1.05rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.05); transition: all 0.2s;">Denuncias de Perfiles</button>
+    </div>
 
     <main class="contenedor-solicitudes" id="lista-solicitudes">
         <div class="estado-mensaje">
             <i class="fa-solid fa-spinner fa-spin" style="font-size: 2rem; color: #e57373; margin-bottom: 10px;"></i>
-            <p style="margin: 0;">Cargando solicitudes pendientes...</p>
+            <p style="margin: 0;">Cargando solicitudes...</p>
         </div>
     </main>
 
     <script>
+        let pestanaActual = 'fundaciones';
+
+        function cambiarPestanaAdmin(tipo) {
+            pestanaActual = tipo;
+            const btnFund = document.getElementById('tab-fundaciones');
+            const btnDen = document.getElementById('tab-denuncias');
+
+            if (tipo === 'fundaciones') {
+                btnFund.style.background = '#e57373';
+                btnFund.style.color = 'white';
+                btnFund.style.boxShadow = '0 4px 12px rgba(229,115,115,0.3)';
+                btnDen.style.background = '#fff';
+                btnDen.style.color = '#e57373';
+                btnDen.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)';
+                cargarSolicitudes();
+            } else {
+                btnDen.style.background = '#e57373';
+                btnDen.style.color = 'white';
+                btnDen.style.boxShadow = '0 4px 12px rgba(229,115,115,0.3)';
+                btnFund.style.background = '#fff';
+                btnFund.style.color = '#e57373';
+                btnFund.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)';
+                cargarDenunciasPerfiles();
+            }
+        }
+
         function abrirPdfSeguro(base64Data, nombreDoc) {
             if (!base64Data) {
                 alert("El documento no está disponible.");
@@ -386,11 +418,13 @@
         }
 
         async function cargarSolicitudes() {
+            if (pestanaActual !== 'fundaciones') return;
             const contenedor = document.getElementById('lista-solicitudes');
             try {
                 const res = await fetch('/api/admin/fundaciones-pendientes');
                 const data = await res.json();
                 
+                if (pestanaActual !== 'fundaciones') return;
                 contenedor.innerHTML = '';
 
                 if (!data.exito || data.fundaciones.length === 0) {
@@ -425,7 +459,6 @@
                         botonesDocs = `<span class="sin-docs">Esta solicitud no tiene documentos PDF adjuntos.</span>`;
                     }
 
-                    // Enlace directo a Gmail web para redactar correo con los datos precargados
                     const nombreComercialEscapado = f.Nombre_Comercial || 'Fundación';
                     const correoDestino = f.Correo_fundacion || '';
                     const asunto = encodeURIComponent("Observación sobre tus documentos en ARCA");
@@ -519,7 +552,97 @@
             }
         }
 
-        // Función para rechazar y borrar todos los registros de la fundación
+        async function cargarDenunciasPerfiles() {
+            if (pestanaActual !== 'denuncias') return;
+            const contenedor = document.getElementById('lista-solicitudes');
+            contenedor.innerHTML = `<div class="estado-mensaje"><i class="fa-solid fa-spinner fa-spin" style="font-size: 2rem; color: #e57373; margin-bottom: 10px;"></i><p style="margin: 0;">Cargando denuncias de perfiles...</p></div>`;
+
+            try {
+                const res = await fetch('/api/admin/denuncias');
+                const data = await res.json();
+
+                if (pestanaActual !== 'denuncias') return;
+                contenedor.innerHTML = '';
+
+                if (!data.exito || data.denuncias.length === 0) {
+                    contenedor.innerHTML = `
+                        <div class="estado-mensaje">
+                            <div style="font-size: 2.5rem; margin-bottom: 10px;">🌸</div>
+                            <p style="margin: 0;">¡Todo limpio! No hay denuncias de perfiles pendientes.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                data.denuncias.forEach(d => {
+                    const tarjeta = document.createElement('div');
+                    tarjeta.className = 'tarjeta-solicitud';
+                    tarjeta.innerHTML = `
+                        <div class="tarjeta-header">
+                            <h2 class="titulo-fundacion">
+                                <img src="${d.foto_denunciado || 'logo.png'}" style="width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid #e57373;">
+                                Denuncia a @${d.nombre_denunciado}
+                            </h2>
+                            <span class="badge-pendiente" style="background: #ffebee; color: #c62828; border-color: #ef9a9a;">Reportado por: @${d.nombre_denunciante}</span>
+                        </div>
+
+                        <div class="info-grid">
+                            <div class="dato-item">
+                                <span class="dato-label"><i class="fa-solid fa-envelope"></i> Correo de la cuenta</span>
+                                <span class="dato-valor">${d.correo_denunciado}</span>
+                            </div>
+                            <div class="dato-item">
+                                <span class="dato-label"><i class="fa-solid fa-circle-exclamation"></i> Motivo de denuncia</span>
+                                <span class="dato-valor" style="color: #d9534f; font-weight: bold;">"${d.motivo}"</span>
+                            </div>
+                        </div>
+
+                        <div class="tarjeta-footer">
+                            <a href="perfil_publico.html?user=${encodeURIComponent(d.nombre_denunciado)}" target="_blank" class="btn-mensaje" style="background: #ffb74d;">
+                                <i class="fa-solid fa-eye"></i> Ver Perfil
+                            </a>
+                            <button class="btn-aprobar" style="background: #ff9800;" onclick="gestionarDenuncia(${d.id_denuncia}, ${d.id_denunciado}, 'suspender')">
+                                <i class="fa-solid fa-ban"></i> Poner en Revisión (Suspender)
+                            </button>
+                            <button class="btn-rechazar" onclick="gestionarDenuncia(${d.id_denuncia}, ${d.id_denunciado}, 'eliminar')">
+                                <i class="fa-solid fa-trash"></i> Eliminar Cuenta
+                            </button>
+                        </div>
+                    `;
+                    contenedor.appendChild(tarjeta);
+                });
+            } catch (e) {
+                console.error("Error al cargar denuncias:", e);
+                contenedor.innerHTML = `<div class="estado-mensaje" style="color: #c94a5a;"><p style="margin: 0;">Error al conectar con el servidor para cargar denuncias.</p></div>`;
+            }
+        }
+
+        async function gestionarDenuncia(idDenuncia, idDenunciado, accion) {
+            const mensajeConfirm = accion === 'suspender' 
+                ? '¿Deseas poner esta cuenta en revisión (suspender su acceso temporalmente)?' 
+                : '¿Estás completamente segura de ELIMINAR permanentemente esta cuenta de la base de datos?';
+
+            if (!confirm(mensajeConfirm)) return;
+
+            try {
+                const res = await fetch('/api/admin/gestionar-denuncia', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id_denuncia, id_usuario_denunciado: idDenunciado, accion })
+                });
+                const resultado = await res.json();
+
+                if (resultado.exito) {
+                    alert(resultado.mensaje);
+                    cargarDenunciasPerfiles();
+                } else {
+                    alert("Error: " + (resultado.error || "No se pudo completar la acción."));
+                }
+            } catch (e) {
+                alert("Error de conexión al procesar la acción.");
+            }
+        }
+
         async function rechazar(id_fundacion, correo_fundacion, nombre_comercial) {
             if (!confirm(`¿Estás segura de RECHAZAR y ELIMINAR permanentemente a la fundación "${nombre_comercial}"? Esto borrará sus datos de la base de datos y su cuenta de Firebase.`)) return;
 
@@ -547,7 +670,7 @@
                 }
 
                 alert(`¡La fundación "${nombre_comercial}" ha sido rechazada y sus registros eliminados con éxito! 🌸`);
-                cargarSolicitudes(); // Recargar la lista
+                cargarSolicitudes();
             } catch (error) {
                 alert("Error al rechazar: " + error.message);
                 if (btn) {
@@ -567,7 +690,6 @@
             }
 
             try {
-                // 1. Aprobar en la base de datos a través del backend
                 const res = await fetch('/api/admin/aprobar-fundacion', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -584,7 +706,6 @@
                     return;
                 }
 
-                // 2. Enviar correo usando la plantilla 'template_aprobacion'
                 const linkInicioSesion = window.location.origin + "/home.html";
                 try {
                     await emailjs.send("service_93j9cwn", "template_aprobacion", {
@@ -598,7 +719,7 @@
                     alert("Cuenta aprobada en la base de datos, pero falló el envío del correo de EmailJS.");
                 }
 
-                cargarSolicitudes(); // Recargar la lista
+                cargarSolicitudes();
             } catch (error) {
                 alert("Error al aprobar: " + error.message);
                 if (btn) {
@@ -608,116 +729,8 @@
             }
         }
 
+        // Cargar por defecto las solicitudes pendientes al abrir la página
         cargarSolicitudes();
-        let pestanaActual = 'fundaciones';
-
-        function cambiarPestanaAdmin(tipo) {
-            pestanaActual = tipo;
-            const btnFund = document.getElementById('tab-fundaciones');
-            const btnDen = document.getElementById('tab-denuncias');
-
-            if (tipo === 'fundaciones') {
-                btnFund.style.background = '#e57373';
-                btnFund.style.color = 'white';
-                btnDen.style.background = '#fff';
-                btnDen.style.color = '#e57373';
-                cargarSolicitudes();
-            } else {
-                btnDen.style.background = '#e57373';
-                btnDen.style.color = 'white';
-                btnFund.style.background = '#fff';
-                btnFund.style.color = '#e57373';
-                cargarDenunciasPerfiles();
-            }
-        }
-
-        async function cargarDenunciasPerfiles() {
-            const contenedor = document.getElementById('lista-solicitudes');
-            contenedor.innerHTML = `<div class="estado-mensaje"><i class="fa-solid fa-spinner fa-spin"></i><p>Cargando denuncias...</p></div>`;
-
-            try {
-                const res = await fetch('/api/admin/denuncias');
-                const data = await res.json();
-
-                contenedor.innerHTML = '';
-                if (!data.exito || data.denuncias.length === 0) {
-                    contenedor.innerHTML = `
-                        <div class="estado-mensaje">
-                            <div style="font-size: 2.5rem; margin-bottom: 10px;">🌸</div>
-                            <p style="margin: 0;">¡Todo limpio! No hay denuncias de perfiles pendientes.</p>
-                        </div>
-                    `;
-                    return;
-                }
-
-                data.denuncias.forEach(d => {
-                    const tarjeta = document.createElement('div');
-                    tarjeta.className = 'tarjeta-solicitud';
-                    tarjeta.innerHTML = `
-                        <div class="tarjeta-header">
-                            <h2 class="titulo-fundacion">
-                                <img src="${d.foto_denunciado || 'logo.png'}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
-                                Denuncia a @${d.nombre_denunciado}
-                            </h2>
-                            <span class="badge-pendiente" style="background: #ffebee; color: #c62828; border-color: #ef9a9a;">Denunciado por: @${d.nombre_denunciante}</span>
-                        </div>
-
-                        <div class="info-grid">
-                            <div class="dato-item">
-                                <span class="dato-label"><i class="fa-solid fa-envelope"></i> Correo de la cuenta</span>
-                                <span class="dato-valor">${d.correo_denunciado}</span>
-                            </div>
-                            <div class="dato-item">
-                                <span class="dato-label"><i class="fa-solid fa-circle-exclamation"></i> Motivo de denuncia</span>
-                                <span class="dato-valor" style="color: #d9534f; font-weight: bold;">"${d.motivo}"</span>
-                            </div>
-                        </div>
-
-                        <div class="tarjeta-footer" style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px;">
-                            <a href="perfil_publico.html?user=${encodeURIComponent(d.nombre_denunciado)}" target="_blank" class="btn-mensaje" style="background: #ffb74d;">
-                                <i class="fa-solid fa-eye"></i> Ver Perfil
-                            </a>
-                            <button class="btn-aprobar" style="background: #ff9800;" onclick="gestionarDenuncia(${d.id_denuncia}, ${d.id_denunciado}, 'suspender')">
-                                <i class="fa-solid fa-ban"></i> Poner en Revisión (Suspender)
-                            </button>
-                            <button class="btn-rechazar" onclick="gestionarDenuncia(${d.id_denuncia}, ${d.id_denunciado}, 'eliminar')">
-                                <i class="fa-solid fa-trash"></i> Eliminar Cuenta
-                            </button>
-                        </div>
-                    `;
-                    contenedor.appendChild(tarjeta);
-                });
-            } catch (e) {
-                console.error("Error al cargar denuncias:", e);
-                contenedor.innerHTML = `<div class="estado-mensaje"><p>Error al conectar con el servidor.</p></div>`;
-            }
-        }
-
-        async function gestionarDenuncia(idDenuncia, idDenunciado, accion) {
-            const mensajeConfirm = accion === 'suspender' 
-                ? '¿Deseas poner esta cuenta en revisión (suspender su acceso temporalmente)?' 
-                : '¿Estás completamente segura de ELIMINAR permanentemente esta cuenta de la base de datos?';
-
-            if (!confirm(mensajeConfirm)) return;
-
-            try {
-                const res = await fetch('/api/admin/gestionar-denuncia', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id_denuncia, id_usuario_denunciado: idDenunciado, accion })
-                });
-                const resultado = await res.json();
-
-                if (resultado.exito) {
-                    alert(resultado.mensaje);
-                    cargarDenunciasPerfiles();
-                } else {
-                    alert("Error: " + resultado.error);
-                }
-            } catch (e) {
-                alert("Error de conexión al procesar la acción.");
-            }
-        }
     </script>
 </body>
 </html>
