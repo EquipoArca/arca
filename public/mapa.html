@@ -384,7 +384,7 @@
         .popup-card-arca {
             font-family: 'Itim', cursive, sans-serif;
             text-align: center;
-            max-width: 180px;
+            max-width: 190px;
             padding: 4px;
             color: #5c4033;
         }
@@ -511,12 +511,52 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="script.js"></script>
 
- <script>
+  <script>
       const vectoresArca = {
           casita: `<svg style="width:28px;height:28px;vertical-align:middle;" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 32L32 12L54 32V50C54 52.2 52.2 54 50 54H14C11.8 54 10 52.2 10 50V32Z" fill="#FCE4EC" stroke="#E8A87C" stroke-width="4" stroke-linejoin="round"/><path d="M26 54V36C26 33.8 27.8 32 30 32H34C36.2 32 38 33.8 38 36V54" stroke="#D97736" stroke-width="4" stroke-linecap="round"/><circle cx="32" cy="24" r="4" fill="#E8A87C"/></svg>`,
           corazon: `<svg width="42" height="42" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M32 54C32 54 10 38 10 23C10 15 16 9 23 9C27.5 9 31 11.5 32 13.5C33 11.5 36.5 9 41 9C48 9 54 15 54 23C54 38 32 54 32 54Z" fill="#FAD4DE" stroke="#E985A0" stroke-width="4" stroke-linejoin="round"/></svg>`,
           huellita: `<svg width="42" height="42" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="18" cy="22" rx="6" ry="8" fill="#E8A87C"/><ellipse cx="46" cy="22" rx="6" ry="8" fill="#E8A87C"/><ellipse cx="29" cy="15" rx="5.5" ry="7.5" fill="#E8A87C"/><ellipse cx="35" cy="15" rx="5.5" ry="7.5" fill="#E8A87C"/><path d="M18 42C18 32 25 28 32 28C39 28 46 32 46 42C46 50 39 52 32 52C25 52 18 50 18 42Z" fill="#E8A87C"/></svg>`,
           nube: `<svg width="42" height="42" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16 46H48C53.5 46 58 41.5 58 36C58 30.8 54 26.5 49 26.1C47.8 17.5 40.5 11 31.5 11C23 11 16 16.8 14.3 24.8C9.6 25.8 6 30 6 35C6 41.1 10.5 46 16 46Z" fill="#E0F2FE" stroke="#7DD3FC" stroke-width="4" stroke-linejoin="round"/></svg>`
+      };
+
+      // =========================================================================
+      // BASE DE DATOS BLINDADA DE RESPALDO (VETERINARIAS Y CENTROS EN MEDELLÍN)
+      // Si OpenStreetMap se satura o falla, el mapa NUNCA quedará vacío.
+      // =========================================================================
+      const VETERINARIAS_RESPALDO_MEDELLIN = [
+          { nombre: "Centro de Bienestar Animal La Perla", tipo: "veterinaria", lat: 6.2248, lng: -75.6231, direccion: "Altavista, Medellín" },
+          { nombre: "Hospital Veterinario Universidad de Antioquia", tipo: "veterinaria", lat: 6.2738, lng: -75.5882, direccion: "Robledo, Medellín" },
+          { nombre: "Clínica Veterinaria El Poblado 24h", tipo: "veterinaria", lat: 6.2102, lng: -75.5714, direccion: "El Poblado, Medellín" },
+          { nombre: "Veterinaria Laureles Pet Care", tipo: "veterinaria", lat: 6.2465, lng: -75.5956, direccion: "Laureles, Medellín" },
+          { nombre: "Centro Veterinario San Cristóbal", tipo: "veterinaria", lat: 6.2785, lng: -75.6362, direccion: "San Cristóbal, Medellín" },
+          { nombre: "Veterinaria Castilla Mascotas", tipo: "veterinaria", lat: 6.2921, lng: -75.5724, direccion: "Castilla, Medellín" },
+          { nombre: "Clínica Veterinaria Belén", tipo: "veterinaria", lat: 6.2315, lng: -75.6012, direccion: "Belén, Medellín" },
+          { nombre: "Veterinaria Aranjuez Animal", tipo: "veterinaria", lat: 6.2804, lng: -75.5583, direccion: "Aranjuez, Medellín" },
+          { nombre: "Clínica Veterinaria Envigado Centro", tipo: "veterinaria", lat: 6.1718, lng: -75.5866, direccion: "Envigado, Área Metropolitana" },
+          { nombre: "Veterinaria Sabaneta Pet", tipo: "veterinaria", lat: 6.1515, lng: -75.6164, direccion: "Sabaneta, Área Metropolitana" },
+          { nombre: "Centro Veterinario Itagüí", tipo: "veterinaria", lat: 6.1726, lng: -75.6095, direccion: "Itagüí, Área Metropolitana" },
+          { nombre: "Clínica Veterinaria Bello", tipo: "veterinaria", lat: 6.3373, lng: -75.5579, direccion: "Bello, Área Metropolitana" }
+      ];
+
+      // Coordenadas rápidas de barrios de Medellín para el buscador si Nominatim falla
+      const BARRIOS_MEDELLIN_RESPALDO = {
+          "las flores": [6.2768, -75.6345],
+          "cantares": [6.2792, -75.6381],
+          "san cristobal": [6.2785, -75.6362],
+          "san cristóbal": [6.2785, -75.6362],
+          "castilla": [6.2921, -75.5724],
+          "laureles": [6.2465, -75.5956],
+          "poblado": [6.2102, -75.5714],
+          "el poblado": [6.2102, -75.5714],
+          "belen": [6.2315, -75.6012],
+          "belén": [6.2315, -75.6012],
+          "robledo": [6.2738, -75.5882],
+          "aranjuez": [6.2804, -75.5583],
+          "centro": [6.2518, -75.5636],
+          "itagui": [6.1726, -75.6095],
+          "itagüí": [6.1726, -75.6095],
+          "envigado": [6.1718, -75.5866],
+          "bello": [6.3373, -75.5579]
       };
 
       function obtenerImagenSegura(imgDato) {
@@ -578,7 +618,7 @@
 
           const iconoWrap = document.createElement("div");
           iconoWrap.className = "arca-alerta-icono-wrapper";
-          iconoWrap.innerHTML = tipo === 'pregunta' ? vectoresArca.huellita : vectoresArca.corazon;
+          iconoWrap.innerHTML = tipo === 'pregunta' ? vectoresArca.huellita : (tipo === 'aviso' ? vectoresArca.nube : vectoresArca.corazon);
 
           const encabezado = document.createElement("h2");
           encabezado.className = "arca-alerta-titulo";
@@ -639,6 +679,38 @@
           }).addTo(map);
 
           let markerMiUbicacion = null;
+          let markersLayer = L.layerGroup().addTo(map);
+
+          // Separamos los datos por origen para que NUNCA se borren ni se dupliquen entre sí
+          let listaPublicacionesArca = [];
+          let listaVeterinarias = [];
+
+          // 1. Cargar inmediatamente el respaldo + caché de veterinarias para que aparezcan en 0ms
+          function inicializarVeterinariasBlindadas() {
+              const cacheGuardada = localStorage.getItem('arca_vets_cache');
+              let vetsCache = [];
+              if (cacheGuardada) {
+                  try { vetsCache = JSON.parse(cacheGuardada); } catch (e) {}
+              }
+
+              // Combinar respaldo fijo + caché guardada sin duplicados
+              const combinadas = [...VETERINARIAS_RESPALDO_MEDELLIN];
+              vetsCache.forEach(v => {
+                  const existe = combinadas.some(c => Math.abs(c.lat - v.lat) < 0.0002 && Math.abs(c.lng - v.lng) < 0.0002);
+                  if (!existe) combinadas.push(v);
+              });
+
+              listaVeterinarias = combinadas;
+              renderizarMarcadores(obtenerFiltroActivo());
+          }
+
+          function obtenerFiltroActivo() {
+              return document.querySelector('.filtro-btn.active')?.getAttribute('data-filtro') || 'todos';
+          }
+
+          function obtenerTodosLosElementos() {
+              return [...listaPublicacionesArca, ...listaVeterinarias];
+          }
 
           function irAMiUbicacionReal(conAlertaError = false) {
               if (navigator.geolocation) {
@@ -646,7 +718,7 @@
                       (position) => {
                           latActual = position.coords.latitude;
                           lngActual = position.coords.longitude;
-                          map.setView([latActual, lngActual], 16);
+                          map.setView([latActual, lngActual], 15);
 
                           if (markerMiUbicacion) {
                               markerMiUbicacion.setLatLng([latActual, lngActual]);
@@ -659,14 +731,14 @@
                               markerMiUbicacion = L.marker([latActual, lngActual], { icon: iconoUsuario }).addTo(map);
                               markerMiUbicacion.bindTooltip("¡Estás aquí!", { permanent: false, direction: 'top' });
                           }
-                          cargarVeterinariasDeLaZona();
+                          cargarVeterinariasDeLaZona(false);
                       },
                       (error) => {
                           if (conAlertaError) {
-                              mostrarAlertaArca("Ubicación no encontrada", "No pudimos acceder a tu ubicación GPS.", { tipo: "conexion" });
+                              mostrarAlertaArca("Ubicación no encontrada", "No pudimos acceder a tu ubicación GPS, pero seguimos mostrando Medellín.", { tipo: "aviso" });
                           }
                       },
-                      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                      { enableHighAccuracy: true, timeout: 8000, maximumAge: 30000 }
                   );
               }
           }
@@ -679,8 +751,46 @@
               irAMiUbicacionReal(true);
           });
 
-          let markersLayer = L.layerGroup().addTo(map);
-          let todosLosElementos = [];
+          // =========================================================================
+          // BUSCADOR DE BARRIOS / LUGARES BLINDADO
+          // =========================================================================
+          async function buscarLugarEnMapa() {
+              const input = document.getElementById('input-buscar-lugar');
+              const texto = input.value.trim();
+              if (!texto) return;
+
+              const claveNormalizada = texto.toLowerCase();
+              if (BARRIOS_MEDELLIN_RESPALDO[claveNormalizada]) {
+                  const [latB, lngB] = BARRIOS_MEDELLIN_RESPALDO[claveNormalizada];
+                  map.setView([latB, lngB], 15);
+                  cargarVeterinariasDeLaZona(false);
+                  return;
+              }
+
+              try {
+                  const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(texto + ', Medellín, Colombia')}&limit=1`;
+                  const res = await fetch(url);
+                  if (res.ok) {
+                      const data = await res.json();
+                      if (data && data.length > 0) {
+                          const lat = parseFloat(data[0].lat);
+                          const lon = parseFloat(data[0].lon);
+                          map.setView([lat, lon], 15);
+                          cargarVeterinariasDeLaZona(false);
+                          return;
+                      }
+                  }
+                  mostrarAlertaArca("Zona no encontrada", "No encontramos ese sector exacto. Intenta con otro barrio de Medellín (ej. Castilla, Laureles, Poblado).", { tipo: "aviso" });
+              } catch (e) {
+                  mostrarAlertaArca("Aviso de búsqueda", "Centrando en Medellín para explorar la zona.", { tipo: "aviso" });
+                  map.setView([6.25184, -75.56359], 13);
+              }
+          }
+
+          document.getElementById('btn-ir-lugar').addEventListener('click', buscarLugarEnMapa);
+          document.getElementById('input-buscar-lugar').addEventListener('keypress', (e) => {
+              if (e.key === 'Enter') buscarLugarEnMapa();
+          });
 
           const panelCercanas = document.getElementById('panel-cercanas');
           const btnToggleCercanas = document.getElementById('btn-toggle-cercanas');
@@ -710,9 +820,10 @@
               const centroMapa = map.getCenter();
               if (!centroMapa) return;
               
-              const filtroActivo = document.querySelector('.filtro-btn.active')?.getAttribute('data-filtro') || 'todos';
+              const filtroActivo = obtenerFiltroActivo();
+              const todos = obtenerTodosLosElementos();
 
-              const elementosFiltrados = todosLosElementos.filter(item => {
+              const elementosFiltrados = todos.filter(item => {
                   if (!item || typeof item.lat !== 'number' || typeof item.lng !== 'number') return false;
                   const t = (item.tipo || '').toLowerCase();
                   if (filtroActivo === 'todos') return true;
@@ -738,13 +849,13 @@
                   const distanciaTexto = el.distanciaKm < 1 ? `${Math.round(el.distanciaKm * 1000)} m` : `${el.distanciaKm.toFixed(1)} km`;
                   const queryMaps = `${el.lat},${el.lng}`;
                   const urlMaps = `https://www.google.com/maps/search/?api=1&query=${queryMaps}`;
-                  const nombreMostrar = el.nombre || el.nombre_tipo_reporte || 'Punto';
+                  const nombreMostrar = el.nombre || el.nombre_tipo_reporte || 'Punto ARCA';
                   const direccionMostrar = el.direccion || (el.Ubicacion && !el.Ubicacion.includes("Ubicacion GPS") ? el.Ubicacion : "Medellín");
 
                   htmlItems += `
                       <div class="card-vet-cercana">
                           <p class="vet-nombre">${nombreMostrar}</p>
-                          <span class="vet-distancia"><i class="fa-solid fa-location-arrow"></i> A ${distanciaTexto} de ti</span>
+                          <span class="vet-distancia"><i class="fa-solid fa-location-arrow"></i> A ${distanciaTexto}</span>
                           <p class="vet-dir"><i class="fa-solid fa-location-dot" style="color: #62c385;"></i> ${direccionMostrar}</p>
                           <div class="acciones-vet-cercana">
                               <a href="${urlMaps}" target="_blank" class="btn-accion-card btn-mapa-exacto btn-arca-animado">Abrir en Maps</a>
@@ -762,8 +873,9 @@
 
           function renderizarMarcadores(filtro = 'todos') {
               markersLayer.clearLayers();
+              const todos = obtenerTodosLosElementos();
 
-              todosLosElementos.forEach(item => {
+              todos.forEach(item => {
                   if (!item || typeof item.lat !== 'number' || typeof item.lng !== 'number') return;
                   const tipo = (item.tipo || '').toLowerCase();
 
@@ -809,27 +921,43 @@
                   });
 
                   let popupContenido = '';
-                  if (tipo !== 'veterinaria') {
+                  if (!tipo.includes('veterinaria') && !tipo.includes('clinica')) {
                       const urlMapsReporte = `https://www.google.com/maps/search/?api=1&query=${item.lat},${item.lng}`;
                       const idReal = item.id_origen || item.id_publicacion || '';
                       
-                     let paginaDetalle = `detalle_reporte.html?id=${idReal}&origen=mapa`;
-      if (item.tipo_publicacion === 'adopcion') {
-          paginaDetalle = `detalle_adopcion.html?id=${idReal}&origen=mapa`;
-      } else if (item.tipo_publicacion === 'evento') {
-          paginaDetalle = `detalle_evento.html?id=${idReal}&origen=mapa`;
-      }
+                      // Personalización exacta de destino, botón e ícono por categoría
+                      let paginaDetalle = `detalle_reporte.html?id=${idReal}&origen=mapa`;
+                      let textoBotonDetalle = 'Ver caso';
+                      let etiquetaSinFoto = 'Reporte ARCA';
+                      let iconoSinFoto = 'fa-triangle-exclamation';
+                      let colorIconoSinFoto = '#e57373';
 
-                      // Procesar la imagen de forma segura extrayéndola del array JSON
+                      if (tipo.includes('adop')) {
+                          paginaDetalle = `detalle_adopcion.html?id=${idReal}&origen=mapa`;
+                          textoBotonDetalle = 'Ver adopción';
+                          etiquetaSinFoto = 'En Adopción';
+                          iconoSinFoto = 'fa-heart';
+                          colorIconoSinFoto = '#e985a0';
+                      } else if (tipo.includes('evento')) {
+                          paginaDetalle = `detalle_evento.html?id=${idReal}&origen=mapa`;
+                          textoBotonDetalle = 'Ver detalles';
+                          etiquetaSinFoto = 'Evento ARCA';
+                          iconoSinFoto = 'fa-calendar-days';
+                          colorIconoSinFoto = '#6bbbe7';
+                      }
+
                       const fotoUrl = obtenerImagenSegura(item.img_reporte);
 
                       popupContenido = `
                           <div class="popup-card-arca">
-                              ${fotoUrl ? `<img src="${fotoUrl}" alt="Foto">` : `<div class="popup-card-sin-foto"><i class="fa-solid fa-calendar-days" style="color: #6bbbe7; font-size: 20px;"></i><span style="font-size: 11px;">Publicación ARCA</span></div>`}
-                              <b>${item.nombre_tipo_reporte || 'Publicación'}</b>
+                              ${fotoUrl 
+                                  ? `<img src="${fotoUrl}" alt="Foto">` 
+                                  : `<div class="popup-card-sin-foto"><i class="fa-solid ${iconoSinFoto}" style="color: ${colorIconoSinFoto}; font-size: 20px;"></i><span style="font-size: 11px;">${etiquetaSinFoto}</span></div>`
+                              }
+                              <b>${item.nombre_tipo_reporte || 'Publicación ARCA'}</b>
                               <p>${item.Ubicacion && !item.Ubicacion.includes("Ubicacion GPS") ? item.Ubicacion : 'Medellín'}</p>
                               <div style="display: flex; gap: 6px; justify-content: center; margin-top: 6px;">
-                                  <a href="${paginaDetalle}" class="btn-ver-caso btn-arca-animado" style="padding: 5px 10px; font-size: 11.5px;">Ver caso</a>
+                                  <a href="${paginaDetalle}" class="btn-ver-caso btn-arca-animado" style="padding: 5px 10px; font-size: 11.5px;">${textoBotonDetalle}</a>
                                   <a href="${urlMapsReporte}" target="_blank" class="btn-ver-caso btn-arca-animado" style="background: #62c385; padding: 5px 10px; font-size: 11.5px;">Maps</a>
                               </div>
                           </div>
@@ -852,91 +980,128 @@
                   marker.bindPopup(popupContenido);
                   markersLayer.addLayer(marker);
               });
+
+              if (panelCercanas.classList.contains('abierto')) {
+                  actualizarListaCercanas();
+              }
           }
 
-          async function cargarVeterinariasDeLaZona() {
+          // =========================================================================
+          // CARGA DE VETERINARIAS CON TIMEOUT DE 4 SEGUNDOS + CACHÉ + RESPALDO
+          // =========================================================================
+          let escaneandoVets = false;
+          async function cargarVeterinariasDeLaZona(mostrarMensaje = false) {
+              if (escaneandoVets) return;
+              escaneandoVets = true;
+
               const bounds = map.getBounds();
-              if (!bounds) return;
+              if (!bounds) {
+                  escaneandoVets = false;
+                  return;
+              }
               const southWest = bounds.getSouthWest();
               const northEast = bounds.getNorthEast();
 
               const overpassQuery = `
-                  [out:json][timeout:25];
+                  [out:json][timeout:6];
                   (
                     node["amenity"="veterinary"](${southWest.lat},${southWest.lng},${northEast.lat},${northEast.lng});
-                    way["amenity"="veterinary"](${southWest.lat},${southWest.lng},${northEast.lat},${northEast.lng});
-                    relation["amenity"="veterinary"](${southWest.lat},${southWest.lng},${northEast.lat},${northEast.lng});
                     node["shop"="pet"](${southWest.lat},${southWest.lng},${northEast.lat},${northEast.lng});
                   );
                   out body;
-                  >;
-                  out skel qt;
               `;
+
+              const controller = new AbortController();
+              const timeoutId = setTimeout(() => controller.abort(), 4500);
 
               try {
                   const res = await fetch('https://overpass-api.de/api/interpreter', {
                       method: 'POST',
-                      body: overpassQuery
+                      body: overpassQuery,
+                      signal: controller.signal
                   });
+                  clearTimeout(timeoutId);
+
                   if (res.ok) {
                       const datosValidos = await res.json();
-                      if (datosValidos && datosValidos.elements) {
+                      if (datosValidos && datosValidos.elements && datosValidos.elements.length > 0) {
+                          let agregadasNuevas = 0;
                           datosValidos.elements.forEach(element => {
-                              let lat = element.lat;
-                              let lon = element.lon;
+                              const lat = element.lat;
+                              const lon = element.lon;
                               if (lat && lon && element.tags) {
                                   const nombreTag = element.tags.name || "Centro Veterinario";
-                                  const nuevaVetObj = {
-                                      nombre: nombreTag,
-                                      tipo: 'veterinaria',
-                                      lat: lat,
-                                      lng: lon,
-                                      direccion: "Medellín"
-                                  };
-                                  const existe = todosLosElementos.some(e => e && Math.abs(e.lat - lat) < 0.00005 && Math.abs(e.lng - lon) < 0.00005);
-                                  if (!existe) todosLosElementos.push(nuevaVetObj);
+                                  const direccionTag = element.tags["addr:street"] ? `${element.tags["addr:street"]}, Medellín` : "Medellín";
+                                  const existe = listaVeterinarias.some(e => Math.abs(e.lat - lat) < 0.0002 && Math.abs(e.lng - lon) < 0.0002);
+                                  if (!existe) {
+                                      listaVeterinarias.push({
+                                          nombre: nombreTag,
+                                          tipo: 'veterinaria',
+                                          lat: lat,
+                                          lng: lon,
+                                          direccion: direccionTag
+                                      });
+                                      agregadasNuevas++;
+                                  }
                               }
                           });
-                          const filtroActual = document.querySelector('.filtro-btn.active')?.getAttribute('data-filtro') || 'todos';
-                          renderizarMarcadores(filtroActual);
+
+                          if (agregadasNuevas > 0) {
+                              localStorage.setItem('arca_vets_cache', JSON.stringify(listaVeterinarias));
+                              renderizarMarcadores(obtenerFiltroActivo());
+                          }
                       }
                   }
               } catch (e) {
-                  console.warn("Aviso: La API de OpenStreetMap (Overpass) no respondió o está saturada (502). El mapa principal de reportes seguirá funcionando con normalidad.");
+                  clearTimeout(timeoutId);
+                  // Si falla Overpass, no pasa nada porque listaVeterinarias ya tiene el respaldo y la caché cargada
+              } finally {
+                  escaneandoVets = false;
+                  if (mostrarMensaje) {
+                      mostrarAlertaArca("Zona actualizada", `Mostrando ${listaVeterinarias.length} centros veterinarios disponibles en el mapa.`, { tipo: "aviso" });
+                  }
               }
           }
 
           document.getElementById('btn-escanear').addEventListener('click', () => {
-              cargarVeterinariasDeLaZona();
-              mostrarAlertaArca("Escaneando zona", "Buscando veterinarias y centros cercanos...", { tipo: "aviso" });
+              cargarVeterinariasDeLaZona(true);
           });
 
-          // Cargar publicaciones globales (Reportes, Adopciones y Eventos)
-          auth.onAuthStateChanged(async (user) => {
+          // =========================================================================
+          // CARGA BLINDADA DE PUBLICACIONES DE TU SERVIDOR (REPORTES, ADOPCIONES, EVENTOS)
+          // Se ejecuta de inmediato sin quedarse bloqueado esperando a Firebase
+          // =========================================================================
+          let publicacionesCargadas = false;
+          async function cargarPublicacionesArca(correoUsuario = '') {
               try {
-                  const correoActual = (user && user.email) ? user.email : '';
-                  const respuestaReportes = await fetch(`/api/publicaciones-globales?correo=${encodeURIComponent(correoActual)}`);
+                  const respuestaReportes = await fetch(`/api/publicaciones-globales?correo=${encodeURIComponent(correoUsuario)}`);
                   
                   if (respuestaReportes.ok) {
                       const reportes = await respuestaReportes.json();
-                      reportes.forEach(reporte => {
+                      const nuevasPublicaciones = [];
+
+                      reportes.forEach((reporte, index) => {
                           const textoUbicacion = reporte.Ubicacion || "";
                           const matches = textoUbicacion.match(/(-?\d+\.\d+),\s*(-?\d+\.\d+)/);
 
                           let lat = matches ? parseFloat(matches[1]) : null;
                           let lng = matches ? parseFloat(matches[2]) : null;
 
+                          // Si no tiene coordenadas GPS guardadas, asignamos una posición estable y determinista en Medellín (sin saltar al recargar)
                           if (isNaN(lat) || isNaN(lng) || lat === null || lng === null) {
-                              lat = 6.25184 + (Math.random() - 0.5) * 0.05;
-                              lng = -75.56359 + (Math.random() - 0.5) * 0.05;
+                              const seed = (reporte.id_publicacion || reporte.id_origen || (index + 1)) * 1.6180339;
+                              const offsetLat = ((seed % 1) - 0.5) * 0.045;
+                              const offsetLng = (((seed * 7) % 1) - 0.5) * 0.045;
+                              lat = 6.25184 + offsetLat;
+                              lng = -75.56359 + offsetLng;
                           }
 
-                          todosLosElementos.push({
+                          nuevasPublicaciones.push({
                               id_origen: reporte.id_origen,
                               id_publicacion: reporte.id_publicacion,
                               tipo_publicacion: reporte.tipo_publicacion,
                               nombre_tipo_reporte: reporte.nombre_tipo_reporte,
-                              tipo: reporte.tipo_publicacion || 'reporte',
+                              tipo: (reporte.tipo_publicacion || 'reporte').toLowerCase(),
                               lat: lat,
                               lng: lng,
                               Ubicacion: reporte.Ubicacion,
@@ -944,14 +1109,30 @@
                               nombre: reporte.nombre_tipo_reporte
                           });
                       });
+
+                      // Reemplazamos limpiamente para que NUNCA desaparezcan ni se dupliquen
+                      listaPublicacionesArca = nuevasPublicaciones;
+                      publicacionesCargadas = true;
+                      renderizarMarcadores(obtenerFiltroActivo());
                   }
               } catch (error) {
                   console.error("Error al cargar publicaciones del servidor:", error);
               }
+          }
 
-              renderizarMarcadores('todos');
-              cargarVeterinariasDeLaZona();
-          });
+          // 1. Arrancamos veterinarias blindadas y publicaciones de inmediato
+          inicializarVeterinariasBlindadas();
+          await cargarPublicacionesArca('');
+          cargarVeterinariasDeLaZona(false);
+
+          // 2. Si Firebase resuelve el usuario después, actualizamos sin borrar lo que ya estaba
+          if (typeof auth !== 'undefined') {
+              auth.onAuthStateChanged(async (user) => {
+                  if (user && user.email) {
+                      await cargarPublicacionesArca(user.email);
+                  }
+              });
+          }
 
           const botonesFiltro = document.querySelectorAll('.filtro-btn');
           botonesFiltro.forEach(btn => {

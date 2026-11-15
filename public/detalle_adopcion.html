@@ -614,22 +614,48 @@
               });
           }
 
-     const urlParams = new URLSearchParams(window.location.search);
+          const urlParams = new URLSearchParams(window.location.search);
           const origen = urlParams.get('origen');
           const btnVolver = document.getElementById('btn-volver-dinamico');
 
           if (btnVolver) {
+              let destinoUrl = 'home.html';
+              let textoBoton = 'Volver al inicio';
+
               if (origen === 'guardados') {
-                  btnVolver.innerHTML = `<i class="fa-solid fa-arrow-left"></i> Volver a guardados`;
-                  btnVolver.href = 'guardados_usuario.html';
+                  destinoUrl = 'guardados_usuario.html';
+                  textoBoton = 'Volver a guardados';
+              } else if (origen === 'mis-reportes' || origen === 'mis_reportes') {
+                  destinoUrl = 'mis_publicaciones.html';
+                  textoBoton = 'Volver a mis publicaciones';
               } else if (origen === 'mapa') {
-                  // NUEVA VALIDACIÓN: Si viene del mapa de adopciones
-                  btnVolver.innerHTML = `<i class="fa-solid fa-arrow-left"></i> Volver al mapa`;
-                  btnVolver.href = 'mapa.html';
+                  destinoUrl = 'mapa.html';
+                  textoBoton = 'Volver al mapa';
+              } else if (origen === 'fundacion' || origen === 'panel-fundacion') {
+                  destinoUrl = 'home.html';
+                  textoBoton = 'Volver al panel';
               } else {
-                  btnVolver.innerHTML = `<i class="fa-solid fa-arrow-left"></i> Volver al inicio`;
-                  btnVolver.href = 'home.html';
+                  // Detección automática por rol o historial si no hay parámetro de origen explícito
+                  const tipoUsuarioLocal = localStorage.getItem('tipo_usuario');
+                  const referrer = document.referrer;
+
+                  if (tipoUsuarioLocal === 'fundacion' || (referrer && referrer.includes('fundacion'))) {
+                      destinoUrl = 'home_fundacion.html';
+                      textoBoton = 'Volver al panel';
+                  } else if (referrer && referrer.includes('mis_reportes')) {
+                      destinoUrl = 'mis_reportes.html';
+                      textoBoton = 'Volver a mis publicaciones';
+                  } else if (referrer && referrer.includes('guardados')) {
+                      destinoUrl = 'guardados_usuario.html';
+                      textoBoton = 'Volver a guardados';
+                  } else if (referrer && referrer.includes('mapa')) {
+                      destinoUrl = 'mapa.html';
+                      textoBoton = 'Volver al mapa';
+                  }
               }
+
+              btnVolver.innerHTML = `<i class="fa-solid fa-arrow-left"></i> ${textoBoton}`;
+              btnVolver.href = destinoUrl;
           }
 
           cargarDetalleAdopcion();
@@ -764,11 +790,10 @@
               }
               document.getElementById('lbl-contacto').innerHTML = contactoHTML;
 
-             const nombreUsuario = adopcion.nombre_usuario || 'usuario';
+              const nombreUsuario = adopcion.nombre_usuario || 'usuario';
               const tipoUsuario = adopcion.tipo_usuario || '';
               const autorTextoElemento = document.getElementById('nombre-autor-texto');
               
-              // Verificación estricta por rol de base de datos o nombre comercial
               if (tipoUsuario === 'fundacion' || (nombreUsuario && nombreUsuario.toLowerCase().includes('fundacion'))) {
                   autorTextoElemento.innerHTML = `
                       @${nombreUsuario} 
@@ -785,7 +810,6 @@
                   linkAutor.href = `perfil_publico.html?user=${encodeURIComponent(nombreUsuario)}`;
               }
 
-              // --- VERIFICACIÓN DE AUTOR ROBUSTA POR ID Y CORREO (ADOPCIÓN) ---
               const contenedorAccion = document.getElementById('contenedor-boton-accion');
 
               firebase.auth().onAuthStateChanged(async (user) => {
@@ -801,19 +825,14 @@
                   }
 
                   try {
-                      // 1. Consultamos el ID del usuario logueado en la base de datos
                       const resUser = await fetch(`/api/obtener-usuario?correo=${encodeURIComponent(correoLogueado)}`);
                       if (!resUser.ok) throw new Error("No se pudo obtener el usuario actual");
                       const datosUsuarioLogueado = await resUser.json();
                       const idUsuarioLogueado = Number(datosUsuarioLogueado.id_usuarios);
 
-                      // 2. Obtenemos el ID del creador de la adopción
                       const idCreadorAdopcion = Number(adopcion.id_usuarios);
-
-                      // Comparamos directamente por ID de base de datos
                       let esDueño = (idUsuarioLogueado && idCreadorAdopcion && idUsuarioLogueado === idCreadorAdopcion);
 
-                      // Respaldo por si el registro no traía el id_usuarios pero sí el correo
                       if (!esDueño && adopcion.correo_usuario && correoLogueado) {
                           if (adopcion.correo_usuario.toLowerCase().trim() === correoLogueado.toLowerCase().trim()) {
                               esDueño = true;
@@ -821,7 +840,6 @@
                       }
 
                       if (esDueño) {
-                          // SI ES EL DUEÑO: Botones Editar y Eliminar
                           contenedorAccion.innerHTML = `
                               <div style="display: flex; gap: 8px;">
                                   <a href="formulario_adopcion.html?editar=${adopcion.id_adopcion || adopcionId}" class="detalle-btn-accion" style="background: #fca38d; color: #fff;">
@@ -851,7 +869,6 @@
                           });
 
                       } else {
-                          // SI NO ES EL DUEÑO: Lógica de guardado normal
                           const resPubs = await fetch('/api/publicaciones-globales');
                           const publicaciones = await resPubs.json();
                           
