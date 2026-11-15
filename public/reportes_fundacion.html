@@ -17,7 +17,6 @@
     }
     </script>
     <style>
-        /* Ajuste de scroll y contenedor */
         .main-content {
             height: calc(100vh - 70px);
             overflow-y: auto;
@@ -34,40 +33,107 @@
         }
 
         .tarjeta-prototipo-estilo {
-            background: #fde8e5; 
-            border-radius: 24px;
-            padding: 24px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+            background: #fff5f3; 
+            border-radius: 20px;
+            padding: 20px 24px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
             border: 2px solid #f9d5d3;
             width: 100%;
             font-family: 'Itim', cursive, sans-serif;
             box-sizing: border-box;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
-        .proto-card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
-        .proto-titulo-pill { background: #fbc2c4; color: #2b2b2b; padding: 8px 32px; border-radius: 30px; font-size: 22px; font-weight: bold; }
-        .proto-fecha { font-size: 15px; font-weight: bold; color: #444; }
-        .proto-card-body { display: flex; gap: 24px; align-items: center; }
-        .proto-img-wrapper { width: 210px; height: 150px; border-radius: 20px; overflow: hidden; background: #fff; border: 2px solid #f9d5d3; flex-shrink: 0; }
-        .proto-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
-        .proto-content-right { flex-grow: 1; display: flex; flex-direction: column; gap: 12px; }
-        .proto-pill-tipo { background: #fff; color: #333; padding: 8px 22px; border-radius: 20px; font-size: 15px; font-weight: bold; border: 1px solid #f3c1c3; display: inline-block; align-self: flex-start; }
-        .proto-autor { font-size: 14px; color: #555; }
-        .proto-autor a { color: #d9534f; text-decoration: none; font-weight: bold; }
-        .proto-footer-row { display: flex; justify-content: flex-end; margin-top: 5px; }
+
+        .proto-card-top { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 14px; 
+        }
+
+        .proto-titulo-pill { 
+            background: #fbc2c4; 
+            color: #3b2a2a; 
+            padding: 6px 20px; 
+            border-radius: 20px; 
+            font-size: 18px; 
+            font-weight: bold; 
+        }
+
+        .proto-fecha { 
+            font-size: 14px; 
+            color: #666; 
+        }
+
+        .proto-card-body { 
+            display: flex; 
+            gap: 20px; 
+            align-items: stretch; 
+        }
+
+        /* Contenedor de imágenes rediseñado para que no se deforme */
+        .proto-img-wrapper { 
+            width: 240px; 
+            height: 160px; 
+            border-radius: 16px; 
+            overflow: hidden; 
+            background: #ffffff; 
+            border: 2px solid #f5c2bf; 
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .proto-content-right { 
+            flex-grow: 1; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between;
+        }
+
+        .proto-pill-tipo { 
+            background: #ffffff; 
+            color: #444; 
+            padding: 6px 16px; 
+            border-radius: 15px; 
+            font-size: 14px; 
+            font-weight: bold; 
+            border: 1.5px solid #f5c2bf; 
+            display: inline-block; 
+            align-self: flex-start; 
+            margin-bottom: 8px;
+        }
+
+        .proto-autor { 
+            font-size: 14px; 
+            color: #555; 
+        }
+
+        .proto-autor a { 
+            color: #d9534f; 
+            text-decoration: none; 
+            font-weight: bold; 
+        }
+
+        .proto-footer-row { 
+            display: flex; 
+            justify-content: flex-end; 
+            margin-top: 10px; 
+        }
         
-        /* Botón suave y orgánico */
         .proto-btn-detalles { 
             background-color: #fffde8; 
             color: #442c20; 
             border: 1.5px solid #f0e6b8; 
-            padding: 10px 28px; 
-            border-radius: 50px; 
+            padding: 8px 24px; 
+            border-radius: 30px; 
             cursor: pointer; 
-            font-weight: 400; 
-            font-size: 15px;
+            font-size: 14px;
             font-family: 'Itim', cursive, sans-serif;
             transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
         }
         .proto-btn-detalles:hover { background-color: #fff9c4; transform: translateY(-1px); }
     </style>
@@ -144,9 +210,9 @@
 
   <main class="main-content">
       <section class="feed-novedades" id="contenedor-novedades-fundacion">
-          <article class="tarjeta-reporte">
-              <div class="header-tarjeta-reporte">
-                  <div class="badge-titulo-reporte">Cargando reportes recientes...</div>
+          <article class="tarjeta-prototipo-estilo">
+              <div class="proto-card-top">
+                  <div class="proto-titulo-pill">Cargando reportes recientes...</div>
               </div>
           </article>
       </section>
@@ -157,8 +223,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="script.js"></script>
-
-  <script>
+<script>
       document.addEventListener('DOMContentLoaded', () => {
           const btnToggleMenu = document.getElementById('btn-toggle-menu');
           const sidebar = document.getElementById('sidebar');
@@ -173,18 +238,66 @@
           cargarReportesFundacion();
       });
 
- async function cargarReportesFundacion() {
+      // Función robusta para extraer cualquier formato de imagen de la BD
+      function extraerUrlsImagenes(imgReporteDato) {
+          if (!imgReporteDato) return [];
+          
+          let parsed = imgReporteDato;
+          
+          // Si es un string, intentamos parsearlo a JSON
+          if (typeof parsed === 'string') {
+              try {
+                  parsed = JSON.parse(parsed);
+              } catch (e) {
+                  // Si no es un JSON válido, puede ser una sola URL o string plano
+                  if (parsed.trim() !== '' && parsed !== '[]') {
+                      return [parsed];
+                  }
+                  return [];
+              }
+          }
+
+          // Si tras el parseo (o si ya era) es un array
+          if (Array.isArray(parsed)) {
+              let resultadoFinal = [];
+              parsed.forEach(item => {
+                  if (typeof item === 'string' && item.trim() !== '') {
+                      // Por si viene doblemente parseado como string JSON interno
+                      if (item.startsWith('[') || item.startsWith('{')) {
+                          try {
+                              let subParse = JSON.parse(item);
+                              if (Array.isArray(subParse)) {
+                                  resultadoFinal.push(...subParse);
+                              } else {
+                                  resultadoFinal.push(item);
+                              }
+                          } catch (err) {
+                              resultadoFinal.push(item);
+                          }
+                      } else {
+                          resultadoFinal.push(item);
+                      }
+                  }
+              });
+              return resultadoFinal;
+          }
+
+          return [];
+      }
+
+      async function cargarReportesFundacion() {
           const contenedor = document.getElementById('contenedor-novedades-fundacion');
           try {
               const res = await fetch('/api/publicaciones-globales');
               if (!res.ok) throw new Error("Error al consultar reportes");
               
               const publicaciones = await res.json();
-              // Filtro corregido para capturar todos los reportes sin excepción
-              const reportes = publicaciones.filter(p => p.tipo_publicacion === 'reporte' || p.nombre_tipo_reporte || p.id_reporte);
+              
+              // Filtro estricto: Solo reportes de ciudadanos
+              const reportes = publicaciones.filter(p => p.tipo_publicacion === 'reporte');
 
               if (!reportes || reportes.length === 0) {
-                  contenedor.innerHTML = `<p style="text-align: center; color: #555;">No hay reportes disponibles.</p>`;
+                  contenedor.innerHTML = `<p style="text-align: center; color: #555; padding: 40px; font-family: 'Itim', cursive;">No hay reportes de ciudadanos disponibles.</p>`;
                   return;
               }
 
@@ -192,28 +305,25 @@
                   const idRep = item.id_reporte || item.id_origen || item.id_publicacion;
                   const estadoReporte = item.estado || 'Sin atender';
                   
-                  // 📸 Soporte completo de 1, 2 o 3 fotos en la tarjeta de la fundación
-                  let imagenHTML = '<img src="logo.png" alt="Foto reporte" style="width:100%; height:100%; object-fit:cover;">';
-                  if (item.img_reporte) {
-                      try {
-                          const parsed = JSON.parse(item.img_reporte);
-                          if (Array.isArray(parsed) && parsed.length > 0) {
-                              if (parsed.length === 1) {
-                                  imagenHTML = `<img src="${parsed[0]}" alt="Foto reporte" style="width:100%; height:100%; object-fit:cover;">`;
-                              } else {
-                                  imagenHTML = `
-                                      <div style="display: flex; gap: 4px; width: 100%; height: 100%;">
-                                          ${parsed.map(img => `<div style="flex: 1; height: 100%; overflow: hidden;"><img src="${img}" alt="Foto" style="width: 100%; height: 100%; object-fit: cover;"></div>`).join('')}
-                                      </div>
-                                  `;
-                              }
-                          } else if (typeof item.img_reporte === 'string' && item.img_reporte.trim() !== '' && item.img_reporte !== '[]') {
-                              imagenHTML = `<img src="${item.img_reporte}" alt="Foto reporte" style="width:100%; height:100%; object-fit:cover;">`;
-                          }
-                      } catch (e) {
-                          if (typeof item.img_reporte === 'string' && item.img_reporte.trim() !== '' && item.img_reporte !== '[]') {
-                              imagenHTML = `<img src="${item.img_reporte}" alt="Foto reporte" style="width:100%; height:100%; object-fit:cover;">`;
-                          }
+                  // Extraemos las imágenes usando nuestra función robusta
+                  const listaFotos = extraerUrlsImagenes(item.img_reporte);
+                  
+                  let imagenHTML = `
+                      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; color: #c97a77; width: 100%; height: 100%; font-size: 13px;">
+                          <i class="fa-solid fa-image" style="font-size: 22px; margin-bottom: 4px;"></i>
+                          <span>Sin foto</span>
+                      </div>`;
+
+                  if (listaFotos.length > 0) {
+                      if (listaFotos.length === 1) {
+                          imagenHTML = `<img src="${listaFotos[0]}" alt="Foto reporte" style="width:100%; height:100%; object-fit:cover;">`;
+                      } else {
+                          // Si hay 2 o 3 fotos reales, las distribuimos limpiamente lado a lado
+                          imagenHTML = `
+                              <div style="display: flex; gap: 3px; width: 100%; height: 100%;">
+                                  ${listaFotos.map(img => `<div style="flex: 1; height: 100%; overflow: hidden;"><img src="${img}" alt="Foto" style="width: 100%; height: 100%; object-fit: cover;"></div>`).join('')}
+                              </div>
+                          `;
                       }
                   }
                   
@@ -221,7 +331,7 @@
                       <article class="tarjeta-prototipo-estilo">
                           <div class="proto-card-top">
                               <div class="proto-titulo-pill">
-                                  UBICACIÓN: <span style="font-size: 16px; font-weight: normal;">${item.Ubicacion || item.ubicacion || 'San Cristóbal'}</span>
+                                  UBICACIÓN: <span style="font-size: 16px; font-weight: normal;">${item.Ubicacion || item.ubicacion || 'Medellín'}</span>
                               </div>
                               <span class="proto-fecha">${item.Fecha_reporte ? item.Fecha_reporte.split('T')[0] : 'Reciente'}</span>
                           </div>
@@ -232,17 +342,18 @@
                               </div>
                               
                               <div class="proto-content-right">
-                                  <span class="proto-pill-tipo">TIPO: ${item.nombre_tipo_reporte || item.Nombre_tipo_reporte || 'Reporte General'}</span>
-                                  
-                                  <div class="proto-info-extra" style="display: flex; justify-content: space-between; align-items: center;">
-                                      <span class="proto-autor">REPORTADO POR: <a href="perfil_publico.html?user=${encodeURIComponent(item.nombre_usuario || 'usuario')}">@${item.nombre_usuario || 'usuario'}</a></span>
-                                      <span style="background: #ffffff; padding: 3px 12px; border-radius: 50px; border: 1.5px solid #f9cab5; color: #5c4033; font-size: 13px;">
-                                          Estado: ${estadoReporte}
-                                      </span>
+                                  <div>
+                                      <span class="proto-pill-tipo">TIPO: ${item.nombre_tipo_reporte || 'Reporte General'}</span>
+                                      <div class="proto-info-extra" style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+                                          <span class="proto-autor">REPORTADO POR: <a href="perfil_publico.html?user=${encodeURIComponent(item.nombre_usuario || 'usuario')}">@${item.nombre_usuario || 'usuario'}</a></span>
+                                          <span style="background: #ffffff; padding: 4px 14px; border-radius: 50px; border: 1.5px solid #f5c2bf; color: #5c4033; font-size: 13px; font-weight: bold;">
+                                              Estado: ${estadoReporte}
+                                          </span>
+                                      </div>
                                   </div>
                                   
                                   <div class="proto-footer-row">
-                                      <a href="detalle_reporte.html?id=${idRep}&origen=fundacion" class="proto-btn-detalles" style="text-decoration: none;">
+                                      <a href="detalle_reporte.html?id=${idRep}&origen=fundacion" class="proto-btn-detalles">
                                           Ver detalles
                                       </a>
                                   </div>
@@ -253,7 +364,7 @@
               }).join('');
           } catch (error) {
               console.error(error);
-              contenedor.innerHTML = `<p style="text-align: center; color: #555;">No se pudieron cargar los reportes en este momento.</p>`;
+              contenedor.innerHTML = `<p style="text-align: center; color: #555; padding: 40px; font-family: 'Itim', cursive;">No se pudieron cargar los reportes en este momento.</p>`;
           }
       }
   </script>
