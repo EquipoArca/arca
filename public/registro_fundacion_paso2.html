@@ -120,10 +120,24 @@
             cursor: pointer;
             text-align: center;
             transition: background-color 0.2s;
+            box-sizing: border-box;
         }
 
         .zona-subida-foto:hover {
             background-color: #f9d1d1;
+        }
+
+        .img-preview-subida {
+            width: 100%;
+            height: 110px;
+            object-fit: cover;
+            border-radius: 15px;
+            border: 2px solid #e2a0a0;
+            display: none;
+            margin-top: -110px;
+            position: relative;
+            cursor: pointer;
+            box-sizing: border-box;
         }
 
         .checkbox-enfoque {
@@ -206,17 +220,17 @@
                                 <span style="font-size: 0.8rem; color: #777; margin-top: 4px;">Sube tu portada</span>
                                 <input type="file" id="input-foto-portada" accept="image/*" style="display:none;" onchange="previsualizarImagen(event, 'preview-portada')">
                             </div>
-                            <img id="preview-portada" src="" style="width: 100%; height: 110px; object-fit: cover; border-radius: 15px; border: 1px solid #ddd; display: none; margin-top: -110px; position: relative;">
+                            <img id="preview-portada" class="img-preview-subida" src="" alt="Vista previa portada" title="Haz clic para cambiar la portada" onclick="document.getElementById('input-foto-portada').click()">
                         </div>
                         
                         <div style="flex: 1;">
                             <div class="sub-capsula">Foto oficial</div>
                             <div class="zona-subida-foto" onclick="document.getElementById('input-foto-oficial').click()">
-                                <i class="fa-solid fa-image-user" style="font-size: 1.5rem; color: #888;"></i>
+                                <i class="fa-solid fa-camera" style="font-size: 1.5rem; color: #888;"></i>
                                 <span style="font-size: 0.8rem; color: #777; margin-top: 4px;">Sube tu logo/foto</span>
                                 <input type="file" id="input-foto-oficial" accept="image/*" style="display:none;" onchange="previsualizarImagen(event, 'preview-oficial')">
                             </div>
-                            <img id="preview-oficial" src="" style="width: 100%; height: 110px; object-fit: cover; border-radius: 15px; border: 1px solid #ddd; display: none; margin-top: -110px; position: relative;">
+                            <img id="preview-oficial" class="img-preview-subida" src="" alt="Vista previa foto oficial" title="Haz clic para cambiar la foto" onclick="document.getElementById('input-foto-oficial').click()">
                         </div>
                     </div>
 
@@ -281,94 +295,114 @@
     </main>
 
     <script>
+    // Función para mostrar la miniatura de las imágenes subidas
+    function previsualizarImagen(event, previewId) {
+        const archivo = event.target.files[0];
+        if (archivo) {
+            const lector = new FileReader();
+            lector.onload = function(e) {
+                const imgPreview = document.getElementById(previewId);
+                imgPreview.src = e.target.result;
+                imgPreview.style.display = 'block';
+            };
+            lector.readAsDataURL(archivo);
+        }
+    }
+
     async function finalizarRegistroCompleto() {
-    const correo = sessionStorage.getItem('correo_fundacion_temp') || new URLSearchParams(window.location.search).get('email');
-    const password = sessionStorage.getItem('pass_fundacion_temp'); // Recuperamos la contraseña guardada temporalmente
+        const correo = sessionStorage.getItem('correo_fundacion_temp') || new URLSearchParams(window.location.search).get('email');
+        const password = sessionStorage.getItem('pass_fundacion_temp');
 
-    if (!correo || !password) {
-        alert("La sesión de credenciales expiró. Por favor, inicia el registro de nuevo.");
-        window.location.href = "home.html";
-        return;
-    }
-
-    const datosPaso1 = JSON.parse(sessionStorage.getItem('datos_fundacion_p1') || '{}');
-
-    let enfoques = [];
-    if (document.getElementById('ef1')?.checked) enfoques.push('Rescate adopción');
-    if (document.getElementById('ef2')?.checked) enfoques.push('Esterilización y control poblacional');
-    if (document.getElementById('ef3')?.checked) enfoques.push('Rehabilitación de animales maltratados');
-    const otroEnfoqueInput = document.querySelector('#ef4 input');
-    if (otroEnfoqueInput && otroEnfoqueInput.value.trim()) enfoques.push(otroEnfoqueInput.value.trim());
-
-    let paisVal = 'Colombia';
-    let ciudadVal = 'Medellín';
-    if (datosPaso1.paisCiudad && datosPaso1.paisCiudad.includes(',')) {
-        const partes = datosPaso1.paisCiudad.split(',');
-        paisVal = partes[0].trim();
-        ciudadVal = partes[1].trim();
-    }
-
-    const payload = {
-        correo_fundacion: correo,
-        password: password, // <-- Enviamos la contraseña para que el servidor cree la cuenta al final
-        nombre_legal: datosPaso1.nombreLegal || '',
-        nombre_comercial: datosPaso1.nombreComercial || '',
-        nit_rut: datosPaso1.nitRut || '',
-        id_representante: datosPaso1.repDocumento || '12345',
-        pais: paisVal,
-        ciudad: ciudadVal,
-        direccion: datosPaso1.direccionFisica || '',
-        telefono_fundacion: datosPaso1.telefonoPrincipal || '',
-        pagina_web: datosPaso1.paginaWeb || '',
-        
-        rep_nombre: datosPaso1.repNombre || '',
-        rep_documento: datosPaso1.repDocumento || '',
-        rep_cargo: datosPaso1.repCargo || '',
-        rep_telefono: datosPaso1.repTelefono || '',
-        metodos_donacion: datosPaso1.metodosDonacion || '',
-
-        descripcion_mision: document.getElementById('mision-publica').value || '',
-        descripcion_vision: document.getElementById('vision-publica').value || '',
-        programas_proyectos: document.getElementById('programas-publicos').value || '',
-        pfp_fundacion: '',
-        foto_portada: '',
-        enfoque_otro: enfoques.join(', '),
-
-        certificado_existencia: datosPaso1.certBase64 || null,
-        estatuto: datosPaso1.estatutoBase64 || null,
-        registro_oficial: datosPaso1.registroBase64 || null,
-        estado_financiero: datosPaso1.financieroBase64 || null
-    };
-
-    try {
-        const respuesta = await fetch('/api/registrar-fundacion', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-
-        const resultado = await respuesta.json();
-
-        if (!resultado.exito) {
-            alert("No se pudo registrar: " + resultado.mensaje);
+        if (!correo || !password) {
+            alert("La sesión de credenciales expiró. Por favor, inicia el registro de nuevo.");
+            window.location.href = "home.html";
             return;
         }
 
-        alert(resultado.mensaje);
-        sessionStorage.clear();
-        
-        // Asegurar que no quede sesión iniciada a medias
-        if (typeof auth !== 'undefined') {
-            await auth.signOut();
+        const datosPaso1 = JSON.parse(sessionStorage.getItem('datos_fundacion_p1') || '{}');
+
+        let enfoques = [];
+        if (document.getElementById('ef1')?.checked) enfoques.push('Rescate adopción');
+        if (document.getElementById('ef2')?.checked) enfoques.push('Esterilización y control poblacional');
+        if (document.getElementById('ef3')?.checked) enfoques.push('Rehabilitación de animales maltratados');
+        const otroEnfoqueInput = document.querySelector('#ef4 input');
+        if (otroEnfoqueInput && otroEnfoqueInput.value.trim()) enfoques.push(otroEnfoqueInput.value.trim());
+
+        let paisVal = 'Colombia';
+        let ciudadVal = 'Medellín';
+        if (datosPaso1.paisCiudad && datosPaso1.paisCiudad.includes(',')) {
+            const partes = datosPaso1.paisCiudad.split(',');
+            paisVal = partes[0].trim();
+            ciudadVal = partes[1].trim();
         }
 
-        window.location.href = "home.html";
+        // Obtenemos las imágenes solo si fueron cargadas (evitando enviar la URL de la página actual si src está vacío)
+        const previewOficial = document.getElementById('preview-oficial');
+        const previewPortada = document.getElementById('preview-portada');
+        const fotoOficialBase64 = (previewOficial && previewOficial.style.display === 'block') ? previewOficial.src : '';
+        const fotoPortadaBase64 = (previewPortada && previewPortada.style.display === 'block') ? previewPortada.src : '';
 
-    } catch (error) {
-        console.error("Error crítico durante el registro final:", error);
-        alert("Ocurrió un error inesperado al procesar el registro: " + error.message);
+        const payload = {
+            correo_fundacion: correo,
+            password: password,
+            nombre_legal: datosPaso1.nombreLegal || '',
+            nombre_comercial: document.getElementById('nombre-publico-fundacion').value.trim() || datosPaso1.nombreComercial || '',
+            nit_rut: datosPaso1.nitRut || '',
+            id_representante: datosPaso1.repDocumento || '12345',
+            pais: paisVal,
+            ciudad: ciudadVal,
+            direccion: datosPaso1.direccionFisica || '',
+            telefono_fundacion: datosPaso1.telefonoPrincipal || '',
+            pagina_web: datosPaso1.paginaWeb || '',
+            
+            rep_nombre: datosPaso1.repNombre || '',
+            rep_documento: datosPaso1.repDocumento || '',
+            rep_cargo: datosPaso1.repCargo || '',
+            rep_telefono: datosPaso1.repTelefono || '',
+            metodos_donacion: datosPaso1.metodosDonacion || '',
+
+            descripcion_mision: document.getElementById('mision-publica').value || '',
+            descripcion_vision: document.getElementById('vision-publica').value || '',
+            programas_proyectos: document.getElementById('programas-publicos').value || '',
+            pfp_fundacion: fotoOficialBase64,
+            foto_portada: fotoPortadaBase64,
+            enfoque_otro: enfoques.join(', '),
+
+            // Recuperamos los 4 PDFs guardados en el Paso 1
+            certificado_existencia: sessionStorage.getItem('pdf_cert') || null,
+            estatuto: sessionStorage.getItem('pdf_estatuto') || null,
+            registro_oficial: sessionStorage.getItem('pdf_registro') || null,
+            estado_financiero: sessionStorage.getItem('pdf_financiero') || null
+        };
+
+        try {
+            const respuesta = await fetch('/api/registrar-fundacion', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const resultado = await respuesta.json();
+
+            if (!resultado.exito) {
+                alert("No se pudo registrar: " + resultado.mensaje);
+                return;
+            }
+
+            alert(resultado.mensaje);
+            sessionStorage.clear();
+            
+            if (typeof auth !== 'undefined') {
+                await auth.signOut();
+            }
+
+            window.location.href = "home.html";
+
+        } catch (error) {
+            console.error("Error crítico durante el registro final:", error);
+            alert("Ocurrió un error inesperado al procesar el registro: " + error.message);
+        }
     }
-}
     </script>
 </body>
 </html>

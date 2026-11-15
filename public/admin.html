@@ -6,132 +6,502 @@
     <title>Panel de Administración - ARCA</title>
     <link rel="stylesheet" href="style_home.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- SDK de EmailJS -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function(){
+            // ⚠️ REEMPLAZA ESTO CON TU PUBLIC KEY REAL DE EMAILJS
+            emailjs.init("TU_PUBLIC_KEY_DE_EMAILJS"); 
+        })();
+    </script>
+
     <style>
-        body { font-family: 'Itim', sans-serif; background-color: #fff5f6; padding: 20px; color: #333; }
-        header { text-align: center; margin-bottom: 30px; }
-        h1 { color: #e57373; font-size: 2.5rem; }
-        .contenedor-solicitudes { max-width: 1000px; margin: 0 auto; }
-        .tarjeta-solicitud {
-            background: #ffffff;
-            border: 2px solid #fcae9e;
-            border-radius: 20px;
-            padding: 20px 25px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
-        .seccion-docs { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
-        .btn-pdf {
-            background-color: #fce4e4;
-            color: #b71c1c;
-            padding: 6px 12px;
-            border-radius: 10px;
-            text-decoration: none;
-            font-size: 0.9rem;
-            border: 1px solid #e2a0a0;
-        }
-        .btn-pdf:hover { background-color: #f9d1d1; }
-        .btn-aprobar {
-            background-color: #a5d6a7;
-            color: #1b5e20;
-            border: none;
-            padding: 10px 25px;
+        body {
             font-family: 'Itim', sans-serif;
-            font-size: 1.1rem;
-            border-radius: 15px;
-            cursor: pointer;
-            float: right;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            background-color: #fff5f6;
+            margin: 0;
+            padding: 0 0 50px 0;
+            color: #4a3b40;
         }
-        .btn-aprobar:hover { background-color: #81c784; }
-        .limpiar { clear: both; }
+
+        /* Header estilo ARCA */
+        .header-admin {
+            width: 100%;
+            background-color: rgba(255, 214, 216, 0.85);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.8);
+            padding: 18px 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(229, 115, 115, 0.08);
+            margin-bottom: 35px;
+            box-sizing: border-box;
+        }
+
+        .header-admin h1 {
+            margin: 0;
+            color: #d96b78;
+            font-size: 2.2rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .header-admin p {
+            margin: 6px 0 0 0;
+            color: #795f68;
+            font-size: 1.05rem;
+        }
+
+        .contenedor-solicitudes {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Tarjeta principal con Glassmorphism suave */
+        .tarjeta-solicitud {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(12px);
+            border: 2px solid #ffffff;
+            border-radius: 28px;
+            padding: 28px 32px;
+            margin-bottom: 28px;
+            box-shadow: 0 12px 32px rgba(180, 110, 125, 0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .tarjeta-solicitud:hover {
+            box-shadow: 0 15px 38px rgba(180, 110, 125, 0.13);
+        }
+
+        /* Cabecera de la tarjeta */
+        .tarjeta-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding-bottom: 16px;
+            margin-bottom: 20px;
+            border-bottom: 2px dashed #f8d7da;
+        }
+
+        .titulo-fundacion {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 0;
+            font-size: 1.65rem;
+            color: #5c3a44;
+        }
+
+        .icono-huella-badge {
+            width: 42px;
+            height: 42px;
+            background-color: #fcae9e;
+            color: #ffffff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 3px 8px rgba(252, 174, 158, 0.5);
+        }
+
+        .badge-pendiente {
+            background-color: #fff0d4;
+            color: #b27818;
+            border: 1px solid #f5d89e;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        /* Cuadrícula limpia de datos */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .dato-item {
+            background-color: #fff8f9;
+            border: 1px solid #f5dfe3;
+            border-radius: 16px;
+            padding: 12px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .dato-label {
+            font-size: 0.82rem;
+            color: #9e7b86;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .dato-valor {
+            font-size: 1.05rem;
+            color: #3d2e33;
+            word-break: break-word;
+        }
+
+        /* Caja de Misión */
+        .caja-mision {
+            background-color: #fdf6f7;
+            border-left: 4px solid #fcae9e;
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin-bottom: 22px;
+        }
+
+        .caja-mision .dato-label {
+            margin-bottom: 6px;
+        }
+
+        .caja-mision p {
+            margin: 0;
+            font-size: 1rem;
+            line-height: 1.45;
+            color: #4f3d43;
+        }
+
+        /* Sección de Documentos Legales */
+        .bloque-documentos {
+            background-color: #fff9fa;
+            border: 1px solid #f3dce0;
+            border-radius: 20px;
+            padding: 16px 20px;
+            margin-bottom: 22px;
+        }
+
+        .titulo-seccion-docs {
+            font-size: 1.05rem;
+            color: #6e4e58;
+            margin: 0 0 12px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .seccion-docs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .btn-pdf {
+            background-color: #ffffff;
+            color: #c94a5a;
+            padding: 10px 14px;
+            border-radius: 14px;
+            text-decoration: none;
+            font-size: 0.95rem;
+            border: 1.5px solid #f5c6cb;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-family: 'Itim', sans-serif;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        }
+
+        .btn-pdf i {
+            font-size: 1.2rem;
+            color: #e57373;
+        }
+
+        .btn-pdf:hover {
+            background-color: #fce4e6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(229, 115, 115, 0.15);
+        }
+
+        .sin-docs {
+            color: #9e7b86;
+            font-size: 0.95rem;
+            font-style: italic;
+        }
+
+        /* Pie de tarjeta y botón aprobar */
+        .tarjeta-footer {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding-top: 10px;
+        }
+
+        .btn-aprobar {
+            background-color: #81c784;
+            color: #ffffff;
+            border: none;
+            padding: 12px 28px;
+            font-family: 'Itim', sans-serif;
+            font-size: 1.15rem;
+            border-radius: 22px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 14px rgba(129, 199, 132, 0.4);
+            transition: all 0.2s ease;
+        }
+
+        .btn-aprobar:hover {
+            background-color: #66bb6a;
+            transform: scale(1.03);
+        }
+
+        .btn-aprobar:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Estado vacío / cargando */
+        .estado-mensaje {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid #fff;
+            border-radius: 25px;
+            padding: 45px 20px;
+            color: #795f68;
+            font-size: 1.25rem;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.04);
+        }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>Panel de Verificación de Fundaciones</h1>
-        <p>Revisa la información legal y los documentos antes de aprobar el acceso a la plataforma.</p>
+    <header class="header-admin">
+        <h1><i class="fa-solid fa-shield-heart"></i> Panel de Verificación de Fundaciones</h1>
+        <p>Revisa la información legal y los documentos adjuntos antes de aprobar el acceso a ARCA.</p>
     </header>
 
     <main class="contenedor-solicitudes" id="lista-solicitudes">
-        <p style="text-align: center; color: #777;">Cargando solicitudes pendientes...</p>
+        <div class="estado-mensaje">
+            <i class="fa-solid fa-spinner fa-spin" style="font-size: 2rem; color: #e57373; margin-bottom: 10px;"></i>
+            <p style="margin: 0;">Cargando solicitudes pendientes...</p>
+        </div>
     </main>
 
     <script>
+        // Función para abrir PDFs en Base64 sin bloqueos del navegador
+        function abrirPdfSeguro(base64Data, nombreDoc) {
+            if (!base64Data) {
+                alert("El documento no está disponible.");
+                return;
+            }
+            try {
+                // Si es una URL normal (http/https), abrirla directamente
+                if (base64Data.startsWith('http')) {
+                    window.open(base64Data, '_blank');
+                    return;
+                }
+
+                // Extraer el contenido Base64 puro
+                const partes = base64Data.split(',');
+                const byteString = atob(partes.length > 1 ? partes[1] : partes[0]);
+                const ab = new ArrayBuffer(byteString.length);
+                const ia = new Uint8Array(ab);
+                for (let i = 0; i < byteString.length; i++) {
+                    ia[i] = byteString.charCodeAt(i);
+                }
+
+                const blob = new Blob([ab], { type: 'application/pdf' });
+                const blobUrl = URL.createObjectURL(blob);
+                window.open(blobUrl, '_blank');
+            } catch (e) {
+                console.error("Error al abrir el PDF:", e);
+                alert("No se pudo abrir el documento '" + nombreDoc + "'. Verifica que el archivo sea un PDF válido.");
+            }
+        }
+
         async function cargarSolicitudes() {
+            const contenedor = document.getElementById('lista-solicitudes');
             try {
                 const res = await fetch('/api/admin/fundaciones-pendientes');
                 const data = await res.json();
                 
-                const contenedor = document.getElementById('lista-solicitudes');
                 contenedor.innerHTML = '';
 
                 if (!data.exito || data.fundaciones.length === 0) {
-                    contenedor.innerHTML = '<p style="text-align: center; font-size: 1.2rem; color: #555;">No hay fundaciones pendientes por aprobar 🎉</p>';
+                    contenedor.innerHTML = `
+                        <div class="estado-mensaje">
+                            <div style="font-size: 2.5rem; margin-bottom: 10px;">🌸</div>
+                            <p style="margin: 0;">¡Todo al día! No hay fundaciones pendientes por aprobar.</p>
+                        </div>
+                    `;
                     return;
                 }
 
                 data.fundaciones.forEach(f => {
                     const tarjeta = document.createElement('div');
                     tarjeta.className = 'tarjeta-solicitud';
-                    
+
+                    // Construimos los botones de PDFs disponibles
+                    let botonesDocs = '';
+                    if (f.certificado_existencia) {
+                        botonesDocs += `<button type="button" class="btn-pdf" data-doc="certificado"><i class="fa-solid fa-file-pdf"></i> Certificado de Existencia</button>`;
+                    }
+                    if (f.estatuto) {
+                        botonesDocs += `<button type="button" class="btn-pdf" data-doc="estatuto"><i class="fa-solid fa-file-pdf"></i> Estatutos</button>`;
+                    }
+                    if (f.registro_oficial) {
+                        botonesDocs += `<button type="button" class="btn-pdf" data-doc="registro"><i class="fa-solid fa-file-pdf"></i> Registro Oficial</button>`;
+                    }
+                    if (f.estado_financiero) {
+                        botonesDocs += `<button type="button" class="btn-pdf" data-doc="financiero"><i class="fa-solid fa-file-pdf"></i> Estado Financiero</button>`;
+                    }
+
+                    if (!botonesDocs) {
+                        botonesDocs = `<span class="sin-docs">Esta solicitud no tiene documentos PDF adjuntos.</span>`;
+                    }
+
                     tarjeta.innerHTML = `
-                        <h3>🐾 ${f.Nombre_Comercial || 'Sin nombre comercial'}</h3>
+                        <div class="tarjeta-header">
+                            <h2 class="titulo-fundacion">
+                                <span class="icono-huella-badge"><i class="fa-solid fa-paw"></i></span>
+                                ${f.Nombre_Comercial || 'Sin nombre comercial'}
+                            </h2>
+                            <span class="badge-pendiente"><i class="fa-regular fa-clock"></i> Pendiente de revisión</span>
+                        </div>
+
                         <div class="info-grid">
-                            <div>
-                                <p><strong>Nombre Legal:</strong> ${f.Nombre_Legal}</p>
-                                <p><strong>NIT / RUT:</strong> ${f.Nit_Rut}</p>
-                                <p><strong>Correo:</strong> ${f.Correo_fundacion}</p>
-                                <p><strong>Ciudad/País:</strong> ${f.Ciudad}, ${f.Pais}</p>
+                            <div class="dato-item">
+                                <span class="dato-label"><i class="fa-solid fa-building"></i> Nombre Legal</span>
+                                <span class="dato-valor">${f.Nombre_Legal || 'No especificado'}</span>
                             </div>
-                            <div>
-                                <p><strong>Dirección:</strong> ${f.Direccion}</p>
-                                <p><strong>Teléfono:</strong> ${f.Telefono_fundacion}</p>
-                                <p><strong>Sitio Web:</strong> ${f.Pagina_web || 'No registra'}</p>
+                            <div class="dato-item">
+                                <span class="dato-label"><i class="fa-solid fa-id-card"></i> NIT / RUT</span>
+                                <span class="dato-valor">${f.Nit_Rut || 'No especificado'}</span>
+                            </div>
+                            <div class="dato-item">
+                                <span class="dato-label"><i class="fa-solid fa-envelope"></i> Correo Oficial</span>
+                                <span class="dato-valor">${f.Correo_fundacion || 'No especificado'}</span>
+                            </div>
+                            <div class="dato-item">
+                                <span class="dato-label"><i class="fa-solid fa-phone"></i> Teléfono</span>
+                                <span class="dato-valor">${f.Telefono_fundacion || 'No especificado'}</span>
+                            </div>
+                            <div class="dato-item">
+                                <span class="dato-label"><i class="fa-solid fa-location-dot"></i> Ubicación</span>
+                                <span class="dato-valor">${f.Ciudad || ''}, ${f.Pais || ''} — ${f.Direccion || ''}</span>
+                            </div>
+                            <div class="dato-item">
+                                <span class="dato-label"><i class="fa-solid fa-globe"></i> Sitio Web</span>
+                                <span class="dato-valor">${f.Pagina_web ? `<a href="${f.Pagina_web}" target="_blank" style="color: #d96b78;">${f.Pagina_web}</a>` : 'No registra'}</span>
                             </div>
                         </div>
-                        <p><strong>Misión:</strong> ${f.Descripcion_mision}</p>
+
+                        <div class="caja-mision">
+                            <span class="dato-label"><i class="fa-solid fa-heart"></i> Misión de la fundación</span>
+                            <p>${f.Descripcion_mision || 'Sin descripción registrada.'}</p>
+                        </div>
                         
-                        <div style="margin-top: 15px;">
-                            <strong>Documentos Legales (Haz clic para revisar):</strong>
+                        <div class="bloque-documentos">
+                            <h3 class="titulo-seccion-docs"><i class="fa-solid fa-folder-open" style="color: #e57373;"></i> Documentación Legal (Haz clic para abrir el PDF)</h3>
                             <div class="seccion-docs">
-                                ${f.certificado_existencia ? `<a href="${f.certificado_existencia}" target="_blank" class="btn-pdf"><i class="fa-solid fa-file-pdf"></i> Certificado de Existencia</a>` : ''}
-                                ${f.estatuto ? `<a href="${f.estatuto}" target="_blank" class="btn-pdf"><i class="fa-solid fa-file-pdf"></i> Estatutos</a>` : ''}
-                                ${f.registro_oficial ? `<a href="${f.registro_oficial}" target="_blank" class="btn-pdf"><i class="fa-solid fa-file-pdf"></i> Registro Oficial</a>` : ''}
-                                ${f.estado_financiero ? `<a href="${f.estado_financiero}" target="_blank" class="btn-pdf"><i class="fa-solid fa-file-pdf"></i> Estado Financiero</a>` : ''}
+                                ${botonesDocs}
                             </div>
                         </div>
-                        <br>
-                        <button class="btn-aprobar" onclick="aprobar(${f.id_fundacion}, '${f.Correo_fundacion}', '${f.Nombre_Comercial}')">
-                            <i class="fa-solid fa-check"></i> Aprobar Cuenta
-                        </button>
-                        <div class="limpiar"></div>
+
+                        <div class="tarjeta-footer">
+                            <button class="btn-aprobar" id="btn-aprobar-${f.id_fundacion}" onclick="aprobar(${f.id_fundacion}, '${f.Correo_fundacion}', '${(f.Nombre_Comercial || '').replace(/'/g, "\\'")}')">
+                                <i class="fa-solid fa-check-circle"></i> Aprobar Cuenta
+                            </button>
+                        </div>
                     `;
+
+                    // Asignamos los eventos de clic de forma segura para abrir cada PDF
+                    const btnCert = tarjeta.querySelector('[data-doc="certificado"]');
+                    if (btnCert) btnCert.onclick = () => abrirPdfSeguro(f.certificado_existencia, 'Certificado de Existencia');
+
+                    const btnEst = tarjeta.querySelector('[data-doc="estatuto"]');
+                    if (btnEst) btnEst.onclick = () => abrirPdfSeguro(f.estatuto, 'Estatutos');
+
+                    const btnReg = tarjeta.querySelector('[data-doc="registro"]');
+                    if (btnReg) btnReg.onclick = () => abrirPdfSeguro(f.registro_oficial, 'Registro Oficial');
+
+                    const btnFin = tarjeta.querySelector('[data-doc="financiero"]');
+                    if (btnFin) btnFin.onclick = () => abrirPdfSeguro(f.estado_financiero, 'Estado Financiero');
+
                     contenedor.appendChild(tarjeta);
                 });
 
             } catch (error) {
                 console.error("Error al cargar solicitudes:", error);
+                contenedor.innerHTML = `
+                    <div class="estado-mensaje" style="color: #c94a5a;">
+                        <p style="margin: 0;">Hubo un error al cargar las solicitudes. Revisa la conexión con el servidor.</p>
+                    </div>
+                `;
             }
         }
 
         async function aprobar(id_fundacion, correo_fundacion, nombre_comercial) {
             if (!confirm(`¿Estás segura de aprobar a la fundación "${nombre_comercial}"? Se le enviará un correo de notificación.`)) return;
 
+            const btn = document.getElementById(`btn-aprobar-${id_fundacion}`);
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Procesando...`;
+            }
+
             try {
+                // 1. Aprobar en el servidor / base de datos
                 const res = await fetch('/api/admin/aprobar-fundacion', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ id_fundacion, correo_fundacion, nombre_comercial })
                 });
                 const resultado = await res.json();
-                alert(resultado.mensaje);
+
+                if (!resultado.exito) {
+                    alert("No se pudo aprobar: " + resultado.mensaje);
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = `<i class="fa-solid fa-check-circle"></i> Aprobar Cuenta`;
+                    }
+                    return;
+                }
+
+                // 2. Enviar correo de confirmación con EmailJS
+                const linkInicioSesion = window.location.origin + "/home.html";
+                try {
+                    // ⚠️ Asegúrate de que las variables coincidan con tu plantilla en EmailJS
+                    await emailjs.send("service_arca", "template_arca", {
+                        to_email: correo_fundacion,
+                        nombre: nombre_comercial,
+                        mensaje: `¡Felicidades! La cuenta de "${nombre_comercial}" ha sido verificada y aprobada en ARCA. Ya puedes iniciar sesión en: ${linkInicioSesion}`,
+                        codigo: linkInicioSesion // Por si tu plantilla usa la variable {{codigo}}
+                    });
+                    alert(`¡Fundación "${nombre_comercial}" aprobada y correo enviado con éxito! 🌸`);
+                } catch (emailErr) {
+                    console.error("Error al enviar correo con EmailJS:", emailErr);
+                    alert(`Cuenta aprobada en la base de datos, pero hubo un error enviando el correo con EmailJS. Revisa tu Public Key o los campos de la plantilla.`);
+                }
+
                 cargarSolicitudes(); // Recargar la lista
             } catch (error) {
                 alert("Error al aprobar: " + error.message);
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fa-solid fa-check-circle"></i> Aprobar Cuenta`;
+                }
             }
         }
 
