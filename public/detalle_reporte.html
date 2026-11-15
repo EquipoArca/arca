@@ -262,23 +262,6 @@
             background: #ffe5dd;
         }
 
-        .btn-ver-mapa-chiquito {
-            color: #e06d53;
-            font-weight: bold;
-            text-decoration: none;
-            font-size: 12.5px;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            margin-top: 4px;
-            transition: color 0.2s;
-        }
-
-        .btn-ver-mapa-chiquito:hover {
-            color: #b8432a;
-            text-decoration: underline;
-        }
-
         .detalle-barra-inferior {
             display: flex;
             justify-content: space-between;
@@ -519,7 +502,11 @@
                   <div class="detalle-titulo-capsula">Animal reportado</div>
                   <div>
                       <div class="detalle-sub-label">Situación:</div>
-                      <div class="detalle-pill-situacion" id="lbl-tipo-reporte">Cargando situación...</div>
+                      <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                          <div class="detalle-pill-situacion" id="lbl-tipo-reporte">Cargando situación...</div>
+                          <!-- BADGE DE ESTADO PÚBLICO (SOLO PENDIENTE O RESUELTO PARA USUARIOS) -->
+                          <div id="badge-estado-publico" style="display: none; padding: 6px 12px; border-radius: 14px; font-size: 13px; font-weight: bold; border: 1px solid #f9cab5;"></div>
+                      </div>
                   </div>
                   <div class="detalle-foto-wrapper">
                       <img id="img-reporte" src="logo.png" alt="Foto del reporte">
@@ -546,6 +533,9 @@
               </div>
           </div>
 
+          <!-- SECCIÓN DE EVIDENCIA DE RESOLUCIÓN (SI YA ESTÁ RESUELTO) -->
+          <div id="contenedor-evidencia-resolucion" style="margin-top: 15px; display: none;"></div>
+
           <div class="detalle-barra-inferior">
               <div class="detalle-info-autor">
                   Publicado por: 
@@ -561,7 +551,49 @@
       </div>
   </main>
 
-  <!-- Modal Estilo ARCA con Huellitas para Confirmar Redirección -->
+  <!-- MODAL OBLIGATORIO DE EVIDENCIAS DE RESOLUCIÓN -->
+  <div id="modalResolucion" class="modal-arca-overlay">
+      <div class="modal-arca-box" style="max-width: 450px; text-align: left;">
+          <div class="modal-huella-icono" style="text-align: center;">
+              <i class="fa-solid fa-clipboard-check"></i>
+          </div>
+          <h3 style="text-align: center; color: #2b2b2b;">Evidencia de Resolución 🐾</h3>
+          <p style="text-align: center; font-size: 14px; color: #666;">Es obligatorio detallar cómo se resolvió el caso y proporcionar evidencias de respaldo:</p>
+          
+          <textarea id="input-detalles-resolucion" rows="4" placeholder="Ej: El animal fue rescatado, valorado en veterinaria y adoptado..." style="width: 100%; padding: 12px; border-radius: 14px; border: 1px solid #fca38d; font-family: 'Itim', cursive; box-sizing: border-box; resize: vertical; margin-bottom: 15px; outline: none;"></textarea>
+          
+          <div class="modal-botones-fila">
+              <button id="modalBtnConfirmarResolucion" class="modal-btn-aceptar">Guardar y Marcar Resuelto</button>
+              <button onclick="cerrarModalResolucion()" class="modal-btn-cancelar">Cancelar</button>
+          </div>
+      </div>
+  </div>
+
+  <!-- MODAL DE DERIVACIÓN (SELECCIONAR FUNDACIÓN Y MOTIVO) -->
+  <div id="modalDerivacion" class="modal-arca-overlay">
+      <div class="modal-arca-box" style="max-width: 450px; text-align: left;">
+          <div class="modal-huella-icono" style="text-align: center;">
+              <i class="fa-solid fa-share-nodes"></i>
+          </div>
+          <h3 style="text-align: center; color: #2b2b2b;">Derivar Reporte a otra Fundación 🐾</h3>
+          <p style="text-align: center; font-size: 14px; color: #666;">Selecciona la fundación receptora y escribe el motivo de la derivación:</p>
+          
+          <label style="font-size: 13px; font-weight: bold; color: #555; display: block; margin-bottom: 4px;">Fundación Destino:</label>
+          <select id="select-fundacion-destino" style="width: 100%; padding: 10px; border-radius: 12px; border: 1px solid #fca38d; font-family: 'Itim', cursive; margin-bottom: 12px; outline: none; background: #fff;">
+              <option value="">Cargando fundaciones...</option>
+          </select>
+
+          <label style="font-size: 13px; font-weight: bold; color: #555; display: block; margin-bottom: 4px;">Motivo de la derivación:</label>
+          <textarea id="input-motivo-derivacion" rows="3" placeholder="Ej: El caso se encuentra fuera de nuestra zona de cobertura..." style="width: 100%; padding: 12px; border-radius: 14px; border: 1px solid #fca38d; font-family: 'Itim', cursive; box-sizing: border-box; resize: vertical; margin-bottom: 15px; outline: none;"></textarea>
+          
+          <div class="modal-botones-fila">
+              <button id="modalBtnConfirmarDerivacion" class="modal-btn-aceptar">Confirmar Derivación</button>
+              <button onclick="cerrarModalDerivacion()" class="modal-btn-cancelar">Cancelar</button>
+          </div>
+      </div>
+  </div>
+
+  <!-- Modal Estilo ARCA para Enlaces Externos -->
   <div id="modalConfirmacion" class="modal-arca-overlay">
       <div class="modal-arca-box">
           <div class="modal-huella-icono">
@@ -594,7 +626,7 @@
               });
           }
 
-      const urlParams = new URLSearchParams(window.location.search);
+          const urlParams = new URLSearchParams(window.location.search);
           const origen = urlParams.get('origen');
           const btnVolver = document.getElementById('btn-volver-dinamico');
 
@@ -625,44 +657,6 @@
           });
       }
 
-      async function obtenerNombreUbicacion(lat, lon) {
-          if (!lat || !lon) return "Ubicación no especificada";
-          try {
-              const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`;
-              const respuesta = await fetch(url, {
-                  headers: {
-                      'Accept-Language': 'es',
-                      'User-Agent': 'ARCA-App-Mascotas'
-                  }
-              });
-              
-              if (!respuesta.ok) throw new Error("Error en el servidor de mapas");
-              
-              const datos = await respuesta.json();
-              
-              if (datos && datos.address) {
-                  const addr = datos.address;
-                  const calle = addr.road || addr.pedestrian || addr.footway || "";
-                  const numero = addr.house_number || "";
-                  const barrio = addr.neighbourhood || addr.suburb || addr.city_district || "";
-                  const ciudad = addr.town || addr.city || addr.state || "Medellín";
-                  
-                  if (calle) {
-                      let direccionExacta = numero ? `${calle} #${numero}` : calle;
-                      if (barrio && barrio !== calle) {
-                          direccionExacta += `, ${barrio}`;
-                      }
-                      return direccionExacta;
-                  }
-                  
-                  return barrio && barrio !== ciudad ? `${barrio}, ${ciudad}` : ciudad;
-              }
-              return "San Cristóbal, Medellín (Ubicación aproximada)";
-          } catch (error) {
-              return "San Cristóbal, Medellín (Ubicación aproximada)";
-          }
-      }
-
       let urlDestinoGlobal = "";
 
       function abrirModalArca(titulo, mensaje, url) {
@@ -676,12 +670,100 @@
           document.getElementById('modalConfirmacion').style.display = 'none';
       }
 
-      document.getElementById('modalBtnAceptar').addEventListener('click', () => {
-          if (urlDestinoGlobal) {
-              window.open(urlDestinoGlobal, '_blank');
+      // ==========================================
+      // MODALES DE RESOLUCIÓN Y DERIVACIÓN
+      // ==========================================
+      let callbackResolucionGlobal = null;
+      let callbackDerivacionGlobal = null;
+
+      function abrirModalResolucion(callback) {
+          callbackResolucionGlobal = callback;
+          document.getElementById('input-detalles-resolucion').value = '';
+          document.getElementById('modalResolucion').style.display = 'flex';
+      }
+      function cerrarModalResolucion() {
+          document.getElementById('modalResolucion').style.display = 'none';
+          callbackResolucionGlobal = null;
+      }
+
+      async function abrirModalDerivacion(callback) {
+          callbackDerivacionGlobal = callback;
+          document.getElementById('input-motivo-derivacion').value = '';
+          const select = document.getElementById('select-fundacion-destino');
+          select.innerHTML = '<option value="">Cargando fundaciones...</option>';
+          
+          document.getElementById('modalDerivacion').style.display = 'flex';
+
+          try {
+              const res = await fetch('/api/fundaciones-lista');
+              const fundaciones = await res.json();
+              if (Array.isArray(fundaciones) && fundaciones.length > 0) {
+                  select.innerHTML = '<option value="">Selecciona una fundación</option>' + 
+                      fundaciones.map(f => `<option value="${f.id_fundacion}">${f.Nombre_Comercial || f.Nombre_Legal}</option>`).join('');
+              } else {
+                  select.innerHTML = '<option value="">No hay fundaciones disponibles</option>';
+              }
+          } catch (e) {
+              console.error("Error al cargar fundaciones:", e);
+              select.innerHTML = '<option value="">Error al cargar fundaciones</option>';
           }
-          cerrarModalArca();
+      }
+      function cerrarModalDerivacion() {
+          document.getElementById('modalDerivacion').style.display = 'none';
+          callbackDerivacionGlobal = null;
+      }
+
+      document.getElementById('modalBtnConfirmarResolucion')?.addEventListener('click', () => {
+          const detalles = document.getElementById('input-detalles-resolucion').value.trim();
+          if (!detalles) {
+              mostrarAlertaArca("Evidencia obligatoria", "Debes redactar los detalles o evidencias de cómo se resolvió el caso.", { tipo: "error" });
+              return;
+          }
+          if (typeof callbackResolucionGlobal === 'function') callbackResolucionGlobal(detalles);
+          cerrarModalResolucion();
       });
+
+      document.getElementById('modalBtnConfirmarDerivacion')?.addEventListener('click', () => {
+          const idFundacionDestino = document.getElementById('select-fundacion-destino').value;
+          const motivo = document.getElementById('input-motivo-derivacion').value.trim();
+
+          if (!idFundacionDestino) {
+              mostrarAlertaArca("Campo obligatorio", "Debes seleccionar una fundación destino.", { tipo: "error" });
+              return;
+          }
+          if (!motivo) {
+              mostrarAlertaArca("Campo obligatorio", "Debes escribir el motivo de la derivación.", { tipo: "error" });
+              return;
+          }
+
+          if (typeof callbackDerivacionGlobal === 'function') callbackDerivacionGlobal(idFundacionDestino, motivo);
+          cerrarModalDerivacion();
+      });
+
+      async function enviarActualizacionEstado(idReporte, estado, payloadAdicional = {}) {
+          try {
+              const resPut = await fetch(`/api/reportes/${idReporte}/estado`, {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ 
+                      estado: estado, 
+                      ...payloadAdicional 
+                  })
+              });
+              if (resPut.ok) {
+                  mostrarAlertaArca("¡Estado actualizado!", "El reporte ha sido actualizado con éxito. 🌸", { 
+                      tipo: "aviso",
+                      alCerrar: () => location.reload()
+                  });
+              } else {
+                  const errData = await resPut.json();
+                  alert(errData.error || "No se pudo actualizar el estado.");
+              }
+          } catch (err) {
+              console.error(err);
+              alert("Error de conexión al actualizar el estado.");
+          }
+      }
 
       async function cargarDetalleReporte() {
           const params = new URLSearchParams(window.location.search);
@@ -729,7 +811,38 @@
               document.getElementById('lbl-tipo-reporte').textContent = reporteData.nombre_tipo_reporte || reporteData.Nombre_tipo_reporte || 'Reporte General';
               document.getElementById('lbl-descripcion').textContent = reporteData.Descripcion || 'Sin descripción proporcionada.';
               
-              // 📸 CARGA SEGURA DE 1 HASTA 3 FOTOS EN EL DETALLE
+              // 🏷️ RENDERIZAR BADGE DE ESTADO PÚBLICO (SOLO PENDIENTE O RESUELTO PARA USUARIOS)
+              const badgeEstadoPublico = document.getElementById('badge-estado-publico');
+              const estadoReporte = reporteData.estado || 'pendiente';
+              
+              if (estadoReporte === 'resuelto') {
+                  badgeEstadoPublico.style.display = 'inline-block';
+                  badgeEstadoPublico.style.background = '#e2fcd9';
+                  badgeEstadoPublico.style.color = '#2e7d32';
+                  badgeEstadoPublico.style.border = '1px solid #c8e6c9';
+                  badgeEstadoPublico.innerHTML = 'Resuelto ✓';
+              } else {
+                  // Pendiente o Derivado se muestran como Pendiente para los usuarios comunes
+                  badgeEstadoPublico.style.display = 'inline-block';
+                  badgeEstadoPublico.style.background = '#fff8e1';
+                  badgeEstadoPublico.style.color = '#f57f17';
+                  badgeEstadoPublico.style.border = '1px solid #ffe0b2';
+                  badgeEstadoPublico.innerHTML = 'Pendiente ⏳';
+              }
+
+              // Mostrar evidencias si ya está resuelto
+              if (reporteData.detalles_resolucion) {
+                  const contenedorEvidencia = document.getElementById('contenedor-evidencia-resolucion');
+                  contenedorEvidencia.style.display = 'block';
+                  contenedorEvidencia.innerHTML = `
+                      <div style="background: #e8f5e9; border: 1px solid #c8e6c9; border-radius: 16px; padding: 15px; color: #2e7d32;">
+                          <strong><i class="fa-solid fa-circle-check"></i> Caso Resuelto - Evidencias y Detalles:</strong>
+                          <p style="margin: 8px 0 0 0; font-size: 14px; color: #1b5e20; line-height: 1.4;">${reporteData.detalles_resolucion}</p>
+                      </div>
+                  `;
+              }
+              
+              // 📸 CARGA DE FOTOS
               const fotoWrapper = document.querySelector('.detalle-foto-wrapper');
               if (reporteData.img_reporte) {
                   try {
@@ -738,7 +851,6 @@
                           if (parsed.length === 1) {
                               fotoWrapper.innerHTML = `<img id="img-reporte" src="${parsed[0]}" alt="Foto del reporte">`;
                           } else {
-                              // Si hay 2 o 3 fotos, se distribuyen en minigalería horizontal
                               fotoWrapper.style.display = 'flex';
                               fotoWrapper.style.gap = '8px';
                               fotoWrapper.innerHTML = parsed.map((img, idx) => `
@@ -758,7 +870,6 @@
               let textoUbicacionOriginal = reporteData.Ubicacion || reporteData.ubicacion || 'Ubicación no especificada';
               document.getElementById('lbl-ubicacion').innerHTML = `<span>${textoUbicacionOriginal}</span>`;
 
-              // Renderizar contactos
               let contactoHTML = "";
               const tel = reporteData.telefono_contacto ? reporteData.telefono_contacto.trim() : "";
               const correo = reporteData.correo_contacto ? reporteData.correo_contacto.trim() : "";
@@ -778,7 +889,7 @@
               document.getElementById('nombre-autor-texto').textContent = `@${nombreUsuario}`;
               document.getElementById('link-autor').href = `perfil_publico.html?user=${encodeURIComponent(nombreUsuario)}`;
 
-              // Gestionar botones de acción (Editar / Guardar / Eliminar)
+              // Gestionar botones de acción
               const contenedorBoton = document.getElementById('contenedor-boton-accion');
 
               if (typeof firebase !== 'undefined' && firebase.auth) {
@@ -794,12 +905,50 @@
                           const resUser = await fetch(`/api/obtener-usuario?correo=${encodeURIComponent(correoLogueado)}`);
                           const datosUsuarioLogueado = resUser.ok ? await resUser.json() : null;
                           const idUsuarioLogueado = datosUsuarioLogueado ? Number(datosUsuarioLogueado.id_usuarios) : null;
+                          const tipoUsuario = datosUsuarioLogueado ? datosUsuarioLogueado.tipo_usuario : localStorage.getItem('tipo_usuario');
                           const idCreadorReporte = Number(reporteData.id_usuarios);
 
+                          const esFundacion = tipoUsuario === 'fundacion';
                           const esDueño = (idUsuarioLogueado && idCreadorReporte && idUsuarioLogueado === idCreadorReporte) || 
                                           (reporteData.correo_usuario && reporteData.correo_usuario.toLowerCase().trim() === correoLogueado.toLowerCase().trim());
 
-                          if (esDueño) {
+                          if (esFundacion) {
+                              // 🐾 PANEL DE CONTROL PARA FUNDACIONES
+                              const estadoActual = reporteData.estado || 'pendiente';
+                              contenedorBoton.innerHTML = `
+                                  <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                      <select id="select-estado-reporte" class="detalle-btn-accion" style="background: #fff; cursor: pointer;">
+                                          <option value="pendiente" ${estadoActual === 'pendiente' ? 'selected' : ''}>Pendiente ⏳</option>
+                                          <option value="en_proceso" ${estadoActual === 'en_proceso' ? 'selected' : ''}>En Proceso 🔄</option>
+                                          <option value="derivado" ${estadoActual === 'derivado' ? 'selected' : ''}>Derivado ↗️</option>
+                                          <option value="resuelto" ${estadoActual === 'resuelto' ? 'selected' : ''}>Resuelto ✓</option>
+                                      </select>
+                                      <button class="detalle-btn-accion detalle-btn-editar" id="btn-actualizar-estado">
+                                          <i class="fa-solid fa-check"></i> Actualizar Estado
+                                      </button>
+                                  </div>
+                              `;
+
+                              document.getElementById('btn-actualizar-estado')?.addEventListener('click', async () => {
+                                  const nuevoEstado = document.getElementById('select-estado-reporte').value;
+                                  
+                                  if (nuevoEstado === 'resuelto') {
+                                      abrirModalResolucion(async (detalles) => {
+                                          await enviarActualizacionEstado(reporteData.id_reporte || reporteId, nuevoEstado, { detalles_resolucion: detalles });
+                                      });
+                                  } else if (nuevoEstado === 'derivado') {
+                                      abrirModalDerivacion(async (idFundacionDestino, motivo) => {
+                                          await enviarActualizacionEstado(reporteData.id_reporte || reporteId, nuevoEstado, { 
+                                              id_fundacion_derivada: idFundacionDestino, 
+                                              motivo_derivacion: motivo 
+                                          });
+                                      });
+                                  } else {
+                                      await enviarActualizacionEstado(reporteData.id_reporte || reporteId, nuevoEstado);
+                                  }
+                              });
+
+                          } else if (esDueño) {
                               contenedorBoton.innerHTML = `
                                   <div style="display: flex; gap: 8px;">
                                       <a href="formularior.html?editar=${reporteData.id_reporte || reporteId}" class="detalle-btn-accion detalle-btn-editar">
@@ -1002,4 +1151,4 @@
       }
   </script>
 </body>
-</html>
+</html> 

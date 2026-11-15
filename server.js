@@ -2194,32 +2194,48 @@ app.get('/api/obtener-fundacion-header', (req, res) => {
 
 app.put('/api/reportes/:id/estado', (req, res) => {
     const { id } = req.params;
-    const { estado } = req.body;
+    const { estado, detalles_resolucion, id_fundacion_derivada, motivo_derivacion } = req.body;
 
     if (!estado) return res.status(400).json({ error: 'El estado es requerido' });
 
-    const query = 'UPDATE reportes SET estado = ? WHERE id_reporte = ?';
-    db.query(query, [estado, id], (err, result) => {
-        if (err || result.affectedRows === 0) {
-            return res.status(500).json({ error: 'Error al actualizar el estado' });
+    if (estado === 'resuelto' && (!detalles_resolucion || detalles_resolucion.trim() === '')) {
+        return res.status(400).json({ error: 'Se requieren detalles o evidencias de la resolución para marcar como resuelto.' });
+    }
+
+    if (estado === 'derivado' && !id_fundacion_derivada) {
+        return res.status(400).json({ error: 'Debes seleccionar una fundación a la cual derivar el reporte.' });
+    }
+
+    const query = 'UPDATE reportes SET estado = ?, detalles_resolucion = ?, id_fundacion_derivada = ?, motivo_derivacion = ? WHERE id_reporte = ?';
+    db.query(query, [estado, detalles_resolucion || null, id_fundacion_derivada || null, motivo_derivacion || null, id], (err, result) => {
+        if (err) {
+            console.warn("⚠️ Advertencia: Actualizando estado básico (columnas adicionales pendientes en BD):", err.message);
+            db.query('UPDATE reportes SET estado = ? WHERE id_reporte = ?', [estado, id], (err2, result2) => {
+                if (err2 || result2.affectedRows === 0) {
+                    return res.status(500).json({ error: 'Error al actualizar el estado' });
+                }
+                res.json({ success: true, message: 'Estado actualizado correctamente' });
+            });
+            return;
         }
-        res.json({ success: true, message: 'Estado actualizado correctamente' });
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Reporte no encontrado' });
+        }
+        res.json({ success: true, message: 'Estado actualizado correctamente con derivación/resolución' });
     });
 });
-
+// Obtener lista de fundaciones para derivar reportes
 app.get('/api/fundaciones-lista', (req, res) => {
-    const query = `
-        SELECT f.id_fundacion, f.Nombre_Comercial, f.Nombre_Legal, f.Correo_fundacion
-        FROM fundacion f
-        JOIN usuarios u ON f.Correo_fundacion = u.correo_usuario
-        WHERE u.estado_aprobacion = 'aprobado' OR u.estado_aprobacion = 'pendiente'
-    `;
-    db.query(query, (err, resultados) => {
-        if (err) return res.status(500).json({ error: "Error en el servidor" });
-        res.json(resultados);
+    const query = 'SELECT id_fundacion, Nombre_Comercial, Nombre_Legal FROM fundacion';
+    db.query(query, (err, results) => {
+        if (err) {
+            console.error("❌ Error al obtener fundaciones:", err.message);
+            return res.status(500).json({ error: "Error al cargar las fundaciones." });
+        }
+        res.json(results);
     });
 });
-
 // ==========================================
 // MÓDULO PERFIL Y EDICIÓN DE FUNDACIÓN
 // ==========================================
