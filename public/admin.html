@@ -616,8 +616,7 @@
                 contenedor.innerHTML = `<div class="estado-mensaje" style="color: #c94a5a;"><p style="margin: 0;">Error al conectar con el servidor para cargar denuncias.</p></div>`;
             }
         }
-
-        async function gestionarDenuncia(idDenuncia, idDenunciado, accion) {
+async function gestionarDenuncia(idDenuncia, idDenunciado, accion) {
             const mensajeConfirm = accion === 'suspender' 
                 ? '¿Deseas poner esta cuenta en revisión (suspender su acceso temporalmente)?' 
                 : '¿Estás completamente segura de ELIMINAR permanentemente esta cuenta de la base de datos?';
@@ -630,56 +629,29 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ id_denuncia, id_usuario_denunciado: idDenunciado, accion })
                 });
-                const resultado = await res.json();
 
-                if (resultado.exito) {
-                    alert(resultado.mensaje);
-                    cargarDenunciasPerfiles();
-                } else {
-                    alert("Error: " + (resultado.error || "No se pudo completar la acción."));
-                }
-            } catch (e) {
-                alert("Error de conexión al procesar la acción.");
-            }
-        }
-
-        async function rechazar(id_fundacion, correo_fundacion, nombre_comercial) {
-            if (!confirm(`¿Estás segura de RECHAZAR y ELIMINAR permanentemente a la fundación "${nombre_comercial}"? Esto borrará sus datos de la base de datos y su cuenta de Firebase.`)) return;
-
-            const btn = document.getElementById(`btn-rechazar-${id_fundacion}`);
-            if (btn) {
-                btn.disabled = true;
-                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Eliminando...`;
-            }
-
-            try {
-                const res = await fetch('/api/admin/rechazar-fundacion', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id_fundacion, correo_fundacion })
-                });
-                const resultado = await res.json();
-
-                if (!resultado.exito) {
-                    alert("No se pudo rechazar: " + resultado.mensaje);
-                    if (btn) {
-                        btn.disabled = false;
-                        btn.innerHTML = `<i class="fa-solid fa-trash-can"></i> Rechazar y Borrar`;
-                    }
+                // Leemos la respuesta como texto plano primero para evitar fallos de JSON
+                const textoRespuesta = await res.text();
+                let resultado;
+                try {
+                    resultado = JSON.parse(textoRespuesta);
+                } catch (errJson) {
+                    console.error("Respuesta del servidor no es JSON:", textoRespuesta);
+                    alert("⚠️ Error del servidor (Texto plano): " + textoRespuesta.substring(0, 200));
                     return;
                 }
 
-                alert(`¡La fundación "${nombre_comercial}" ha sido rechazada y sus registros eliminados con éxito! 🌸`);
-                cargarSolicitudes();
-            } catch (error) {
-                alert("Error al rechazar: " + error.message);
-                if (btn) {
-                    btn.disabled = false;
-                    btn.innerHTML = `<i class="fa-solid fa-trash-can"></i> Rechazar y Borrar`;
+                if (res.ok && resultado.exito) {
+                    alert(resultado.mensaje);
+                    cargarDenunciasPerfiles();
+                } else {
+                    alert("⚠️ Error del servidor: " + (resultado.error || resultado.mensaje || "Desconocido"));
                 }
+            } catch (e) {
+                console.error("Excepción de red:", e);
+                alert("⚠️ Error de conexión con el servidor: " + e.message);
             }
         }
-
         async function aprobar(id_fundacion, correo_fundacion, nombre_comercial) {
             if (!confirm(`¿Estás segura de aprobar a la fundación "${nombre_comercial}"? Se le enviará un correo de notificación.`)) return;
 
