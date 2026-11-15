@@ -599,7 +599,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="script.js"></script>
   <script>
-      document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
           const btnToggleMenu = document.getElementById('btn-toggle-menu');
           const sidebar = document.getElementById('sidebar');
 
@@ -615,19 +615,43 @@
           const btnVolver = document.getElementById('btn-volver-dinamico');
 
           if (btnVolver) {
+              let destinoUrl = 'novedades.html';
+              let textoBoton = 'Volver a novedades';
+
               if (origen === 'guardados') {
-                  btnVolver.innerHTML = `<i class="fa-solid fa-arrow-left"></i> Volver a guardados`;
-                  btnVolver.href = 'guardados_usuario.html';
+                  destinoUrl = 'guardados_usuario.html';
+                  textoBoton = 'Volver a guardados';
               } else if (origen === 'mis-reportes') {
-                  btnVolver.innerHTML = `<i class="fa-solid fa-arrow-left"></i> Volver a mis reportes`;
-                  btnVolver.href = 'mis_reportes.html';
+                  destinoUrl = 'mis_reportes.html';
+                  textoBoton = 'Volver a mis reportes';
               } else if (origen === 'mapa') {
-                  btnVolver.innerHTML = `<i class="fa-solid fa-arrow-left"></i> Volver al mapa`;
-                  btnVolver.href = 'mapa.html';
+                  destinoUrl = 'mapa.html';
+                  textoBoton = 'Volver al mapa';
+              } else if (origen === 'fundacion' || origen === 'panel-fundacion') {
+                  destinoUrl = 'home_fundacion.html'; // O la ruta de la home de fundaciones que utilices
+                  textoBoton = 'Volver al panel';
               } else {
-                  btnVolver.innerHTML = `<i class="fa-solid fa-arrow-left"></i> Volver a novedades`;
-                  btnVolver.href = 'novedades.html';
+                  // Si no hay parámetro de origen explícito, revisamos de dónde vino el navegador o el rol
+                  const tipoUsuarioLocal = localStorage.getItem('tipo_usuario');
+                  const referrer = document.referrer;
+
+                  if (tipoUsuarioLocal === 'fundacion' || (referrer && referrer.includes('fundacion'))) {
+                      destinoUrl = 'home_fundacion.html';
+                      textoBoton = 'Volver al panel';
+                  } else if (referrer && referrer.includes('mis_reportes')) {
+                      destinoUrl = 'mis_reportes.html';
+                      textoBoton = 'Volver a mis reportes';
+                  } else if (referrer && referrer.includes('guardados')) {
+                      destinoUrl = 'guardados_usuario.html';
+                      textoBoton = 'Volver a guardados';
+                  } else if (referrer && referrer.includes('mapa')) {
+                      destinoUrl = 'mapa.html';
+                      textoBoton = 'Volver al mapa';
+                  }
               }
+
+              btnVolver.innerHTML = `<i class="fa-solid fa-arrow-left"></i> ${textoBoton}`;
+              btnVolver.href = destinoUrl;
           }
 
           cargarDetalleReporte();
