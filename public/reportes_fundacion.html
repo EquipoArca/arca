@@ -16,24 +16,27 @@
         document.body.classList.add("dark-mode");
     }
     </script>
-    <style>
-       .main-content {
-            position: absolute;
-            top: 85px; /* Altura exacta para quedar debajo de la barra de navegación */
-            left: 0;
-            right: 0;
-            bottom: 0;
-            overflow-y: auto;
-            display: flex;
-            justify-content: center;
-            padding: 25px 20px;
+<style>
+        body {
+            background-color: #fff5f3;
+            margin: 0;
+            font-family: 'Itim', cursive, sans-serif;
+            overflow-y: auto; /* Scroll natural de toda la ventana */
+        }
+
+        /* Quitamos el absolute y el flex con overflow que cortaban las tarjetas */
+        .main-content {
+            margin-top: 95px; /* Deja espacio exacto para que la barra superior no estorbe */
+            width: 100%;
+            display: block;
             box-sizing: border-box;
+            padding: 0 20px 50px 20px;
         }
 
         .feed-novedades {
             width: 100%;
             max-width: 950px;
-            padding-bottom: 40px;
+            margin: 0 auto; /* Centra las tarjetas perfectamente sin romper el layout */
         }
 
         .tarjeta-prototipo-estilo {
