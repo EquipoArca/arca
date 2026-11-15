@@ -1196,10 +1196,16 @@ function atrasPaso4() {
 // ==========================================
 // ALERTA PERSONALIZADA ARCA
 // ==========================================
+// ==========================================
+// ALERTA Y CONFIRMACIÓN PERSONALIZADA ARCA
+// ==========================================
 function mostrarAlertaArca(titulo, mensaje, opciones = {}) {
     const {
         tipo = "error",
         textoBoton = "Entendido",
+        textoCancelar = "Cancelar",
+        confirmar = false,
+        alConfirmar = null,
         alCerrar = null
     } = opciones;
 
@@ -1209,7 +1215,6 @@ function mostrarAlertaArca(titulo, mensaje, opciones = {}) {
         const estilos = document.createElement("style");
         estilos.id = "estilos-alerta-arca";
         estilos.textContent = `
-            /* Estilos generales para error y aviso */
             .arca-alerta-overlay {
                 position: fixed;
                 inset: 0;
@@ -1262,11 +1267,17 @@ function mostrarAlertaArca(titulo, mensaje, opciones = {}) {
                 overflow-wrap: anywhere;
             }
 
-           .arca-alerta-boton {
+            .arca-alerta-botones-grupo {
+                display: flex;
+                gap: 10px;
+                width: 100%;
+            }
+
+            .arca-alerta-boton {
                 width: 100%;
                 padding: 12px 18px;
                 border: 0;
-                outline: none; /* <-- Añade esto */
+                outline: none;
                 border-radius: 18px;
                 background: #E985A0;
                 color: white;
@@ -1278,6 +1289,25 @@ function mostrarAlertaArca(titulo, mensaje, opciones = {}) {
 
             .arca-alerta-boton:hover {
                 background: #D96F8D;
+                transform: translateY(-2px);
+            }
+
+            .arca-alerta-boton-cancelar {
+                width: 100%;
+                padding: 12px 18px;
+                border: 2px solid #fff;
+                outline: none;
+                border-radius: 18px;
+                background: #EAE0E3;
+                color: #704653;
+                font: inherit;
+                font-size: 17px;
+                cursor: pointer;
+                transition: transform .2s, background .2s;
+            }
+
+            .arca-alerta-boton-cancelar:hover {
+                background: #DFD2D6;
                 transform: translateY(-2px);
             }
 
@@ -1350,11 +1380,11 @@ function mostrarAlertaArca(titulo, mensaje, opciones = {}) {
                 margin-bottom: 24px;
             }
 
-          .custom-alert-btn {
+            .custom-alert-btn {
                 background-color: #ffffff;
                 color: #e57373;
                 border: 2px solid #ffffff;
-                outline: none; /* <-- Y esto aquí también */
+                outline: none;
                 border-radius: 26px;
                 padding: 12px 0;
                 width: 100%;
@@ -1411,7 +1441,6 @@ function mostrarAlertaArca(titulo, mensaje, opciones = {}) {
         tarjeta.className = "custom-alert-card";
 
         icono.className = "alert-icon-circle";
-        // Aquí incorporamos el icono SVG exacto con el círculo oscuro y el signo de exclamación (!)
         icono.innerHTML = `
             <svg class="alert-icon" viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="10" fill="#4a4a4a"/>
@@ -1430,6 +1459,12 @@ function mostrarAlertaArca(titulo, mensaje, opciones = {}) {
         boton.className = "custom-alert-btn";
         boton.textContent = textoBoton;
 
+        boton.addEventListener("click", () => {
+            overlay.remove();
+            if (typeof alCerrar === "function") alCerrar();
+        });
+
+        tarjeta.append(icono, encabezado, texto, boton);
     } else {
         overlay.className = "arca-alerta-overlay";
         overlay.setAttribute("role", "alertdialog");
@@ -1439,7 +1474,8 @@ function mostrarAlertaArca(titulo, mensaje, opciones = {}) {
 
         const iconos = {
             error: "♡",
-            aviso: "🌸"
+            aviso: "🌸",
+            pregunta: "🐾"
         };
         icono.className = "arca-alerta-icono";
         icono.textContent = iconos[tipo] || "♡";
@@ -1452,20 +1488,40 @@ function mostrarAlertaArca(titulo, mensaje, opciones = {}) {
 
         boton.type = "button";
         boton.className = "arca-alerta-boton";
-        boton.textContent = textoBoton;
+        boton.textContent = confirmar ? (textoBoton === "Entendido" ? "Aceptar" : textoBoton) : textoBoton;
+
+        if (confirmar) {
+            const grupoBotones = document.createElement("div");
+            grupoBotones.className = "arca-alerta-botones-grupo";
+
+            const botonCancelar = document.createElement("button");
+            botonCancelar.type = "button";
+            botonCancelar.className = "arca-alerta-boton-cancelar";
+            botonCancelar.textContent = textoCancelar;
+
+            botonCancelar.addEventListener("click", () => {
+                overlay.remove();
+                if (typeof alCerrar === "function") alCerrar();
+            });
+
+            boton.addEventListener("click", () => {
+                overlay.remove();
+                if (typeof alConfirmar === "function") alConfirmar();
+            });
+
+            grupoBotones.append(botonCancelar, boton);
+            tarjeta.append(icono, encabezado, texto, grupoBotones);
+        } else {
+            boton.addEventListener("click", () => {
+                overlay.remove();
+                if (typeof alCerrar === "function") alCerrar();
+            });
+            tarjeta.append(icono, encabezado, texto, boton);
+        }
     }
 
-    boton.addEventListener("click", () => {
-        overlay.remove();
-        if (typeof alCerrar === "function") {
-            alCerrar();
-        }
-    });
-
-    tarjeta.append(icono, encabezado, texto, boton);
     overlay.appendChild(tarjeta);
     document.body.appendChild(overlay);
-
     boton.focus();
 }
 // Función para adaptar la interfaz del Home según el tipo de usuario (Usuario normal vs Fundación)

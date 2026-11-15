@@ -41,7 +41,7 @@
             padding: 35px;
             margin-bottom: 20px;
             box-shadow: 0 20px 45px rgba(92, 64, 51, 0.08);
-            display: none; /* Se oculta por defecto hasta cargar datos */
+            display: none;
             width: 100%;
             box-sizing: border-box;
         }
@@ -355,15 +355,23 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
     <script src="script.js"></script>
 
-    <!-- Script de lógica de la vista corregido y robusto -->
+    <!-- Script de lógica de la vista con alertas estilizadas ARCA -->
     <script>
-    let idUsuarioActual = null; // Variable global para almacenar el ID del usuario
+    let idUsuarioActual = null;
 
     document.addEventListener('DOMContentLoaded', () => {
         firebase.auth().onAuthStateChanged(async (user) => {
             if (!user) {
-                alert("Debes iniciar sesión.");
-                window.location.href = "adopciones.html";
+                mostrarAlertaArca(
+                    "¡Inicia sesión! ♡",
+                    "Debes iniciar sesión para ver tu perfil de adoptante.",
+                    {
+                        tipo: "aviso",
+                        alCerrar: () => {
+                            window.location.href = "adopciones.html";
+                        }
+                    }
+                );
                 return;
             }
 
@@ -373,7 +381,7 @@
                 if (!resUser.ok) throw new Error("No se pudo obtener el usuario.");
                 const datosUser = await resUser.json();
                 
-                idUsuarioActual = datosUser.id_usuarios; // Guardamos el ID aquí
+                idUsuarioActual = datosUser.id_usuarios;
 
                 // 2. Consultamos la ficha de adoptante usando el id exacto
                 const resFicha = await fetch(`/api/obtener-ficha-adoptante/${idUsuarioActual}`);
@@ -381,7 +389,6 @@
                 if (resFicha.ok) {
                     const ficha = await resFicha.json();
 
-                    // Rellenamos los campos de la ficha...
                     document.getElementById('ficha-nombre').textContent = ficha.nombre_completo || 'Sin nombre';
                     document.getElementById('ficha-ubicacion').textContent = ficha.Ubicacion || ficha.ubicacion || 'No especificada';
                     document.getElementById('ficha-nacimiento').textContent = ficha.fecha_nacimiento ? ficha.fecha_nacimiento.split('T')[0] : '';
@@ -401,7 +408,6 @@
                     document.getElementById('ficha-cuidador').textContent = ficha.cuidador || 'No especificado';
                     document.getElementById('ficha-motivacion').textContent = ficha.motivacion || 'Sin motivación descrita.';
 
-                    // Mostramos la tarjeta y los botones de acción
                     document.getElementById('contenedor-ficha').style.display = 'block';
                     document.getElementById('acciones-perfil').style.display = 'flex';
                     document.getElementById('sin-perfil').style.display = 'none';
@@ -423,31 +429,54 @@
         window.location.href = "formulario_adoptante.html?modo=editar";
     }
 
-    async function eliminarPerfilAdoptante() {
+    function eliminarPerfilAdoptante() {
         if (!idUsuarioActual) {
-            alert("No se pudo identificar el usuario.");
+            mostrarAlertaArca("¡Ups! ♡", "No se pudo identificar el usuario.", { tipo: "error" });
             return;
         }
 
-        const confirmar = confirm("¿Estás seguro de que deseas eliminar tu perfil de adoptante? Esta acción no se puede deshacer.");
-        if (!confirmar) return;
+        mostrarAlertaArca(
+            "¿Eliminar perfil de adoptante?",
+            "¿Estás seguro de que deseas eliminar tu perfil de adoptante? Esta acción no se puede deshacer.",
+            {
+                tipo: "pregunta",
+                confirmar: true,
+                textoBoton: "Sí, eliminar",
+                textoCancelar: "Cancelar",
+                alConfirmar: async () => {
+                    try {
+                        const response = await fetch(`/api/eliminar-adoptante/${idUsuarioActual}`, {
+                            method: 'DELETE'
+                        });
 
-        try {
-            const response = await fetch(`/api/eliminar-adoptante/${idUsuarioActual}`, {
-                method: 'DELETE'
-            });
-
-            const resultado = await response.json();
-            if (response.ok) {
-                alert(resultado.mensaje || "Perfil eliminado correctamente.");
-                window.location.reload();
-            } else {
-                alert("Error: " + (resultado.error || "No se pudo eliminar el perfil."));
+                        const resultado = await response.json();
+                        if (response.ok) {
+                            mostrarAlertaArca(
+                                "¡Perfil eliminado! 🌸",
+                                resultado.mensaje || "Perfil eliminado correctamente.",
+                                {
+                                    tipo: "aviso",
+                                    alCerrar: () => window.location.reload()
+                                }
+                            );
+                        } else {
+                            mostrarAlertaArca(
+                                "No se pudo eliminar",
+                                resultado.error || "No se pudo eliminar el perfil.",
+                                { tipo: "error" }
+                            );
+                        }
+                    } catch (error) {
+                        console.error("Error de red al eliminar:", error);
+                        mostrarAlertaArca(
+                            "Error de conexión ♡",
+                            "Hubo un error al conectar con el servidor.",
+                            { tipo: "error" }
+                        );
+                    }
+                }
             }
-        } catch (error) {
-            console.error("Error de red al eliminar:", error);
-            alert("Hubo un error al conectar con el servidor.");
-        }
+        );
     }
 
     // ==========================================
@@ -464,7 +493,6 @@
         document.getElementById('modal-accesos').style.display = 'none';
     }
 
-    // Cerrar el modal si el usuario hace clic fuera de la tarjeta
     window.addEventListener('click', (e) => {
         const modal = document.getElementById('modal-accesos');
         if (e.target === modal) {
@@ -511,28 +539,46 @@
         }
     }
 
-    async function revocarAcceso(idSolicitud) {
-        if (!confirm("¿Estás seguro de quitarle el acceso a este usuario? Podrá volver a solicitarlo si lo desea.")) return;
-        
-        try {
-            const res = await fetch(`/api/adoptante/acceso/${idSolicitud}`, {
-                method: 'DELETE'
-            });
+    function revocarAcceso(idSolicitud) {
+        mostrarAlertaArca(
+            "¿Quitar acceso? 🐾",
+            "¿Estás seguro de quitarle el acceso a este usuario? Podrá volver a solicitarlo si lo desea.",
+            {
+                tipo: "pregunta",
+                confirmar: true,
+                textoBoton: "Aceptar",
+                textoCancelar: "Cancelar",
+                alConfirmar: async () => {
+                    try {
+                        const res = await fetch(`/api/adoptante/acceso/${idSolicitud}`, {
+                            method: 'DELETE'
+                        });
 
-            if (res.ok) {
-                if (typeof mostrarAlertaArca === 'function') {
-                    mostrarAlertaArca("¡Listo! 🌸", "Acceso revocado con éxito.", { tipo: "aviso" });
-                } else {
-                    alert("Acceso revocado correctamente. 🌸");
+                        if (res.ok) {
+                            mostrarAlertaArca(
+                                "¡Listo! 🌸",
+                                "Acceso revocado con éxito.",
+                                { tipo: "aviso" }
+                            );
+                            cargarAccesosAdoptante(idUsuarioActual);
+                        } else {
+                            mostrarAlertaArca(
+                                "Hubo un problema",
+                                "No se pudo quitar el acceso. Inténtalo de nuevo.",
+                                { tipo: "error" }
+                            );
+                        }
+                    } catch (e) {
+                        console.error("Error de red al revocar acceso:", e);
+                        mostrarAlertaArca(
+                            "Error de conexión ♡",
+                            "Hubo un error al conectar con el servidor.",
+                            { tipo: "error" }
+                        );
+                    }
                 }
-                cargarAccesosAdoptante(idUsuarioActual); // Actualiza la lista dentro del modal
-            } else {
-                alert("No se pudo quitar el acceso.");
             }
-        } catch (e) {
-            console.error("Error de red al revocar acceso:", e);
-            alert("Hubo un error al conectar con el servidor.");
-        }
+        );
     }
 </script>
 <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
