@@ -622,6 +622,39 @@
             }
         });
 
+        // Función auxiliar para comprimir la imagen a max 600px de ancho y evitar el error 413
+        function comprimirImagenYEnviar(file, callback) {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function (event) {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = function () {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 600; // Ancho máximo seguro para EmailJS
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > MAX_WIDTH) {
+                        height = Math.round((height * MAX_WIDTH) / width);
+                        width = MAX_WIDTH;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // Comprimimos a JPEG con calidad 0.7 para que pese muy pocos KB
+                    const dataUrlCompressed = canvas.toDataURL('image/jpeg', 0.7);
+                    callback(dataUrlCompressed);
+                }
+            }
+            reader.onerror = function () {
+                callback("");
+            };
+        }
+
         // Lógica de envío del formulario mediante EmailJS
         document.getElementById('form-reportar-error').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -638,7 +671,6 @@
             const nombreUsuario = document.getElementById('nombre-usuario-error').value.trim();
             const correoUsuario = document.getElementById('correo-usuario-error').value.trim();
 
-            // Función para enviar con o sin imagen en Base64
             const ejecutarEnvioEmailJS = (imagenBase64 = "") => {
                 const templateParams = {
                     to_email: "arcaoficial0@gmail.com",
@@ -649,7 +681,6 @@
                     imagen: imagenBase64 ? `<img src="${imagenBase64}" style="max-width: 100%; border-radius: 12px; border: 1px solid #ccc; margin-top: 10px;" />` : '<em style="color: #777;">El usuario no adjuntó captura de pantalla.</em>'
                 };
 
-                // Enviamos usando el servicio 'service_arca' y una plantilla 'template_error'
                 emailjs.send("service_arca", "template_error", templateParams)
                     .then((response) => {
                         console.log('SUCCESS!', response.status, response.text);
@@ -668,16 +699,11 @@
                     });
             };
 
-            // Si subió un archivo, lo convertimos a Base64 antes de llamar a EmailJS
+            // Si hay archivo, lo comprimimos primero; si no, enviamos directo
             if (fileInput.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    ejecutarEnvioEmailJS(event.target.result);
-                };
-                reader.onerror = function() {
-                    ejecutarEnvioEmailJS(""); // Si falla la lectura, enviamos sin imagen
-                };
-                reader.readAsDataURL(fileInput.files[0]);
+                comprimirImagenYEnviar(fileInput.files[0], (imgComprimida) => {
+                    ejecutarEnvioEmailJS(imgComprimida);
+                });
             } else {
                 ejecutarEnvioEmailJS("");
             }
