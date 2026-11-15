@@ -2907,7 +2907,6 @@ app.get('/api/admin/denuncias', (req, res) => {
         res.json({ exito: true, denuncias: results });
     });
 });
-
 // 3. Acción del Admin: Poner cuenta en revisión o ELIMINARLA DE TODAS PARTES (MySQL y Firebase)
 app.post('/api/admin/gestionar-denuncia', (req, res) => {
     const { id_denuncia, id_usuario_denunciado, accion } = req.body; 
@@ -2932,77 +2931,66 @@ app.post('/api/admin/gestionar-denuncia', (req, res) => {
 
             const correoUser = userRows[0].correo_usuario;
 
-            // 2. Consulta múltiple con Foreign Key Checks desactivados para borrar por ID de una vez
-            const sqlEliminacionTotal = `
-                SET FOREIGN_KEY_CHECKS = 0;
-
-                DELETE FROM denuncias_usuarios WHERE id_usuario_denunciado = ? OR id_denunciante = ?;
-                DELETE FROM notificaciones WHERE id_usuario_destino = ? OR id_usuario_origen = ?;
-                DELETE FROM seguidores WHERE id_usuario_seguidor = ? OR id_usuario_seguido = ?;
-                DELETE FROM guardados WHERE id_usuarios = ?;
-                DELETE FROM usuarios_bloqueados WHERE id_usuario_bloqueador = ? OR id_usuario_bloqueado = ?;
-                DELETE FROM solicitudes_adoptante WHERE id_solicitante = ? OR id_propietario = ?;
-                DELETE FROM adoptante WHERE id_usuarios = ?;
-                DELETE FROM donaciones WHERE id_usuario = ?;
-
-                DELETE FROM publicaciones WHERE id_reporte IN (SELECT id_reporte FROM reportes WHERE id_usuarios = ?);
-                DELETE FROM reportes WHERE id_usuarios = ?;
-
-                DELETE FROM publicaciones WHERE id_animal IN (SELECT id_animal FROM animal WHERE id_usuarios = ?) 
-                                      OR id_publicaciones_adopcion IN (SELECT id_publicaciones_adopcion FROM publicaciones_adopcion WHERE id_usuarios = ?);
-                DELETE FROM publicaciones_adopcion WHERE id_usuarios = ?;
-                DELETE FROM animal WHERE id_usuarios = ?;
-
-                DELETE FROM eventos WHERE id_fundacion IN (SELECT id_fundacion FROM fundacion WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(?)));
-                DELETE FROM representante WHERE id_fundacion IN (SELECT id_fundacion FROM fundacion WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(?)));
-                DELETE FROM donaciones WHERE id_fundacion IN (SELECT id_fundacion FROM fundacion WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(?)));
-                DELETE FROM documentacion WHERE id_documentacion IN (SELECT id_documentacion FROM fundacion WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(?)));
-                DELETE FROM fundacion WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(?));
-
-                DELETE FROM usuarios WHERE id_usuarios = ?;
-
-                SET FOREIGN_KEY_CHECKS = 1;
-            `;
-
-            const params = [
-                id_usuario_denunciado, id_usuario_denunciado,
-                id_usuario_denunciado, id_usuario_denunciado,
-                id_usuario_denunciado, id_usuario_denunciado,
-                id_usuario_denunciado,
-                id_usuario_denunciado, id_usuario_denunciado,
-                id_usuario_denunciado, id_usuario_denunciado,
-                id_usuario_denunciado,
-                id_usuario_denunciado,
-                id_usuario_denunciado, id_usuario_denunciado,
-                id_usuario_denunciado, id_usuario_denunciado, id_usuario_denunciado, id_usuario_denunciado,
-                correoUser, correoUser, correoUser, correoUser, correoUser,
-                id_usuario_denunciado
+            // 2. Lista de pasos secuenciales seguros (evita el error de parámetros en multipleStatements)
+            const pasos = [
+                "SET FOREIGN_KEY_CHECKS = 0",
+                `DELETE FROM denuncias_usuarios WHERE id_usuario_denunciado = ${db.escape(id_usuario_denunciado)} OR id_denunciante = ${db.escape(id_usuario_denunciado)}`,
+                `DELETE FROM notificaciones WHERE id_usuario_destino = ${db.escape(id_usuario_denunciado)} OR id_usuario_origen = ${db.escape(id_usuario_denunciado)}`,
+                `DELETE FROM seguidores WHERE id_usuario_seguidor = ${db.escape(id_usuario_denunciado)} OR id_usuario_seguido = ${db.escape(id_usuario_denunciado)}`,
+                `DELETE FROM guardados WHERE id_usuarios = ${db.escape(id_usuario_denunciado)}`,
+                `DELETE FROM usuarios_bloqueados WHERE id_usuario_bloqueador = ${db.escape(id_usuario_denunciado)} OR id_usuario_bloqueado = ${db.escape(id_usuario_denunciado)}`,
+                `DELETE FROM solicitudes_adoptante WHERE id_solicitante = ${db.escape(id_usuario_denunciado)} OR id_propietario = ${db.escape(id_usuario_denunciado)}`,
+                `DELETE FROM adoptante WHERE id_usuarios = ${db.escape(id_usuario_denunciado)}`,
+                `DELETE FROM donaciones WHERE id_usuario = ${db.escape(id_usuario_denunciado)}`,
+                `DELETE FROM publicaciones WHERE id_reporte IN (SELECT id_reporte FROM reportes WHERE id_usuarios = ${db.escape(id_usuario_denunciado)})`,
+                `DELETE FROM reportes WHERE id_usuarios = ${db.escape(id_usuario_denunciado)}`,
+                `DELETE FROM publicaciones WHERE id_animal IN (SELECT id_animal FROM animal WHERE id_usuarios = ${db.escape(id_usuario_denunciado)}) OR id_publicaciones_adopcion IN (SELECT id_publicaciones_adopcion FROM publicaciones_adopcion WHERE id_usuarios = ${db.escape(id_usuario_denunciado)})`,
+                `DELETE FROM publicaciones_adopcion WHERE id_usuarios = ${db.escape(id_usuario_denunciado)}`,
+                `DELETE FROM animal WHERE id_usuarios = ${db.escape(id_usuario_denunciado)}`,
+                `DELETE FROM eventos WHERE id_fundacion IN (SELECT id_fundacion FROM fundacion WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(${db.escape(correoUser)})))`,
+                `DELETE FROM representante WHERE id_fundacion IN (SELECT id_fundacion FROM fundacion WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(${db.escape(correoUser)})))`,
+                `DELETE FROM donaciones WHERE id_fundacion IN (SELECT id_fundacion FROM fundacion WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(${db.escape(correoUser)})))`,
+                `DELETE FROM documentacion WHERE id_documentacion IN (SELECT id_documentacion FROM fundacion WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(${db.escape(correoUser)})))`,
+                `DELETE FROM fundacion WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(${db.escape(correoUser)}))`,
+                `DELETE FROM usuarios WHERE id_usuarios = ${db.escape(id_usuario_denunciado)}`,
+                "SET FOREIGN_KEY_CHECKS = 1"
             ];
 
-            db.query(sqlEliminacionTotal, params, async (errDel) => {
-                if (errDel) {
-                    db.query("SET FOREIGN_KEY_CHECKS = 1;"); // Reactivar por seguridad
-                    console.error("❌ Error en borrado total:", errDel.message);
-                    return res.status(500).json({ error: "Error al eliminar en MySQL: " + errDel.message });
+            // 3. Ejecutar pasos uno por uno de forma limpia
+            const ejecutarPaso = (index) => {
+                if (index >= pasos.length) {
+                    // Borrado completado en MySQL, ahora borrar de Firebase Auth
+                    (async () => {
+                        try {
+                            const userRecord = await getAuth().getUserByEmail(correoUser);
+                            if (userRecord && userRecord.uid) {
+                                await getAuth().deleteUser(userRecord.uid);
+                                console.log("✅ Eliminado de Firebase Auth:", correoUser);
+                            }
+                        } catch (fbErr) {
+                            console.error("⚠️ Firebase Auth notice:", fbErr.message);
+                        }
+
+                        if (id_denuncia) {
+                            db.query("DELETE FROM denuncias_usuarios WHERE id_denuncia = ?", [id_denuncia]);
+                        }
+
+                        res.json({ exito: true, mensaje: "¡Cuenta eliminada permanentemente de la base de datos y Firebase con éxito!" });
+                    })();
+                    return;
                 }
 
-                // 3. Borrar de Firebase Auth
-                try {
-                    const userRecord = await getAuth().getUserByEmail(correoUser);
-                    if (userRecord && userRecord.uid) {
-                        await getAuth().deleteUser(userRecord.uid);
-                        console.log("✅ Eliminado de Firebase Auth:", correoUser);
+                db.query(pasos[index], (errPaso) => {
+                    if (errPaso) {
+                        console.error(`❌ Error en paso de borrado (${pasos[index]}):`, errPaso.message);
+                        db.query("SET FOREIGN_KEY_CHECKS = 1"); // Asegurar que se reactiven siempre
+                        return res.status(500).json({ error: "Error al eliminar en MySQL: " + errPaso.message });
                     }
-                } catch (fbErr) {
-                    console.error("⚠️ Firebase Auth notice:", fbErr.message);
-                }
+                    ejecutarPaso(index + 1);
+                });
+            };
 
-                if (id_denuncia) {
-                    db.query("DELETE FROM denuncias_usuarios WHERE id_denuncia = ?", [id_denuncia]);
-                }
-
-                res.json({ exito: true, mensaje: "¡Cuenta eliminada permanentemente de la base de datos y Firebase con éxito!" });
-            });
+            ejecutarPaso(0);
         });
     } else {
         if (id_denuncia) {
