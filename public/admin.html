@@ -234,11 +234,13 @@
             font-style: italic;
         }
 
-        /* Pie de tarjeta y botón aprobar */
+        /* Pie de tarjeta y botones de acción */
         .tarjeta-footer {
             display: flex;
             justify-content: flex-end;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
             padding-top: 10px;
         }
 
@@ -246,15 +248,15 @@
             background-color: #81c784;
             color: #ffffff;
             border: none;
-            padding: 12px 28px;
+            padding: 11px 22px;
             font-family: 'Itim', sans-serif;
-            font-size: 1.15rem;
-            border-radius: 22px;
+            font-size: 1.05rem;
+            border-radius: 20px;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            box-shadow: 0 4px 14px rgba(129, 199, 132, 0.4);
+            box-shadow: 0 4px 14px rgba(129, 199, 132, 0.3);
             transition: all 0.2s ease;
         }
 
@@ -263,7 +265,51 @@
             transform: scale(1.03);
         }
 
-        .btn-aprobar:disabled {
+        .btn-rechazar {
+            background-color: #e57373;
+            color: #ffffff;
+            border: none;
+            padding: 11px 22px;
+            font-family: 'Itim', sans-serif;
+            font-size: 1.05rem;
+            border-radius: 20px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 14px rgba(229, 115, 115, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .btn-rechazar:hover {
+            background-color: #ef5350;
+            transform: scale(1.03);
+        }
+
+        .btn-mensaje {
+            background-color: #64b5f6;
+            color: #ffffff;
+            border: none;
+            padding: 11px 22px;
+            font-family: 'Itim', sans-serif;
+            font-size: 1.05rem;
+            border-radius: 20px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            box-shadow: 0 4px 14px rgba(100, 181, 246, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .btn-mensaje:hover {
+            background-color: #42a5f5;
+            transform: scale(1.03);
+            color: #ffffff;
+        }
+
+        .btn-aprobar:disabled, .btn-rechazar:disabled {
             background-color: #ccc;
             cursor: not-allowed;
             transform: none;
@@ -379,6 +425,12 @@
                         botonesDocs = `<span class="sin-docs">Esta solicitud no tiene documentos PDF adjuntos.</span>`;
                     }
 
+                    // Enlace mailto para enviar correo rápido de observaciones
+                    const nombreComercialEscapado = f.Nombre_Comercial || 'Fundación';
+                    const asunto = encodeURIComponent("Observación sobre tus documentos en ARCA");
+                    const cuerpo = encodeURIComponent(`Hola, equipo de ${nombreComercialEscapado}.\n\nNos comunicamos desde el equipo de administración de ARCA respecto a tu solicitud de registro. Encontramos algunos detalles a revisar en la documentación:\n\n- \n\nPor favor, responde a este mensaje con la corrección necesaria.\n\nSaludos cordiales,\nEquipo ARCA 🐾`);
+                    const mailtoUrl = `mailto:${f.Correo_fundacion || ''}?subject=${asunto}&body=${cuerpo}`;
+
                     tarjeta.innerHTML = `
                         <div class="tarjeta-header">
                             <h2 class="titulo-fundacion">
@@ -428,6 +480,12 @@
                         </div>
 
                         <div class="tarjeta-footer">
+                            <a href="${mailtoUrl}" class="btn-mensaje" target="_blank">
+                                <i class="fa-solid fa-envelope"></i> Enviar Mensaje
+                            </a>
+                            <button class="btn-rechazar" id="btn-rechazar-${f.id_fundacion}" onclick="rechazar(${f.id_fundacion}, '${f.Correo_fundacion}', '${(f.Nombre_Comercial || '').replace(/'/g, "\\'")}')">
+                                <i class="fa-solid fa-trash-can"></i> Rechazar y Borrar
+                            </button>
                             <button class="btn-aprobar" id="btn-aprobar-${f.id_fundacion}" onclick="aprobar(${f.id_fundacion}, '${f.Correo_fundacion}', '${(f.Nombre_Comercial || '').replace(/'/g, "\\'")}')">
                                 <i class="fa-solid fa-check-circle"></i> Aprobar Cuenta
                             </button>
@@ -459,6 +517,44 @@
             }
         }
 
+        // Función para rechazar y borrar todos los registros de la fundación
+        async function rechazar(id_fundacion, correo_fundacion, nombre_comercial) {
+            if (!confirm(`¿Estás segura de RECHAZAR y ELIMINAR permanentemente a la fundación "${nombre_comercial}"? Esto borrará sus datos de la base de datos y su cuenta de Firebase.`)) return;
+
+            const btn = document.getElementById(`btn-rechazar-${id_fundacion}`);
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Eliminando...`;
+            }
+
+            try {
+                const res = await fetch('/api/admin/rechazar-fundacion', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id_fundacion, correo_fundacion })
+                });
+                const resultado = await res.json();
+
+                if (!resultado.exito) {
+                    alert("No se pudo rechazar: " + resultado.mensaje);
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = `<i class="fa-solid fa-trash-can"></i> Rechazar y Borrar`;
+                    }
+                    return;
+                }
+
+                alert(`¡La fundación "${nombre_comercial}" ha sido rechazada y sus registros eliminados con éxito! 🌸`);
+                cargarSolicitudes(); // Recargar la lista
+            } catch (error) {
+                alert("Error al rechazar: " + error.message);
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fa-solid fa-trash-can"></i> Rechazar y Borrar`;
+                }
+            }
+        }
+
         async function aprobar(id_fundacion, correo_fundacion, nombre_comercial) {
             if (!confirm(`¿Estás segura de aprobar a la fundación "${nombre_comercial}"? Se le enviará un correo de notificación.`)) return;
 
@@ -486,7 +582,7 @@
                     return;
                 }
 
-                // 2. Enviar correo usando la plantilla nueva 'template_aprobacion'
+                // 2. Enviar correo usando la plantilla 'template_aprobacion'
                 const linkInicioSesion = window.location.origin + "/home.html";
                 try {
                     await emailjs.send("service_93j9cwn", "template_aprobacion", {

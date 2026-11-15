@@ -2118,7 +2118,63 @@ app.post('/api/admin/aprobar-fundacion', async (req, res) => {
         });
     });
 });
+app.post('/api/admin/rechazar-fundacion', async (req, res) => {
+    const { id_fundacion, correo_fundacion } = req.body;
 
+    if (!id_fundacion || !correo_fundacion) {
+        return res.status(400).json({ exito: false, mensaje: "Faltan datos requeridos." });
+    }
+
+    try {
+        // 1. Obtener id_documentacion antes de borrar la fundación
+        db.query("SELECT id_documentacion FROM fundacion WHERE id_fundacion = ?", [id_fundacion], async (errF, fundRows) => {
+            if (errF) {
+                console.error("❌ Error al buscar fundación para rechazar:", errF);
+                return res.status(500).json({ exito: false, mensaje: "Error en el servidor." });
+            }
+
+            const idDocumentacion = fundRows.length > 0 ? fundRows[0].id_documentacion : null;
+
+            // 2. Borrar representante
+            db.query("DELETE FROM representante WHERE id_fundacion = ?", [id_fundacion], (errRep) => {
+                if (errRep) console.error("⚠️ Error al borrar representante:", errRep.message);
+
+                // 3. Borrar fundación
+                db.query("DELETE FROM fundacion WHERE id_fundacion = ?", [id_fundacion], (errFund) => {
+                    if (errFund) console.error("⚠️ Error al borrar fundación:", errFund.message);
+
+                    // 4. Borrar documentación si existe
+                    if (idDocumentacion) {
+                        db.query("DELETE FROM documentacion WHERE id_documentacion = ?", [idDocumentacion], (errDoc) => {
+                            if (errDoc) console.error("⚠️ Error al borrar documentación:", errDoc.message);
+                        });
+                    }
+
+                    // 5. Borrar usuario en MySQL
+                    db.query("DELETE FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))", [correo_fundacion], async (errUsr) => {
+                        if (errUsr) console.error("⚠️ Error al borrar usuario de MySQL:", errUsr.message);
+
+                        // 6. Borrar usuario en Firebase Auth
+                        try {
+                            const userRecord = await getAuth().getUserByEmail(correo_fundacion);
+                            if (userRecord && userRecord.uid) {
+                                await getAuth().deleteUser(userRecord.uid);
+                                console.log("✅ Usuario eliminado de Firebase Auth:", correo_fundacion);
+                            }
+                        } catch (fbErr) {
+                            console.error("⚠️ No se pudo eliminar el usuario de Firebase Auth (puede que ya no exista):", fbErr.message);
+                        }
+
+                        res.json({ exito: true, mensaje: "Solicitud rechazada y registros eliminados correctamente." });
+                    });
+                });
+            });
+        });
+    } catch (error) {
+        console.error("❌ Error crítico al rechazar fundación:", error);
+        res.status(500).json({ exito: false, mensaje: "Error interno al rechazar: " + error.message });
+    }
+});
 app.get('/api/obtener-fundacion-header', (req, res) => {
     const { correo } = req.query;
     if (!correo) return res.status(400).json({ error: "Correo requerido" });
