@@ -594,7 +594,7 @@
               });
           }
 
-          const urlParams = new URLSearchParams(window.location.search);
+      const urlParams = new URLSearchParams(window.location.search);
           const origen = urlParams.get('origen');
           const btnVolver = document.getElementById('btn-volver-dinamico');
 
@@ -605,6 +605,9 @@
               } else if (origen === 'mis-reportes') {
                   btnVolver.innerHTML = `<i class="fa-solid fa-arrow-left"></i> Volver a mis reportes`;
                   btnVolver.href = 'mis_reportes.html';
+              } else if (origen === 'mapa') {
+                  btnVolver.innerHTML = `<i class="fa-solid fa-arrow-left"></i> Volver al mapa`;
+                  btnVolver.href = 'mapa.html';
               } else {
                   btnVolver.innerHTML = `<i class="fa-solid fa-arrow-left"></i> Volver a novedades`;
                   btnVolver.href = 'novedades.html';
