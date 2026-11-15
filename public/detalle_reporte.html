@@ -729,12 +729,29 @@
               document.getElementById('lbl-tipo-reporte').textContent = reporteData.nombre_tipo_reporte || reporteData.Nombre_tipo_reporte || 'Reporte General';
               document.getElementById('lbl-descripcion').textContent = reporteData.Descripcion || 'Sin descripción proporcionada.';
               
+              // 📸 CARGA SEGURA DE 1 HASTA 3 FOTOS EN EL DETALLE
+              const fotoWrapper = document.querySelector('.detalle-foto-wrapper');
               if (reporteData.img_reporte) {
                   try {
                       const parsed = JSON.parse(reporteData.img_reporte);
-                      document.getElementById('img-reporte').src = Array.isArray(parsed) ? parsed[0] : reporteData.img_reporte;
+                      if (Array.isArray(parsed) && parsed.length > 0) {
+                          if (parsed.length === 1) {
+                              fotoWrapper.innerHTML = `<img id="img-reporte" src="${parsed[0]}" alt="Foto del reporte">`;
+                          } else {
+                              // Si hay 2 o 3 fotos, se distribuyen en minigalería horizontal
+                              fotoWrapper.style.display = 'flex';
+                              fotoWrapper.style.gap = '8px';
+                              fotoWrapper.innerHTML = parsed.map((img, idx) => `
+                                  <div style="flex: 1; height: 100%; border-radius: 12px; overflow: hidden; background: #fff;">
+                                      <img src="${img}" alt="Foto ${idx + 1}" style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;" onclick="window.open('${img}', '_blank')" title="Clic para ampliar">
+                                  </div>
+                              `).join('');
+                          }
+                      } else {
+                          fotoWrapper.innerHTML = `<img id="img-reporte" src="${reporteData.img_reporte}" alt="Foto del reporte">`;
+                      }
                   } catch(e) {
-                      document.getElementById('img-reporte').src = reporteData.img_reporte;
+                      fotoWrapper.innerHTML = `<img id="img-reporte" src="${reporteData.img_reporte}" alt="Foto del reporte">`;
                   }
               }
 
@@ -761,7 +778,7 @@
               document.getElementById('nombre-autor-texto').textContent = `@${nombreUsuario}`;
               document.getElementById('link-autor').href = `perfil_publico.html?user=${encodeURIComponent(nombreUsuario)}`;
 
-              // Gestionar botones de acción (Editar / Guardar / Eliminar) de forma protegida
+              // Gestionar botones de acción (Editar / Guardar / Eliminar)
               const contenedorBoton = document.getElementById('contenedor-boton-accion');
 
               if (typeof firebase !== 'undefined' && firebase.auth) {

@@ -924,13 +924,16 @@ async function cargarNovedadesSeguras() {
                 if (pub.img_reporte) {
                     try {
                         const parsed = JSON.parse(pub.img_reporte);
-                        if (Array.isArray(parsed) && parsed.length > 0) {
-                            imagenSrc = parsed[0];
-                        } else {
+                        // Validamos que sea un array válido con al menos una foto real
+                        if (Array.isArray(parsed) && parsed.length > 0 && parsed[0]) {
+                            imagenSrc = parsed[0]; // 📸 Extrae siempre la primera foto de las hasta 3 disponibles
+                        } else if (typeof pub.img_reporte === 'string' && pub.img_reporte.trim() !== '' && pub.img_reporte !== '[]') {
                             imagenSrc = pub.img_reporte;
                         }
                     } catch (e) {
-                        imagenSrc = pub.img_reporte;
+                        if (typeof pub.img_reporte === 'string' && pub.img_reporte.trim() !== '' && pub.img_reporte !== '[]') {
+                            imagenSrc = pub.img_reporte;
+                        }
                     }
                 }
 
