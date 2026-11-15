@@ -614,7 +614,7 @@
               });
           }
 
-          const urlParams = new URLSearchParams(window.location.search);
+     const urlParams = new URLSearchParams(window.location.search);
           const origen = urlParams.get('origen');
           const btnVolver = document.getElementById('btn-volver-dinamico');
 
@@ -622,6 +622,10 @@
               if (origen === 'guardados') {
                   btnVolver.innerHTML = `<i class="fa-solid fa-arrow-left"></i> Volver a guardados`;
                   btnVolver.href = 'guardados_usuario.html';
+              } else if (origen === 'mapa') {
+                  // NUEVA VALIDACIÓN: Si viene del mapa de adopciones
+                  btnVolver.innerHTML = `<i class="fa-solid fa-arrow-left"></i> Volver al mapa`;
+                  btnVolver.href = 'mapa.html';
               } else {
                   btnVolver.innerHTML = `<i class="fa-solid fa-arrow-left"></i> Volver al inicio`;
                   btnVolver.href = 'home.html';
