@@ -1108,41 +1108,34 @@ async function enviarCodigoOtpFundacion() {
     codigoOtpGenerado = Math.floor(1000 + Math.random() * 9000).toString();
 
     try {
+        // Se envían tanto 'passcode' (que espera tu plantilla template_arca) como 'codigo'
         await emailjs.send("service_arca", "template_arca", {
             to_email: correoValidado,
+            passcode: codigoOtpGenerado,
             codigo: codigoOtpGenerado,
             nombre: "Fundación"
         });
 
-       // Caso 1: Cuando el correo se envía con éxito
-    mostrarAlertaArca(
-        "¡Código enviado! 🌸",
-        "¡Código de verificación enviado a tu correo!",
-        {
-            tipo: "aviso",
-            alCerrar: () => {
-                document.getElementById("paso4").style.display = "none";
-                document.getElementById("paso5").style.display = "block";
+        mostrarAlertaArca(
+            "¡Código enviado! 🌸",
+            "¡Código de verificación enviado a tu correo exitosamente!",
+            {
+                tipo: "aviso",
+                alCerrar: () => {
+                    document.getElementById("paso4").style.display = "none";
+                    document.getElementById("paso5").style.display = "block";
+                }
             }
-        }
-    );
+        );
 
-} catch (err) {
-    console.error("Error EmailJS:", err);
-    
-    // Caso 2: Cuando ocurre un error y usas el código de prueba
-    mostrarAlertaArca(
-        "Código de prueba generado ♡",
-        "Código de prueba generado: " + codigoOtpGenerado,
-        {
-            tipo: "error",
-            alCerrar: () => {
-                document.getElementById("paso4").style.display = "none";
-                document.getElementById("paso5").style.display = "block";
-            }
-        }
-    );
-}
+    } catch (err) {
+        console.error("Error EmailJS:", err);
+        mostrarAlertaArca(
+            "Error al enviar correo",
+            "No se pudo enviar el código de verificación por correo. Por favor, revisa tu conexión o intenta nuevamente.",
+            { tipo: "error" }
+        );
+    }
 }
 
 document.addEventListener('input', (e) => {
@@ -1154,15 +1147,14 @@ document.addEventListener('input', (e) => {
         }
     }
 });
+
 async function verificarOtpYIrAlRegistro() {
     const inputs = document.querySelectorAll('.otp-input-modal');
     let codigoIngresado = "";
     inputs.forEach(inp => codigoIngresado += inp.value);
 
-    if (codigoIngresado === codigoOtpGenerado || codigoIngresado === "1234") {
-        // ❌ Eliminamos el auth.createUserWithEmailAndPassword de aquí para que no se cree antes de tiempo.
-        
-        // Guardamos las credenciales temporalmente en sessionStorage para usarlas al final del Paso 2
+    // Eliminamos el código de prueba fijo ("1234") para usar estrictamente el código generado por EmailJS
+    if (codigoIngresado === codigoOtpGenerado) {
         sessionStorage.setItem('pass_fundacion_temp', passwordFundacionTemporal);
         sessionStorage.setItem('correo_fundacion_temp', correoValidado);
         
@@ -1177,7 +1169,7 @@ async function verificarOtpYIrAlRegistro() {
     } else {
         mostrarAlertaArca(
             "Código incorrecto",
-            "Inténtalo de nuevo. ♡",
+            "El código ingresado no coincide. Inténtalo de nuevo. ♡",
             { tipo: "error" }
         );
     }
@@ -1195,9 +1187,6 @@ function atrasPaso4() {
 
 // ==========================================
 // ALERTA PERSONALIZADA ARCA
-// ==========================================
-// ==========================================
-// ALERTA Y CONFIRMACIÓN PERSONALIZADA ARCA
 // ==========================================
 function mostrarAlertaArca(titulo, mensaje, opciones = {}) {
     const {
@@ -1524,8 +1513,7 @@ function mostrarAlertaArca(titulo, mensaje, opciones = {}) {
     document.body.appendChild(overlay);
     boton.focus();
 }
-// Función para adaptar la interfaz del Home según el tipo de usuario (Usuario normal vs Fundación)
-// Función para adaptar la interfaz del Home según el tipo de usuario (Usuario normal vs Fundación)
+
 function adaptarInterfazSegunRol() {
     const tipoUsuario = localStorage.getItem('tipo_usuario') || 'usuario';
     
@@ -1534,12 +1522,9 @@ function adaptarInterfazSegunRol() {
     const logoCard1 = document.getElementById('logo-card-1');
     const cardReportar = document.getElementById('card-reportar-home');
     const linkGuardado = document.getElementById('link-guardado');
-    
-    // Seleccionamos el botón de últimas novedades
     const botonNovedades = document.querySelector('.news-button');
 
     if (tipoUsuario === 'fundacion') {
-        // 1. Título con tipografía exacta y el badge de verificación pastel
         if (brandContainer) {
             brandContainer.innerHTML = `
                 ARCA
@@ -1549,7 +1534,6 @@ function adaptarInterfazSegunRol() {
             `;
         }
 
-        // 2. Tarjeta 1 -> "Reportes" con su imagen PNG oficial (tamaño 200px que te gusta)
         if (tituloCard1) tituloCard1.textContent = "Reportes";
         
         if (logoCard1) {
@@ -1560,7 +1544,6 @@ function adaptarInterfazSegunRol() {
             cardReportar.setAttribute("href", "reportes_fundacion.html");
         }
 
-        // 3. Icono del Sidebar para Fundación
         if (linkGuardado) {
             const iconoGuardado = linkGuardado.querySelector('i');
             const textoGuardado = linkGuardado.querySelector('.menu-text');
@@ -1569,13 +1552,11 @@ function adaptarInterfazSegunRol() {
             linkGuardado.href = "publicaciones_fundacion.html";
         }
 
-        // 4. Ocultar el botón de Últimas Novedades para fundaciones
         if (botonNovedades) {
             botonNovedades.style.display = 'none';
         }
 
     } else {
-        // Modo Usuario Normal
         if (brandContainer) {
             brandContainer.innerHTML = `ARCA`;
         }
@@ -1594,22 +1575,18 @@ function adaptarInterfazSegunRol() {
             linkGuardado.href = "guardados_usuario.html";
         }
 
-        // Mostrar el botón de Últimas Novedades para usuarios normales
         if (botonNovedades) {
             botonNovedades.style.display = 'flex';
         }
     }
-}   // ==========================================
-// 9. CONTROLADOR DEL MODO OSCURO GLOBAL
-// ==========================================
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Aplicar el modo oscuro guardado al cargar cualquier página
     const modoOscuroGuardado = localStorage.getItem('theme') === 'dark' || localStorage.getItem('darkMode') === 'true';
     if (modoOscuroGuardado) {
         document.body.classList.add('dark-mode');
     }
 
-    // 2. Detectar automáticamente si usas un switch o botón de modo oscuro en configuración
     const switchDarkMode = document.querySelector('#switch-dark-mode, .toggle-dark-mode, input[type="checkbox"][name="darkMode"]');
     if (switchDarkMode) {
         switchDarkMode.checked = modoOscuroGuardado;
@@ -1626,5 +1603,3 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-});
-
