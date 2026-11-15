@@ -883,7 +883,6 @@ document.addEventListener('DOMContentLoaded', () => {
 let peticionNovedadesEnCurso = false;
 
 async function cargarNovedadesSeguras() {
-    // Si estamos en la página de eventos exclusiva, evitamos que este script interfiera
     if (window.location.pathname.includes('novedades-eventos')) return;
 
     const contenedor = document.getElementById('contenedor-novedades');
@@ -891,7 +890,6 @@ async function cargarNovedadesSeguras() {
     
     peticionNovedadesEnCurso = true;
 
-    // Detectar automáticamente el filtro según la URL actual de la página
     let tipoFiltro = 'todos';
     const path = window.location.pathname;
     if (path.includes('reportes')) tipoFiltro = 'reporte';
@@ -907,32 +905,39 @@ async function cargarNovedadesSeguras() {
         
         let publicaciones = await respuesta.json();
 
-        // Aplicar el filtro correspondiente
         if (tipoFiltro === 'reporte') {
-            publicaciones = publicaciones.filter(pub => pub.tipo_publicacion === 'reporte');
+            publicaciones = publicaciones.filter(pub => pub.tipo_publicacion === 'reporte' || pub.nombre_tipo_reporte);
         } else if (tipoFiltro === 'adopcion') {
             publicaciones = publicaciones.filter(pub => pub.tipo_publicacion === 'adopcion');
         } else if (tipoFiltro === 'evento') {
             publicaciones = publicaciones.filter(pub => pub.tipo_publicacion === 'evento');
         }
 
-        contenedor.innerHTML = ''; // Limpiar estado de carga
+        contenedor.innerHTML = '';
 
         if (publicaciones.length > 0) {
             for (const pub of publicaciones) {
-                let imagenSrc = 'logo.png';
+                // 📸 Renderizado dinámico de 1 a 3 fotos en la tarjeta del feed
+                let imagenHTML = '<img src="logo.png" alt="Publicación" style="width:100%; height:100%; object-fit:cover;">';
                 if (pub.img_reporte) {
                     try {
                         const parsed = JSON.parse(pub.img_reporte);
-                        // Validamos que sea un array válido con al menos una foto real
-                        if (Array.isArray(parsed) && parsed.length > 0 && parsed[0]) {
-                            imagenSrc = parsed[0]; // 📸 Extrae siempre la primera foto de las hasta 3 disponibles
+                        if (Array.isArray(parsed) && parsed.length > 0) {
+                            if (parsed.length === 1) {
+                                imagenHTML = `<img src="${parsed[0]}" alt="Publicación" style="width:100%; height:100%; object-fit:cover;">`;
+                            } else {
+                                imagenHTML = `
+                                    <div style="display: flex; gap: 4px; width: 100%; height: 100%;">
+                                        ${parsed.map(img => `<div style="flex: 1; height: 100%; overflow: hidden;"><img src="${img}" alt="Foto" style="width: 100%; height: 100%; object-fit: cover;"></div>`).join('')}
+                                    </div>
+                                `;
+                            }
                         } else if (typeof pub.img_reporte === 'string' && pub.img_reporte.trim() !== '' && pub.img_reporte !== '[]') {
-                            imagenSrc = pub.img_reporte;
+                            imagenHTML = `<img src="${pub.img_reporte}" alt="Publicación" style="width:100%; height:100%; object-fit:cover;">`;
                         }
                     } catch (e) {
                         if (typeof pub.img_reporte === 'string' && pub.img_reporte.trim() !== '' && pub.img_reporte !== '[]') {
-                            imagenSrc = pub.img_reporte;
+                            imagenHTML = `<img src="${pub.img_reporte}" alt="Publicación" style="width:100%; height:100%; object-fit:cover;">`;
                         }
                     }
                 }
@@ -965,7 +970,7 @@ async function cargarNovedadesSeguras() {
                     <div class="proto-card-body">
                         ${!esEvento ? `
                         <div class="proto-img-wrapper">
-                            <img src="${imagenSrc}" alt="Publicación" style="width:100%; height:100%; object-fit:cover;">
+                            ${imagenHTML}
                         </div>
                         ` : ''}
 

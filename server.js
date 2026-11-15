@@ -1094,7 +1094,7 @@ app.get('/api/publicaciones-globales', (req, res) => {
 
     let sql = `
         SELECT
-            p.id_publicacion,
+            COALESCE(p.id_publicacion, r.id_reporte) AS id_publicacion,
             'reporte' AS tipo_publicacion,
             r.id_reporte AS id_reporte,
             r.id_reporte AS id_origen,
@@ -1110,8 +1110,8 @@ app.get('/api/publicaciones-globales', (req, res) => {
             u.nombre_usuario AS nombre_usuario,
             u.tipo_usuario AS tipo_usuario,
             r.id_usuarios
-        FROM publicaciones p
-        INNER JOIN reportes r ON p.id_reporte = r.id_reporte
+        FROM reportes r
+        LEFT JOIN publicaciones p ON r.id_reporte = p.id_reporte
         INNER JOIN usuarios u ON r.id_usuarios = u.id_usuarios
         LEFT JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
         WHERE r.id_usuarios NOT IN (
@@ -1119,7 +1119,7 @@ app.get('/api/publicaciones-globales', (req, res) => {
             INNER JOIN usuarios u_bloq ON ub.id_usuario_bloqueador = u_bloq.id_usuarios
             WHERE LOWER(TRIM(u_bloq.correo_usuario)) = LOWER(TRIM(?))
             UNION
-            SELECT COALESCE(ub.id_usuario_bloqueador, 0) FROM usuarios_bloqueados ub
+            SELECT COALESCE(ub.id_usuario_bloqueado, 0) FROM usuarios_bloqueados ub
             INNER JOIN usuarios u_bloq ON ub.id_usuario_bloqueado = u_bloq.id_usuarios
             WHERE LOWER(TRIM(u_bloq.correo_usuario)) = LOWER(TRIM(?))
         )
@@ -1152,7 +1152,7 @@ app.get('/api/publicaciones-globales', (req, res) => {
             INNER JOIN usuarios u_bloq ON ub.id_usuario_bloqueador = u_bloq.id_usuarios
             WHERE LOWER(TRIM(u_bloq.correo_usuario)) = LOWER(TRIM(?))
             UNION
-            SELECT COALESCE(ub.id_usuario_bloqueador, 0) FROM usuarios_bloqueados ub
+            SELECT COALESCE(ub.id_usuario_bloqueado, 0) FROM usuarios_bloqueados ub
             INNER JOIN usuarios u_bloq ON ub.id_usuario_bloqueado = u_bloq.id_usuarios
             WHERE LOWER(TRIM(u_bloq.correo_usuario)) = LOWER(TRIM(?))
         )

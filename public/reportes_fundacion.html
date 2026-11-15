@@ -180,7 +180,8 @@
               if (!res.ok) throw new Error("Error al consultar reportes");
               
               const publicaciones = await res.json();
-              const reportes = publicaciones.filter(p => p.tipo_publicacion === 'reporte' || p.Nombre_tipo_reporte);
+              // Filtro corregido para capturar todos los reportes sin excepción
+              const reportes = publicaciones.filter(p => p.tipo_publicacion === 'reporte' || p.nombre_tipo_reporte || p.id_reporte);
 
               if (!reportes || reportes.length === 0) {
                   contenedor.innerHTML = `<p style="text-align: center; color: #555;">No hay reportes disponibles.</p>`;
@@ -191,18 +192,28 @@
                   const idRep = item.id_reporte || item.id_origen || item.id_publicacion;
                   const estadoReporte = item.estado || 'Sin atender';
                   
-                  // 🔍 Extracción segura de la primera imagen en formato array JSON o texto plano
-                  let imgSrc = 'logo.png';
+                  // 📸 Soporte completo de 1, 2 o 3 fotos en la tarjeta de la fundación
+                  let imagenHTML = '<img src="logo.png" alt="Foto reporte" style="width:100%; height:100%; object-fit:cover;">';
                   if (item.img_reporte) {
                       try {
                           const parsed = JSON.parse(item.img_reporte);
                           if (Array.isArray(parsed) && parsed.length > 0) {
-                              imgSrc = parsed[0];
-                          } else {
-                              imgSrc = item.img_reporte;
+                              if (parsed.length === 1) {
+                                  imagenHTML = `<img src="${parsed[0]}" alt="Foto reporte" style="width:100%; height:100%; object-fit:cover;">`;
+                              } else {
+                                  imagenHTML = `
+                                      <div style="display: flex; gap: 4px; width: 100%; height: 100%;">
+                                          ${parsed.map(img => `<div style="flex: 1; height: 100%; overflow: hidden;"><img src="${img}" alt="Foto" style="width: 100%; height: 100%; object-fit: cover;"></div>`).join('')}
+                                      </div>
+                                  `;
+                              }
+                          } else if (typeof item.img_reporte === 'string' && item.img_reporte.trim() !== '' && item.img_reporte !== '[]') {
+                              imagenHTML = `<img src="${item.img_reporte}" alt="Foto reporte" style="width:100%; height:100%; object-fit:cover;">`;
                           }
                       } catch (e) {
-                          imgSrc = item.img_reporte;
+                          if (typeof item.img_reporte === 'string' && item.img_reporte.trim() !== '' && item.img_reporte !== '[]') {
+                              imagenHTML = `<img src="${item.img_reporte}" alt="Foto reporte" style="width:100%; height:100%; object-fit:cover;">`;
+                          }
                       }
                   }
                   
@@ -217,11 +228,11 @@
                           
                           <div class="proto-card-body">
                               <div class="proto-img-wrapper">
-                                  <img src="${imgSrc}" alt="Foto reporte">
+                                  ${imagenHTML}
                               </div>
                               
                               <div class="proto-content-right">
-                                  <span class="proto-pill-tipo">TIPO: ${item.Nombre_tipo_reporte || item.nombre_tipo_reporte || 'Reporte General'}</span>
+                                  <span class="proto-pill-tipo">TIPO: ${item.nombre_tipo_reporte || item.Nombre_tipo_reporte || 'Reporte General'}</span>
                                   
                                   <div class="proto-info-extra" style="display: flex; justify-content: space-between; align-items: center;">
                                       <span class="proto-autor">REPORTADO POR: <a href="perfil_publico.html?user=${encodeURIComponent(item.nombre_usuario || 'usuario')}">@${item.nombre_usuario || 'usuario'}</a></span>
