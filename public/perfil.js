@@ -1138,20 +1138,30 @@ async function cargarMisDonacionesUsuario() {
 }
 
 window.eliminarDonacionUsuario = async function(idDonacion) {
-    if (!confirm("¿Estás seguro de que deseas eliminar esta donación del sistema?")) return;
+    mostrarAlertaArca(
+        "¿Eliminar donación?",
+        "¿Estás seguro de que deseas eliminar esta donación del sistema?",
+        {
+            tipo: "pregunta",
+            confirmar: true,
+            textoBoton: "Sí, eliminar",
+            textoCancelar: "Cancelar",
+            alConfirmar: async () => {
+                try {
+                    const res = await fetch(`/api/donaciones/${idDonacion}`, { method: 'DELETE' });
+                    const data = await res.json();
 
-    try {
-        const res = await fetch(`/api/donaciones/${idDonacion}`, { method: 'DELETE' });
-        const data = await res.json();
-
-        if (res.ok) {
-            mostrarAlertaArca("¡Eliminado!", "La donación ha sido borrada con éxito. 🌸", { tipo: "aviso" });
-            cargarMisDonacionesUsuario(); // Recargar lista
-        } else {
-            throw new Error(data.error || "No se pudo eliminar");
+                    if (res.ok) {
+                        mostrarAlertaArca("¡Eliminado! 🌸", "La donación ha sido borrada con éxito.", { tipo: "aviso" });
+                        cargarMisDonacionesUsuario(); // Recargar lista
+                    } else {
+                        throw new Error(data.error || "No se pudo eliminar");
+                    }
+                } catch (e) {
+                    console.error("Error al eliminar donación:", e);
+                    mostrarAlertaArca("Error ♡", "No se pudo eliminar la donación.", { tipo: "error" });
+                }
+            }
         }
-    } catch (e) {
-        console.error("Error al eliminar donación:", e);
-        mostrarAlertaArca("Error", "No se pudo eliminar la donación.", { tipo: "error" });
-    }
+    );
 };
