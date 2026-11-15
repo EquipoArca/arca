@@ -2830,7 +2830,11 @@ setInterval(() => {
 // MÓDULO DE DENUNCIAS DE PERFIL
 // ==========================================
 
-// 1. Registrar denuncia de perfil y notificar al admin
+// ==========================================
+// MÓDULO DE DENUNCIAS DE PERFIL
+// ==========================================
+
+// 1. Registrar denuncia de perfil y notificar al admin (Sin enviar a correos de prueba)
 app.post('/api/denunciar-usuario', (req, res) => {
     const { correo_denunciante, id_usuario_denunciado, username_denunciado, motivo } = req.body;
 
@@ -2838,14 +2842,12 @@ app.post('/api/denunciar-usuario', (req, res) => {
         return res.status(400).json({ error: "Faltan datos requeridos para la denuncia." });
     }
 
-    // Buscar ID del denunciante
     db.query("SELECT id_usuarios, nombre_usuario FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))", [correo_denunciante], (err, rows) => {
         if (err || rows.length === 0) return res.status(404).json({ error: "Usuario denunciante no encontrado." });
 
         const idDenunciante = rows[0].id_usuarios;
         const nombreDenunciante = rows[0].nombre_usuario;
 
-        // Guardar la denuncia en base de datos
         const sqlDenuncia = `
             INSERT INTO denuncias_usuarios (id_denunciante, id_usuario_denunciado, motivo)
             VALUES (?, ?, ?)
@@ -2860,12 +2862,11 @@ app.post('/api/denunciar-usuario', (req, res) => {
             const idDenuncia = resultado.insertId;
             const mensajeNotif = `🚨 Nueva denuncia contra @${username_denunciado} por parte de @${nombreDenunciante}. Motivo: "${motivo}"`;
 
-            // Enviar notificación interna a los administradores (o usuarios con rol admin/fundación de control)
-            // Buscamos usuarios administradores o notificamos de forma general en la tabla de notificaciones admin
+            // Notifica unícamente a usuarios administradores (excluyendo la cuenta de prueba de fundación)
             const sqlAdminNotif = `
                 INSERT INTO notificaciones (id_usuario_destino, id_usuario_origen, tipo, mensaje)
                 SELECT id_usuarios, ?, 'denuncia_perfil', ? 
-                FROM usuarios WHERE tipo_usuario = 'admin' OR correo_usuario = 'arcaoficial0@gmail.com'
+                FROM usuarios WHERE tipo_usuario = 'admin'
             `;
 
             db.query(sqlAdminNotif, [idDenunciante, mensajeNotif], (errNotif) => {
@@ -2881,8 +2882,6 @@ app.post('/api/denunciar-usuario', (req, res) => {
 
 // 2. Obtener lista de denuncias pendientes para el Panel de Administración
 app.get('/api/admin/denuncias', (req, res) => {
-    const sql = `
-        -`;
     const sqlDenuncias = `
         SELECT 
             d.id_denuncia, 
@@ -2909,41 +2908,92 @@ app.get('/api/admin/denuncias', (req, res) => {
     });
 });
 
-// 3. Acción del Admin: Poner cuenta en revisión (suspender acceso) o eliminarla
+// 3. Acción del Admin: Poner cuenta en revisión o ELIMINARLA DE TODAS PARTES (MySQL y Firebase)
 app.post('/api/admin/gestionar-denuncia', (req, res) => {
     const { id_denuncia, id_usuario_denunciado, accion } = req.body; 
-    // accion puede ser: 'suspender' o 'eliminar'
 
     if (!id_usuario_denunciado || !accion) {
         return res.status(400).json({ error: "Faltan datos requeridos." });
     }
 
     if (accion === 'suspender') {
-        // Poner estado de aprobación o cuenta en 'revision' o 'suspendido'
         const sqlSuspender = "UPDATE usuarios SET estado_aprobacion = 'suspendido' WHERE id_usuarios = ?";
         db.query(sqlSuspender, [id_usuario_denunciado], (err) => {
             if (err) return res.status(500).json({ error: "Error al suspender la cuenta." });
             
-            // Borrar la denuncia atendida
             db.query("DELETE FROM denuncias_usuarios WHERE id_denuncia = ?", [id_denuncia]);
             res.json({ exito: true, mensaje: "Cuenta puesta en revisión / suspendida con éxito." });
         });
     } else if (accion === 'eliminar') {
-        // Eliminar completamente de la base de datos
-        db.query("DELETE FROM usuarios WHERE id_usuarios = ?", [id_usuario_denunciado], (err) => {
-            if (err) return res.status(500).json({ error: "Error al eliminar la cuenta de la base de datos." });
+        // 1. Obtener correo y tipo del usuario antes de borrarlo
+        db.query("SELECT correo_usuario, tipo_usuario FROM usuarios WHERE id_usuarios = ?", [id_usuario_denunciado], async (errU, userRows) => {
+            if (errU || userRows.length === 0) {
+                return res.status(404).json({ error: "Usuario no encontrado en la base de datos." });
+            }
 
-            db.query("DELETE FROM denuncias_usuarios WHERE id_denuncia = ?", [id_denuncia]);
-            res.json({ exito: true, mensaje: "Cuenta eliminada permanentemente con éxito." });
+            const correoUser = userRows[0].correo_usuario;
+            const tipoUser = userRows[0].tipo_usuario;
+
+            try {
+                // Si es fundación, limpiamos sus tablas asociadas (fundación, representante, documentación, eventos)
+                if (tipoUser === 'fundacion') {
+                    db.query("SELECT id_fundacion, id_documentacion FROM fundacion WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(?))", [correoUser], (errF, fundRows) => {
+                        if (fundRows && fundRows.length > 0) {
+                            const idFund = fundRows[0].id_fundacion;
+                            const idDoc = fundRows[0].id_documentacion;
+
+                            db.query("DELETE FROM representante WHERE id_fundacion = ?", [idFund]);
+                            db.query("DELETE FROM eventos WHERE id_fundacion = ?", [idFund]);
+                            db.query("DELETE FROM fundacion WHERE id_fundacion = ?", [idFund]);
+                            if (idDoc) {
+                                db.query("DELETE FROM documentacion WHERE id_documentacion = ?", [idDoc]);
+                            }
+                        }
+                    });
+                }
+
+                // Limpiar perfil de adoptante si lo tuviera
+                db.query("DELETE FROM adoptante WHERE id_usuarios = ?", [id_usuario_denunciado]);
+
+                // Limpiar relaciones generales en MySQL (seguidores, guardados, bloqueados, notificaciones, denuncias)
+                db.query("DELETE FROM seguidores WHERE id_usuario_seguidor = ? OR id_usuario_seguido = ?", [id_usuario_denunciado, id_usuario_denunciado]);
+                db.query("DELETE FROM guardados WHERE id_usuarios = ?", [id_usuario_denunciado]);
+                db.query("DELETE FROM usuarios_bloqueados WHERE id_usuario_bloqueador = ? OR id_usuario_bloqueado = ?", [id_usuario_denunciado, id_usuario_denunciado]);
+                db.query("DELETE FROM notificaciones WHERE id_usuario_destino = ? OR id_usuario_origen = ?", [id_usuario_denunciado, id_usuario_denunciado]);
+                db.query("DELETE FROM denuncias_usuarios WHERE id_usuario_denunciado = ? OR id_denunciante = ?", [id_usuario_denunciado, id_usuario_denunciado]);
+
+                // 2. Borrar de la tabla principal `usuarios` en MySQL
+                db.query("DELETE FROM usuarios WHERE id_usuarios = ?", [id_usuario_denunciado], async (errDelUsr) => {
+                    if (errDelUsr) {
+                        console.error("❌ Error al eliminar de usuarios:", errDelUsr.message);
+                        return res.status(500).json({ error: "Error al eliminar la cuenta de la base de datos." });
+                    }
+
+                    // 3. Borrar de Firebase Authentication para que tampoco pueda iniciar sesión
+                    try {
+                        const userRecord = await getAuth().getUserByEmail(correoUser);
+                        if (userRecord && userRecord.uid) {
+                            await getAuth().deleteUser(userRecord.uid);
+                            console.log("✅ Cuenta eliminada de Firebase Auth con éxito:", correoUser);
+                        }
+                    } catch (fbErr) {
+                        console.error("⚠️ No se encontró en Firebase Auth o ya fue eliminada:", fbErr.message);
+                    }
+
+                    res.json({ exito: true, mensaje: "¡Cuenta eliminada permanentemente de todas partes (MySQL y Firebase) con éxito!" });
+                });
+
+            } catch (error) {
+                console.error("❌ Error crítico al eliminar cuenta:", error);
+                res.status(500).json({ error: "Error al procesar la eliminación completa." });
+            }
         });
     } else {
-        // Si el admin decide descartar la denuncia sin castigar
         db.query("DELETE FROM denuncias_usuarios WHERE id_denuncia = ?", [id_denuncia], () => {
             res.json({ exito: true, mensaje: "Denuncia descartada." });
         });
     }
 });
-
 // ==========================================
 // INICIALIZACIÓN DEL SERVIDOR
 // ==========================================
