@@ -15,940 +15,66 @@
         document.body.classList.add("dark-mode");
     }
     </script>
-        <style>
-    html, body {
-        min-height: 100vh;
-        margin: 0;
-        font-family: 'Itim', cursive, sans-serif;
-        background-color: #fce8e6;
-    }
-
-    .main-content {
-        /* Cambiamos a padding superior en lugar de margin-top para respetar el flujo */
-        padding: 30px 20px;
-        min-height: calc(100vh - 70px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-sizing: border-box;
-    }
-
-    .detalle-container-principal {
-        background: rgba(255, 255, 255, 0.45);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border-radius: 28px;
-        padding: 20px 30px;
-        width: 100%;
-        max-width: 1100px;
-        box-shadow: 0 12px 35px rgba(220, 150, 140, 0.12);
-        border: 2px solid rgba(255, 255, 255, 0.7);
-        box-sizing: border-box;
-    }
-
-    .detalle-header-card {
-        background: rgba(253, 203, 208, 0.65);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        padding: 10px 20px;
-        border-radius: 18px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 15px;
-        border: 1px solid rgba(255, 255, 255, 0.8);
-        box-shadow: 0 4px 15px rgba(230, 160, 140, 0.08);
-    }
-
-    .detalle-header-card h1 {
-        margin: 0;
-        font-size: 22px;
-        color: #2b2b2b;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .detalle-header-icon {
-        width: 26px;
-        height: 26px;
-        object-fit: contain;
-        border-radius: 50%;
-    }
-        .header-acciones-derecha {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .detalle-btn-volver {
-            background: rgba(255, 255, 255, 0.8);
-            border: 1px solid #f4c2c4;
-            padding: 6px 14px;
-            border-radius: 14px;
-            color: #d9534f;
-            font-weight: bold;
-            font-size: 13px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            transition: all 0.2s;
+    <style>
+        html, body {
+            min-height: 100vh;
+            margin: 0;
             font-family: 'Itim', cursive, sans-serif;
+            background-color: #fce8e6;
         }
 
-        .detalle-btn-volver:hover {
-            background: #fff;
-            transform: translateY(-1px);
-        }
-
-        .detalle-fecha-texto {
-            font-size: 13px;
-            font-weight: bold;
-            color: #555;
-        }
-
-        .detalle-body-grid {
-            display: grid;
-            grid-template-columns: 1fr 1.3fr;
-            gap: 20px;
-            align-items: stretch;
-        }
-
-        .detalle-col-izq {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .detalle-col-derecha {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-        }
-
-        .detalle-titulo-capsula {
-            background: rgba(252, 185, 160, 0.75);
-            backdrop-filter: blur(8px);
-            padding: 8px 16px;
-            border-radius: 18px;
-            font-size: 17px;
-            font-weight: bold;
-            color: #2b2b2b;
-            text-align: center;
-            box-shadow: 0 3px 10px rgba(230, 160, 140, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-        }
-
-        .detalle-sub-label {
-            font-size: 13px;
-            color: #666;
-            margin-bottom: 2px;
-            font-weight: bold;
-        }
-
-        .detalle-pill-situacion {
-            background: rgba(255, 255, 255, 0.75);
-            backdrop-filter: blur(6px);
-            color: #333;
-            padding: 6px 14px;
-            border-radius: 14px;
-            font-size: 13px;
-            font-weight: bold;
-            border: 1px solid #f9cab5;
-            display: inline-block;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
-        }
-
-        .detalle-foto-wrapper {
-            width: 100%;
-            height: 180px;
-            border-radius: 18px;
-            overflow: hidden;
-            background: rgba(255, 255, 255, 0.8);
-            border: 3px solid #fca38d;
-            box-shadow: 0 6px 18px rgba(230, 150, 130, 0.12);
+        .main-content {
+            padding: 30px 20px;
+            min-height: calc(100vh - 70px);
             display: flex;
             align-items: center;
             justify-content: center;
-        }
-
-        .detalle-foto-wrapper img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .detalle-caja-descripcion {
-            background: rgba(255, 255, 255, 0.65);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-radius: 20px;
-            padding: 22px;
-            border: 1px solid rgba(255, 255, 255, 0.9);
-            box-shadow: 0 6px 20px rgba(230, 150, 130, 0.06);
-            font-size: 15.5px;
-            color: #333;
-            line-height: 1.5;
-            flex: 1;
-            display: flex;
-            align-items: center;
-            overflow-y: auto;
             box-sizing: border-box;
         }
 
-        .detalle-footer-info {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 15px;
-        }
-
-        .detalle-bloque-mini {
-            background: rgba(255, 255, 255, 0.65);
-            backdrop-filter: blur(8px);
-            padding: 12px 16px;
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.9);
-            font-size: 13.5px;
-            color: #444;
-            box-shadow: 0 4px 12px rgba(230, 150, 130, 0.04);
-        }
-
-        .detalle-bloque-mini strong {
-            color: #e06d53;
-            display: block;
-            margin-bottom: 6px;
-            font-size: 13px;
-        }
-
-        .contacto-items {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            font-size: 13.5px;
-        }
-
-        .contacto-fila-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: rgba(255, 255, 255, 0.85);
-            padding: 6px 12px;
-            border-radius: 14px;
-            border: 1px solid #f9cab5;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
-            gap: 10px;
-        }
-
-        .btn-contacto-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-            color: #333;
-            font-weight: bold;
-            cursor: pointer;
-            flex-grow: 1;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .btn-contacto-link.whatsapp {
-            color: #25d366;
-        }
-
-        .btn-contacto-link.correo {
-            color: #007bff;
-        }
-
-        .btn-contacto-link:hover {
-            text-decoration: underline;
-        }
-
-        .btn-copiar-mini {
-            background: #fff;
-            border: 1px solid #f4c2c4;
-            cursor: pointer;
-            color: #d9534f;
-            font-size: 12px;
-            padding: 4px 8px;
-            border-radius: 10px;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            flex-shrink: 0;
-            font-family: 'Itim', cursive, sans-serif;
-        }
-
-        .btn-copiar-mini:hover {
-            background: #ffe5dd;
-        }
-
-        .btn-ver-mapa-chiquito {
-            color: #e06d53;
-            font-weight: bold;
-            text-decoration: none;
-            font-size: 12.5px;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            margin-top: 4px;
-            transition: color 0.2s;
-        }
-
-        .btn-ver-mapa-chiquito:hover {
-            color: #b8432a;
-            text-decoration: underline;
-        }
-
-        .detalle-barra-inferior {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 15px;
-            padding-top: 12px;
-            border-top: 1px dashed rgba(245, 180, 165, 0.6);
-        }
-
-        .detalle-info-autor {
-            font-size: 13.5px;
-            color: #555;
-        }
-
-        .detalle-info-autor a {
-            color: #e06d53;
-            text-decoration: none;
-            font-weight: bold;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            transition: all 0.2s;
-        }
-
-        .detalle-info-autor a:hover {
-            color: #b8432a;
-            text-decoration: underline;
-        }
-
-        .badge-ver-perfil {
-            font-size: 11px;
-            background: rgba(252, 185, 160, 0.4);
-            padding: 2px 6px;
-            border-radius: 8px;
-            color: #d9534f;
-            border: 1px dashed #fca38d;
-            margin-left: 4px;
-        }
-
-        .detalle-btn-accion {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(6px);
-            color: #2b2b2b;
-            border: 1px solid #f4d0c5;
-            padding: 8px 20px;
-            border-radius: 16px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 13.5px;
-            box-shadow: 0 3px 10px rgba(230, 150, 130, 0.08);
-            text-decoration: none;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-family: 'Itim', cursive, sans-serif;
-        }
-
-        .detalle-btn-accion:hover {
-            background: #ffe5dd;
-        }
-
-        .detalle-btn-editar {
-            background: #fca38d;
-            color: #fff;
-            border: none;
-        }
-        .detalle-btn-editar:hover {
-            background: #eb917b;
-        }
-
-        .modal-arca-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(4px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-
-        .modal-arca-box {
-            background: #ffffff;
+        .detalle-container-principal {
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border-radius: 28px;
-            padding: 30px;
-            width: 90%;
-            max-width: 400px;
-            text-align: center;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
-            border: 2px solid #fce8e6;
-            font-family: 'Itim', cursive, sans-serif;
-            animation: modalScale 0.2s ease-in-out;
+            padding: 20px 30px;
+            width: 100%;
+            max-width: 1100px;
+            box-shadow: 0 12px 35px rgba(220, 150, 140, 0.12);
+            border: 2px solid rgba(255, 255, 255, 0.7);
+            box-sizing: border-box;
         }
 
-        @keyframes modalScale {
-            from { transform: scale(0.9); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-
-        .modal-huella-icono {
-            font-size: 36px;
-            color: #7b5c93;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .modal-arca-box h3 {
-            margin: 0 0 10px 0;
-            color: #2b2b2b;
-            font-size: 20px;
-        }
-
-        .modal-arca-box p {
-            color: #555;
-            font-size: 15px;
-            line-height: 1.4;
-            margin-bottom: 20px;
-        }
-
-        .modal-botones-fila {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
-
-        .modal-btn-aceptar {
-            background: #fca38d;
-            color: #fff;
-            border: none;
-            padding: 10px 24px;
-            border-radius: 18px;
-            font-weight: bold;
-            font-size: 15px;
-            cursor: pointer;
-            font-family: 'Itim', cursive, sans-serif;
-            box-shadow: 0 4px 12px rgba(252, 163, 141, 0.4);
-            transition: background 0.2s;
-        }
-
-        .modal-btn-aceptar:hover {
-            background: #eb917b;
-        }
-
-        .modal-btn-cancelar {
-            background: #f1f1f1;
-            color: #555;
-            border: none;
+        .detalle-header-card {
+            background: rgba(253, 203, 208, 0.65);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             padding: 10px 20px;
             border-radius: 18px;
-            font-weight: bold;
-            font-size: 15px;
-            cursor: pointer;
-            font-family: 'Itim', cursive, sans-serif;
-            transition: background 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 15px rgba(230, 160, 140, 0.08);
         }
 
-        .modal-btn-cancelar:hover {
-            background: #e2e2e2;
+        .detalle-header-card h1 {
+            margin: 0;
+            font-size: 22px;
+            color: #2b2b2b;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
-    </style>
-</head>
-<body>
 
-  <!-- Barra de Navegación Superior -->
-  <nav class="top-nav">
-    <div class="top-left">
-        <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu"></i>
-        <div class="mini-logo-circle">
-            <img src="logo.png" alt="Logo">
-        </div>
-        <span class="page-title" id="titulo-pagina">Publicación</span>
-    </div>
+        .detalle-header-icon {
+            width: 26px;
+            height: 26px;
+            object-fit: contain;
+            border-radius: 50%;
+        }
 
-    <div class="search-bar">
-        <i class="fa-solid fa-magnifying-glass"></i>
-        <input type="text" id="input-busqueda-nav" name="busqueda" placeholder="Busca algo" aria-label="Buscar en la aplicación">
-        <i class="fa-solid fa-microphone"></i>
-    </div>
-
-    <div class="top-right">
-        <div class="user-header-info">
-            <div class="user-profile-menu" id="user-profile-menu">
-                <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
-                    <img src="logo.png" id="user-avatar-img" alt="Perfil">
-                </div>
-                <div class="mini-menu-card" id="mini-menu-card">
-                    <div class="mini-menu-header">
-                        <span id="mini-menu-username">Usuario</span>
-                    </div>
-                    <hr class="mini-menu-divider">
-                    <a href="javascript:void(0)" onclick="mostrarSeccion('configuracion')" class="mini-menu-item btn-ajustes">
-                        <i class="fa-solid fa-gear"></i>
-                        <span>Ajustes</span>
-                    </a>
-                    <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini">
-                        <i class="fa-solid fa-right-from-bracket"></i>
-                        <span>Cerrar sesión</span>
-                    </a>
-                </div>
-            </div>
-            <div class="notif-circle">
-                <a href="notificaciones.html" aria-label="Notificaciones"><i class="fa-solid fa-bell"></i></a>
-            </div>
-        </div>
-    </div>
-  </nav>
-
-  <!-- Barra Lateral (Sidebar) -->
-  <aside class="sidebar" id="sidebar">
-      <div class="side-icons">
-          <a href="home.html" class="menu-fila"><i class="fa-solid fa-house"></i><span class="menu-text">Inicio</span></a>
-          <a href="perfil_usuario.html" class="menu-fila"><i class="fa-solid fa-circle-user"></i><span class="menu-text">Perfil</span></a>
-          <a href="guardados_usuario.html" class="menu-fila"><i class="fa-solid fa-bookmark"></i><span class="menu-text">Guardado</span></a>
-          <a href="mapa.html" class="menu-fila"><i class="fa-solid fa-location-dot"></i><span class="menu-text">Mapa</span></a>
-          <a href="configuracion.html" class="menu-fila"><i class="fa-solid fa-gear"></i><span class="menu-text">Ajustes</span></a>
-      </div>
-  </aside>
-
-  <!-- Contenido Principal -->
-  <main class="main-content">
-      <div class="detalle-container-principal">
-          <div class="detalle-header-card">
-              <h1>Reporte <img src="rlogo.png" class="detalle-header-icon" alt="Logo ARCA"></h1>
-              <div class="header-acciones-derecha">
-                  <a href="novedades.html" id="btn-volver-dinamico" class="detalle-btn-volver"><i class="fa-solid fa-arrow-left"></i> Volver a novedades</a>
-                  <span class="detalle-fecha-texto" id="lbl-fecha">Publicado el --/--/----</span>
-              </div>
-          </div>
-
-          <div class="detalle-body-grid">
-              <div class="detalle-col-izq">
-                  <div class="detalle-titulo-capsula">Animal reportado</div>
-                  <div>
-                      <div class="detalle-sub-label">Situación:</div>
-                      <div class="detalle-pill-situacion" id="lbl-tipo-reporte">Cargando situación...</div>
-                  </div>
-                  <div class="detalle-foto-wrapper">
-                      <img id="img-reporte" src="logo.png" alt="Foto del reporte">
-                  </div>
-              </div>
-
-              <div class="detalle-col-derecha">
-                  <div class="detalle-caja-descripcion" id="lbl-descripcion">
-                      Cargando descripción detallada del reporte...
-                  </div>
-              </div>
-          </div>
-
-          <div class="detalle-footer-info">
-              <div class="detalle-bloque-mini">
-                  <strong>Medios de contacto:</strong>
-                  <div class="contacto-items" id="lbl-contacto">
-                      <div>Cargando...</div>
-                  </div>
-              </div>
-              <div class="detalle-bloque-mini">
-                  <strong>Ubicación:</strong>
-                  <div id="lbl-ubicacion">Cargando ubicación...</div>
-              </div>
-          </div>
-
-          <div class="detalle-barra-inferior">
-              <div class="detalle-info-autor">
-                  Publicado por: 
-                  <a href="javascript:void(0)" id="link-autor" title="Ver perfil del autor">
-                      <span id="nombre-autor-texto">@usuario</span>
-                      <span class="badge-ver-perfil"><i class="fa-solid fa-user-check"></i> Ver perfil</span>
-                  </a>
-              </div>
-              <div id="contenedor-boton-accion">
-                  <button class="detalle-btn-accion"><i class="fa-solid fa-bookmark"></i> Cargando...</button>
-              </div>
-          </div>
-      </div>
-  </main>
-
-  <!-- Modal Estilo ARCA con Huellitas para Confirmar Redirección -->
-  <div id="modalConfirmacion" class="modal-arca-overlay">
-      <div class="modal-arca-box">
-          <div class="modal-huella-icono">
-              <i class="fa-solid fa-paw"></i>
-              <i class="fa-solid fa-paw" style="font-size: 26px; margin-top: 10px;"></i>
-          </div>
-          <h3 id="modalTitulo">Abrir enlace</h3>
-          <p id="modalMensaje">¿Deseas abrir esta aplicación externa?</p>
-          <div class="modal-botones-fila">
-              <button id="modalBtnAceptar" class="modal-btn-aceptar">Aceptar</button>
-              <button onclick="cerrarModalArca()" class="modal-btn-cancelar">Cancelar</button>
-          </div>
-      </div>
-  </div>
-
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-  <script src="script.js"></script>
- <script>
-      document.addEventListener('DOMContentLoaded', () => {
-          const btnToggleMenu = document.getElementById('btn-toggle-menu');
-          const sidebar = document.getElementById('sidebar');
-
-          if (btnToggleMenu && sidebar) {
-              btnToggleMenu.addEventListener('click', (e) => {
-                  e.stopPropagation();
-                  sidebar.classList.toggle('sidebar-abierta');
-              });
-          }
-
-          const urlParams = new URLSearchParams(window.location.search);
-          const origen = urlParams.get('origen');
-          const btnVolver = document.getElementById('btn-volver-dinamico');
-
-          if (btnVolver) {
-              if (origen === 'guardados') {
-                  btnVolver.innerHTML = `<i class="fa-solid fa-arrow-left"></i> Volver a guardados`;
-                  btnVolver.href = 'guardados_usuario.html';
-              } else if (origen === 'mis-reportes') {
-                  btnVolver.innerHTML = `<i class="fa-solid fa-arrow-left"></i> Volver a mis reportes`;
-                  btnVolver.href = 'mis_reportes.html';
-              } else {
-                  btnVolver.innerHTML = `<i class="fa-solid fa-arrow-left"></i> Volver a novedades`;
-                  btnVolver.href = 'novedades.html';
-              }
-          }
-
-          cargarDetalleReporte();
-      });
-
-      function copiarAlPortapapeles(texto) {
-          navigator.clipboard.writeText(texto).then(() => {
-              mostrarAlertaArca("¡Copiado al portapapeles!", `Se ha copiado "${texto}" correctamente. 🌸`, { tipo: "aviso" });
-          }).catch(err => {
-              console.error('Error al copiar: ', err);
-          });
-      }
-
-      async function obtenerNombreUbicacion(lat, lon) {
-          if (!lat || !lon) return "Ubicación no especificada";
-          try {
-              const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`;
-              const respuesta = await fetch(url, { headers: { 'Accept-Language': 'es', 'User-Agent': 'ARCA-App-Mascotas' } });
-              if (!respuesta.ok) throw new Error();
-              const datos = await respuesta.json();
-              if (datos && datos.address) {
-                  const addr = datos.address;
-                  const calle = addr.road || addr.pedestrian || "";
-                  const numero = addr.house_number || "";
-                  const barrio = addr.neighbourhood || addr.suburb || "";
-                  const ciudad = addr.town || addr.city || "Medellín";
-                  if (calle) return numero ? `${calle} #${numero}, ${barrio || ciudad}` : `${calle}, ${barrio || ciudad}`;
-                  return barrio ? `${barrio}, ${ciudad}` : ciudad;
-              }
-              return "Medellín (Ubicación aproximada)";
-          } catch (error) {
-              return "Medellín (Ubicación aproximada)";
-          }
-      }
-
-      let urlDestinoGlobal = "";
-
-      function abrirModalArca(titulo, mensaje, url) {
-          document.getElementById('modalTitulo').textContent = titulo;
-          document.getElementById('modalMensaje').textContent = mensaje;
-          urlDestinoGlobal = url;
-          document.getElementById('modalConfirmacion').style.display = 'flex';
-      }
-
-      function cerrarModalArca() {
-          document.getElementById('modalConfirmacion').style.display = 'none';
-      }
-
-      document.getElementById('modalBtnAceptar').addEventListener('click', () => {
-          if (urlDestinoGlobal) window.open(urlDestinoGlobal, '_blank');
-          cerrarModalArca();
-      });
-
-      async function cargarDetalleReporte() {
-          const params = new URLSearchParams(window.location.search);
-          const reporteId = params.get('id');
-
-          if (!reporteId) {
-              mostrarAlertaArca("No se especificó ningún reporte.", "Te redireccionaremos a novedades. ♡", { tipo: "error", alCerrar: () => window.location.href = 'novedades.html' });
-              return;
-          }
-
-          try {
-              // 1. Obtener la lista global de publicaciones para encontrar el reporte al instante
-              const respuesta = await fetch(`/api/publicaciones-globales`);
-              if (!respuesta.ok) throw new Error("No se pudo cargar la información global.");
-              
-              const publicaciones = await respuesta.json();
-              
-              let reporteData = publicaciones.find(r => 
-                  Number(r.id_reporte) === Number(reporteId) || 
-                  Number(r.id_publicacion) === Number(reporteId) || 
-                  Number(r.id_origen) === Number(reporteId)
-              );
-
-              // Respaldo por ruta individual si no estuviera en la lista global
-              if (!reporteData) {
-                  const resIndividual = await fetch(`/api/reportes/${reporteId}`);
-                  if (resIndividual.ok) {
-                      reporteData = await resIndividual.json();
-                  }
-              }
-
-              if (!reporteData) {
-                  throw new Error("Reporte no encontrado en el servidor.");
-              }
-
-              // 2. Rellenar datos básicos en la interfaz
-              document.getElementById('lbl-fecha').textContent = `Publicado el ${reporteData.Fecha_reporte ? reporteData.Fecha_reporte.split('T')[0] : 'Reciente'}`;
-              document.getElementById('lbl-tipo-reporte').textContent = reporteData.nombre_tipo_reporte || reporteData.Nombre_tipo_reporte || 'Reporte General';
-              document.getElementById('lbl-descripcion').textContent = reporteData.Descripcion || 'Sin descripción proporcionada.';
-              
-              // 3. Procesar la imagen correctamente (deserializando el array JSON si existe)
-              if (reporteData.img_reporte) {
-                  try {
-                      const parsed = JSON.parse(reporteData.img_reporte);
-                      document.getElementById('img-reporte').src = Array.isArray(parsed) ? parsed[0] : reporteData.img_reporte;
-                  } catch (e) {
-                      document.getElementById('img-reporte').src = reporteData.img_reporte;
-                  }
-              }
-
-              // 4. Ubicación
-              let textoUbicacionOriginal = reporteData.Ubicacion || 'Ubicación no especificada';
-              let textoUbicacionLimpia = textoUbicacionOriginal.replace('Ubicación GPS:', '').trim();
-              let textoUbicacionFinal = textoUbicacionOriginal;
-
-              if (textoUbicacionLimpia.includes(',')) {
-                  const partes = textoUbicacionLimpia.split(',');
-                  const latPosible = parseFloat(partes[0].trim());
-                  const lonPosible = parseFloat(partes[1].trim());
-                  if (!isNaN(latPosible) && !isNaN(lonPosible)) {
-                      textoUbicacionFinal = await obtenerNombreUbicacion(latPosible, lonPosible);
-                      reporteData.latitud = latPosible;
-                      reporteData.longitud = lonPosible;
-                  }
-              }
-
-              let htmlUbicacion = `<span>${textoUbicacionFinal}</span>`;
-              if (reporteData.latitud && reporteData.longitud) {
-                  htmlUbicacion += `<br><a href="mapa.html?lat=${reporteData.latitud}&lng=${reporteData.longitud}" class="btn-ver-mapa-chiquito"><i class="fa-solid fa-map-location-dot"></i> Ver en el mapa</a>`;
-              }
-              document.getElementById('lbl-ubicacion').innerHTML = htmlUbicacion;
-
-              // 5. Contactos
-              let contactoHTML = "";
-              const tel = reporteData.telefono_contacto ? reporteData.telefono_contacto.trim() : "";
-              const correo = reporteData.correo_contacto ? reporteData.correo_contacto.trim() : "";
-
-              if (tel && correo) {
-                  contactoHTML = `
-                      <div class="contacto-fila-item">
-                          <span style="color: #25d366;"><i class="fa-brands fa-whatsapp"></i> ${tel}</span>
-                          <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${tel}')"><i class="fa-solid fa-copy"></i></button>
-                      </div>
-                      <div class="contacto-fila-item">
-                          <span style="color: #007bff;"><i class="fa-solid fa-envelope"></i> ${correo}</span>
-                          <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${correo}')"><i class="fa-solid fa-copy"></i></button>
-                      </div>
-                  `;
-              } else if (tel) {
-                  contactoHTML = `<div class="contacto-fila-item"><span style="color: #25d366;"><i class="fa-brands fa-whatsapp"></i> ${tel}</span></div>`;
-              } else if (correo) {
-                  contactoHTML = `<div class="contacto-fila-item"><span style="color: #007bff;"><i class="fa-solid fa-envelope"></i> ${correo}</span></div>`;
-              } else {
-                  contactoHTML = `<span style="color: #666; font-style: italic;">Disponible por chat interno</span>`;
-              }
-              document.getElementById('lbl-contacto').innerHTML = contactoHTML;
-
-              // 6. Autor
-              const nombreUsuario = reporteData.nombre_usuario || 'usuario';
-              document.getElementById('nombre-autor-texto').textContent = `@${nombreUsuario}`;
-              const linkAutor = document.getElementById('link-autor');
-              if (linkAutor) {
-                  linkAutor.href = `perfil_publico.html?user=${encodeURIComponent(nombreUsuario)}`;
-              }
-
-              // 7. Verificación de sesión y permisos (Dueño vs Guardado) sin dejar el botón congelado
-              const contenedorBoton = document.getElementById('contenedor-boton-accion');
-              
-              firebase.auth().onAuthStateChanged(async (user) => {
-                  const correoLogueado = user ? user.email : (localStorage.getItem('correo_usuario') || localStorage.getItem('correo'));
-                  
-                  if (!correoLogueado) {
-                      contenedorBoton.innerHTML = `<a href="login.html" class="detalle-btn-accion"><i class="fa-regular fa-bookmark"></i> Inicia sesión</a>`;
-                      return;
-                  }
-
-                  try {
-                      const resUser = await fetch(`/api/obtener-usuario?correo=${encodeURIComponent(correoLogueado)}`);
-                      const datosUsuarioLogueado = resUser.ok ? await resUser.json() : null;
-                      const idUsuarioLogueado = datosUsuarioLogueado ? Number(datosUsuarioLogueado.id_usuarios) : null;
-                      const idCreadorReporte = Number(reporteData.id_usuarios);
-
-                      const esDueño = (idUsuarioLogueado && idCreadorReporte && idUsuarioLogueado === idCreadorReporte) || 
-                                      (reporteData.correo_usuario && reporteData.correo_usuario.toLowerCase().trim() === correoLogueado.toLowerCase().trim());
-
-                      if (esDueño) {
-                          contenedorBoton.innerHTML = `
-                              <div style="display: flex; gap: 8px;">
-                                  <a href="formularior.html?editar=${reporteData.id_reporte || reporteId}" class="detalle-btn-accion detalle-btn-editar">
-                                      <i class="fa-solid fa-pen-to-square"></i> Editar
-                                  </a>
-                                  <button class="detalle-btn-accion" id="btn-eliminar-reporte" style="background: #ffe5dd; color: #d9534f; border-color: #f4c2c4;">
-                                      <i class="fa-solid fa-trash"></i> Eliminar
-                                  </button>
-                              </div>
-                          `;
-                          document.getElementById('btn-eliminar-reporte').addEventListener('click', async () => {
-                              if (confirm("¿Estás seguro de eliminar este reporte?")) {
-                                  const resDel = await fetch(`/api/reportes/${reporteData.id_reporte || reporteId}`, { method: 'DELETE' });
-                                  if (resDel.ok) window.location.href = 'novedades.html';
-                                  else alert("No se pudo eliminar el reporte.");
-                              }
-                          });
-                      } else {
-                          const idPublicacionGlobal = reporteData.id_publicacion || reporteId;
-                          const resGuards = await fetch(`/api/guardados/ids/${encodeURIComponent(correoLogueado)}`);
-                          const idsGuardados = resGuards.ok ? await resGuards.json() : [];
-                          const estaGuardada = idsGuardados.map(Number).includes(Number(idPublicacionGlobal));
-
-                          if (estaGuardada) {
-                              contenedorBoton.innerHTML = `<button class="detalle-btn-accion" id="btn-accion-guardado" style="background: #ffe5dd; color: #d9534f;"><i class="fa-solid fa-bookmark"></i> Guardado</button>`;
-                              document.getElementById('btn-accion-guardado').addEventListener('click', async () => {
-                                  await fetch('/api/quitar-guardado', {
-                                      method: 'POST',
-                                      headers: { 'Content-Type': 'application/json' },
-                                      body: JSON.stringify({ correo: correoLogueado, id_publicacion: Number(idPublicacionGlobal) })
-                                  });
-                                  location.reload();
-                              });
-                          } else {
-                              contenedorBoton.innerHTML = `<button class="detalle-btn-accion" id="btn-accion-guardado"><i class="fa-regular fa-bookmark"></i> Guardar</button>`;
-                              document.getElementById('btn-accion-guardado').addEventListener('click', async () => {
-                                  await fetch('/api/guardar-publicacion', {
-                                      method: 'POST',
-                                      headers: { 'Content-Type': 'application/json' },
-                                      body: JSON.stringify({ correo: correoLogueado, id_publicacion: Number(idPublicacionGlobal) })
-                                  });
-                                  location.reload();
-                              });
-                          }
-                      }
-                  } catch (errAuth) {
-                      console.error("Error al validar permisos de usuario:", errAuth);
-                      contenedorBoton.innerHTML = `<span style="font-size: 13px; color: #775a4c;">Acciones no disponibles</span>`;
-                  }
-              });
-
-          } catch (error) {
-              console.error("Error al cargar detalle:", error);
-              mostrarAlertaArca("Hubo un error al cargar los detalles del reporte.", "Por favor, inténtalo de nuevo más tarde. ♡", { tipo: "error" });
-          }
-      }
-  </script>
-  
-</body>
-</html><!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detalle del Reporte - ARCA</title>
-    <link rel="stylesheet" href="style_home.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="dark-mode.css">
-    <script>
-    if (localStorage.getItem("modo_oscuro") === "true") {
-        document.body.classList.add("dark-mode");
-    }
-    </script>
-        <style>
-        html, body {
-        min-height: 100vh;
-        margin: 0;
-        font-family: 'Itim', cursive, sans-serif;
-        background-color: #fce8e6;
-    }
-
-    .main-content {
-        /* Cambiamos a padding superior en lugar de margin-top para respetar el flujo */
-        padding: 30px 20px;
-        min-height: calc(100vh - 70px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-sizing: border-box;
-    }
-
-    .detalle-container-principal {
-        background: rgba(255, 255, 255, 0.45);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border-radius: 28px;
-        padding: 20px 30px;
-        width: 100%;
-        max-width: 1100px;
-        box-shadow: 0 12px 35px rgba(220, 150, 140, 0.12);
-        border: 2px solid rgba(255, 255, 255, 0.7);
-        box-sizing: border-box;
-    }
-
-    .detalle-header-card {
-        background: rgba(253, 203, 208, 0.65);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        padding: 10px 20px;
-        border-radius: 18px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 15px;
-        border: 1px solid rgba(255, 255, 255, 0.8);
-        box-shadow: 0 4px 15px rgba(230, 160, 140, 0.08);
-    }
-
-    .detalle-header-card h1 {
-        margin: 0;
-        font-size: 22px;
-        color: #2b2b2b;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .detalle-header-icon {
-        width: 26px;
-        height: 26px;
-        object-fit: contain;
-        border-radius: 50%;
-    }
         .header-acciones-derecha {
             display: flex;
             align-items: center;
@@ -1114,32 +240,6 @@
             border: 1px solid #f9cab5;
             box-shadow: 0 2px 5px rgba(0,0,0,0.03);
             gap: 10px;
-        }
-
-        .btn-contacto-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-            color: #333;
-            font-weight: bold;
-            cursor: pointer;
-            flex-grow: 1;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .btn-contacto-link.whatsapp {
-            color: #25d366;
-        }
-
-        .btn-contacto-link.correo {
-            color: #007bff;
-        }
-
-        .btn-contacto-link:hover {
-            text-decoration: underline;
         }
 
         .btn-copiar-mini {
@@ -1514,22 +614,13 @@
           cargarDetalleReporte();
       });
 
-    function copiarAlPortapapeles(texto) {
-    navigator.clipboard.writeText(texto).then(() => {
-        mostrarAlertaArca(
-            "¡Copiado con éxito! ",
-            "🌸",
-            { tipo: "aviso" }
-        );
-    }).catch(err => {
-        console.error('Error al copiar: ', err);
-        mostrarAlertaArca(
-            "¡Algo falló!",
-            "♡",
-            { tipo: "error" }
-        );
-    });
-}
+      function copiarAlPortapapeles(texto) {
+          navigator.clipboard.writeText(texto).then(() => {
+              mostrarAlertaArca("¡Copiado al portapapeles!", `Se ha copiado "${texto}" correctamente. 🌸`, { tipo: "aviso" });
+          }).catch(err => {
+              console.error('Error al copiar: ', err);
+          });
+      }
 
       async function obtenerNombreUbicacion(lat, lon) {
           if (!lat || !lon) return "Ubicación no especificada";
@@ -1589,13 +680,12 @@
           cerrarModalArca();
       });
 
-async function cargarDetalleReporte() {
+      async function cargarDetalleReporte() {
           const params = new URLSearchParams(window.location.search);
           const reporteId = params.get('id');
 
           if (!reporteId) {
-              mostrarAlertaArca("No se especificó ningún reporte.", "Te redireccionaremos a novedades. ♡", { tipo: "error" });
-              window.location.href = 'novedades.html';
+              mostrarAlertaArca("No se especificó ningún reporte.", "Te redireccionaremos a novedades. ♡", { tipo: "error", alCerrar: () => window.location.href = 'novedades.html' });
               return;
           }
 
@@ -1654,10 +744,10 @@ async function cargarDetalleReporte() {
               const correo = reporteData.correo_contacto ? reporteData.correo_contacto.trim() : "";
 
               if (tel) {
-                  contactoHTML += `<div class="contacto-fila-item"><span style="color: #25d366;"><i class="fa-brands fa-whatsapp"></i> ${tel}</span></div>`;
+                  contactoHTML += `<div class="contacto-fila-item"><span style="color: #25d366;"><i class="fa-brands fa-whatsapp"></i> ${tel}</span><button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${tel}')"><i class="fa-solid fa-copy"></i></button></div>`;
               }
               if (correo) {
-                  contactoHTML += `<div class="contacto-fila-item"><span style="color: #007bff;"><i class="fa-solid fa-envelope"></i> ${correo}</span></div>`;
+                  contactoHTML += `<div class="contacto-fila-item"><span style="color: #007bff;"><i class="fa-solid fa-envelope"></i> ${correo}</span><button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${correo}')"><i class="fa-solid fa-copy"></i></button></div>`;
               }
               if (!tel && !correo) {
                   contactoHTML = `<span style="color: #666; font-style: italic;">Disponible por chat interno</span>`;
@@ -1668,75 +758,81 @@ async function cargarDetalleReporte() {
               document.getElementById('nombre-autor-texto').textContent = `@${nombreUsuario}`;
               document.getElementById('link-autor').href = `perfil_publico.html?user=${encodeURIComponent(nombreUsuario)}`;
 
-              // Gestionar botones de acción (Editar / Guardar / Eliminar) sin que quede cargando indefinidamente
+              // Gestionar botones de acción (Editar / Guardar / Eliminar) de forma protegida
               const contenedorBoton = document.getElementById('contenedor-boton-accion');
 
-              if (!correoActual) {
-                  contenedorBoton.innerHTML = `<a href="login.html" class="detalle-btn-accion"><i class="fa-regular fa-bookmark"></i> Inicia sesión</a>`;
-                  return;
-              }
+              if (typeof firebase !== 'undefined' && firebase.auth) {
+                  firebase.auth().onAuthStateChanged(async (user) => {
+                      const correoLogueado = user ? user.email : (localStorage.getItem('correo_usuario') || localStorage.getItem('correo'));
+                      
+                      if (!correoLogueado) {
+                          contenedorBoton.innerHTML = `<a href="login.html" class="detalle-btn-accion"><i class="fa-regular fa-bookmark"></i> Inicia sesión</a>`;
+                          return;
+                      }
 
-              try {
-                  const resUser = await fetch(`/api/obtener-usuario?correo=${encodeURIComponent(correoActual)}`);
-                  const datosUsuarioLogueado = resUser.ok ? await resUser.json() : null;
-                  const idUsuarioLogueado = datosUsuarioLogueado ? Number(datosUsuarioLogueado.id_usuarios) : null;
-                  const idCreadorReporte = Number(reporteData.id_usuarios);
+                      try {
+                          const resUser = await fetch(`/api/obtener-usuario?correo=${encodeURIComponent(correoLogueado)}`);
+                          const datosUsuarioLogueado = resUser.ok ? await resUser.json() : null;
+                          const idUsuarioLogueado = datosUsuarioLogueado ? Number(datosUsuarioLogueado.id_usuarios) : null;
+                          const idCreadorReporte = Number(reporteData.id_usuarios);
 
-                  const esDueño = (idUsuarioLogueado && idCreadorReporte && idUsuarioLogueado === idCreadorReporte) || 
-                                  (reporteData.correo_usuario && reporteData.correo_usuario.toLowerCase().trim() === correoActual.toLowerCase().trim());
+                          const esDueño = (idUsuarioLogueado && idCreadorReporte && idUsuarioLogueado === idCreadorReporte) || 
+                                          (reporteData.correo_usuario && reporteData.correo_usuario.toLowerCase().trim() === correoLogueado.toLowerCase().trim());
 
-                  if (esDueño) {
-                      contenedorBoton.innerHTML = `
-                          <div style="display: flex; gap: 8px;">
-                              <a href="formularior.html?editar=${reporteData.id_reporte || reporteId}" class="detalle-btn-accion detalle-btn-editar">
-                                  <i class="fa-solid fa-pen-to-square"></i> Editar
-                              </a>
-                              <button class="detalle-btn-accion" id="btn-eliminar-reporte" style="background: #ffe5dd; color: #d9534f; border-color: #f4c2c4;">
-                                  <i class="fa-solid fa-trash"></i> Eliminar
-                              </button>
-                          </div>
-                      `;
-                      document.getElementById('btn-eliminar-reporte').addEventListener('click', async () => {
-                          if (confirm("¿Estás seguro de eliminar este reporte?")) {
-                              const resDel = await fetch(`/api/reportes/${reporteData.id_reporte || reporteId}`, { method: 'DELETE' });
-                              if (resDel.ok) {
-                                  window.location.href = 'novedades.html';
+                          if (esDueño) {
+                              contenedorBoton.innerHTML = `
+                                  <div style="display: flex; gap: 8px;">
+                                      <a href="formularior.html?editar=${reporteData.id_reporte || reporteId}" class="detalle-btn-accion detalle-btn-editar">
+                                          <i class="fa-solid fa-pen-to-square"></i> Editar
+                                      </a>
+                                      <button class="detalle-btn-accion" id="btn-eliminar-reporte" style="background: #ffe5dd; color: #d9534f; border-color: #f4c2c4;">
+                                          <i class="fa-solid fa-trash"></i> Eliminar
+                                      </button>
+                                  </div>
+                              `;
+                              document.getElementById('btn-eliminar-reporte')?.addEventListener('click', async () => {
+                                  if (confirm("¿Estás seguro de eliminar este reporte?")) {
+                                      const resDel = await fetch(`/api/reportes/${reporteData.id_reporte || reporteId}`, { method: 'DELETE' });
+                                      if (resDel.ok) {
+                                          window.location.href = 'novedades.html';
+                                      } else {
+                                          alert("No se pudo eliminar el reporte.");
+                                      }
+                                  }
+                              });
+                          } else {
+                              const idPublicacionGlobal = reporteData.id_publicacion || reporteId;
+                              const resGuards = await fetch(`/api/guardados/ids/${encodeURIComponent(correoLogueado)}`);
+                              const idsGuardados = resGuards.ok ? await resGuards.json() : [];
+                              const estaGuardada = idsGuardados.map(Number).includes(Number(idPublicacionGlobal));
+
+                              if (estaGuardada) {
+                                  contenedorBoton.innerHTML = `<button class="detalle-btn-accion" id="btn-accion-guardado" style="background: #ffe5dd; color: #d9534f;"><i class="fa-solid fa-bookmark"></i> Guardado</button>`;
+                                  document.getElementById('btn-accion-guardado')?.addEventListener('click', async () => {
+                                      await fetch('/api/quitar-guardado', {
+                                          method: 'POST',
+                                          headers: { 'Content-Type': 'application/json' },
+                                          body: JSON.stringify({ correo: correoLogueado, id_publicacion: Number(idPublicacionGlobal) })
+                                      });
+                                      location.reload();
+                                  });
                               } else {
-                                  alert("No se pudo eliminar el reporte.");
+                                  contenedorBoton.innerHTML = `<button class="detalle-btn-accion" id="btn-accion-guardado"><i class="fa-regular fa-bookmark"></i> Guardar</button>`;
+                                  document.getElementById('btn-accion-guardado')?.addEventListener('click', async () => {
+                                      await fetch('/api/guardar-publicacion', {
+                                          method: 'POST',
+                                          headers: { 'Content-Type': 'application/json' },
+                                          body: JSON.stringify({ correo: correoLogueado, id_publicacion: Number(idPublicacionGlobal) })
+                                      });
+                                      location.reload();
+                                  });
                               }
                           }
-                      });
-                  } else {
-                      const idPublicacionGlobal = reporteData.id_publicacion || reporteId;
-                      const resGuards = await fetch(`/api/guardados/ids/${encodeURIComponent(correoActual)}`);
-                      const idsGuardados = resGuards.ok ? await resGuards.json() : [];
-                      const estaGuardada = idsGuardados.map(Number).includes(Number(idPublicacionGlobal));
-
-                      if (estaGuardada) {
-                          contenedorBoton.innerHTML = `<button class="detalle-btn-accion" id="btn-accion-guardado" style="background: #ffe5dd; color: #d9534f;"><i class="fa-solid fa-bookmark"></i> Guardado</button>`;
-                          document.getElementById('btn-accion-guardado').addEventListener('click', async () => {
-                              await fetch('/api/quitar-guardado', {
-                                  method: 'POST',
-                                  headers: { 'Content-Type': 'application/json' },
-                                  body: JSON.stringify({ correo: correoActual, id_publicacion: Number(idPublicacionGlobal) })
-                              });
-                              location.reload();
-                          });
-                      } else {
-                          contenedorBoton.innerHTML = `<button class="detalle-btn-accion" id="btn-accion-guardado"><i class="fa-regular fa-bookmark"></i> Guardar</button>`;
-                          document.getElementById('btn-accion-guardado').addEventListener('click', async () => {
-                              await fetch('/api/guardar-publicacion', {
-                                  method: 'POST',
-                                  headers: { 'Content-Type': 'application/json' },
-                                  body: JSON.stringify({ correo: correoActual, id_publicacion: Number(idPublicacionGlobal) })
-                              });
-                              location.reload();
-                          });
+                      } catch (innerErr) {
+                          console.warn("Aviso secundario de permisos:", innerErr);
+                          contenedorBoton.innerHTML = `<span style="font-size: 13px; color: #775a4c;">Opciones no disponibles</span>`;
                       }
-                  }
-              } catch (innerErr) {
-                  console.error("Error al verificar permisos de usuario:", innerErr);
-                  contenedorBoton.innerHTML = `<span style="font-size: 13px; color: #775a4c;">No disponible</span>`;
+                  });
               }
 
           } catch (error) {
@@ -1745,281 +841,145 @@ async function cargarDetalleReporte() {
           }
       }
 
-// ==========================================
-// ALERTA PERSONALIZADA ARCA
-// ==========================================
-function mostrarAlertaArca(titulo, mensaje, opciones = {}) {
-    const {
-        tipo = "error",
-        textoBoton = "Entendido",
-        alCerrar = null
-    } = opciones;
+      // ==========================================
+      // ALERTA PERSONALIZADA ARCA
+      // ==========================================
+      function mostrarAlertaArca(titulo, mensaje, opciones = {}) {
+          const {
+              tipo = "error",
+              textoBoton = "Entendido",
+              alCerrar = null
+          } = opciones;
 
-    document.getElementById("alerta-arca-personalizada")?.remove();
+          document.getElementById("alerta-arca-personalizada")?.remove();
 
-    if (!document.getElementById("estilos-alerta-arca")) {
-        const estilos = document.createElement("style");
-        estilos.id = "estilos-alerta-arca";
-        estilos.textContent = `
-            /* Estilos generales para error y aviso */
-            .arca-alerta-overlay {
-                position: fixed;
-                inset: 0;
-                z-index: 999999;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                padding: 20px;
-                background: rgba(40, 25, 35, 0.38);
-                backdrop-filter: blur(5px);
-                animation: arcaAparecer .22s ease;
-            }
+          if (!document.getElementById("estilos-alerta-arca")) {
+              const estilos = document.createElement("style");
+              estilos.id = "estilos-alerta-arca";
+              estilos.textContent = `
+                  .arca-alerta-overlay {
+                      position: fixed;
+                      inset: 0;
+                      z-index: 999999;
+                      display: flex;
+                      justify-content: center;
+                      align-items: center;
+                      padding: 20px;
+                      background: rgba(40, 25, 35, 0.38);
+                      backdrop-filter: blur(5px);
+                      animation: arcaAparecer .22s ease;
+                  }
 
-            .arca-alerta-tarjeta {
-                width: min(100%, 360px);
-                padding: 30px 25px 25px;
-                border: 2px solid #fff;
-                border-radius: 28px;
-                background: #FFF1F2;
-                box-shadow: 0 15px 45px rgba(120, 60, 80, .20);
-                text-align: center;
-                font-family: 'Itim', sans-serif;
-                animation: arcaSaltar .28s ease;
-            }
+                  .arca-alerta-tarjeta {
+                      width: min(100%, 360px);
+                      padding: 30px 25px 25px;
+                      border: 2px solid #fff;
+                      border-radius: 28px;
+                      background: #FFF1F2;
+                      box-shadow: 0 15px 45px rgba(120, 60, 80, .20);
+                      text-align: center;
+                      font-family: 'Itim', sans-serif;
+                      animation: arcaSaltar .28s ease;
+                  }
 
-            .arca-alerta-icono {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                width: 76px;
-                height: 76px;
-                margin: 0 auto 17px;
-                border: 3px solid white;
-                border-radius: 50%;
-                background: #FAD4DE;
-                font-size: 36px;
-            }
+                  .arca-alerta-icono {
+                      display: flex;
+                      justify-content: center;
+                      align-items: center;
+                      width: 76px;
+                      height: 76px;
+                      margin: 0 auto 17px;
+                      border: 3px solid white;
+                      border-radius: 50%;
+                      background: #FAD4DE;
+                      font-size: 36px;
+                  }
 
-            .arca-alerta-titulo {
-                margin: 0 0 10px;
-                color: #704653;
-                font-size: 25px;
-            }
+                  .arca-alerta-titulo {
+                      margin: 0 0 10px;
+                      color: #704653;
+                      font-size: 25px;
+                  }
 
-            .arca-alerta-mensaje {
-                margin: 0 0 23px;
-                color: #795F68;
-                font-size: 17px;
-                line-height: 1.5;
-                overflow-wrap: anywhere;
-            }
+                  .arca-alerta-mensaje {
+                      margin: 0 0 23px;
+                      color: #795F68;
+                      font-size: 17px;
+                      line-height: 1.5;
+                      overflow-wrap: anywhere;
+                  }
 
-           .arca-alerta-boton {
-                width: 100%;
-                padding: 12px 18px;
-                border: 0;
-                outline: none; /* <-- Añade esto */
-                border-radius: 18px;
-                background: #E985A0;
-                color: white;
-                font: inherit;
-                font-size: 17px;
-                cursor: pointer;
-                transition: transform .2s, background .2s;
-            }
+                  .arca-alerta-boton {
+                      width: 100%;
+                      padding: 12px 18px;
+                      border: 0;
+                      outline: none;
+                      border-radius: 18px;
+                      background: #E985A0;
+                      color: white;
+                      font: inherit;
+                      font-size: 17px;
+                      cursor: pointer;
+                      transition: transform .2s, background .2s;
+                  }
 
-            .arca-alerta-boton:hover {
-                background: #D96F8D;
-                transform: translateY(-2px);
-            }
+                  .arca-alerta-boton:hover {
+                      background: #D96F8D;
+                      transform: translateY(-2px);
+                  }
 
-            /* CSS EXCLUSIVO PARA EL TIPO "CONEXION" */
-            .custom-alert-overlay {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100vw;
-                height: 100vh;
-                background-color: rgba(92, 64, 51, 0.45);
-                backdrop-filter: blur(8px);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                z-index: 999999;
-                animation: arcaAparecer .22s ease;
-            }
+                  @keyframes arcaAparecer {
+                      from { opacity: 0; }
+                      to { opacity: 1; }
+                  }
 
-            .custom-alert-card {
-                position: relative;
-                background-color: rgba(235, 224, 223, 0.94);
-                backdrop-filter: blur(16px);
-                color: #333333;
-                padding: 32px 24px 28px 24px;
-                border-radius: 38px;
-                max-width: 380px;
-                width: 88%;
-                text-align: center;
-                box-shadow: 0 24px 50px rgba(92, 64, 51, 0.18);
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                border: 2px solid rgba(255, 255, 255, 0.9);
-                font-family: 'Itim', sans-serif;
-                animation: entradaEscalonada 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-            }
+                  @keyframes arcaSaltar {
+                      from { opacity: 0; transform: scale(.92) translateY(8px); }
+                      to { opacity: 1; transform: scale(1) translateY(0); }
+                  }
+              `;
+              document.head.appendChild(estilos);
+          }
 
-            .alert-icon-circle {
-                width: 90px;
-                height: 90px;
-                background-color: #f7cac9;
-                border-radius: 50%;
-                border: 4px solid #ffffff;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                margin-bottom: 20px;
-                box-shadow: 0 8px 20px rgba(247, 202, 201, 0.7);
-                animation: latidoSuave 2s ease-in-out infinite;
-            }
+          const overlay = document.createElement("div");
+          overlay.id = "alerta-arca-personalizada";
+          overlay.className = "arca-alerta-overlay";
+          overlay.setAttribute("role", "alertdialog");
+          overlay.setAttribute("aria-modal", "true");
 
-            .alert-icon {
-                width: 44px;
-                height: 44px;
-            }
+          const tarjeta = document.createElement("div");
+          tarjeta.className = "arca-alerta-tarjeta";
 
-            .custom-alert-title {
-                font-size: 1.25rem;
-                font-weight: 400;
-                color: #2b2b2b;
-                margin-bottom: 10px;
-                letter-spacing: 0.3px;
-            }
+          const icono = document.createElement("div");
+          icono.className = "arca-alerta-icono";
+          icono.textContent = tipo === "aviso" ? "🌸" : "♡";
 
-            .custom-alert-message {
-                font-size: 0.9rem;
-                color: #666666;
-                line-height: 1.45;
-                margin-bottom: 24px;
-            }
+          const encabezado = document.createElement("h2");
+          encabezado.className = "arca-alerta-titulo";
+          encabezado.textContent = titulo;
 
-          .custom-alert-btn {
-                background-color: #ffffff;
-                color: #e57373;
-                border: 2px solid #ffffff;
-                outline: none; /* <-- Y esto aquí también */
-                border-radius: 26px;
-                padding: 12px 0;
-                width: 100%;
-                font-size: 0.95rem;
-                font-weight: 400;
-                cursor: pointer;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-                transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-            }
+          const texto = document.createElement("p");
+          texto.className = "arca-alerta-mensaje";
+          texto.textContent = mensaje;
 
-            .custom-alert-btn:hover {
-                background-color: #f9f9f9;
-                transform: scale(1.04) translateY(-2px);
-                box-shadow: 0 8px 20px rgba(229, 115, 115, 0.2);
-            }
+          const boton = document.createElement("button");
+          boton.type = "button";
+          boton.className = "arca-alerta-boton";
+          boton.textContent = textoBoton;
 
-            @keyframes arcaAparecer {
-                from { opacity: 0; }
-                to { opacity: 1; }
-            }
+          boton.addEventListener("click", () => {
+              overlay.remove();
+              if (typeof alCerrar === "function") {
+                  alCerrar();
+              }
+          });
 
-            @keyframes arcaSaltar {
-                from { opacity: 0; transform: scale(.92) translateY(8px); }
-                to { opacity: 1; transform: scale(1) translateY(0); }
-            }
+          tarjeta.append(icono, encabezado, texto, boton);
+          overlay.appendChild(tarjeta);
+          document.body.appendChild(overlay);
 
-            @keyframes entradaEscalonada {
-                from { opacity: 0; transform: scale(0.92) translateY(8px); }
-                to { opacity: 1; transform: scale(1) translateY(0); }
-            }
-
-            @keyframes latidoSuave {
-                0%, 100% { transform: scale(1); }
-                50% { transform: scale(1.05); }
-            }
-        `;
-        document.head.appendChild(estilos);
-    }
-
-    const overlay = document.createElement("div");
-    overlay.id = "alerta-arca-personalizada";
-
-    const tarjeta = document.createElement("div");
-    const icono = document.createElement("div");
-    const encabezado = document.createElement("h2");
-    const texto = document.createElement("p");
-    const boton = document.createElement("button");
-
-    if (tipo === "conexion") {
-        overlay.className = "custom-alert-overlay";
-        overlay.setAttribute("role", "alertdialog");
-        overlay.setAttribute("aria-modal", "true");
-
-        tarjeta.className = "custom-alert-card";
-
-        icono.className = "alert-icon-circle";
-        // Aquí incorporamos el icono SVG exacto con el círculo oscuro y el signo de exclamación (!)
-        icono.innerHTML = `
-            <svg class="alert-icon" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="10" fill="#4a4a4a"/>
-                <path d="M12 7v5" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                <circle cx="12" cy="16" r="1.2" fill="white"/>
-            </svg>
-        `;
-
-        encabezado.className = "custom-alert-title";
-        encabezado.textContent = titulo;
-
-        texto.className = "custom-alert-message";
-        texto.textContent = mensaje;
-
-        boton.type = "button";
-        boton.className = "custom-alert-btn";
-        boton.textContent = textoBoton;
-
-    } else {
-        overlay.className = "arca-alerta-overlay";
-        overlay.setAttribute("role", "alertdialog");
-        overlay.setAttribute("aria-modal", "true");
-
-        tarjeta.className = "arca-alerta-tarjeta";
-
-        const iconos = {
-            error: "♡",
-            aviso: "🌸"
-        };
-        icono.className = "arca-alerta-icono";
-        icono.textContent = iconos[tipo] || "♡";
-
-        encabezado.className = "arca-alerta-titulo";
-        encabezado.textContent = titulo;
-
-        texto.className = "arca-alerta-mensaje";
-        texto.textContent = mensaje;
-
-        boton.type = "button";
-        boton.className = "arca-alerta-boton";
-        boton.textContent = textoBoton;
-    }
-
-    boton.addEventListener("click", () => {
-        overlay.remove();
-        if (typeof alCerrar === "function") {
-            alCerrar();
-        }
-    });
-
-    tarjeta.append(icono, encabezado, texto, boton);
-    overlay.appendChild(tarjeta);
-    document.body.appendChild(overlay);
-
-    boton.focus();
-}
+          boton.focus();
+      }
   </script>
 </body>
 </html>
