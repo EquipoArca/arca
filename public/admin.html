@@ -299,31 +299,44 @@
     </main>
 
     <script>
-        // Función para abrir PDFs en Base64 sin bloqueos del navegador
         function abrirPdfSeguro(base64Data, nombreDoc) {
             if (!base64Data) {
                 alert("El documento no está disponible.");
                 return;
             }
             try {
-                // Si es una URL normal (http/https), abrirla directamente
-                if (base64Data.startsWith('http')) {
-                    window.open(base64Data, '_blank');
-                    return;
+                let blob;
+
+                // Si MySQL lo devuelve como un Buffer de Node.js
+                if (typeof base64Data === 'object' && base64Data.type === 'Buffer') {
+                    const uint8 = new Uint8Array(base64Data.data);
+                    blob = new Blob([uint8], { type: 'application/pdf' });
+                } else {
+                    let dataStr = typeof base64Data === 'string' ? base64Data : String(base64Data);
+
+                    // Si es una URL normal (http/https), abrirla directamente
+                    if (dataStr.startsWith('http')) {
+                        window.open(dataStr, '_blank');
+                        return;
+                    }
+
+                    // Extraer el contenido Base64 puro de la Data URL
+                    const partes = dataStr.split(',');
+                    const base64Puro = partes.length > 1 ? partes[1] : partes[0];
+                    
+                    const byteString = atob(base64Puro);
+                    const ab = new ArrayBuffer(byteString.length);
+                    const ia = new Uint8Array(ab);
+                    for (let i = 0; i < byteString.length; i++) {
+                        ia[i] = byteString.charCodeAt(i);
+                    }
+
+                    blob = new Blob([ab], { type: 'application/pdf' });
                 }
 
-                // Extraer el contenido Base64 puro
-                const partes = base64Data.split(',');
-                const byteString = atob(partes.length > 1 ? partes[1] : partes[0]);
-                const ab = new ArrayBuffer(byteString.length);
-                const ia = new Uint8Array(ab);
-                for (let i = 0; i < byteString.length; i++) {
-                    ia[i] = byteString.charCodeAt(i);
-                }
-
-                const blob = new Blob([ab], { type: 'application/pdf' });
                 const blobUrl = URL.createObjectURL(blob);
                 window.open(blobUrl, '_blank');
+
             } catch (e) {
                 console.error("Error al abrir el PDF:", e);
                 alert("No se pudo abrir el documento '" + nombreDoc + "'. Verifica que el archivo sea un PDF válido.");
