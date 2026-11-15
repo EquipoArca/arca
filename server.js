@@ -1256,14 +1256,14 @@ app.get('/api/reportes/:id', (req, res) => {
             u.correo_usuario,
             u.tipo_usuario,
             p.id_publicacion
-        FROM reportes r
-        INNER JOIN usuarios u
-            ON r.id_usuarios = u.id_usuarios
-        LEFT JOIN tipo_reporte tr
-            ON r.id_tipo_reporte = tr.id_tipo_reporte
-        LEFT JOIN publicaciones p
+        FROM publicaciones p
+        INNER JOIN reportes r 
             ON p.id_reporte = r.id_reporte
-        WHERE r.id_reporte = ? OR p.id_publicacion = ?
+        INNER JOIN usuarios u 
+            ON r.id_usuarios = u.id_usuarios
+        LEFT JOIN tipo_reporte tr 
+            ON r.id_tipo_reporte = tr.id_tipo_reporte
+        WHERE p.id_publicacion = ? OR r.id_reporte = ?
         LIMIT 1
     `;
 
