@@ -681,7 +681,7 @@
                     imagen: imagenBase64 ? `<img src="${imagenBase64}" style="max-width: 100%; border-radius: 12px; border: 1px solid #ccc; margin-top: 10px;" />` : '<em style="color: #777;">El usuario no adjuntó captura de pantalla.</em>'
                 };
 
-                emailjs.send("service_arca", "template_error", templateParams)
+                emailjs.send("service_arca", "template_error", templateParams, "YbX39O_aKiiiBXLpd")
                     .then((response) => {
                         console.log('SUCCESS!', response.status, response.text);
                         document.getElementById('modal-exito').classList.add('activo');
