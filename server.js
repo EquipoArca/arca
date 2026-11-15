@@ -2919,79 +2919,138 @@ app.post('/api/admin/gestionar-denuncia', (req, res) => {
     if (accion === 'suspender') {
         const sqlSuspender = "UPDATE usuarios SET estado_aprobacion = 'suspendido' WHERE id_usuarios = ?";
         db.query(sqlSuspender, [id_usuario_denunciado], (err) => {
-            if (err) return res.status(500).json({ error: "Error al suspender la cuenta." });
-            
-            db.query("DELETE FROM denuncias_usuarios WHERE id_denuncia = ?", [id_denuncia]);
+            if (err) {
+                console.error("⚠️ Error al suspender cuenta:", err.message);
+            }
+            if (id_denuncia) {
+                db.query("DELETE FROM denuncias_usuarios WHERE id_denuncia = ?", [id_denuncia]);
+            }
             res.json({ exito: true, mensaje: "Cuenta puesta en revisión / suspendida con éxito." });
         });
     } else if (accion === 'eliminar') {
         // 1. Obtener correo y tipo del usuario antes de borrarlo
-        db.query("SELECT correo_usuario, tipo_usuario FROM usuarios WHERE id_usuarios = ?", [id_usuario_denunciado], async (errU, userRows) => {
-            if (errU || userRows.length === 0) {
+        db.query("SELECT correo_usuario, tipo_usuario FROM usuarios WHERE id_usuarios = ?", [id_usuario_denunciado], (errU, userRows) => {
+            if (errU || !userRows || userRows.length === 0) {
                 return res.status(404).json({ error: "Usuario no encontrado en la base de datos." });
             }
 
             const correoUser = userRows[0].correo_usuario;
             const tipoUser = userRows[0].tipo_usuario;
 
-            try {
-                // Si es fundación, limpiamos sus tablas asociadas (fundación, representante, documentación, eventos)
-                if (tipoUser === 'fundacion') {
+            // Función para limpiar de forma segura todas las dependencias en orden
+            const limpiarYBorrarUsuario = () => {
+                // Si es fundación, limpiar registros de fundacion
+                const limpiarFundacion = (callback) => {
                     db.query("SELECT id_fundacion, id_documentacion FROM fundacion WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(?))", [correoUser], (errF, fundRows) => {
                         if (fundRows && fundRows.length > 0) {
                             const idFund = fundRows[0].id_fundacion;
                             const idDoc = fundRows[0].id_documentacion;
 
-                            db.query("DELETE FROM representante WHERE id_fundacion = ?", [idFund]);
-                            db.query("DELETE FROM eventos WHERE id_fundacion = ?", [idFund]);
-                            db.query("DELETE FROM fundacion WHERE id_fundacion = ?", [idFund]);
-                            if (idDoc) {
-                                db.query("DELETE FROM documentacion WHERE id_documentacion = ?", [idDoc]);
-                            }
+                            db.query("DELETE FROM eventos WHERE id_fundacion = ?", [idFund], () => {
+                                db.query("DELETE FROM representante WHERE id_fundacion = ?", [idFund], () => {
+                                    db.query("DELETE FROM donaciones WHERE id_fundacion = ?", [idFund], () => {
+                                        db.query("DELETE FROM fundacion WHERE id_fundacion = ?", [idFund], () => {
+                                            if (idDoc) {
+                                                db.query("DELETE FROM documentacion WHERE id_documentacion = ?", [idDoc], () => callback());
+                                            } else {
+                                                callback();
+                                            }
+                                        });
+                                    });
+                                });
+                            });
+                        } else {
+                            callback();
                         }
                     });
-                }
+                };
 
-                // Limpiar perfil de adoptante si lo tuviera
-                db.query("DELETE FROM adoptante WHERE id_usuarios = ?", [id_usuario_denunciado]);
+                limpiarFundacion(() => {
+                    // Limpiar adoptante, donaciones, solicitudes y relaciones generales
+                    db.query("DELETE FROM adoptante WHERE id_usuarios = ?", [id_usuario_denunciado], () => {
+                        db.query("DELETE FROM donaciones WHERE id_usuario = ?", [id_usuario_denunciado], () => {
+                            db.query("DELETE FROM solicitudes_adoptante WHERE id_solicitante = ? OR id_propietario = ?", [id_usuario_denunciado, id_usuario_denunciado], () => {
+                                db.query("DELETE FROM seguidores WHERE id_usuario_seguidor = ? OR id_usuario_seguido = ?", [id_usuario_denunciado, id_usuario_denunciado], () => {
+                                    db.query("DELETE FROM guardados WHERE id_usuarios = ?", [id_usuario_denunciado], () => {
+                                        db.query("DELETE FROM usuarios_bloqueados WHERE id_usuario_bloqueador = ? OR id_usuario_bloqueado = ?", [id_usuario_denunciado, id_usuario_denunciado], () => {
+                                            db.query("DELETE FROM notificaciones WHERE id_usuario_destino = ? OR id_usuario_origen = ?", [id_usuario_denunciado, id_usuario_denunciado], () => {
+                                                db.query("DELETE FROM denuncias_usuarios WHERE id_usuario_denunciado = ? OR id_denunciante = ?", [id_usuario_denunciado, id_usuario_denunciado], () => {
+                                                    
+                                                    // Limpiar reportes creados por el usuario
+                                                    db.query("SELECT id_reporte FROM reportes WHERE id_usuarios = ?", [id_usuario_denunciado], (errR, repRows) => {
+                                                        const reportIds = repRows ? repRows.map(r => r.id_reporte) : [];
+                                                        
+                                                        const borrarReportes = (cb) => {
+                                                            if (reportIds.length === 0) return cb();
+                                                            db.query("DELETE FROM publicaciones WHERE id_reporte IN (?)", [reportIds], () => {
+                                                                db.query("DELETE FROM reportes WHERE id_usuarios = ?", [id_usuario_denunciado], () => cb());
+                                                            });
+                                                        };
 
-                // Limpiar relaciones generales en MySQL (seguidores, guardados, bloqueados, notificaciones, denuncias)
-                db.query("DELETE FROM seguidores WHERE id_usuario_seguidor = ? OR id_usuario_seguido = ?", [id_usuario_denunciado, id_usuario_denunciado]);
-                db.query("DELETE FROM guardados WHERE id_usuarios = ?", [id_usuario_denunciado]);
-                db.query("DELETE FROM usuarios_bloqueados WHERE id_usuario_bloqueador = ? OR id_usuario_bloqueado = ?", [id_usuario_denunciado, id_usuario_denunciado]);
-                db.query("DELETE FROM notificaciones WHERE id_usuario_destino = ? OR id_usuario_origen = ?", [id_usuario_denunciado, id_usuario_denunciado]);
-                db.query("DELETE FROM denuncias_usuarios WHERE id_usuario_denunciado = ? OR id_denunciante = ?", [id_usuario_denunciado, id_usuario_denunciado]);
+                                                        borrarReportes(() => {
+                                                            // Limpiar animales y adopciones del usuario
+                                                            db.query("SELECT id_animal FROM animal WHERE id_usuarios = ?", [id_usuario_denunciado], (errA, animRows) => {
+                                                                const animalIds = animRows ? animRows.map(a => a.id_animal) : [];
 
-                // 2. Borrar de la tabla principal `usuarios` en MySQL
-                db.query("DELETE FROM usuarios WHERE id_usuarios = ?", [id_usuario_denunciado], async (errDelUsr) => {
-                    if (errDelUsr) {
-                        console.error("❌ Error al eliminar de usuarios:", errDelUsr.message);
-                        return res.status(500).json({ error: "Error al eliminar la cuenta de la base de datos." });
-                    }
+                                                                const borrarAnimales = (cb) => {
+                                                                    if (animalIds.length === 0) return cb();
+                                                                    db.query("DELETE FROM publicaciones WHERE id_animal IN (?) OR id_publicaciones_adopcion IN (SELECT id_publicaciones_adopcion FROM publicaciones_adopcion WHERE id_usuarios = ?)", [animalIds, id_usuario_denunciado], () => {
+                                                                        db.query("DELETE FROM publicaciones_adopcion WHERE id_usuarios = ? OR id_animal IN (?)", [id_usuario_denunciado, animalIds], () => {
+                                                                            db.query("DELETE FROM animal WHERE id_usuarios = ?", [id_usuario_denunciado], () => cb());
+                                                                        });
+                                                                    });
+                                                                };
 
-                    // 3. Borrar de Firebase Authentication para que tampoco pueda iniciar sesión
-                    try {
-                        const userRecord = await getAuth().getUserByEmail(correoUser);
-                        if (userRecord && userRecord.uid) {
-                            await getAuth().deleteUser(userRecord.uid);
-                            console.log("✅ Cuenta eliminada de Firebase Auth con éxito:", correoUser);
-                        }
-                    } catch (fbErr) {
-                        console.error("⚠️ No se encontró en Firebase Auth o ya fue eliminada:", fbErr.message);
-                    }
+                                                                borrarAnimales(async () => {
+                                                                    // Borrar de la tabla principal `usuarios` en MySQL
+                                                                    db.query("DELETE FROM usuarios WHERE id_usuarios = ?", [id_usuario_denunciado], async (errDelUsr) => {
+                                                                        if (errDelUsr) {
+                                                                            console.error("❌ Error al eliminar de usuarios:", errDelUsr.message);
+                                                                            return res.status(500).json({ error: "Error al eliminar la cuenta de la base de datos." });
+                                                                        }
 
-                    res.json({ exito: true, mensaje: "¡Cuenta eliminada permanentemente de todas partes (MySQL y Firebase) con éxito!" });
+                                                                        // Borrar de Firebase Authentication
+                                                                        try {
+                                                                            const userRecord = await getAuth().getUserByEmail(correoUser);
+                                                                            if (userRecord && userRecord.uid) {
+                                                                                await getAuth().deleteUser(userRecord.uid);
+                                                                                console.log("✅ Cuenta eliminada de Firebase Auth:", correoUser);
+                                                                            }
+                                                                        } catch (fbErr) {
+                                                                            console.error("⚠️ Firebase Auth notice:", fbErr.message);
+                                                                        }
+
+                                                                        if (id_denuncia) {
+                                                                            db.query("DELETE FROM denuncias_usuarios WHERE id_denuncia = ?", [id_denuncia]);
+                                                                        }
+
+                                                                        res.json({ exito: true, mensaje: "¡Cuenta eliminada permanentemente de todas partes con éxito!" });
+                                                                    });
+                                                                });
+                                                            });
+                                                        });
+                                                    });
+                                                });
+                                            });
+                                        });
+                                    });
+                                });
+                            });
+                        });
+                    });
                 });
+            };
 
-            } catch (error) {
-                console.error("❌ Error crítico al eliminar cuenta:", error);
-                res.status(500).json({ error: "Error al procesar la eliminación completa." });
-            }
+            limpiarYBorrarUsuario();
         });
     } else {
-        db.query("DELETE FROM denuncias_usuarios WHERE id_denuncia = ?", [id_denuncia], () => {
-            res.json({ exito: true, mensaje: "Denuncia descartada." });
-        });
+        if (id_denuncia) {
+            db.query("DELETE FROM denuncias_usuarios WHERE id_denuncia = ?", [id_denuncia], () => {
+                res.json({ exito: true, mensaje: "Denuncia descartada." });
+            });
+        } else {
+            res.json({ exito: true, mensaje: "Acción procesada." });
+        }
     }
 });
 // ==========================================
