@@ -2700,6 +2700,48 @@ app.delete('/api/donaciones/:id', (req, res) => {
     });
 });
 // ==========================================
+// GESTIÓN DE ACCESOS A FICHA DE ADOPTANTE
+// ==========================================
+
+// 1. Obtener la lista de usuarios que tienen acceso aceptado a la ficha
+app.get('/api/adoptante/accesos/:id_usuarios', (req, res) => {
+    const idUsuarios = req.params.id_usuarios;
+    const sql = `
+        SELECT s.id_solicitud, u.id_usuarios, u.nombre_usuario, u.foto_perfil, u.correo_usuario
+        FROM solicitudes_adoptante s
+        JOIN usuarios u ON s.id_solicitante = u.id_usuarios
+        WHERE s.id_propietario = ? AND s.estado = 'aceptada'
+    `;
+    db.query(sql, [idUsuarios], (err, results) => {
+        if (err) {
+            console.error("❌ Error al obtener accesos de adoptante:", err);
+            return res.status(500).json({ error: "Error en el servidor" });
+        }
+        res.json(results);
+    });
+});
+
+// 2. Revocar/Quitar el acceso (Elimina el registro para que el botón vuelva a estar disponible)
+app.delete('/api/adoptante/acceso/:id_solicitud', (req, res) => {
+    const idSolicitud = req.params.id_solicitud;
+    const sql = "DELETE FROM solicitudes_adoptante WHERE id_solicitud = ?";
+    
+    db.query(sql, [idSolicitud], (err, result) => {
+        if (err) {
+            console.error("❌ Error al revocar acceso:", err);
+            return res.status(500).json({ error: "Error en el servidor al quitar el acceso" });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: "No se encontró el registro de acceso." });
+        }
+
+        // Al no insertar ninguna notificación en la tabla 'notificaciones', 
+        // a la otra persona no le llegará ninguna alerta.
+        res.json({ mensaje: "Acceso revocado con éxito." });
+    });
+});
+// ==========================================
 // INICIALIZACIÓN DEL SERVIDOR
 // ==========================================
 const PORT = process.env.PORT || 3000;
