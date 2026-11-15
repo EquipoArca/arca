@@ -2923,43 +2923,47 @@ app.post('/api/admin/gestionar-denuncia', (req, res) => {
             res.json({ exito: true, mensaje: "Cuenta suspendida con éxito." });
         });
     } else if (accion === 'eliminar') {
+        console.log(`🗑️ [ADMIN] Iniciando eliminación total del usuario ID: ${id_usuario_denunciado}`);
+
         // 1. Obtener el correo del usuario antes de borrar
         db.query("SELECT correo_usuario FROM usuarios WHERE id_usuarios = ?", [id_usuario_denunciado], (errU, userRows) => {
             if (errU || !userRows || userRows.length === 0) {
+                console.error("❌ Usuario no encontrado en la BD para eliminar:", errU ? errU.message : "Sin registros");
                 return res.status(404).json({ error: "Usuario no encontrado en la base de datos." });
             }
 
             const correoUser = userRows[0].correo_usuario;
+            console.log(`📧 Correo asociado al usuario a eliminar: ${correoUser}`);
 
-            // 2. Lista de pasos secuenciales seguros (evita el error de parámetros en multipleStatements)
+            // 2. Pasos secuenciales con registro en consola
             const pasos = [
-                "SET FOREIGN_KEY_CHECKS = 0",
-                `DELETE FROM denuncias_usuarios WHERE id_usuario_denunciado = ${db.escape(id_usuario_denunciado)} OR id_denunciante = ${db.escape(id_usuario_denunciado)}`,
-                `DELETE FROM notificaciones WHERE id_usuario_destino = ${db.escape(id_usuario_denunciado)} OR id_usuario_origen = ${db.escape(id_usuario_denunciado)}`,
-                `DELETE FROM seguidores WHERE id_usuario_seguidor = ${db.escape(id_usuario_denunciado)} OR id_usuario_seguido = ${db.escape(id_usuario_denunciado)}`,
-                `DELETE FROM guardados WHERE id_usuarios = ${db.escape(id_usuario_denunciado)}`,
-                `DELETE FROM usuarios_bloqueados WHERE id_usuario_bloqueador = ${db.escape(id_usuario_denunciado)} OR id_usuario_bloqueado = ${db.escape(id_usuario_denunciado)}`,
-                `DELETE FROM solicitudes_adoptante WHERE id_solicitante = ${db.escape(id_usuario_denunciado)} OR id_propietario = ${db.escape(id_usuario_denunciado)}`,
-                `DELETE FROM adoptante WHERE id_usuarios = ${db.escape(id_usuario_denunciado)}`,
-                `DELETE FROM donaciones WHERE id_usuario = ${db.escape(id_usuario_denunciado)}`,
-                `DELETE FROM publicaciones WHERE id_reporte IN (SELECT id_reporte FROM reportes WHERE id_usuarios = ${db.escape(id_usuario_denunciado)})`,
-                `DELETE FROM reportes WHERE id_usuarios = ${db.escape(id_usuario_denunciado)}`,
-                `DELETE FROM publicaciones WHERE id_animal IN (SELECT id_animal FROM animal WHERE id_usuarios = ${db.escape(id_usuario_denunciado)}) OR id_publicaciones_adopcion IN (SELECT id_publicaciones_adopcion FROM publicaciones_adopcion WHERE id_usuarios = ${db.escape(id_usuario_denunciado)})`,
-                `DELETE FROM publicaciones_adopcion WHERE id_usuarios = ${db.escape(id_usuario_denunciado)}`,
-                `DELETE FROM animal WHERE id_usuarios = ${db.escape(id_usuario_denunciado)}`,
-                `DELETE FROM eventos WHERE id_fundacion IN (SELECT id_fundacion FROM fundacion WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(${db.escape(correoUser)})))`,
-                `DELETE FROM representante WHERE id_fundacion IN (SELECT id_fundacion FROM fundacion WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(${db.escape(correoUser)})))`,
-                `DELETE FROM donaciones WHERE id_fundacion IN (SELECT id_fundacion FROM fundacion WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(${db.escape(correoUser)})))`,
-                `DELETE FROM documentacion WHERE id_documentacion IN (SELECT id_documentacion FROM fundacion WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(${db.escape(correoUser)})))`,
-                `DELETE FROM fundacion WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(${db.escape(correoUser)}))`,
-                `DELETE FROM usuarios WHERE id_usuarios = ${db.escape(id_usuario_denunciado)}`,
-                "SET FOREIGN_KEY_CHECKS = 1"
+                { desc: "Desactivar FK Checks", sql: "SET FOREIGN_KEY_CHECKS = 0" },
+                { desc: "Borrar denuncias", sql: `DELETE FROM denuncias_usuarios WHERE id_usuario_denunciado = ${db.escape(id_usuario_denunciado)} OR id_denunciante = ${db.escape(id_usuario_denunciado)}` },
+                { desc: "Borrar notificaciones", sql: `DELETE FROM notificaciones WHERE id_usuario_destino = ${db.escape(id_usuario_denunciado)} OR id_usuario_origen = ${db.escape(id_usuario_denunciado)}` },
+                { desc: "Borrar seguidores", sql: `DELETE FROM seguidores WHERE id_usuario_seguidor = ${db.escape(id_usuario_denunciado)} OR id_usuario_seguido = ${db.escape(id_usuario_denunciado)}` },
+                { desc: "Borrar guardados", sql: `DELETE FROM guardados WHERE id_usuarios = ${db.escape(id_usuario_denunciado)}` },
+                { desc: "Borrar bloqueados", sql: `DELETE FROM usuarios_bloqueados WHERE id_usuario_bloqueador = ${db.escape(id_usuario_denunciado)} OR id_usuario_bloqueado = ${db.escape(id_usuario_denunciado)}` },
+                { desc: "Borrar solicitudes adoptante", sql: `DELETE FROM solicitudes_adoptante WHERE id_solicitante = ${db.escape(id_usuario_denunciado)} OR id_propietario = ${db.escape(id_usuario_denunciado)}` },
+                { desc: "Borrar adoptante", sql: `DELETE FROM adoptante WHERE id_usuarios = ${db.escape(id_usuario_denunciado)}` },
+                { desc: "Borrar donaciones usuario", sql: `DELETE FROM donaciones WHERE id_usuario = ${db.escape(id_usuario_denunciado)}` },
+                { desc: "Borrar publicaciones de reportes", sql: `DELETE FROM publicaciones WHERE id_reporte IN (SELECT id_reporte FROM reportes WHERE id_usuarios = ${db.escape(id_usuario_denunciado)})` },
+                { desc: "Borrar reportes", sql: `DELETE FROM reportes WHERE id_usuarios = ${db.escape(id_usuario_denunciado)}` },
+                { desc: "Borrar publicaciones de animal/adopción", sql: `DELETE FROM publicaciones WHERE id_animal IN (SELECT id_animal FROM animal WHERE id_usuarios = ${db.escape(id_usuario_denunciado)}) OR id_publicaciones_adopcion IN (SELECT id_publicaciones_adopcion FROM publicaciones_adopcion WHERE id_usuarios = ${db.escape(id_usuario_denunciado)})` },
+                { desc: "Borrar publicaciones_adopcion", sql: `DELETE FROM publicaciones_adopcion WHERE id_usuarios = ${db.escape(id_usuario_denunciado)}` },
+                { desc: "Borrar animal", sql: `DELETE FROM animal WHERE id_usuarios = ${db.escape(id_usuario_denunciado)}` },
+                { desc: "Borrar eventos fundacion", sql: `DELETE FROM eventos WHERE id_fundacion IN (SELECT id_fundacion FROM fundacion WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(${db.escape(correoUser)})))` },
+                { desc: "Borrar representante fundacion", sql: `DELETE FROM representante WHERE id_fundacion IN (SELECT id_fundacion FROM fundacion WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(${db.escape(correoUser)})))` },
+                { desc: "Borrar donaciones fundacion", sql: `DELETE FROM donaciones WHERE id_fundacion IN (SELECT id_fundacion FROM fundacion WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(${db.escape(correoUser)})))` },
+                { desc: "Borrar documentacion fundacion", sql: `DELETE FROM documentacion WHERE id_documentacion IN (SELECT id_documentacion FROM fundacion WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(${db.escape(correoUser)})))` },
+                { desc: "Borrar fundacion", sql: `DELETE FROM fundacion WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(${db.escape(correoUser)}))` },
+                { desc: "Borrar usuario principal", sql: `DELETE FROM usuarios WHERE id_usuarios = ${db.escape(id_usuario_denunciado)}` },
+                { desc: "Reactivar FK Checks", sql: "SET FOREIGN_KEY_CHECKS = 1" }
             ];
 
-            // 3. Ejecutar pasos uno por uno de forma limpia
             const ejecutarPaso = (index) => {
                 if (index >= pasos.length) {
-                    // Borrado completado en MySQL, ahora borrar de Firebase Auth
+                    console.log("✅ ¡Borrado en MySQL completado con éxito! Procediendo a Firebase Auth...");
+                    
                     (async () => {
                         try {
                             const userRecord = await getAuth().getUserByEmail(correoUser);
@@ -2980,11 +2984,14 @@ app.post('/api/admin/gestionar-denuncia', (req, res) => {
                     return;
                 }
 
-                db.query(pasos[index], (errPaso) => {
+                const pasoActual = pasos[index];
+                console.log(`➡️ Ejecutando paso [${index + 1}/${pasos.length}]: ${pasoActual.desc}`);
+
+                db.query(pasoActual.sql, (errPaso) => {
                     if (errPaso) {
-                        console.error(`❌ Error en paso de borrado (${pasos[index]}):`, errPaso.message);
-                        db.query("SET FOREIGN_KEY_CHECKS = 1"); // Asegurar que se reactiven siempre
-                        return res.status(500).json({ error: "Error al eliminar en MySQL: " + errPaso.message });
+                        console.error(`❌ ERROR en paso [${pasoActual.desc}]:`, errPaso.message);
+                        db.query("SET FOREIGN_KEY_CHECKS = 1"); // Reactivar por seguridad
+                        return res.status(500).json({ error: `Error en (${pasoActual.desc}): ${errPaso.message}` });
                     }
                     ejecutarPaso(index + 1);
                 });
