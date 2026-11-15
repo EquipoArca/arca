@@ -15,7 +15,7 @@
     <script type="text/javascript">
         (function(){
             // ⚠️ REEMPLAZA ESTO CON TU PUBLIC KEY REAL DE EMAILJS
-            emailjs.init("TU_PUBLIC_KEY_DE_EMAILJS"); 
+            emailjs.init("AVpXUrYdpwa9oh438"); 
         })();
     </script>
 
@@ -492,20 +492,18 @@
                     return;
                 }
 
-                // 2. Enviar correo de confirmación con EmailJS
+               // 2. Enviar correo de confirmación con EmailJS
                 const linkInicioSesion = window.location.origin + "/home.html";
                 try {
-                    // ⚠️ Asegúrate de que las variables coincidan con tu plantilla en EmailJS
                     await emailjs.send("service_arca", "template_arca", {
                         to_email: correo_fundacion,
                         nombre: nombre_comercial,
-                        mensaje: `¡Felicidades! La cuenta de "${nombre_comercial}" ha sido verificada y aprobada en ARCA. Ya puedes iniciar sesión en: ${linkInicioSesion}`,
-                        codigo: linkInicioSesion // Por si tu plantilla usa la variable {{codigo}}
+                        codigo: `¡Cuenta aprobada! Ya puedes iniciar sesión aquí: ${linkInicioSesion}`
                     });
                     alert(`¡Fundación "${nombre_comercial}" aprobada y correo enviado con éxito! 🌸`);
                 } catch (emailErr) {
                     console.error("Error al enviar correo con EmailJS:", emailErr);
-                    alert(`Cuenta aprobada en la base de datos, pero hubo un error enviando el correo con EmailJS. Revisa tu Public Key o los campos de la plantilla.`);
+                    alert("Cuenta aprobada en la base de datos, pero falló el envío del correo de EmailJS.");
                 }
 
                 cargarSolicitudes(); // Recargar la lista
