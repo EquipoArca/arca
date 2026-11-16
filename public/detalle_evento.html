@@ -445,8 +445,55 @@
       </div>
   </main>
 
-  <!-- Modal Estilo ARCA -->
+<!-- Modal Estilo ARCA (Alertas y Confirmaciones) -->
   <div id="modalConfirmacion" class="modal-arca-overlay">
+      <div class="modal-arca-box">
+          <div class="modal-huella-icono">
+              <i class="fa-solid fa-paw"></i>
+              <i class="fa-solid fa-paw" style="font-size: 22px; margin-top: 6px;"></i>
+          </div>
+          <h3 id="modalTitulo">Mensaje</h3>
+          <p id="modalMensaje">Contenido de la alerta...</p>
+          <div style="margin-top: 15px;">
+              <button id="modalBtnAceptar" class="modal-btn-aceptar">Aceptar</button>
+              <button id="modalBtnCancelar" onclick="cerrarModalArca()" class="modal-btn-cancelar" style="display: none;">Cancelar</button>
+          </div>
+      </div>
+  </div>
+
+  <!-- Modal para Editar Evento -->
+  <div id="modalEditarEvento" class="modal-arca-overlay">
+      <div class="modal-arca-box" style="max-width: 420px; text-align: left;">
+          <div class="modal-huella-icono" style="text-align: center;">
+              <i class="fa-solid fa-pen-to-square"></i>
+          </div>
+          <h3 style="text-align: center; margin-bottom: 15px;">Editar Evento</h3>
+          
+          <form id="formEditarEvento" onsubmit="guardarEdicionEvento(event)" style="display: flex; flex-direction: column; gap: 12px; font-family: 'Itim', cursive;">
+              <div>
+                  <label style="font-size: 13.5px; color: #555;">Nombre del evento:</label>
+                  <input type="text" id="edit-nombre" required style="width: 100%; padding: 8px 12px; border-radius: 12px; border: 1.5px solid #f4c2c4; font-family: 'Itim', cursive; box-sizing: border-box;">
+              </div>
+              <div>
+                  <label style="font-size: 13.5px; color: #555;">Lugar:</label>
+                  <input type="text" id="edit-lugar" required style="width: 100%; padding: 8px 12px; border-radius: 12px; border: 1.5px solid #f4c2c4; font-family: 'Itim', cursive; box-sizing: border-box;">
+              </div>
+              <div>
+                  <label style="font-size: 13.5px; color: #555;">Fecha y hora:</label>
+                  <input type="datetime-local" id="edit-fecha" required style="width: 100%; padding: 8px 12px; border-radius: 12px; border: 1.5px solid #f4c2c4; font-family: 'Itim', cursive; box-sizing: border-box;">
+              </div>
+              <div>
+                  <label style="font-size: 13.5px; color: #555;">Instrucciones y detalles:</label>
+                  <textarea id="edit-detalles" rows="3" style="width: 100%; padding: 8px 12px; border-radius: 12px; border: 1.5px solid #f4c2c4; font-family: 'Itim', cursive; box-sizing: border-box; resize: none;"></textarea>
+              </div>
+
+              <div style="display: flex; justify-content: center; gap: 10px; margin-top: 10px;">
+                  <button type="submit" class="modal-btn-aceptar">Guardar Cambios</button>
+                  <button type="button" onclick="cerrarModalEditar()" class="modal-btn-cancelar" style="display: inline-block; margin-left: 0;">Cancelar</button>
+              </div>
+          </form>
+      </div>
+  </div>
       <div class="modal-arca-box">
           <div class="modal-huella-icono">
               <i class="fa-solid fa-paw"></i>
@@ -661,55 +708,94 @@
                   btnRec.classList.add('btn-recordatorio-activo');
               }
 
-              // Gestión de Guardados de Publicación
+// Gestión de Propiedad y Acciones (Si es tuyo, muestras Editar; si no, Guardar/Recordatorio)
               firebase.auth().onAuthStateChanged(async (user) => {
                   const correoLogueado = user ? user.email : (localStorage.getItem('correo_usuario') || localStorage.getItem('correo'));
-                  const btnGuardar = document.getElementById('btn-accion-guardar');
+                  const columnaDerecha = document.querySelector('.evento-columna-derecha');
+                  
+                  // Verificamos si el correo logueado coincide con el correo de la fundación organizadora del evento
+                  const esDueño = correoLogueado && evento.correo_fundacion && correoLogueado.toLowerCase() === evento.correo_fundacion.toLowerCase();
 
-                  if (!correoLogueado) {
-                      btnGuardar.onclick = () => { window.location.href = 'login.html'; };
-                      return;
-                  }
-
-                  try {
-                      const resG = await fetch(`/api/guardados/ids/${encodeURIComponent(correoLogueado)}`);
-                      const idsGuards = await resG.json();
+                  if (esDueño) {
+                      // Si es el dueño, reemplazamos los botones de visitante por los de gestión propia
+                      const btnRecordatorio = document.getElementById('btn-activar-recordatorio');
+                      const btnGuardar = document.getElementById('btn-accion-guardar');
                       
-                      const resPub = await fetch('/api/publicaciones-globales');
-                      const pubList = await resPub.json();
-                      const pubEvento = pubList.find(p => p.tipo_publicacion === 'evento' && Number(p.id_origen) === Number(eventoId));
-                      const idPubReal = pubEvento ? pubEvento.id_publicacion : eventoId;
+                      if (btnRecordatorio) btnRecordatorio.remove();
+                      if (btnGuardar) btnGuardar.remove();
 
-                      const estaGuardada = idsGuards.map(Number).includes(Number(idPubReal));
+                      // Agregamos un indicador visual de que es su evento y el botón de editar
+                      const divDueño = document.createElement('div');
+                      divDueño.innerHTML = `
+                          <div style="background: rgba(254, 243, 199, 0.8); border: 1.5px solid #fde047; padding: 10px 16px; border-radius: 20px; font-size: 14px; color: #854d0e; text-align: center; margin-bottom: 5px;">
+                              <i class="fa-solid fa-crown" style="color: #ca8a04;"></i> Este evento fue publicado por tu fundación
+                          </div>
+                          <button id="btn-abrir-editar" class="btn-accion-prototipo" style="background: #fffbeb; border-color: #fde047; color: #854d0e; width: 100%; margin-top: 10px;" onclick="abrirModalEditar()">
+                              <i class="fa-solid fa-pen-to-square"></i> EDITAR EVENTO
+                          </button>
+                      `;
+                      columnaDerecha.appendChild(divDueño);
 
-                      if (estaGuardada) {
-                          btnGuardar.innerHTML = `<i class="fa-solid fa-bookmark"></i> Publicación guardada`;
-                          btnGuardar.classList.add('btn-guardado-activo');
-                          btnGuardar.onclick = async () => {
-                              mostrarConfirmacionArca("¿Deseas quitar este evento de tus guardados?", "Quitar guardado", async () => {
-                                  await fetch('/api/quitar-guardado', {
-                                      method: 'POST',
-                                      headers: { 'Content-Type': 'application/json' },
-                                      body: JSON.stringify({ correo: correoLogueado, id_publicacion: Number(idPubReal) })
-                                  });
-                                  location.reload();
-                              });
-                          };
-                      } else {
-                          btnGuardar.innerHTML = `<i class="fa-regular fa-bookmark"></i> Guardar publicación`;
-                          btnGuardar.onclick = async () => {
-                              await fetch('/api/guardar-publicacion', {
-                                  method: 'POST',
-                                  headers: { 'Content-Type': 'application/json' },
-                                  body: JSON.stringify({ correo: correoLogueado, id_publicacion: Number(idPubReal) })
-                              });
-                              mostrarAlertaArca("¡Evento guardado con éxito en tus favoritos!", "Guardado", () => {
-                                  location.reload();
-                              });
-                          };
+                  } else {
+                      // Comportamiento normal para visitantes (Recordatorio y Guardar)
+                      const recordatoriosGuardados = JSON.parse(localStorage.getItem('arca_recordatorios') || '[]');
+                      if (recordatoriosGuardados.includes(Number(eventoId))) {
+                          const btnRec = document.getElementById('btn-activar-recordatorio');
+                          if (btnRec) {
+                              btnRec.innerHTML = `<i class="fa-solid fa-bell"></i> RECORDATORIO ACTIVADO`;
+                              btnRec.classList.add('btn-recordatorio-activo');
+                          }
                       }
-                  } catch (e) {
-                      console.error("Error al gestionar guardados:", e);
+
+                      const btnGuardar = document.getElementById('btn-accion-guardar');
+                      if (!correoLogueado) {
+                          if (btnGuardar) btnGuardar.onclick = () => { window.location.href = 'login.html'; };
+                      } else {
+                          try {
+                              const resG = await fetch(`/api/guardados/ids/${encodeURIComponent(correoLogueado)}`);
+                              const idsGuards = await resG.json();
+                              
+                              const resPub = await fetch('/api/publicaciones-globales');
+                              const pubList = await resPub.json();
+                              const pubEvento = pubList.find(p => p.tipo_publicacion === 'evento' && Number(p.id_origen) === Number(eventoId));
+                              const idPubReal = pubEvento ? pubEvento.id_publicacion : eventoId;
+
+                              const estaGuardada = idsGuards.map(Number).includes(Number(idPubReal));
+
+                              if (estaGuardada) {
+                                  if (btnGuardar) {
+                                      btnGuardar.innerHTML = `<i class="fa-solid fa-bookmark"></i> Publicación guardada`;
+                                      btnGuardar.classList.add('btn-guardado-activo');
+                                      btnGuardar.onclick = async () => {
+                                          mostrarConfirmacionArca("¿Deseas quitar este evento de tus guardados?", "Quitar guardado", async () => {
+                                              await fetch('/api/quitar-guardado', {
+                                                  method: 'POST',
+                                                  headers: { 'Content-Type': 'application/json' },
+                                                  body: JSON.stringify({ correo: correoLogueado, id_publicacion: Number(idPubReal) })
+                                              });
+                                              location.reload();
+                                          });
+                                      };
+                                  }
+                              } else {
+                                  if (btnGuardar) {
+                                      btnGuardar.innerHTML = `<i class="fa-regular fa-bookmark"></i> Guardar publicación`;
+                                      btnGuardar.onclick = async () => {
+                                          await fetch('/api/guardar-publicacion', {
+                                              method: 'POST',
+                                              headers: { 'Content-Type': 'application/json' },
+                                              body: JSON.stringify({ correo: correoLogueado, id_publicacion: Number(idPubReal) })
+                                          });
+                                          mostrarAlertaArca("¡Evento guardado con éxito en tus favoritos!", "Guardado", () => {
+                                              location.reload();
+                                          });
+                                      };
+                                  }
+                              }
+                          } catch (e) {
+                              console.error("Error al gestionar guardados:", e);
+                          }
+                      }
                   }
               });
 
@@ -756,6 +842,82 @@
 
           mostrarAlertaArca(`¡Recordatorio activado con éxito! Te enviaremos una notificación un día antes de "${nombreEventoGlobal}" para que no lo olvides. 🐾✨`, "¡Listo!");
       }
+
+      // Variables y funciones para la edición de eventos propios
+      let eventoGlobalParaEditar = null;
+
+      async function abrirModalEditar() {
+          const params = new URLSearchParams(window.location.search);
+          const eventoId = params.get('id');
+          
+          try {
+              const res = await fetch('/api/eventos');
+              const eventos = await res.json();
+              const evento = eventos.find(e => Number(e.id_evento) === Number(eventoId));
+              
+              if (!evento) return;
+              eventoGlobalParaEditar = evento;
+
+              // Rellenar campos del formulario con los datos actuales
+              document.getElementById('edit-nombre').value = evento.nombre_evento || '';
+              document.getElementById('edit-lugar').value = evento.lugar || '';
+              
+              if (evento.fecha_hora) {
+                  const fechaIso = new Date(evento.fecha_hora).toISOString().slice(0, 16);
+                  document.getElementById('edit-fecha').value = fechaIso;
+              }
+              
+              document.getElementById('edit-detalles').value = evento.detalles_adicionales || '';
+
+              document.getElementById('modalEditarEvento').style.display = 'flex';
+          } catch (e) {
+              console.error("Error al preparar edición:", e);
+              mostrarAlertaArca("No se pudo cargar la información para editar.", "Error");
+          }
+      }
+
+      function cerrarModalEditar() {
+          document.getElementById('modalEditarEvento').style.display = 'none';
+      }
+
+      async function guardarEdicionEvento(event) {
+          event.preventDefault();
+          const params = new URLSearchParams(window.location.search);
+          const eventoId = params.get('id');
+          const correoActual = firebase.auth().currentUser ? firebase.auth().currentUser.email : (localStorage.getItem('correo_usuario') || localStorage.getItem('correo'));
+
+          const datosActualizados = {
+              nombre_evento: document.getElementById('edit-nombre').value.trim(),
+              lugar: document.getElementById('edit-lugar').value.trim(),
+              ubicacion: eventoGlobalParaEditar ? eventoGlobalParaEditar.ubicacion : 'Medellín',
+              fecha_hora: document.getElementById('edit-fecha').value,
+              detalles_adicionales: document.getElementById('edit-detalles').value.trim(),
+              correo_fundacion: correoActual
+          };
+
+          try {
+              const respuesta = await fetch(`/api/eventos/${eventoId}`, {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(datosActualizados)
+              });
+
+              const resultado = await respuesta.json();
+
+              if (respuesta.ok) {
+                  cerrarModalEditar();
+                  mostrarAlertaArca("¡Evento actualizado con éxito! 🌸", "¡Listo!", () => {
+                      location.reload();
+                  });
+              } else {
+                  mostrarAlertaArca("No se pudo actualizar: " + (resultado.error || "Error desconocido"), "Aviso");
+              }
+          } catch (error) {
+              console.error("Error de red al actualizar evento:", error);
+              mostrarAlertaArca("Error de conexión con el servidor.", "Error");
+          }
+      }
+      
   </script>
 </body>
 </html>
