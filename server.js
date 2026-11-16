@@ -1144,7 +1144,8 @@ app.get('/api/publicaciones-globales', (req, res) => {
         LEFT JOIN publicaciones p ON r.id_reporte = p.id_reporte
         INNER JOIN usuarios u ON r.id_usuarios = u.id_usuarios
         LEFT JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
-        WHERE r.id_usuarios NOT IN (
+        WHERE (r.estado IS NULL OR LOWER(TRIM(r.estado)) != 'resuelto' OR r.Fecha_reporte >= NOW() - INTERVAL 1 DAY)
+          AND r.id_usuarios NOT IN (
             SELECT COALESCE(ub.id_usuario_bloqueado, 0) FROM usuarios_bloqueados ub
             INNER JOIN usuarios u_bloq ON ub.id_usuario_bloqueador = u_bloq.id_usuarios
             WHERE LOWER(TRIM(u_bloq.correo_usuario)) = LOWER(TRIM(?))
@@ -2250,7 +2251,7 @@ app.get('/api/obtener-fundacion-header', (req, res) => {
 
 app.put('/api/reportes/:id/estado', (req, res) => {
     const { id } = req.params;
-    const { estado, detalles_resolucion, id_fundacion_derivada, motivo_derivacion } = req.body;
+    const { estado, detalles_resolucion, id_fundacion_derivada, motivo_derivacion, correo_fundacion } = req.body;
 
     if (!estado) return res.status(400).json({ error: 'El estado es requerido' });
 
@@ -2262,24 +2263,47 @@ app.put('/api/reportes/:id/estado', (req, res) => {
         return res.status(400).json({ error: 'Debes seleccionar una fundación a la cual derivar el reporte.' });
     }
 
-    const query = 'UPDATE reportes SET estado = ?, detalles_resolucion = ?, id_fundacion_derivada = ?, motivo_derivacion = ? WHERE id_reporte = ?';
-    db.query(query, [estado, detalles_resolucion || null, id_fundacion_derivada || null, motivo_derivacion || null, id], (err, result) => {
-        if (err) {
-            console.warn("⚠️ Advertencia: Actualizando estado básico (columnas adicionales pendientes en BD):", err.message);
-            db.query('UPDATE reportes SET estado = ? WHERE id_reporte = ?', [estado, id], (err2, result2) => {
-                if (err2 || result2.affectedRows === 0) {
-                    return res.status(500).json({ error: 'Error al actualizar el estado' });
-                }
-                res.json({ success: true, message: 'Estado actualizado correctamente' });
-            });
-            return;
-        }
+    const actualizarReporte = (idFundacionQueResuelve) => {
+        const fundacionFinal = estado === 'derivado'
+            ? id_fundacion_derivada
+            : (idFundacionQueResuelve || id_fundacion_derivada || null);
 
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ error: 'Reporte no encontrado' });
-        }
-        res.json({ success: true, message: 'Estado actualizado correctamente con derivación/resolución' });
-    });
+        const query = `
+            UPDATE reportes 
+            SET estado = ?, 
+                detalles_resolucion = ?, 
+                id_fundacion_derivada = COALESCE(?, id_fundacion_derivada), 
+                motivo_derivacion = ? 
+            WHERE id_reporte = ?
+        `;
+
+        db.query(query, [estado, detalles_resolucion || null, fundacionFinal, motivo_derivacion || null, id], (err, result) => {
+            if (err) {
+                console.warn("⚠️ Advertencia: Actualizando estado básico:", err.message);
+                db.query('UPDATE reportes SET estado = ? WHERE id_reporte = ?', [estado, id], (err2, result2) => {
+                    if (err2 || result2.affectedRows === 0) {
+                        return res.status(500).json({ error: 'Error al actualizar el estado' });
+                    }
+                    res.json({ success: true, message: 'Estado actualizado correctamente' });
+                });
+                return;
+            }
+
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ error: 'Reporte no encontrado' });
+            }
+            res.json({ success: true, message: 'Estado actualizado correctamente' });
+        });
+    };
+
+    if (correo_fundacion) {
+        db.query("SELECT id_fundacion FROM fundacion WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(?))", [correo_fundacion], (errF, rowsF) => {
+            const idF = (!errF && rowsF.length > 0) ? rowsF[0].id_fundacion : null;
+            actualizarReporte(idF);
+        });
+    } else {
+        actualizarReporte(null);
+    }
 });
 // Obtener lista de fundaciones para derivar reportes
 app.get('/api/fundaciones-lista', (req, res) => {
@@ -2555,7 +2579,7 @@ app.get('/api/novedades', (req, res) => {
         INNER JOIN reportes r ON p.id_reporte = r.id_reporte
         INNER JOIN usuarios u ON r.id_usuarios = u.id_usuarios
         LEFT JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
-       
+        WHERE (r.estado IS NULL OR LOWER(TRIM(r.estado)) != 'resuelto' OR r.Fecha_reporte >= NOW() - INTERVAL 1 DAY)
         UNION ALL
        
         SELECT
@@ -2858,34 +2882,7 @@ app.delete('/api/adoptante/acceso/:id_solicitud', (req, res) => {
     });
 });
 // Limpieza automática segura de reportes resueltos con más de 24 horas
-setInterval(() => {
-    const queryBuscar = "SELECT id_reporte FROM reportes WHERE estado = 'resuelto' AND Fecha_reporte < NOW() - INTERVAL 1 DAY";
-    
-    db.query(queryBuscar, (err, rows) => {
-        if (err || !rows || rows.length === 0) return;
 
-        rows.forEach(row => {
-            const idReporte = row.id_reporte;
-
-            // 1. Borramos primero la publicación hija vinculada
-            db.query("DELETE FROM publicaciones WHERE id_reporte = ?", [idReporte], (errPub) => {
-                if (errPub) {
-                    console.error("Error al limpiar publicaciones hijas:", errPub.message);
-                    return;
-                }
-
-                // 2. Luego borramos el reporte principal con seguridad
-                db.query("DELETE FROM reportes WHERE id_reporte = ?", [idReporte], (errRep) => {
-                    if (errRep) {
-                        console.error("Error al limpiar reporte:", errRep.message);
-                    } else {
-                        console.log(`Reporte automático limpio con éxito: ID ${idReporte}`);
-                    }
-                });
-            });
-        });
-    });
-}, 1000 * 60 * 60);
 // ==========================================
 // MÓDULO DE DENUNCIAS DE PERFIL
 // ==========================================
@@ -3175,6 +3172,7 @@ app.get('/api/estadisticas-fundacion', (req, res) => {
         const nombreFundacion = fundRows[0].Nombre_Comercial || fundRows[0].Nombre_Legal || 'Fundación';
 
         // 1. Reportes marcados como resueltos (vinculados a la fundación por usuario o derivación)
+        // 1. Reportes marcados como resueltos (vinculados a esta fundación o atendidos sin otra fundación asignada)
         const sqlReportesResueltos = `
             SELECT 
                 r.id_reporte,
@@ -3182,16 +3180,16 @@ app.get('/api/estadisticas-fundacion', (req, res) => {
                 COALESCE(tr.Nombre_tipo_reporte, 'Otro reporte') AS tipo_reporte
             FROM reportes r
             LEFT JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
-            WHERE r.estado = 'resuelto'
-              AND (r.id_usuarios = ? OR r.id_fundacion_derivada = ?)
+            WHERE LOWER(TRIM(r.estado)) = 'resuelto'
+              AND (r.id_usuarios = ? OR r.id_fundacion_derivada = ? OR r.id_fundacion_derivada IS NULL)
         `;
 
         // 2. Total de reportes en estado 'en_proceso' o 'derivado' activos
         const sqlReportesActivos = `
             SELECT COUNT(*) AS total
             FROM reportes
-            WHERE estado IN ('en_proceso', 'derivado')
-              AND (id_usuarios = ? OR id_fundacion_derivada = ?)
+            WHERE LOWER(TRIM(estado)) IN ('en_proceso', 'derivado')
+              AND (id_usuarios = ? OR id_fundacion_derivada = ? OR id_fundacion_derivada IS NULL)
         `;
 
         // 3. Donaciones recibidas (totales y recogidas) + desglose por tipo
