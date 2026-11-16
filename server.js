@@ -1717,21 +1717,48 @@ app.get('/api/perfil-publico/:parametro', (req, res) => {
     const correoVisitante = req.query.correo_visitante;
 
     const sql = `
-        SELECT u.id_usuarios, u.nombre_usuario, u.foto_perfil, u.correo_usuario, u.Telefono_usuario
+        SELECT 
+            u.id_usuarios, 
+            u.nombre_usuario, 
+            u.foto_perfil, 
+            u.correo_usuario, 
+            u.Telefono_usuario,
+            u.tipo_usuario,
+            f.id_fundacion,
+            f.Nombre_Comercial,
+            f.Nombre_Legal,
+            f.Descripcion_mision,
+            f.Descripcion_vision,
+            f.Programas_Proyectos_Actuales,
+            f.enfoque_otro,
+            f.PFP_Fundacion,
+            f.Foto_Portada,
+            f.Telefono_fundacion,
+            f.Instagram,
+            f.Facebook,
+            f.TikTok,
+            f.Pagina_web,
+            f.Ciudad,
+            f.Direccion
         FROM usuarios u
-        WHERE u.nombre_usuario LIKE ?
-           OR u.correo_usuario LIKE ?
+        LEFT JOIN fundacion f ON LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(f.Correo_fundacion))
+        WHERE LOWER(TRIM(u.nombre_usuario)) = LOWER(TRIM(?))
+           OR LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(?))
+           OR LOWER(TRIM(f.Nombre_Comercial)) = LOWER(TRIM(?))
+           OR u.nombre_usuario LIKE ?
+           OR f.Nombre_Comercial LIKE ?
+        LIMIT 1
     `;
 
-    db.query(sql, [`%${parametro}%`, `%${parametro}%`], (err, results) => {
+    db.query(sql, [parametro, parametro, parametro, `%${parametro}%`, `%${parametro}%`], (err, results) => {
         if (err || results.length === 0) {
-            return res.status(404).json({ error: "Usuario no encontrado" });
+            return res.status(404).json({ error: "Perfil no encontrado" });
         }
 
-        const usuario = results[0];
+        const perfil = results[0];
 
         if (!correoVisitante) {
-            return res.json({ ...usuario, siguiendo: false, estado_solicitud: 'ninguna' });
+            return res.json({ ...perfil, siguiendo: false, estado_solicitud: 'ninguna' });
         }
 
         const sqlBloqueo = `
@@ -1742,7 +1769,7 @@ app.get('/api/perfil-publico/:parametro', (req, res) => {
                OR (LOWER(TRIM(u2.correo_usuario)) = LOWER(TRIM(?)) AND u1.id_usuarios = ?)
         `;
 
-        db.query(sqlBloqueo, [correoVisitante, usuario.id_usuarios, correoVisitante, usuario.id_usuarios], (errB, resB) => {
+        db.query(sqlBloqueo, [correoVisitante, perfil.id_usuarios, correoVisitante, perfil.id_usuarios], (errB, resB) => {
             if (resB && resB[0].bloqueado > 0) {
                 return res.status(404).json({ error: "Perfil no disponible" });
             }
@@ -1753,10 +1780,10 @@ app.get('/api/perfil-publico/:parametro', (req, res) => {
                     (SELECT estado FROM solicitudes_adoptante WHERE id_solicitante = (SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))) AND id_propietario = ?) AS estado_solicitud
             `;
 
-            db.query(sqlVerificaciones, [correoVisitante, usuario.id_usuarios, correoVisitante, usuario.id_usuarios], (errVerif, resVerif) => {
+            db.query(sqlVerificaciones, [correoVisitante, perfil.id_usuarios, correoVisitante, perfil.id_usuarios], (errVerif, resVerif) => {
                 const estadoFinal = (resVerif && resVerif.length > 0 && resVerif[0].estado_solicitud) ? resVerif[0].estado_solicitud : 'ninguna';
                 res.json({
-                    ...usuario,
+                    ...perfil,
                     siguiendo: resVerif && resVerif.length > 0 && resVerif[0].siguiendo > 0,
                     estado_solicitud: estadoFinal
                 });
@@ -1764,7 +1791,6 @@ app.get('/api/perfil-publico/:parametro', (req, res) => {
         });
     });
 });
-
 app.post('/api/alternar-seguimiento', (req, res) => {
     const { correo_seguidor, id_seguido } = req.body;
 
