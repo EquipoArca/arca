@@ -872,21 +872,51 @@ app.post('/api/guardar-publicacion', (req, res) => {
         }
 
         const id_usuarios = results[0].id_usuarios;
-        const query = `INSERT INTO guardados (id_usuarios, id_publicacion) VALUES (?, ?)`;
 
-        db.query(query, [id_usuarios, id_publicacion], (errInsert) => {
-            if (errInsert) {
-                if (errInsert.code === 'ER_DUP_ENTRY') {
-                    return res.status(400).json({ error: "Ya tienes esta publicación en tus guardados." });
-                }
-                console.error("❌ ERROR AL GUARDAR:", errInsert.message);
-                return res.status(500).json({ error: "Error al guardar en la base de datos: " + errInsert.message });
+        // 1. Verificamos si el ID enviado ya existe en la tabla 'publicaciones'
+        db.query("SELECT id_publicacion FROM publicaciones WHERE id_publicacion = ?", [id_publicacion], (errPub, pubRows) => {
+            if (errPub) return res.status(500).json({ error: "Error en el servidor." });
+
+            let pubIdFinal = id_publicacion;
+
+            if (pubRows.length > 0) {
+                // Si existe, guardamos directamente
+                ejecutarInsertGuardado(id_usuarios, pubIdFinal, res);
+            } else {
+                // 2. Si no existe como id_publicacion, comprobamos si es un id_reporte válido
+                db.query("SELECT id_reporte FROM reportes WHERE id_reporte = ?", [id_publicacion], (errRep, repRows) => {
+                    if (errRep || repRows.length === 0) {
+                        return res.status(404).json({ error: "La publicación o reporte no existe en el sistema." });
+                    }
+
+                    // 3. Creamos automáticamente el registro faltante en 'publicaciones' para este reporte
+                    db.query("INSERT INTO publicaciones (id_reporte) VALUES (?)", [id_publicacion], (errIns, insRes) => {
+                        if (errIns) {
+                            return res.status(500).json({ error: "Error al registrar la publicación: " + errIns.message });
+                        }
+                        pubIdFinal = insRes.insertId; // Usamos el nuevo ID de publicación generado
+                        ejecutarInsertGuardado(id_usuarios, pubIdFinal, res);
+                    });
+                });
             }
-
-            res.status(201).json({ mensaje: "Publicación guardada exitosamente" });
         });
     });
 });
+
+function ejecutarInsertGuardado(id_usuarios, id_publicacion, res) {
+    const query = `INSERT INTO guardados (id_usuarios, id_publicacion) VALUES (?, ?)`;
+    db.query(query, [id_usuarios, id_publicacion], (errInsert) => {
+        if (errInsert) {
+            if (errInsert.code === 'ER_DUP_ENTRY') {
+                return res.status(400).json({ error: "Ya tienes esta publicación en tus guardados." });
+            }
+            console.error("❌ ERROR AL GUARDAR:", errInsert.message);
+            return res.status(500).json({ error: "Error al guardar en la base de datos: " + errInsert.message });
+        }
+
+        res.status(201).json({ mensaje: "Publicación guardada exitosamente" });
+    });
+}
 
 app.get('/api/guardar-publicacion/:correo', (req, res) => {
     const correo = req.params.correo;
