@@ -622,18 +622,21 @@
               let destinoUrl = 'home.html';
               let textoBoton = 'Volver al inicio';
 
-              if (origen === 'guardados') {
-                  destinoUrl = 'guardados_usuario.html';
-                  textoBoton = 'Volver a guardados';
-              } else if (origen === 'mis-reportes' || origen === 'mis_reportes') {
-                  destinoUrl = 'mis_publicaciones.html';
-                  textoBoton = 'Volver a mis publicaciones';
-              } else if (origen === 'mapa') {
-                  destinoUrl = 'mapa.html';
-                  textoBoton = 'Volver al mapa';
-              } else if (origen === 'fundacion' || origen === 'panel-fundacion') {
-                  destinoUrl = 'home.html';
-                  textoBoton = 'Volver al panel';
+            if (origen === 'guardados') {
+    destinoUrl = 'guardados_usuario.html';
+    textoBoton = 'Volver a guardados';
+} else if (origen === 'mis-reportes' || origen === 'mis_reportes') {
+    destinoUrl = 'mis_publicaciones.html';
+    textoBoton = 'Volver a mis publicaciones';
+} else if (origen === 'mapa') {
+    destinoUrl = 'mapa.html';
+    textoBoton = 'Volver al mapa';
+} else if (origen === 'novedades') {
+    destinoUrl = 'novedades.html';
+    textoBoton = 'Volver a novedades';
+} else if (origen === 'fundacion' || origen === 'panel-fundacion') {
+    destinoUrl = 'home.html';
+    textoBoton = 'Volver al panel';
               } else {
                   // Detección automática por rol o historial si no hay parámetro de origen explícito
                   const tipoUsuarioLocal = localStorage.getItem('tipo_usuario');

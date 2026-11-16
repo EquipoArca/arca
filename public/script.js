@@ -1018,12 +1018,16 @@ document.addEventListener('click', (event) => {
         const tipoItem = botonDetalle.getAttribute('data-tipo');
         
         if (idItem) {
+            // Detectamos si venimos de la página de novedades
+            const esNovedades = window.location.pathname.includes('novedades');
+            const paramOrigen = esNovedades ? '&origen=novedades' : '';
+            
             if (tipoItem === 'adopcion' || window.location.pathname.includes('adopciones')) {
-                window.location.href = `detalle_adopcion.html?id=${idItem}`;
+                window.location.href = `detalle_adopcion.html?id=${idItem}${paramOrigen}`;
             } else if (tipoItem === 'evento') {
-                window.location.href = `detalle_evento.html?id=${idItem}`;
+                window.location.href = `detalle_evento.html?id=${idItem}${paramOrigen}`;
             } else {
-                window.location.href = `detalle_reporte.html?id=${idItem}`;
+                window.location.href = `detalle_reporte.html?id=${idItem}${paramOrigen}`;
             }
         }
     }
