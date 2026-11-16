@@ -1257,17 +1257,17 @@ app.get('/api/reportes/:id', (req, res) => {
             u.tipo_usuario,
             p.id_publicacion
         FROM reportes r
-        LEFT JOIN publicaciones p 
+        LEFT JOIN publicaciones p
             ON p.id_reporte = r.id_reporte
-        LEFT JOIN usuarios u 
+        LEFT JOIN usuarios u
             ON r.id_usuarios = u.id_usuarios
-        LEFT JOIN tipo_reporte tr 
+        LEFT JOIN tipo_reporte tr
             ON r.id_tipo_reporte = tr.id_tipo_reporte
-        WHERE p.id_publicacion = ? OR r.id_reporte = ?
+        WHERE r.id_reporte = ?
         LIMIT 1
     `;
 
-    db.query(query, [idParam, idParam], (err, results) => {
+    db.query(query, [idParam], (err, results) => {
         if (err) {
             console.error("❌ Error al consultar el reporte:", err.message);
             return res.status(500).json({
