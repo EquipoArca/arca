@@ -498,14 +498,7 @@
           <div class="modal-huella-icono">
               <i class="fa-solid fa-paw"></i>
               <i class="fa-solid fa-paw" style="font-size: 22px; margin-top: 6px;"></i>
-          </div>
-          <h3 id="modalTitulo">Mensaje</h3>
-          <p id="modalMensaje">Contenido de la alerta...</p>
-          <div style="margin-top: 15px;">
-              <button id="modalBtnAceptar" class="modal-btn-aceptar">Aceptar</button>
-              <button id="modalBtnCancelar" onclick="cerrarModalArca()" class="modal-btn-cancelar" style="display: none;">Cancelar</button>
-          </div>
-      </div>
+         
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -726,12 +719,15 @@
 
                       const divDueño = document.createElement('div');
                       divDueño.innerHTML = `
-                          <div style="background: #f4c2c4; color: #5a2e2e; padding: 12px 16px; border-radius: 25px; font-size: 14px; text-align: center; margin-bottom: 10px; font-family: 'Itim', cursive; font-weight: bold; box-sizing: border-box;">
-                              <i class="fa-solid fa-crown" style="color: #7a3e3e;"></i> Este evento fue publicado por tu fundación
-                          </div>
-                          <button id="btn-abrir-editar" class="btn-accion-prototipo" style="width: 100%; margin-top: 5px;" onclick="abrirModalEditar()">
-                              <i class="fa-solid fa-pen-to-square"></i> EDITAR EVENTO
-                          </button>
+                        
+<div style="background: #fbd4d8; color: #80515e; padding: 10px 20px; border: 1px solid #f4b8bf; border-radius: 25px; font-size: 14px; text-align: left; margin-bottom: 10px; font-family: 'Itim', cursive; font-weight: bold; box-sizing: border-box; box-shadow: 0 2px 6px rgba(180, 100, 115, 0.08);">
+    ESTE EVENTO FUE PUBLICADO POR TU FUNDACIÓN
+</div>
+
+<button id="btn-abrir-editar" class="btn-accion-prototipo" style="width: 100%; margin-top: 5px;" onclick="abrirModalEditar()">
+    <i class="fa-solid fa-pen-to-square"></i> EDITAR EVENTO
+</button>
+
                       `;
                       columnaDerecha.appendChild(divDueño);
 
