@@ -956,48 +956,61 @@ document.addEventListener('DOMContentLoaded', () => {
                                       }
                                   }
                               });
-                          } else {
-                              // Es un usuario normal viendo un reporte ajeno -> Mostramos botón de Guardar
-                              const idPubReal = reporteData.id_publicacion || reporteId;
-                              
-                              // Consultamos si ya está guardado para adaptar el botón
-                              fetch(`/api/guardados/ids/${encodeURIComponent(correoLogueado)}`)
-                                  .then(res => res.json())
-                                  .then(idsGuardados => {
-                                      const estaGuardado = Array.isArray(idsGuardados) && idsGuardados.includes(Number(idPubReal));
-                                      
-                                      contenedorBoton.innerHTML = `
-                                          <button class="detalle-btn-accion" id="btn-guardar-reporte" style="background: ${estaGuardado ? '#ffe5dd' : '#fff'}; color: ${estaGuardado ? '#d9534f' : '#2b2b2b'}; cursor: pointer;">
-                                              <i class="fa-solid fa-bookmark"></i> ${estaGuardado ? 'Guardado' : 'Guardar publicación'}
-                                          </button>
-                                      `;
+                          app.post('/api/guardar-publicacion', (req, res) => {
+    const { correo, id_publicacion } = req.body;
 
-                                      document.getElementById('btn-guardar-reporte').addEventListener('click', async () => {
-                                          const endpoint = estaGuardado ? '/api/quitar-guardado' : '/api/guardar-publicacion';
-                                          try {
-                                              const r = await fetch(endpoint, {
-                                                  method: 'POST',
-                                                  headers: { 'Content-Type': 'application/json' },
-                                                  body: JSON.stringify({ correo: correoLogueado, id_publicacion: idPubReal })
-                                              });
-                                              if (r.ok) {
-                                                  location.reload();
-                                              } else {
-                                                  const errJson = await r.json();
-                                                  mostrarAlertaArca("Aviso", errJson.error || "No se pudo actualizar el guardado.", { tipo: "aviso" });
-                                              }
-                                          } catch(ex) {
-                                              console.error(ex);
-                                          }
-                                      });
-                                  })
-                                  .catch(() => {
-                                      contenedorBoton.innerHTML = `
-                                          <button class="detalle-btn-accion" id="btn-guardar-reporte">
-                                              <i class="fa-solid fa-bookmark"></i> Guardar publicación
-                                          </button>
-                                      `;
-                                  });
+    if (!correo || !id_publicacion) {
+        return res.status(400).json({ error: "Faltan datos requeridos (correo o id_publicacion)" });
+    }
+
+    db.query("SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))", [correo], (err, results) => {
+        if (err || results.length === 0) {
+            return res.status(404).json({ error: "No se encontró el usuario en la base de datos." });
+        }
+
+        const id_usuarios = results[0].id_usuarios;
+
+        // Verificar si el ID existe en la tabla publicaciones (puede ser id_publicacion o id_reporte)
+        const verificarPub = `SELECT id_publicacion FROM publicaciones WHERE id_publicacion = ? OR id_reporte = ?`;
+        db.query(verificarPub, [id_publicacion, id_publicacion], (errV, pubRows) => {
+            let idPubReal = id_publicacion;
+
+            if (pubRows && pubRows.length > 0) {
+                idPubReal = pubRows[0].id_publicacion;
+                ejecutarGuardado(id_usuarios, idPubReal, res);
+            } else {
+                // Si no está en publicaciones, verificamos si es un reporte válido para crear su registro al vuelo
+                db.query("SELECT id_reporte FROM reportes WHERE id_reporte = ?", [id_publicacion], (errR, repRows) => {
+                    if (repRows && repRows.length > 0) {
+                        db.query("INSERT INTO publicaciones (id_reporte) VALUES (?)", [id_publicacion], (errInsP, resInsP) => {
+                            if (!errInsP) {
+                                idPubReal = resInsP.insertId;
+                                ejecutarGuardado(id_usuarios, idPubReal, res);
+                            } else {
+                                return res.status(400).json({ error: "No se pudo registrar la publicación asociada." });
+                            }
+                        });
+                    } else {
+                        return res.status(400).json({ error: "La publicación que intentas guardar no existe en el sistema." });
+                    }
+                });
+            }
+        });
+    });
+});
+
+function ejecutarGuardado(id_usuarios, id_publicacion, res) {
+    const query = `INSERT INTO guardados (id_usuarios, id_publicacion) VALUES (?, ?)`;
+    db.query(query, [id_usuarios, id_publicacion], (errInsert) => {
+        if (errInsert) {
+            if (errInsert.code === 'ER_DUP_ENTRY') {
+                return res.status(400).json({ error: "Ya tienes esta publicación en tus guardados." });
+            }
+            return res.status(500).json({ error: "Error al guardar en la base de datos: " + errInsert.message });
+        }
+        res.status(201).json({ mensaje: "Publicación guardada exitosamente" });
+    });
+}
                           }
                       } catch (innerErr) {
                           console.warn("Aviso de permisos:", innerErr);
