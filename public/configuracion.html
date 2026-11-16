@@ -820,15 +820,14 @@ body.dark-mode .columna-config-der {
             document.body.appendChild(overlay);
             document.getElementById("modal-btn-cerrar").onclick = () => overlay.remove();
         }
-
-        function confirmarEliminarCuenta() {
+function confirmarEliminarCuenta() {
             const overlay = document.createElement("div");
             overlay.className = "arca-modal-overlay";
             overlay.innerHTML = `
                 <div class="arca-modal-card">
                     <div class="arca-modal-icon" style="background-color: #fdf0ee; color: #e76f51;"><i class="fa-solid fa-triangle-exclamation"></i></div>
                     <h3 style="color: #e76f51; margin: 0; font-weight: 400; font-size: 18px; letter-spacing: 0.5px;">¿Eliminar cuenta?</h3>
-                    <p class="arca-modal-text">¿Estás completamente segura? Esta acción borrará tus datos y no se puede deshacer.</p>
+                    <p class="arca-modal-text">¿Estás completamente segura? Esta acción borrará tus datos permanentemente y no se puede deshacer.</p>
                     <div class="arca-modal-buttons">
                         <button class="arca-btn-modal arca-btn-secondary" id="modal-btn-cancelar">Cancelar</button>
                         <button class="arca-btn-modal arca-btn-danger" id="modal-btn-eliminar">Sí, eliminar</button>
@@ -838,10 +837,44 @@ body.dark-mode .columna-config-der {
             document.body.appendChild(overlay);
 
             document.getElementById("modal-btn-cancelar").onclick = () => overlay.remove();
-            document.getElementById("modal-btn-eliminar").onclick = () => {
-                overlay.remove();
-                localStorage.clear();
-                window.location.href = "index.html";
+            
+            document.getElementById("modal-btn-eliminar").onclick = async () => {
+                const btnEliminar = document.getElementById("modal-btn-eliminar");
+                btnEliminar.disabled = true;
+                btnEliminar.textContent = "Eliminando...";
+
+                const correoLogueado = obtenerCorreoSesionConfig();
+                if (!correoLogueado) {
+                    alert("⚠️ No se pudo identificar tu correo de sesión.");
+                    overlay.remove();
+                    return;
+                }
+
+                try {
+                    const res = await fetch('/api/eliminar-mi-cuenta', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ correo: correoLogueado })
+                    });
+
+                    const data = await res.json();
+
+                    if (res.ok && data.exito) {
+                        // Cerrar sesión en Firebase si está activo
+                        if (typeof firebase !== 'undefined' && firebase.auth()) {
+                            await firebase.auth().signOut().catch(() => {});
+                        }
+                        localStorage.clear();
+                        window.location.href = "home.html";
+                    } else {
+                        alert("⚠️ Error al eliminar cuenta: " + (data.error || data.mensaje || "Desconocido"));
+                        overlay.remove();
+                    }
+                } catch (e) {
+                    console.error("Excepción al eliminar cuenta:", e);
+                    alert("⚠️ Error de conexión con el servidor.");
+                    overlay.remove();
+                }
             };
         }
 

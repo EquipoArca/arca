@@ -2935,7 +2935,7 @@ app.post('/api/admin/gestionar-denuncia', (req, res) => {
             const correoUser = userRows[0].correo_usuario;
             console.log(`📧 Correo asociado al usuario a eliminar: ${correoUser}`);
 
-            // 2. Pasos secuenciales con registro en consola
+            // 2. Pasos secuenciales limpios (sin tablas inexistentes)
             const pasos = [
                 { desc: "Desactivar FK Checks", sql: "SET FOREIGN_KEY_CHECKS = 0" },
                 { desc: "Borrar denuncias", sql: `DELETE FROM denuncias_usuarios WHERE id_usuario_denunciado = ${db.escape(id_usuario_denunciado)} OR id_denunciante = ${db.escape(id_usuario_denunciado)}` },
@@ -2952,7 +2952,6 @@ app.post('/api/admin/gestionar-denuncia', (req, res) => {
                 { desc: "Borrar publicaciones_adopcion", sql: `DELETE FROM publicaciones_adopcion WHERE id_usuarios = ${db.escape(id_usuario_denunciado)}` },
                 { desc: "Borrar animal", sql: `DELETE FROM animal WHERE id_usuarios = ${db.escape(id_usuario_denunciado)}` },
                 { desc: "Borrar eventos fundacion", sql: `DELETE FROM eventos WHERE id_fundacion IN (SELECT id_fundacion FROM fundacion WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(${db.escape(correoUser)})))` },
-                { desc: "Borrar representante fundacion", sql: `DELETE FROM representante WHERE id_fundacion IN (SELECT id_fundacion FROM fundacion WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(${db.escape(correoUser)})))` },
                 { desc: "Borrar donaciones fundacion", sql: `DELETE FROM donaciones WHERE id_fundacion IN (SELECT id_fundacion FROM fundacion WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(${db.escape(correoUser)})))` },
                 { desc: "Borrar documentacion fundacion", sql: `DELETE FROM documentacion WHERE id_documentacion IN (SELECT id_documentacion FROM fundacion WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(${db.escape(correoUser)})))` },
                 { desc: "Borrar fundacion", sql: `DELETE FROM fundacion WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(${db.escape(correoUser)}))` },
@@ -2999,6 +2998,7 @@ app.post('/api/admin/gestionar-denuncia', (req, res) => {
 
             ejecutarPaso(0);
         });
+    
     } else {
         if (id_denuncia) {
             db.query("DELETE FROM denuncias_usuarios WHERE id_denuncia = ?", [id_denuncia], () => {
@@ -3008,6 +3008,84 @@ app.post('/api/admin/gestionar-denuncia', (req, res) => {
             res.json({ exito: true, mensaje: "Acción procesada." });
         }
     }
+});
+// ==========================================
+// ELIMINACIÓN DE CUENTA PROPIA (USUARIO)
+// ==========================================
+app.post('/api/eliminar-mi-cuenta', (req, res) => {
+    const { correo } = req.body;
+
+    if (!correo) {
+        return res.status(400).json({ error: "El correo es requerido para eliminar la cuenta." });
+    }
+
+    db.query("SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))", [correo], (errU, userRows) => {
+        if (errU || !userRows || userRows.length === 0) {
+            console.error("❌ Usuario no encontrado en la BD para auto-eliminar:", errU ? errU.message : "Sin registros");
+            return res.status(404).json({ error: "Usuario no encontrado en la base de datos." });
+        }
+
+        const id_usuario = userRows[0].id_usuarios;
+        console.log(`🗑️ [USUARIO] Iniciando auto-eliminación total del usuario ID: ${id_usuario} (${correo})`);
+
+        const pasos = [
+            { desc: "Desactivar FK Checks", sql: "SET FOREIGN_KEY_CHECKS = 0" },
+            { desc: "Borrar denuncias", sql: `DELETE FROM denuncias_usuarios WHERE id_usuario_denunciado = ${db.escape(id_usuario)} OR id_denunciante = ${db.escape(id_usuario)}` },
+            { desc: "Borrar notificaciones", sql: `DELETE FROM notificaciones WHERE id_usuario_destino = ${db.escape(id_usuario)} OR id_usuario_origen = ${db.escape(id_usuario)}` },
+            { desc: "Borrar seguidores", sql: `DELETE FROM seguidores WHERE id_usuario_seguidor = ${db.escape(id_usuario)} OR id_usuario_seguido = ${db.escape(id_usuario)}` },
+            { desc: "Borrar guardados", sql: `DELETE FROM guardados WHERE id_usuarios = ${db.escape(id_usuario)}` },
+            { desc: "Borrar bloqueados", sql: `DELETE FROM usuarios_bloqueados WHERE id_usuario_bloqueador = ${db.escape(id_usuario)} OR id_usuario_bloqueado = ${db.escape(id_usuario)}` },
+            { desc: "Borrar solicitudes adoptante", sql: `DELETE FROM solicitudes_adoptante WHERE id_solicitante = ${db.escape(id_usuario)} OR id_propietario = ${db.escape(id_usuario)}` },
+            { desc: "Borrar adoptante", sql: `DELETE FROM adoptante WHERE id_usuarios = ${db.escape(id_usuario)}` },
+            { desc: "Borrar donaciones usuario", sql: `DELETE FROM donaciones WHERE id_usuario = ${db.escape(id_usuario)}` },
+            { desc: "Borrar publicaciones de reportes", sql: `DELETE FROM publicaciones WHERE id_reporte IN (SELECT id_reporte FROM reportes WHERE id_usuarios = ${db.escape(id_usuario)})` },
+            { desc: "Borrar reportes", sql: `DELETE FROM reportes WHERE id_usuarios = ${db.escape(id_usuario)}` },
+            { desc: "Borrar publicaciones de animal/adopción", sql: `DELETE FROM publicaciones WHERE id_animal IN (SELECT id_animal FROM animal WHERE id_usuarios = ${db.escape(id_usuario)}) OR id_publicaciones_adopcion IN (SELECT id_publicaciones_adopcion FROM publicaciones_adopcion WHERE id_usuarios = ${db.escape(id_usuario)})` },
+            { desc: "Borrar publicaciones_adopcion", sql: `DELETE FROM publicaciones_adopcion WHERE id_usuarios = ${db.escape(id_usuario)}` },
+            { desc: "Borrar animal", sql: `DELETE FROM animal WHERE id_usuarios = ${db.escape(id_usuario)}` },
+            { desc: "Borrar eventos fundacion", sql: `DELETE FROM eventos WHERE id_fundacion IN (SELECT id_fundacion FROM fundacion WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(${db.escape(correo)})))` },
+            { desc: "Borrar donaciones fundacion", sql: `DELETE FROM donaciones WHERE id_fundacion IN (SELECT id_fundacion FROM fundacion WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(${db.escape(correo)})))` },
+            { desc: "Borrar documentacion fundacion", sql: `DELETE FROM documentacion WHERE id_documentacion IN (SELECT id_documentacion FROM fundacion WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(${db.escape(correo)})))` },
+            { desc: "Borrar fundacion", sql: `DELETE FROM fundacion WHERE LOWER(TRIM(Correo_fundacion)) = LOWER(TRIM(${db.escape(correo)}))` },
+            { desc: "Borrar usuario principal", sql: `DELETE FROM usuarios WHERE id_usuarios = ${db.escape(id_usuario)}` },
+            { desc: "Reactivar FK Checks", sql: "SET FOREIGN_KEY_CHECKS = 1" }
+        ];
+
+        const ejecutarPaso = (index) => {
+            if (index >= pasos.length) {
+                console.log("✅ ¡Borrado en MySQL completado con éxito! Procediendo a Firebase Auth...");
+                
+                (async () => {
+                    try {
+                        const userRecord = await getAuth().getUserByEmail(correo);
+                        if (userRecord && userRecord.uid) {
+                            await getAuth().deleteUser(userRecord.uid);
+                            console.log("✅ Eliminado de Firebase Auth:", correo);
+                        }
+                    } catch (fbErr) {
+                        console.error("⚠️ Firebase Auth notice:", fbErr.message);
+                    }
+
+                    res.json({ exito: true, mensaje: "¡Tu cuenta ha sido eliminada permanentemente con éxito!" });
+                })();
+                return;
+            }
+
+            const pasoActual = pasos[index];
+            console.log(`➡️ Ejecutando paso [${index + 1}/${pasos.length}]: ${pasoActual.desc}`);
+
+            db.query(pasoActual.sql, (errPaso) => {
+                if (errPaso) {
+                    console.error(`❌ ERROR en paso [${pasoActual.desc}]:`, errPaso.message);
+                    db.query("SET FOREIGN_KEY_CHECKS = 1"); // Reactivar por seguridad
+                    return res.status(500).json({ error: `Error en (${pasoActual.desc}): ${errPaso.message}` });
+                }
+                ejecutarPaso(index + 1);
+            });
+        };
+
+        ejecutarPaso(0);
+    });
 });
 // ==========================================
 // INICIALIZACIÓN DEL SERVIDOR
