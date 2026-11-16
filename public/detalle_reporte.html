@@ -659,9 +659,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
       function copiarAlPortapapeles(texto) {
           navigator.clipboard.writeText(texto).then(() => {
-              alert("Copiado al portapapeles: " + texto);
+              mostrarAlertaArca("Copiado al portapapeles: " + texto, "XD", 
+              { tipo: "aviso" });
           }).catch(err => {
               console.error('Error al copiar: ', err);
+              mostrarAlertaArca("Error al copiar al portapapeles.", "XD", 
+              { tipo: "error" });
           });
       }
 
@@ -708,7 +711,8 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('modalBtnConfirmarResolucion')?.addEventListener('click', () => {
           const detalles = document.getElementById('input-detalles-resolucion').value.trim();
           if (!detalles) {
-              alert("Debes redactar los detalles o evidencias de cómo se resolvió el caso.");
+              mostrarAlertaArca("Necesitas dar suficiente información",
+              "Debes redactar los detalles o evidencias de cómo se resolvió el caso.");
               return;
           }
           if (typeof callbackResolucionGlobal === 'function') callbackResolucionGlobal(detalles);
@@ -720,11 +724,15 @@ document.addEventListener('DOMContentLoaded', () => {
           const motivo = document.getElementById('input-motivo-derivacion').value.trim();
 
           if (!idFundacionDestino) {
-              alert("Debes seleccionar una fundación destino.");
+              mostrarAlertaArca("Falta información.",
+                "Debes seleccionar una fundación destino para derivar el reporte."
+              );
               return;
           }
           if (!motivo) {
-              alert("Debes escribir el motivo de la derivación.");
+              mostrarAlertaArca("Falta información.",
+                "Debes escribir el motivo de la derivación."
+              );
               return;
           }
 
@@ -747,15 +755,21 @@ document.addEventListener('DOMContentLoaded', () => {
                   })
               });
               if (resPut.ok) {
-                  alert("Estado actualizado correctamente.");
+                  mostrarAlertaArca("Actualizado.", 
+                  "Se ha actualizado el estado del reporte correctamente.", 
+                  { tipo: "aviso" });
                   location.reload();
               } else {
                   const errData = await resPut.json();
-                  alert(errData.error || "No se pudo actualizar el estado.");
+                  mostrarAlertaArca("Error al actualizar.", 
+                  errData.error || "No se pudo actualizar el estado.", 
+                  { tipo: "error" });
               }
           } catch (err) {
               console.error(err);
-              alert("Error de conexión al actualizar el estado.");
+              mostrarAlertaArca("Error de conexión al actualizar el estado.", 
+              "Inténtelo nuevamente.", 
+              { tipo: "error" });
           }
       }
 
@@ -764,7 +778,8 @@ document.addEventListener('DOMContentLoaded', () => {
           const reporteId = params.get('id');
 
           if (!reporteId) {
-              alert("No se especificó ningún reporte.");
+              mostrarAlertaArca("Reporte no encontrado.",
+               "No se especificó ningún reporte.", { tipo: "error" });
               window.location.href = 'novedades.html';
               return;
           }
@@ -935,7 +950,9 @@ document.addEventListener('DOMContentLoaded', () => {
                                       if (resDel.ok) {
                                           window.location.href = 'novedades.html';
                                       } else {
-                                          alert("No se pudo eliminar el reporte.");
+                                          mostrarAlertaArca("Error al eliminar.", 
+                                          "No se pudo eliminar el reporte.", 
+                                          { tipo: "error" });
                                       }
                                   }
                               });
@@ -950,7 +967,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
           } catch (error) {
               console.error("Error al cargar detalle:", error);
-              alert("Hubo un error al cargar los detalles del reporte.");
+              mostrarAlertaArca("Error al cargar detalle.", 
+              "No se pudieron cargar los detalles del reporte.", 
+              { tipo: "error" });
           }
       }
   </script>

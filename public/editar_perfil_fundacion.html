@@ -517,14 +517,20 @@
 
                 const resultado = await respuesta.json();
                 if (resultado.exito) {
-                    alert("¡Perfil actualizado con éxito!");
+                    mostrarAlertaArca("¡Perfil actualizado!", 
+                    "Se ha actualizado el perfil de la fundación correctamente.", 
+                    { tipo: "aviso" });
                     window.location.href = "perfil_fundacion.html";
                 } else {
-                    alert("No se pudo actualizar: " + resultado.mensaje);
+                    mostrarAlertaArca("Error al actualizar.", 
+                    "No se pudo actualizar el perfil de la fundación.", 
+                    { tipo: "error" });
                 }
             } catch (error) {
                 console.error("Error al actualizar:", error);
-                alert("Ocurrió un error al guardar los cambios.");
+                mostrarAlertaArca("Error al actualizar.", 
+                "Ocurrió un error al guardar los cambios.", 
+                { tipo: "error" });
             }
         }
     </script>

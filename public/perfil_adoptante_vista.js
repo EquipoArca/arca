@@ -1,7 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
     firebase.auth().onAuthStateChanged(async (user) => {
         if (!user) {
-            alert("Debes iniciar sesión.");
+            mostrarAlertaArca("¡Espera!", 
+                "Debes iniciar sesión.", 
+                { tipo: "aviso" });
             window.location.href = "adopciones.html";
             return;
         }

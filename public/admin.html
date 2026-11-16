@@ -378,7 +378,10 @@
 
         function abrirPdfSeguro(base64Data, nombreDoc) {
             if (!base64Data) {
-                alert("El documento no está disponible.");
+                mostrarAlertaArca("El documento no está disponible.",
+                    "Intentalo de nuevo más tarde o contacta al equipo de soporte. ♡",
+                    {tipo: "error"}
+                );
                 return;
             }
             try {
@@ -413,8 +416,13 @@
 
             } catch (e) {
                 console.error("Error al abrir el PDF:", e);
-                alert("No se pudo abrir el documento '" + nombreDoc + "'. Verifica que el archivo sea un PDF válido.");
-            }
+               mostrarAlertaArca(
+    "No se pudo abrir el documento " + nombreDoc + ".",
+    "Verifica que el archivo sea un PDF válido. ♡",
+    { tipo: "error" }
+);
+        }
+
         }
 
         async function cargarSolicitudes() {
@@ -640,19 +648,23 @@ async function gestionarDenuncia(idDenuncia, idDenunciado, accion) {
                     resultado = JSON.parse(textoRespuesta);
                 } catch (errJson) {
                     console.error("Respuesta del servidor no es JSON:", textoRespuesta);
-                    alert("⚠️ Error del servidor (Texto plano): " + textoRespuesta.substring(0, 200));
+                    mostrarAlertaArca("Error del servidor (Texto plano)", 
+                    "Error del servidor (Texto plano): " + textoRespuesta.substring(0, 200), { tipo: "error" });
                     return;
                 }
 
                 if (res.ok && resultado.exito) {
-                    alert(resultado.mensaje);
+                    mostrarAlertaArca("Acción realizada con éxito.", resultado.mensaje, { tipo: "exito" });
                     cargarDenunciasPerfiles();
                 } else {
-                    alert("⚠️ Error del servidor: " + (resultado.error || resultado.mensaje || "Desconocido"));
+                    mostrarAlertaArca("Hubo un error en el servidor al procesar la acción.", 
+                    "Error del servidor: " + (resultado.error || resultado.mensaje || 
+                    "Desconocido"), { tipo: "error" });
                 }
             } catch (e) {
                 console.error("Excepción de red:", e);
-                alert("⚠️ Error de conexión con el servidor: " + e.message);
+                mostrarAlertaArca("Error de conexión", 
+                "Error de conexión con el servidor: " + e.message, { tipo: "error" });
             }
         }
         async function aprobar(id_fundacion, correo_fundacion, nombre_comercial) {
@@ -673,7 +685,10 @@ async function gestionarDenuncia(idDenuncia, idDenunciado, accion) {
                 const resultado = await res.json();
 
                 if (!resultado.exito) {
-                    alert("No se pudo aprobar: " + resultado.mensaje);
+                    mostrarAlertaArca("No se pudo aprobar: " + resultado.mensaje,
+                        "Intenta nuevamente o contacta al equipo de soporte. ♡",
+                        { tipo: "error" }
+                    );
                     if (btn) {
                         btn.disabled = false;
                         btn.innerHTML = `<i class="fa-solid fa-check-circle"></i> Aprobar Cuenta`;
@@ -688,15 +703,24 @@ async function gestionarDenuncia(idDenuncia, idDenunciado, accion) {
                         nombre: nombre_comercial,
                         enlace_login: linkInicioSesion
                     });
-                    alert(`¡Fundación "${nombre_comercial}" aprobada y correo enviado con éxito! 🌸`);
+                    mostrarAlertaArca(`¡Fundación "${nombre_comercial}" aprobada!`,
+                        "La fundación ha sido aprobada y se le ha enviado un correo de notificación. 🌸",
+                        { tipo: "aviso" }
+                    );
                 } catch (emailErr) {
                     console.error("Error al enviar correo con EmailJS:", emailErr);
-                    alert("Cuenta aprobada en la base de datos, pero falló el envío del correo de EmailJS.");
+                    mostrarAlertaArca("Error al enviar correo",
+                        "La fundación ha sido aprobada, pero falló el envío del correo.",
+                        { tipo: "error" }
+                    );
                 }
 
                 cargarSolicitudes();
             } catch (error) {
-                alert("Error al aprobar: " + error.message);
+                mostrarAlertaArca("Error al aprobar",
+                    "Ocurrió un error al intentar aprobar la fundación.",
+                    { tipo: "error" }
+                );
                 if (btn) {
                     btn.disabled = false;
                     btn.innerHTML = `<i class="fa-solid fa-check-circle"></i> Aprobar Cuenta`;
@@ -704,8 +728,8 @@ async function gestionarDenuncia(idDenuncia, idDenunciado, accion) {
             }
         }
 
-        // Cargar por defecto las solicitudes pendientes al abrir la página
         cargarSolicitudes();
+
     </script>
 </body>
 </html>

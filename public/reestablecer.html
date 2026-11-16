@@ -181,7 +181,9 @@
             const oobCode = urlParams.get('oobCode');
 
             if (!oobCode) {
-                alert("Enlace inválido o expirado.");
+                mostrarAlertaArca("Enlace inválido o expirado.", 
+                "El enlace para restablecer la contraseña es inválido o ha expirado.", 
+                { tipo: "error" });
                 return;
             }
 
@@ -189,11 +191,15 @@
 
             try {
                 await firebase.auth().confirmPasswordReset(oobCode, nuevaPasswordTexto);
-                alert("¡Contraseña actualizada con éxito! Ya puedes iniciar sesión.");
+                mostrarAlertaArca("¡Contraseña actualizada!", 
+                "La contraseña ha sido actualizada con éxito.", 
+                { tipo: "aviso" });
                 window.location.href = "home.html"; // O tu página de login
             } catch (error) {
                 console.error("Error:", error);
-                alert("No se pudo actualizar la contraseña. El enlace pudo haber expirado.");
+                mostrarAlertaArca("Hubo un error",
+                "No se pudo actualizar la contraseña. El enlace pudo haber expirado.",
+                { tipo: "error" });
             }
         });     
     </script>

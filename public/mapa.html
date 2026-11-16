@@ -735,7 +735,9 @@
                       },
                       (error) => {
                           if (conAlertaError) {
-                              mostrarAlertaArca("Ubicación no encontrada", "No pudimos acceder a tu ubicación GPS, pero seguimos mostrando Medellín.", { tipo: "aviso" });
+                              mostrarAlertaArca("Ubicación no encontrada", 
+                              "No pudimos acceder a tu ubicación GPS, pero seguimos mostrando Medellín.", 
+                              { tipo: "aviso" });
                           }
                       },
                       { enableHighAccuracy: true, timeout: 8000, maximumAge: 30000 }
@@ -780,9 +782,13 @@
                           return;
                       }
                   }
-                  mostrarAlertaArca("Zona no encontrada", "No encontramos ese sector exacto. Intenta con otro barrio de Medellín (ej. Castilla, Laureles, Poblado).", { tipo: "aviso" });
+                  mostrarAlertaArca("Zona no encontrada", 
+                  "No encontramos ese sector exacto. Intenta con otro barrio de Medellín (ej. Castilla, Laureles, Poblado).", 
+                  { tipo: "error" });
               } catch (e) {
-                  mostrarAlertaArca("Aviso de búsqueda", "Centrando en Medellín para explorar la zona.", { tipo: "aviso" });
+                  mostrarAlertaArca("Aviso de búsqueda", 
+                  "Centrando en Medellín para explorar la zona.", 
+                  { tipo: "aviso" });
                   map.setView([6.25184, -75.56359], 13);
               }
           }
@@ -1058,7 +1064,9 @@
               } finally {
                   escaneandoVets = false;
                   if (mostrarMensaje) {
-                      mostrarAlertaArca("Zona actualizada", `Mostrando ${listaVeterinarias.length} centros veterinarios disponibles en el mapa.`, { tipo: "aviso" });
+                      mostrarAlertaArca("Zona actualizada",
+                       `Mostrando ${listaVeterinarias.length} centros veterinarios disponibles en el mapa.`, 
+                       { tipo: "aviso" });
                   }
               }
           }

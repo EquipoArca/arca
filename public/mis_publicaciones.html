@@ -660,7 +660,9 @@
     function verDetallesPublicacionUnificada(idPubOGeneral) {
         const user = firebase.auth().currentUser;
         if (!user) {
-            mostrarAlertaArca("Aviso", "Debes iniciar sesión para ver los detalles.", { tipo: "aviso" });
+            mostrarAlertaArca("Aviso", 
+            "Debes iniciar sesión para ver los detalles.", 
+            { tipo: "aviso" });
             return;
         }
 
@@ -669,7 +671,9 @@
         );
 
         if (!item) {
-            mostrarAlertaArca("Error", "No se encontró la información de esta publicación.", { tipo: "error" });
+            mostrarAlertaArca("Error", 
+            "No se encontró la información de esta publicación.", 
+            { tipo: "error" });
             return;
         }
 
@@ -794,7 +798,8 @@
                         const response = await fetch(endpoint, { method: 'DELETE' });
                         const resultado = await response.json();
                         if (response.ok) {
-                            mostrarAlertaArca("¡Éxito!", "Publicación eliminada correctamente.", {
+                            mostrarAlertaArca("¡Éxito!", 
+                            "Publicación eliminada correctamente.", {
                                 tipo: "aviso",
                                 alCerrar: () => {
                                     cerrarModalDetalle();
@@ -805,7 +810,9 @@
                             throw new Error(resultado.error || "No se pudo eliminar.");
                         }
                     } catch (error) {
-                        mostrarAlertaArca("Error", "Hubo un error al intentar eliminar la publicación.", { tipo: "error" });
+                        mostrarAlertaArca("Error", 
+                        "Hubo un error al intentar eliminar la publicación.", 
+                        { tipo: "error" });
                     }
                 }
             }
@@ -832,7 +839,9 @@
     async function toggleGuardarPublicacion(idPublicacion) {
         const user = firebase.auth().currentUser;
         if (!user || !user.email) {
-            mostrarAlertaArca("Aviso", "Debes iniciar sesión para gestionar tus guardados.", { tipo: "aviso" });
+            mostrarAlertaArca("Aviso", 
+            "Debes iniciar sesión para gestionar tus guardados.", 
+            { tipo: "aviso" });
             return;
         }
 
@@ -868,7 +877,9 @@
                 mostrarNotificacion("¡Publicación guardada con éxito!");
             }
         } catch (error) {
-            mostrarAlertaArca("Error", "Hubo un error: " + error.message, { tipo: "error" });
+            mostrarAlertaArca("Error", 
+            "Hubo un error: " + error.message, 
+            { tipo: "error" });
         }
     }
 

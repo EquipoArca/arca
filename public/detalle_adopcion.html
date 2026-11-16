@@ -663,9 +663,15 @@
 
       function copiarAlPortapapeles(texto) {
           navigator.clipboard.writeText(texto).then(() => {
-              alert(`¡Copiado: ${texto}!`);
+              mostrarAlertaArca(`¡Copiado: ${texto}!`,
+              "Se ha copiado al portapapeles correctamente. 🌸",
+              {tipo: "aviso"}
+
+              );
           }).catch(err => {
-              console.error('Error al copiar: ', err);
+              console.error('Error al copiar: ',
+              "Intente nuevamente. ♡",
+              {tipo: "error"}, err);
           });
       }
 
@@ -694,7 +700,10 @@
           const adopcionId = params.get('id');
 
           if (!adopcionId) {
-              alert("No se especificó ninguna adopción.");
+              mostrarAlertaArca("No se especificó ninguna adopción.",
+              "Por favor, seleccione una adopción para ver sus detalles. ♡",
+              {tipo: "error"}
+              );
               window.location.href = 'home.html';
               return;
           }
@@ -857,10 +866,16 @@
                                       const idAResolver = adopcion.id_adopcion || adopcionId;
                                       const resDel = await fetch(`/api/adopciones/${idAResolver}`, { method: 'DELETE' });
                                       if (resDel.ok) {
-                                          alert("Publicación de adopción eliminada correctamente.");
+                                          mostrarAlertaArca("Publicación eliminada .",
+                                              "La publicación ha sido eliminada exitosamente. 🌸",
+                                              {tipo: "aviso"}
+                                          );
                                           window.location.href = 'home.html';
                                       } else {
-                                          alert("No se pudo eliminar la adopción.");
+                                          mostrarAlertaArca("Error al eliminar.",
+                                              "Por favor, inténtelo nuevamente. ♡",
+                                              {tipo: "error"}
+                                          );
                                       }
                                   } catch (err) {
                                       console.error("Error al eliminar adopción:", err);
@@ -897,7 +912,10 @@
                                           body: JSON.stringify({ correo: correoLogueado, id_publicacion: Number(idPublicacionGlobal) })
                                       });
                                       if (quitRes.ok) {
-                                          alert("Publicación eliminada de guardados.");
+                                          mostrarAlertaArca("Publicación eliminada.",
+                                              "La publicación ha sido eliminada de tus guardados. 🌸",
+                                              {tipo: "aviso"}
+                                          );
                                           location.reload();
                                       }
                                   }
@@ -915,7 +933,10 @@
                                       body: JSON.stringify({ correo: correoLogueado, id_publicacion: Number(idPublicacionGlobal) })
                                   });
                                   if (saveRes.ok) {
-                                      alert("¡Publicación guardada con éxito!");
+                                      mostrarAlertaArca("Publicación guardada.",
+                                          "La publicación ha sido guardada con exito. 🌸",
+                                          {tipo: "aviso"}
+                                      );
                                       location.reload();
                                   }
                               });
@@ -928,9 +949,13 @@
               
           } catch (error) {
               console.error("Error al cargar detalle de adopción:", error);
-              alert("Hubo un error al cargar los detalles de la adopción.");
+              mostrarAlertaArca("Error al cargar.",
+                  "Hubo un error, inténtelo nuevamente. ♡",
+                  {tipo: "error"}
+              );
           }
       }
+
   </script>
 </body>
 </html>

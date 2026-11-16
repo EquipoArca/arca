@@ -277,7 +277,9 @@
           const correoSolicitante = obtenerCorreoSesion();
 
           if (!username) {
-              alert("No se especificó un usuario.");
+              mostrarAlertaArca("No se especificó un usuario.", 
+                  "Por favor, selecciona un usuario para ver su ficha.", 
+                  { tipo: "aviso" });
               window.location.href = 'home.html';
               return;
           }
@@ -286,7 +288,9 @@
               const res = await fetch(`/api/ficha-adoptante-publica/${encodeURIComponent(username)}?correo_solicitante=${encodeURIComponent(correoSolicitante)}`);
               
               if (res.status === 403) {
-                  alert("No tienes permiso para ver esta ficha de adoptante o aún no ha sido aceptada.");
+                  mostrarAlertaArca("Acceso denegado.", 
+                      "No tienes permiso para ver esta ficha de adoptante o aún no ha sido aceptada.", 
+                      { tipo: "aviso" });
                   window.location.href = `perfil_publico.html?user=${username}`;
                   return;
               }

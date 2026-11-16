@@ -396,14 +396,20 @@
                         try {
                             const res = await fetch(`/api/remover-seguidor/${idSeguidor}`, { method: 'DELETE' });
                             if (res.ok) {
-                                mostrarAlertaArca("¡Listo! 🌸", "Seguidor eliminado con éxito.", { tipo: "aviso" });
+                                mostrarAlertaArca("¡Listo!", 
+                                "Seguidor eliminado con éxito.", 
+                                { tipo: "aviso" });
                                 cargarContenidoSocialIndependiente(tipo);
                                 cargarContadoresPerfil();
                             } else {
-                                mostrarAlertaArca("Error", "No se pudo eliminar al seguidor.", { tipo: "error" });
+                                mostrarAlertaArca("Error", 
+                                "No se pudo eliminar al seguidor.", 
+                                { tipo: "error" });
                             }
                         } catch (e) {
-                            mostrarAlertaArca("Error de red ♡", "Hubo un error al conectar con el servidor.", { tipo: "error" });
+                            mostrarAlertaArca("Hubo un error",
+                            "No se pudo eliminar al seguidor.",
+                            { tipo: "error" });
                         }
                     }
                 }

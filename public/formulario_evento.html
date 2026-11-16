@@ -352,7 +352,11 @@
                 miniMarker.setLatLng([lat, lon]);
                 document.getElementById('input-ubicacion-coords').value = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
             } else {
-                alert("No encontramos ese lugar exacto en Medellín. Intenta ser más específico.");
+                mostrarAlertaArca(
+                    "Ubicación no encontrada",
+                    "No encontramos ese lugar exacto en Medellín. Intenta ser más específico. ♡",
+                    { tipo: "error" }
+                );
             }
         } catch (error) {
             console.error("Error buscando ubicación:", error);
@@ -403,7 +407,11 @@
 
                 const user = firebase.auth().currentUser;
                 if (!user) {
-                    alert("Debes iniciar sesión para realizar esta acción.");
+                    mostrarAlertaArca(
+                        "Sesión no detectada",
+                        "Debes iniciar sesión para realizar esta acción.",
+                        { tipo: "aviso" }
+                    );
                     return;
                 }
 
@@ -414,7 +422,11 @@
                 const detalles_adicionales = document.getElementById('input-detalles').value;
 
                 if (!nombre_evento || !lugar || !fecha_hora) {
-                    alert("Por favor completa los campos obligatorios.");
+                    mostrarAlertaArca(
+                        "Campos incompletos",
+                        "Por favor completa todos los campos obligatorios.",
+                        { tipo: "aviso" }
+                    );
                     return;
                 }
 
@@ -439,14 +451,22 @@
 
                     const resultado = await respuesta.json();
                     if (respuesta.ok) {
-                        alert(idEventoEditar ? "¡Evento actualizado con éxito!" : "¡Evento publicado con éxito!");
+                        mostrarAlertaArca(
+                            idEventoEditar ? "Evento actualizado con éxito!" : "¡Evento publicado con éxito!",
+                            "Tu evento ha sido procesado correctamente. 🌸",
+                            { tipo: "aviso" }
+                        );
                         window.location.href = "mis_publicaciones.html";
                     } else {
                         throw new Error(resultado.error || "No se pudo procesar el evento.");
                     }
                 } catch (error) {
                     console.error("Error:", error);
-                    alert("Hubo un error: " + error.message);
+                    mostrarAlertaArca(
+                        "Error al procesar el evento",
+                        "Hubo un error: " + error.message,
+                        { tipo: "error" }
+                    );
                 }
             });
         }

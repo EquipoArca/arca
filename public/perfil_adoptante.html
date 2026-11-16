@@ -431,7 +431,9 @@
 
     function eliminarPerfilAdoptante() {
         if (!idUsuarioActual) {
-            mostrarAlertaArca("¡Ups! ♡", "No se pudo identificar el usuario.", { tipo: "error" });
+            mostrarAlertaArca("Hubo un error",
+            "No se pudo identificar el usuario.", 
+            { tipo: "error" });
             return;
         }
 
@@ -541,7 +543,7 @@
 
     function revocarAcceso(idSolicitud) {
         mostrarAlertaArca(
-            "¿Quitar acceso? 🐾",
+            "¿Quitar acceso?",
             "¿Estás seguro de quitarle el acceso a este usuario? Podrá volver a solicitarlo si lo desea.",
             {
                 tipo: "pregunta",
@@ -556,7 +558,7 @@
 
                         if (res.ok) {
                             mostrarAlertaArca(
-                                "¡Listo! 🌸",
+                                "¡Listo! ",
                                 "Acceso revocado con éxito.",
                                 { tipo: "aviso" }
                             );

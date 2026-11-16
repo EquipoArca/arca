@@ -473,7 +473,7 @@
 
           if (!usernamePerfil || usernamePerfil === 'null' || usernamePerfil === 'undefined') {
               mostrarAlertaArca(
-                  "¡Ups! ♡",
+                  "Hubo un error.",
                   "No se especificó un usuario válido.",
                   {
                       tipo: "error",
@@ -588,12 +588,16 @@
           const correoLogueado = obtenerCorreoSesion();
 
           if (!motivo) {
-              mostrarAlertaArca("Campo requerido ♡", "Por favor escribe el motivo de la denuncia.", { tipo: "error" });
+              mostrarAlertaArca("Campo requerido", 
+              "Por favor escribe el motivo de la denuncia.", 
+              { tipo: "error" });
               return;
           }
 
           if (!correoLogueado) {
-              mostrarAlertaArca("Inicia sesión", "Debes iniciar sesión para realizar una denuncia.", { tipo: "aviso" });
+              mostrarAlertaArca("Inicia sesión", 
+              "Debes iniciar sesión para realizar una denuncia.", 
+              { tipo: "aviso" });
               return;
           }
 
@@ -612,13 +616,19 @@
               const data = await res.json();
               if (res.ok) {
                   cerrarModalDenuncia();
-                  mostrarAlertaArca("¡Denuncia enviada! 🌸", "La denuncia ha sido enviada al panel de administración correctamente.", { tipo: "aviso" });
+                  mostrarAlertaArca("¡Denuncia enviada!", 
+                  "La denuncia ha sido enviada al panel de administración correctamente.", 
+                  { tipo: "aviso" });
               } else {
-                  mostrarAlertaArca("Error", data.error || "No se pudo enviar la denuncia.", { tipo: "error" });
+                  mostrarAlertaArca("Error", data.error ||
+                   "No se pudo enviar la denuncia.", 
+                   { tipo: "error" });
               }
           } catch (e) {
               console.error("Error al enviar denuncia:", e);
-              mostrarAlertaArca("Error de red", "Hubo un problema al conectar con el servidor.", { tipo: "error" });
+              mostrarAlertaArca("Error de red", 
+              "Hubo un problema al conectar con el servidor.", 
+              { tipo: "error" });
           }
       }
 
@@ -637,7 +647,7 @@
           const correoLogueado = obtenerCorreoSesion();
           if (!correoLogueado) {
               mostrarAlertaArca(
-                  "¡Inicia sesión! ♡",
+                  "¡Inicia sesión! ",
                   "Debes iniciar sesión para seguir a otros usuarios.",
                   { tipo: "aviso" }
               );
@@ -670,7 +680,7 @@
           const correoLogueado = obtenerCorreoSesion();
           if (!correoLogueado) {
               mostrarAlertaArca(
-                  "¡Inicia sesión! ♡",
+                  "¡Inicia sesión! ",
                   "Debes iniciar sesión para enviar una solicitud.",
                   { tipo: "aviso" }
               );
@@ -764,7 +774,7 @@
           const correoLogueado = obtenerCorreoSesion();
           if (!correoLogueado) {
               mostrarAlertaArca(
-                  "¡Inicia sesión! ♡",
+                  "¡Inicia sesión! ",
                   "Debes iniciar sesión para bloquear a un usuario.",
                   {
                       tipo: "aviso",
@@ -778,7 +788,7 @@
 
           if (!idUsuarioPerfil) {
               mostrarAlertaArca(
-                  "¡Ups! ♡",
+                  "Hubo un error",
                   "No se pudo identificar al usuario que deseas bloquear.",
                   { tipo: "error" }
               );
@@ -808,7 +818,7 @@
                           
                           if (respuesta.ok) {
                               mostrarAlertaArca(
-                                  "¡Usuario bloqueado! 🌸",
+                                  "Bloqueaste a este usuario",
                                   "Usuario bloqueado correctamente.",
                                   {
                                       tipo: "aviso",
@@ -819,7 +829,7 @@
                               );
                           } else {
                               mostrarAlertaArca(
-                                  "No se pudo bloquear",
+                                  "Hubo un error",
                                   resultado.error || "No se pudo bloquear al usuario.",
                                   { tipo: "error" }
                               );
@@ -827,7 +837,7 @@
                       } catch (error) {
                           console.error("Error en la solicitud de bloqueo:", error);
                           mostrarAlertaArca(
-                              "Error de conexión ♡",
+                              "Error de conexión",
                               "Ocurrió un error al intentar bloquear al usuario.",
                               { tipo: "error" }
                           );
