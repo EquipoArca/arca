@@ -2414,7 +2414,11 @@ app.post('/api/crear-evento', (req, res) => {
 
 app.get('/api/eventos', (req, res) => {
     const query = `
-        SELECT e.*, f.Nombre_Comercial AS entidad_organizadora, f.PFP_Fundacion AS foto_fundacion
+        SELECT e.*, 
+               f.Nombre_Comercial AS entidad_organizadora, 
+               f.PFP_Fundacion AS foto_fundacion,
+               f.Correo_fundacion AS correo_fundacion,
+               f.Telefono_fundacion AS telefono_fundacion
         FROM eventos e
         LEFT JOIN fundacion f ON e.id_fundacion = f.id_fundacion
         ORDER BY e.id_evento DESC
