@@ -622,9 +622,9 @@
                   btnMapa.href = `mapa.html`;
               }
 
-              // Datos reales de contacto de la fundación organizadora (eliminando el correo genérico de arca)
+// Datos de contacto exclusivos de la fundación organizadora (sin mezclar ubicación)
               const tel = evento.telefono_fundacion || evento.Telefono_fundacion || '';
-              const correo = evento.correo_fundacion || evento.Correo_fundacion || evento.lugar || '';
+              const correo = evento.correo_fundacion || evento.Correo_fundacion || '';
               
               const urlWhatsapp = tel ? `https://wa.me/${tel.replace(/\D/g,'')}` : '#';
               const urlGmail = correo && correo.includes('@') ? `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(correo)}&su=${encodeURIComponent("Consulta sobre el evento: " + evento.nombre_evento)}` : '#';
@@ -647,14 +647,6 @@
                               <i class="fa-solid fa-envelope"></i> ${correo}
                           </a>
                           <button class="btn-copiar-mini" onclick="copiarAlPortapapeles('${correo}')"><i class="fa-solid fa-copy"></i> Copiar</button>
-                      </div>
-                  `;
-              } else if (evento.lugar) {
-                  contactoHTML += `
-                      <div class="contacto-fila-item">
-                          <span class="btn-contacto-link" style="color: #795f68;">
-                              <i class="fa-solid fa-location-dot"></i> Ubicación: ${evento.lugar}
-                          </span>
                       </div>
                   `;
               }
