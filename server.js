@@ -1239,59 +1239,49 @@ app.delete('/api/adopciones/:id', (req, res) => {
 });
 
 
-app.get('/api/perfil-publico/:parametro', (req, res) => {
-    const parametro = decodeURIComponent(req.params.parametro).trim();
-    const correoVisitante = req.query.correo_visitante;
+app.get('/api/reportes/:id', (req, res) => {
+    const idParam = Number(req.params.id);
 
-    const sql = `
-        SELECT u.id_usuarios, u.nombre_usuario, 
-               COALESCE(u.foto_perfil, f.PFP_Fundacion) AS foto_perfil, 
-               u.correo_usuario, u.Telefono_usuario
-        FROM usuarios u
-        LEFT JOIN fundacion f ON LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(f.Correo_fundacion))
-        WHERE u.nombre_usuario LIKE ?
-           OR u.correo_usuario LIKE ?
+    if (!Number.isInteger(idParam) || idParam <= 0) {
+        return res.status(400).json({
+            error: "ID de reporte inválido."
+        });
+    }
+
+    const query = `
+        SELECT
+            r.*,
+            tr.Nombre_tipo_reporte,
+            COALESCE(u.nombre_usuario, 'Usuario') AS nombre_usuario,
+            u.correo_usuario,
+            u.tipo_usuario,
+            p.id_publicacion
+        FROM reportes r
+        LEFT JOIN publicaciones p 
+            ON p.id_reporte = r.id_reporte
+        LEFT JOIN usuarios u 
+            ON r.id_usuarios = u.id_usuarios
+        LEFT JOIN tipo_reporte tr 
+            ON r.id_tipo_reporte = tr.id_tipo_reporte
+        WHERE p.id_publicacion = ? OR r.id_reporte = ?
+        LIMIT 1
     `;
 
-    db.query(sql, [`%${parametro}%`, `%${parametro}%`], (err, results) => {
-        if (err || results.length === 0) {
-            return res.status(404).json({ error: "Usuario no encontrado" });
-        }
-
-        const usuario = results[0];
-
-        if (!correoVisitante) {
-            return res.json({ ...usuario, siguiendo: false, estado_solicitud: 'ninguna' });
-        }
-
-        const sqlBloqueo = `
-            SELECT COUNT(*) AS bloqueado FROM usuarios_bloqueados ub
-            JOIN usuarios u1 ON ub.id_usuario_bloqueador = u1.id_usuarios
-            JOIN usuarios u2 ON ub.id_usuario_bloqueado = u2.id_usuarios
-            WHERE (LOWER(TRIM(u1.correo_usuario)) = LOWER(TRIM(?)) AND u2.id_usuarios = ?)
-               OR (LOWER(TRIM(u2.correo_usuario)) = LOWER(TRIM(?)) AND u1.id_usuarios = ?)
-        `;
-
-        db.query(sqlBloqueo, [correoVisitante, usuario.id_usuarios, correoVisitante, usuario.id_usuarios], (errB, resB) => {
-            if (resB && resB[0].bloqueado > 0) {
-                return res.status(404).json({ error: "Perfil no disponible" });
-            }
-
-            const sqlVerificaciones = `
-                SELECT
-                    (SELECT COUNT(*) FROM seguidores WHERE id_usuario_seguidor = (SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))) AND id_usuario_seguido = ?) AS siguiendo,
-                    (SELECT estado FROM solicitudes_adoptante WHERE id_solicitante = (SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))) AND id_propietario = ?) AS estado_solicitud
-            `;
-
-            db.query(sqlVerificaciones, [correoVisitante, usuario.id_usuarios, correoVisitante, usuario.id_usuarios], (errVerif, resVerif) => {
-                const estadoFinal = (resVerif && resVerif.length > 0 && resVerif[0].estado_solicitud) ? resVerif[0].estado_solicitud : 'ninguna';
-                res.json({
-                    ...usuario,
-                    siguiendo: resVerif && resVerif.length > 0 && resVerif[0].siguiendo > 0,
-                    estado_solicitud: estadoFinal
-                });
+    db.query(query, [idParam, idParam], (err, results) => {
+        if (err) {
+            console.error("❌ Error al consultar el reporte:", err.message);
+            return res.status(500).json({
+                error: "Error en el servidor"
             });
-        });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({
+                error: "Reporte no encontrado"
+            });
+        }
+
+        res.json(results[0]);
     });
 });
 
