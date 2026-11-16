@@ -724,13 +724,12 @@
                       if (btnRecordatorio) btnRecordatorio.remove();
                       if (btnGuardar) btnGuardar.remove();
 
-                      // Agregamos un indicador visual de que es su evento y el botón de editar
                       const divDueño = document.createElement('div');
                       divDueño.innerHTML = `
-                          <div style="background: rgba(254, 243, 199, 0.8); border: 1.5px solid #fde047; padding: 10px 16px; border-radius: 20px; font-size: 14px; color: #854d0e; text-align: center; margin-bottom: 5px;">
-                              <i class="fa-solid fa-crown" style="color: #ca8a04;"></i> Este evento fue publicado por tu fundación
+                          <div style="background: #f4c2c4; color: #5a2e2e; padding: 12px 16px; border-radius: 25px; font-size: 14px; text-align: center; margin-bottom: 10px; font-family: 'Itim', cursive; font-weight: bold; box-sizing: border-box;">
+                              <i class="fa-solid fa-crown" style="color: #7a3e3e;"></i> Este evento fue publicado por tu fundación
                           </div>
-                          <button id="btn-abrir-editar" class="btn-accion-prototipo" style="background: #fffbeb; border-color: #fde047; color: #854d0e; width: 100%; margin-top: 10px;" onclick="abrirModalEditar()">
+                          <button id="btn-abrir-editar" class="btn-accion-prototipo" style="width: 100%; margin-top: 5px;" onclick="abrirModalEditar()">
                               <i class="fa-solid fa-pen-to-square"></i> EDITAR EVENTO
                           </button>
                       `;
@@ -917,7 +916,7 @@
               mostrarAlertaArca("Error de conexión con el servidor.", "Error");
           }
       }
-      
+
   </script>
 </body>
 </html>
