@@ -1,4 +1,25 @@
-﻿body.dark-mode {
+﻿Ninguno seleccionado 
+
+Ir al contenido
+Uso de Correo de Institución Educativa Lusitania Paz de Colombia con lectores de pantalla
+
+1 de 383
+nenaa
+External
+Recibidos
+
+Thamara Puerta Londoño <jermybearmy02@gmail.com>
+Archivos adjuntos
+19:32 (hace 1 minuto)
+para mí
+
+Parece que este mensaje está en inglés
+
+ Un archivo adjunto
+  •  Analizados por Gmail
+dark-mode.css
+100 %
+body.dark-mode {
     background-color: #211918 !important;
     background-image: linear-gradient(rgba(125, 82, 80, 0.25), rgba(30, 24, 23, 0.85)), url('fondo.png.png') !important;
     background-size: cover !important;
@@ -8,7 +29,7 @@
     color: #f4ebd0 !important;
     overflow-x: hidden !important;
     
-    /* Forzamos que la pÃ¡gina cubra al menos toda la pantalla */
+    /* Forzamos que la página cubra al menos toda la pantalla */
     height: auto !important;
     min-height: 100vh !important;
     overflow-y: auto !important;
@@ -16,7 +37,7 @@
 }
 
 
-/* Control estricto de posiciÃ³n y dimensiones del contenido principal */
+/* Control estricto de posición y dimensiones del contenido principal */
 body.dark-mode .main-content {
     background: transparent !important;
     position: relative !important;
@@ -55,7 +76,7 @@ body.dark-mode .mini-logo-circle {
     background-color: #8c5d5b !important;
 }
 
-/* Barra de bÃºsqueda superior */
+/* Barra de búsqueda superior */
 body.dark-mode .search-bar {
     background-color: #2b2321 !important;
     border: 1px solid #4a3b32 !important;
@@ -99,7 +120,7 @@ body.dark-mode .side-icons a:hover .menu-text {
     color: #ffffff !important;
 }
 
-/* 4. TÃ­tulo ARCA */
+/* 4. Título ARCA */
 body.dark-mode .brand-title {
     color: #fbd7d3 !important;
     -webkit-text-stroke: 4px #8c5d5b !important;
@@ -133,7 +154,7 @@ body.dark-mode .card.donate {
     border-color: #645145 !important;
 }
 
-/* 6. BotÃ³n de Novedades */
+/* 6. Botón de Novedades */
 body.dark-mode .news-button {
     background-color: #382c28 !important;
     color: #f4ebd0 !important;
@@ -242,7 +263,7 @@ body.dark-mode .circulo-icono-modal i {
     color: #f4ebd0 !important;
 }
 
-/* 8. SecciÃ³n de Perfil */
+/* 8. Sección de Perfil */
 body.dark-mode .tarjeta-perfil {
     background-color: #2b2321 !important;
     border: 1px solid #4a3b32 !important;
@@ -290,7 +311,7 @@ body.dark-mode .perfil-header-prototipo h2 {
     text-shadow: 0 2px 4px rgba(70, 27, 8, 0.5);
 }
 
-/* MenÃº Desplegable de Usuario */
+/* Menú Desplegable de Usuario */
 body.dark-mode .mini-menu-card {
     background: #2b2321ee !important;
     border: 1.5px solid #4a3b32 !important;
@@ -515,7 +536,7 @@ body.dark-mode .notification-item:hover {
     background-color: #352b28 !important;
 }
 
-/* 12. SecciÃ³n de Mapa y Popups de Veterinarias (Leaflet - AJUSTADO PARA EVITAR CORTES) */
+/* 12. Sección de Mapa y Popups de Veterinarias (Leaflet - AJUSTADO PARA EVITAR CORTES) */
 body.dark-mode .mapa-container-principal {
     background: rgba(43, 35, 33, 0.8) !important;
     border: 2px solid #4a3b32 !important;
@@ -593,7 +614,7 @@ body.dark-mode .card-vet-cercana {
     color: #f4ebd0 !important;
 }
 
-/* Popups especÃ­ficos de Leaflet para veterinarias */
+/* Popups específicos de Leaflet para veterinarias */
 body.dark-mode .leaflet-popup-content-wrapper,
 body.dark-mode .leaflet-popup-tip {
     background: rgba(43, 35, 33, 0.96) !important;
@@ -719,13 +740,13 @@ body.dark-mode .btn-guardar-form {
 }
 
 /* ==========================================
-   OPTIMIZACIÃ“N DEL MAPA LEAFLET (DIMENSIONES EXACTAS)
+   OPTIMIZACIÓN DEL MAPA LEAFLET (DIMENSIONES EXACTAS)
    ========================================== */
 
 body.dark-mode #mapa-arca {
     width: 100% !important;
     max-width: 100% !important;
-    height: 420px !important; /* Altura Ã³ptima para visualizar sin requerir tanto scroll */
+    height: 420px !important; /* Altura óptima para visualizar sin requerir tanto scroll */
     background-color: #2b2321 !important;
     border: 3px solid #4a3b32 !important;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important;
@@ -789,7 +810,7 @@ body.dark-mode .escena-cielo-kawaii {
     justify-content: center;
 }
 
-/* Sol Kawaii corregido (se agregÃ³ el espacio necesario) */
+/* Sol Kawaii corregido (se agregó el espacio necesario) */
 body.dark-mode .sol-kawaii {
     width: 90px;
     height: 90px;
@@ -885,13 +906,13 @@ body.dark-mode .destello {
 body.dark-mode .destello.d1 { top: 12px; left: 45px; animation: brillar 2s ease-in-out infinite; }
 body.dark-mode .destello.d2 { bottom: 20px; right: 50px; animation: brillar 2s ease-in-out infinite 1s; }
 
-/* Oculta cualquier caja extra o tooltip no deseado en el estado vacÃ­o */
+/* Oculta cualquier caja extra o tooltip no deseado en el estado vacío */
 body.dark-mode .estado-vacio > div:not(.escena-cielo-kawaii),
 body.dark-mode .estado-vacio *:not(h2):not(p):not(.escena-cielo-kawaii):not(.sol-kawaii):not(.nube-kawaii):not(.destello):not(.ojo-sol):not(.boca-sol):not(.rubor-sol) {
     display: none !important;
 }
 /* ==========================================
-   FORMULARIO DE ADOPCIÃ“N - DISEÃ‘O GENERAL (MODO CLARO Y OSCURO)
+   FORMULARIO DE ADOPCIÓN - DISEÑO GENERAL (MODO CLARO Y OSCURO)
    ========================================== */
 
 .pagina-adopcion-body {
@@ -924,7 +945,7 @@ body.dark-mode .estado-vacio *:not(h2):not(p):not(.escena-cielo-kawaii):not(.sol
     font-size: 14px;
 }
 
-/* Grilla general: 3 columnas automÃ¡ticas para PC (Aplica para ambos modos) */
+/* Grilla general: 3 columnas automáticas para PC (Aplica para ambos modos) */
 .grid-adopcion-tarjetas {
     display: grid;
     grid-template-columns: repeat(3, minmax(320px, 1fr)) !important;
@@ -1107,7 +1128,7 @@ body.dark-mode .estado-vacio *:not(h2):not(p):not(.escena-cielo-kawaii):not(.sol
 
 
 /* ==========================================
-   ADAPTACIÃ“N EXCLUSIVA AL MODO OSCURO GLOBAL DE ARCA
+   ADAPTACIÓN EXCLUSIVA AL MODO OSCURO GLOBAL DE ARCA
    ========================================== */
 
 body.dark-mode .header-formulario-adopcion h2 {
@@ -1197,15 +1218,15 @@ body.dark-mode .btn-enviar-adopcion-final:hover {
    ARCA - DONACIONES EN MODO OSCURO
    ========================================== */
 
-/* Fondo de la secciÃ³n */
+/* Fondo de la sección */
 body.dark-mode .donation-main-container {
     background-color: transparent !important;
     overflow-y: auto !important; /* Habilita el desplazamiento vertical si el contenido es muy largo */
-    max-height: 100vh; /* Limita la altura al tamaÃ±o de la ventana */
-    padding-bottom: 50px !important; /* Da un respiro al final para que no se corten los Ãºltimos campos */
+    max-height: 100vh; /* Limita la altura al tamaño de la ventana */
+    padding-bottom: 50px !important; /* Da un respiro al final para que no se corten los últimos campos */
 }
 
-/* TÃ­tulos de las secciones */
+/* Títulos de las secciones */
 body.dark-mode .section-pill-title {
     background-color: #925347 !important;
     color: #f7e7de !important;
@@ -1213,7 +1234,7 @@ body.dark-mode .section-pill-title {
     border: none !important;
 }
 
-/* Casillas de selecciÃ³n */
+/* Casillas de selección */
 body.dark-mode .donation-custom-checkbox {
     border-color: #6e5e5b !important;
     background-color: #352b28 !important;
@@ -1226,7 +1247,7 @@ body.dark-mode .donation-option-row input[type="checkbox"]:checked
     border-color: #925347 !important;
 }
 
-/* Campos de texto y descripciÃ³n */
+/* Campos de texto y descripción */
 body.dark-mode .donation-input-pill,
 body.dark-mode .donation-textarea,
 body.dark-mode .donation-contact-wrapper input {
@@ -1252,7 +1273,7 @@ body.dark-mode .donation-plain-text {
     color: #e3d2c9 !important;
 }
 
-/* BotÃ³n para seleccionar fundaciÃ³n */
+/* Botón para seleccionar fundación */
 body.dark-mode .btn-select-map {
     background-color: #80574d !important;
     color: #f7e7de !important;
@@ -1268,7 +1289,7 @@ body.dark-mode .donation-contact-wrapper i {
     color: #925347 !important;
 }
 
-/* BotÃ³n para enviar donaciÃ³n */
+/* Botón para enviar donación */
 body.dark-mode .btn-submit-donation {
     background-color: #925347 !important;
     color: #ffffff !important;
@@ -1285,12 +1306,12 @@ body.dark-mode .donation-contact-wrapper input:focus {
 }   
 
 /* ==========================================
-   ARCA - CORRECCIÃ“N DE DISTRIBUCIÃ“N
-   PÃGINA DE CONFIGURACIÃ“N EN MODO OSCURO
+   ARCA - CORRECCIÓN DE DISTRIBUCIÓN
+   PÁGINA DE CONFIGURACIÓN EN MODO OSCURO
    ========================================== */
 
 /* Mantener el contenedor principal sin alterar
-   la distribuciÃ³n propia de ConfiguraciÃ³n */
+   la distribución propia de Configuración */
 body.dark-mode .main-content:has(.grid-configuracion) {
     display: block !important;
     width: 100% !important;
@@ -1303,7 +1324,7 @@ body.dark-mode .main-content:has(.grid-configuracion) {
     padding-bottom: 40px !important;
 }
 
-/* Conservar la cuadrÃ­cula de dos columnas */
+/* Conservar la cuadrícula de dos columnas */
 body.dark-mode .grid-configuracion {
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -1343,7 +1364,7 @@ body.dark-mode .grid-configuracion .setting-row {
     flex-wrap: wrap !important;
 }
 
-/* AdaptaciÃ³n a pantallas pequeÃ±as */
+/* Adaptación a pantallas pequeñas */
 @media (max-width: 768px) {
     body.dark-mode .grid-configuracion {
         grid-template-columns: minmax(0, 1fr) !important;
@@ -1453,7 +1474,7 @@ body.dark-mode .proto-btn-detalles:hover {
     color: #ffffff !important;
 }
 
-/* Tarjeta dinÃ¡mica bÃ¡sica (.card-novedad) */
+/* Tarjeta dinámica básica (.card-novedad) */
 body.dark-mode .card-novedad {
     background-color: #2b2321 !important;
     border-color: #4a3b32 !important;
@@ -1486,1142 +1507,4 @@ body.dark-mode .btn-detalles {
 body.dark-mode .btn-detalles:hover {
     background-color: #6a4544 !important;
 }
-
-/* ==========================================
-   FORMULARIOS: INPUTS, TEXTAREAS, SELECTS
-   ========================================== */
-body.dark-mode .input-arca,
-body.dark-mode .input-arca-reest,
-body.dark-mode .input-busqueda-nav,
-body.dark-mode .input-con-icono,
-body.dark-mode .input-contacto-wrapper,
-body.dark-mode .input-contacto-wrapper input,
-body.dark-mode .input-contacto-wrapper input:focus,
-body.dark-mode .input-direccion,
-body.dark-mode .input-direccion:focus,
-body.dark-mode .input-fecha,
-body.dark-mode .input-fundacion,
-body.dark-mode .input-group,
-body.dark-mode .input-lugar,
-body.dark-mode .input-motivo-denuncia,
-body.dark-mode .input-nombre-evento,
-body.dark-mode .input-nuevo-correo,
-body.dark-mode .input-nuevo-nombre,
-body.dark-mode .input-nuevo-telefono,
-body.dark-mode .input-paso1,
-body.dark-mode .input-paso2,
-body.dark-mode .input-redes-container,
-body.dark-mode .input-ubicacion-coords,
-body.dark-mode .grupo-campo input,
-body.dark-mode .grupo-campo select,
-body.dark-mode .grupo-campo textarea,
-body.dark-mode .select-wrapper select,
-body.dark-mode .select-estado-reporte,
-body.dark-mode .select-fundacion-destino,
-body.dark-mode .select-fundacion-donacion,
-body.dark-mode .select-raza,
-body.dark-mode .textarea-arca,
-body.dark-mode .textarea-box,
-body.dark-mode .textarea-custom-adopcion,
-body.dark-mode .textarea-custom-adopcion:focus,
-body.dark-mode .texto-input-falso {
-    background-color: #2b2321 !important;
-    border: 1px solid #4a3b32 !important;
-    color: #f4ebd0 !important;
-    box-shadow: inset 0 2px 6px rgba(0,0,0,0.3) !important;
-}
-body.dark-mode .input-arca:focus,
-body.dark-mode .input-arca-reest:focus,
-body.dark-mode .input-busqueda-nav:focus,
-body.dark-mode .input-direccion:focus,
-body.dark-mode .input-fecha:focus,
-body.dark-mode .input-fundacion:focus,
-body.dark-mode .input-lugar:focus,
-body.dark-mode .input-nombre-evento:focus,
-body.dark-mode .input-nuevo-correo:focus,
-body.dark-mode .input-nuevo-nombre:focus,
-body.dark-mode .input-nuevo-telefono:focus,
-body.dark-mode .input-paso1:focus,
-body.dark-mode .input-paso2:focus,
-body.dark-mode .input-ubicacion-coords:focus,
-body.dark-mode .grupo-campo input:focus,
-body.dark-mode .grupo-campo select:focus,
-body.dark-mode .grupo-campo textarea:focus,
-body.dark-mode .select-wrapper select:focus,
-body.dark-mode .select-estado-reporte:focus,
-body.dark-mode .select-fundacion-destino:focus,
-body.dark-mode .select-fundacion-donacion:focus,
-body.dark-mode .select-raza:focus,
-body.dark-mode .textarea-arca:focus,
-body.dark-mode .textarea-box:focus,
-body.dark-mode .textarea-custom-adopcion:focus {
-    border-color: #8c5d5b !important;
-    box-shadow: 0 0 0 3px rgba(140, 93, 91, 0.2), inset 0 2px 6px rgba(0,0,0,0.3) !important;
-    outline: none !important;
-}
-body.dark-mode .input-arca::placeholder,
-body.dark-mode .input-arca-reest::placeholder,
-body.dark-mode .input-busqueda-nav::placeholder,
-body.dark-mode .input-direccion::placeholder,
-body.dark-mode .input-fecha::placeholder,
-body.dark-mode .input-fundacion::placeholder,
-body.dark-mode .input-lugar::placeholder,
-body.dark-mode .input-nombre-evento::placeholder,
-body.dark-mode .input-nuevo-correo::placeholder,
-body.dark-mode .input-nuevo-nombre::placeholder,
-body.dark-mode .input-nuevo-telefono::placeholder,
-body.dark-mode .input-paso1::placeholder,
-body.dark-mode .input-paso2::placeholder,
-body.dark-mode .input-ubicacion-coords::placeholder,
-body.dark-mode .grupo-campo input::placeholder,
-body.dark-mode .grupo-campo textarea::placeholder,
-body.dark-mode .textarea-arca::placeholder,
-body.dark-mode .textarea-box::placeholder,
-body.dark-mode .textarea-custom-adopcion::placeholder {
-    color: #b59b8e !important;
-    opacity: 0.7 !important;
-}
-body.dark-mode .select-wrapper::after {
-    color: #f4ebd0 !important;
-    border-color: #f4ebd0 !important;
-}
-body.dark-mode .input-contenedor-nombre {
-    background: rgba(43, 35, 33, 0.85) !important;
-    backdrop-filter: blur(6px) !important;
-    border: 2px solid rgba(140, 93, 91, 0.4) !important;
-    border-radius: 20px !important;
-}
-body.dark-mode .input-contenedor-nombre input {
-    color: #f4ebd0 !important;
-    background: transparent !important;
-}
-body.dark-mode .prefijo-at {
-    color: #b59b8e !important;
-}
-
-/* ==========================================
-   BOTONES
-   ========================================== */
-body.dark-mode .btn-login,
-body.dark-mode .btn-login-conf,
-body.dark-mode .btn-login-main,
-body.dark-mode .btn-login-map,
-body.dark-mode .btn-siguiente-rosa,
-body.dark-mode .btn-enviar,
-body.dark-mode .btn-registrar,
-body.dark-mode .btn-guardar-form,
-body.dark-mode .btn-subir-archivo,
-body.dark-mode .btn-subir-archivo:hover,
-body.dark-mode .btn-submit-donation,
-body.dark-mode .btn-ver-caso,
-body.dark-mode .btn-ver-caso:hover,
-body.dark-mode .btn-ver-cercanas-toggle,
-body.dark-mode .btn-volver,
-body.dark-mode .btn-volver-opciones,
-body.dark-mode .btn-cerrar,
-body.dark-mode .btn-cerrar-modal,
-body.dark-mode .btn-modal-primario,
-body.dark-mode .btn-modal-primario:hover,
-body.dark-mode .btn-modal-secundario,
-body.dark-mode .btn-modal-secundario:hover,
-body.dark-mode .btn-perfil-amarillo,
-body.dark-mode .btn-perfil-rosa,
-body.dark-mode .btn-select-map,
-body.dark-mode .btn-social,
-body.dark-mode .btn-ubicacion-actual,
-body.dark-mode .btn-ubicacion-actual:hover,
-body.dark-mode .btn-enviar-adopcion-final,
-body.dark-mode .btn-enviar-adopcion-final:hover,
-body.dark-mode .btn-enviar-reporte,
-body.dark-mode .btn-enviar-reporte:hover,
-body.dark-mode .btn-escanear-zona,
-body.dark-mode .btn-flotante-mas,
-body.dark-mode .btn-fundacion,
-body.dark-mode .btn-accion-card,
-body.dark-mode .btn-mapa-exacto,
-body.dark-mode .btn-enfocar-mapa,
-body.dark-mode .btn-arca-animado,
-body.dark-mode .btn-adopcion-opcion,
-body.dark-mode .btn-adopcion-opcion:hover,
-body.dark-mode .btn-confirmar-nombre,
-body.dark-mode .btn-siguiente-rosa,
-body.dark-mode .btn-sobre,
-body.dark-mode .btn-imprimir {
-    background-color: #2b2321 !important;
-    border: 1px solid #4a3b32 !important;
-    color: #f4ebd0 !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
-}
-body.dark-mode .btn-login:hover,
-body.dark-mode .btn-siguiente-rosa:hover,
-body.dark-mode .btn-enviar:hover,
-body.dark-mode .btn-registrar:hover,
-body.dark-mode .btn-guardar-form:hover,
-body.dark-mode .btn-subir-archivo:hover,
-body.dark-mode .btn-submit-donation:hover,
-body.dark-mode .btn-ver-caso:hover,
-body.dark-mode .btn-volver:hover,
-body.dark-mode .btn-volver-opciones:hover,
-body.dark-mode .btn-cerrar:hover,
-body.dark-mode .btn-cerrar-modal:hover,
-body.dark-mode .btn-select-map:hover,
-body.dark-mode .btn-social:hover,
-body.dark-mode .btn-ubicacion-actual:hover,
-body.dark-mode .btn-enviar-adopcion-final:hover,
-body.dark-mode .btn-enviar-reporte:hover,
-body.dark-mode .btn-escanear-zona:hover,
-body.dark-mode .btn-flotante-mas:hover,
-body.dark-mode .btn-fundacion:hover,
-body.dark-mode .btn-accion-card:hover,
-body.dark-mode .btn-mapa-exacto:hover,
-body.dark-mode .btn-enfocar-mapa:hover,
-body.dark-mode .btn-arca-animado:hover,
-body.dark-mode .btn-adopcion-opcion:hover,
-body.dark-mode .btn-confirmar-nombre:hover,
-body.dark-mode .btn-sobre:hover,
-body.dark-mode .btn-imprimir:hover {
-    background-color: #352b28 !important;
-    border-color: #8c5d5b !important;
-    color: #ffffff !important;
-    transform: translateY(-2px) !important;
-    box-shadow: 0 6px 16px rgba(140, 93, 91, 0.3) !important;
-}
-body.dark-mode .btn-modal-primario {
-    background: linear-gradient(135deg, #8c5d5b, #6a4544) !important;
-    color: #ffffff !important;
-    border: 2px solid rgba(255, 255, 255, 0.3) !important;
-}
-body.dark-mode .btn-modal-primario:hover {
-    background: linear-gradient(135deg, #6a4544, #4d3a39) !important;
-    transform: translateY(-2px) !important;
-}
-body.dark-mode .btn-modal-secundario {
-    background: rgba(53, 43, 40, 0.85) !important;
-    color: #f4ebd0 !important;
-    border: 1.5px solid rgba(140, 93, 91, 0.4) !important;
-}
-body.dark-mode .btn-modal-secundario:hover {
-    background: rgba(56, 44, 40, 0.95) !important;
-    color: #ffffff !important;
-    border-color: #8c5d5b !important;
-}
-body.dark-mode .btn-cerrar-modal {
-    color: #b59b8e !important;
-    background: transparent !important;
-    border: none !important;
-}
-body.dark-mode .btn-cerrar-modal:hover {
-    color: #f7d6d0 !important;
-}
-body.dark-mode .btn-social.email {
-    background: rgba(43, 35, 33, 0.8) !important;
-    border: 1px solid #4a3b32 !important;
-    color: #f4ebd0 !important;
-}
-body.dark-mode .btn-fundacion {
-    background: rgba(43, 35, 33, 0.8) !important;
-    border: 1px solid #4a3b32 !important;
-    color: #f4ebd0 !important;
-}
-
-/* ==========================================
-   TARJETAS Y CONTENEDORES
-   ========================================== */
-body.dark-mode .card,
-body.dark-mode .card.adopt,
-body.dark-mode .card.donate,
-body.dark-mode .card.report,
-body.dark-mode .card-adopcion-seccion,
-body.dark-mode .card-vet-cercana,
-body.dark-mode .reporte-card,
-body.dark-mode .reporte-card-header,
-body.dark-mode .tarjeta-reporte,
-body.dark-mode .tarjeta-footer,
-body.dark-mode .tarjeta-header,
-body.dark-mode .info-box,
-body.dark-mode .seccion-arca,
-body.dark-mode .perfil-layout,
-body.dark-mode .main-container,
-body.dark-mode .config-card,
-body.dark-mode .bloque-form,
-body.dark-mode .normas-adopcion-box,
-body.dark-mode .popup-card-arca,
-body.dark-mode .popup-card-sin-foto,
-body.dark-mode .sobre-footer-card,
-body.dark-mode .logo-card-1,
-body.dark-mode .item-sobre-tarjeta,
-body.dark-mode .item-guia-tarjeta,
-body.dark-mode .item-faq-acordeon,
-body.dark-mode .seccion-catalogo-adopcion,
-body.dark-mode .seccion-catalogo-animales,
-body.dark-mode .main-content-error,
-body.dark-mode .main-content-faq,
-body.dark-mode .main-content-guia,
-body.dark-mode .main-content-sobre,
-body.dark-mode .main-content-notificaciones,
-body.dark-mode .mis-publicaciones-container,
-body.dark-mode .guardados-container,
-body.dark-mode .zona-guardados-dinamica,
-body.dark-mode .lista-solicitudes,
-body.dark-mode .lista-accesos,
-body.dark-mode .lista-accesos-contenedor,
-body.dark-mode .lista-donaciones-usuario-container,
-body.dark-mode .lista-faq-estilizada,
-body.dark-mode .lista-guia-estilizada,
-body.dark-mode .lista-sobre-estilizada,
-body.dark-mode .lista-social-container,
-body.dark-mode .lista-cercanas,
-body.dark-mode .lista-cercanas-container,
-body.dark-mode .panel-cercanas,
-body.dark-mode .panel-notificaciones,
-body.dark-mode .donation-main-container,
-body.dark-mode .donation-column,
-body.dark-mode .donation-options-group,
-body.dark-mode .seccion-configuracion,
-body.dark-mode .seccion-docs,
-body.dark-mode .seccion-mapa,
-body.dark-mode .seccion-denuncia-bloqueo,
-body.dark-mode .seccion-ficha-bloque,
-body.dark-mode .seccion-interna-bloque,
-body.dark-mode .seccion-invitado,
-body.dark-mode .seccion-logo,
-body.dark-mode .pagina-adopcion-body,
-body.dark-mode .pagina-web,
-body.dark-mode .medio-ancho,
-body.dark-mode .tres-cols,
-body.dark-mode .posts-grid,
-body.dark-mode .programas-publicos,
-body.dark-mode .publicaciones,
-body.dark-mode .legal-container,
-body.dark-mode .legal-section,
-body.dark-mode .politicas,
-body.dark-mode .privacidad-container,
-body.dark-mode .terminos-container,
-body.dark-mode .seccion-titulo-caja,
-body.dark-mode .seccion-privacidad,
-body.dark-mode .seccion-terminos {
-    background-color: #2b2321 !important;
-    border: 1px solid #4a3b32 !important;
-    color: #f4ebd0 !important;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.4) !important;
-    backdrop-filter: blur(8px) !important;
-    -webkit-backdrop-filter: blur(8px) !important;
-}
-body.dark-mode .card:hover,
-body.dark-mode .reporte-card:hover,
-body.dark-mode .config-card:hover,
-body.dark-mode .tarjeta-reporte:hover,
-body.dark-mode .popup-card-arca:hover,
-body.dark-mode .card-vet-cercana:hover,
-body.dark-mode .info-box:hover {
-    border-color: #8c5d5b !important;
-    transform: translateY(-3px) !important;
-    box-shadow: 0 10px 25px rgba(140, 93, 91, 0.25) !important;
-}
-body.dark-mode .reporte-card-header {
-    border-bottom-color: #4a3b32 !important;
-}
-body.dark-mode .reporte-card-header h2,
-body.dark-mode .reporte-card-header small {
-    color: #f7d6d0 !important;
-}
-body.dark-mode .reporte-card-header small {
-    color: #b59b8e !important;
-}
-/* Tarjeta de vidrio (glassmorphism) */
-body.dark-mode .tarjeta-formulario-glass,
-body.dark-mode .tarjeta-formulario-arca-unico,
-body.dark-mode .perfil-prototipo-container,
-body.dark-mode .perfil-header-prototipo,
-body.dark-mode .perfil-header-card,
-body.dark-mode .perfil-container-principal,
-body.dark-mode .mapa-container-principal,
-body.dark-mode .seccion-adopcion-opciones {
-    background: rgba(43, 35, 33, 0.85) !important;
-    backdrop-filter: blur(14px) !important;
-    -webkit-backdrop-filter: blur(14px) !important;
-    border: 2px solid rgba(140, 93, 91, 0.35) !important;
-    box-shadow: 0 16px 40px rgba(0,0,0,0.35) !important;
-    color: #f4ebd0 !important;
-}
-
-/* ==========================================
-   MODALES Y OVERLAYS
-   ========================================== */
-body.dark-mode .modal-overlay,
-body.dark-mode .modal-overlay-arca,
-body.dark-mode .modal-overlay-aviso,
-body.dark-mode .modal-accesos-overlay,
-body.dark-mode .modal-foto-overlay,
-body.dark-mode .modal-exito-overlay,
-body.dark-mode .custom-alert-overlay,
-body.dark-mode .estado-vacio,
-body.dark-mode .overlay-bloqueo,
-body.dark-mode .configuracion-overlay,
-body.dark-mode .modal-arca,
-body.dark-mode .modal-arca-box,
-body.dark-mode .modal-card,
-body.dark-mode .modal-contenido,
-body.dark-mode .modal-contenido-arca,
-body.dark-mode .modal-foto-contenido,
-body.dark-mode .modal-tarjeta-aviso,
-body.dark-mode .modal-avatar-contenedor,
-body.dark-mode .modal-avatar-preview,
-body.dark-mode .modal-denuncia-perfil,
-body.dark-mode .modal-detalle-publicacion,
-body.dark-mode .modal-mis-donaciones,
-body.dark-mode .modal-nueva-publicacion,
-body.dark-mode .modal-otp,
-body.dark-mode .modal-recuperar-pass,
-body.dark-mode .modal-social-unico,
-body.dark-mode .modal-visor-foto-grande,
-body.dark-mode .modal-accesos-card,
-body.dark-mode .custom-alert-card,
-body.dark-mode .offline-card {
-    background: rgba(35, 27, 26, 0.9) !important;
-    backdrop-filter: blur(16px) !important;
-    -webkit-backdrop-filter: blur(16px) !important;
-    border: 1px solid #4a3b32 !important;
-    box-shadow: 0 24px 50px rgba(0,0,0,0.5) !important;
-    color: #f4ebd0 !important;
-}
-body.dark-mode .modal-header,
-body.dark-mode .modal-header h2,
-body.dark-mode .modal-card h2,
-body.dark-mode .modal-card h3,
-body.dark-mode .modal-arca h2,
-body.dark-mode .modal-contenido-arca h3,
-body.dark-mode .modal-social-titulo,
-body.dark-mode .titulo-modal-aviso,
-body.dark-mode .titulo-modal-exito {
-    color: #f7d6d0 !important;
-}
-body.dark-mode .modal-card .subtitulo,
-body.dark-mode .texto-modal-aviso,
-body.dark-mode .texto-modal-exito,
-body.dark-mode .custom-alert-message,
-body.dark-mode .custom-alert-title {
-    color: #b59b8e !important;
-}
-body.dark-mode .modal-foto-overlay,
-body.dark-mode .modal-exito-overlay,
-body.dark-mode .custom-alert-overlay,
-body.dark-mode .overlay-bloqueo {
-    background-color: rgba(33, 25, 24, 0.85) !important;
-    backdrop-filter: blur(10px) !important;
-}
-body.dark-mode .custom-alert-card {
-    background: rgba(43, 35, 33, 0.95) !important;
-    border: 2px solid rgba(255, 255, 255, 0.2) !important;
-    box-shadow: 0 24px 50px rgba(0,0,0,0.6) !important;
-}
-body.dark-mode .close-x-btn {
-    color: #b59b8e !important;
-}
-body.dark-mode .close-x-btn:hover {
-    color: #ffffff !important;
-}
-/* Toast */
-body.dark-mode .texto-toast,
-body.dark-mode #toast-arca,
-body.dark-mode .toast-seguimiento {
-    background: rgba(33, 25, 24, 0.95) !important;
-    color: #f4ebd0 !important;
-    border: 1px solid #4a3b32 !important;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.4) !important;
-}
-
-/* ==========================================
-   PERFIL Y ELEMENTOS DE USUARIO
-   ========================================== */
-body.dark-mode .perfil-datos-usuario,
-body.dark-mode .perfil-info-izquierda,
-body.dark-mode .perfil-header-card,
-body.dark-mode .perfil-container-principal,
-body.dark-mode .perfil-body-grid,
-body.dark-mode .perfil-fundacion-container,
-body.dark-mode .perfil-grid-opciones,
-body.dark-mode .pf-avatar,
-body.dark-mode .pf-avatar-flotante,
-body.dark-mode .pf-btn-accion-foto,
-body.dark-mode .pf-card-seccion,
-body.dark-mode .pf-enfoque,
-body.dark-mode .pf-grid-amplio,
-body.dark-mode .pf-header-info,
-body.dark-mode .pf-label-capsula,
-body.dark-mode .pf-mision,
-body.dark-mode .pf-nombre-fundacion,
-body.dark-mode .pf-nombre-titulo,
-body.dark-mode .pf-portada,
-body.dark-mode .pf-portada-contenedor,
-body.dark-mode .pf-portada-preview,
-body.dark-mode .pf-programas,
-body.dark-mode .pf-redes-container,
-body.dark-mode .pf-redes-fila,
-body.dark-mode .pf-texto-info,
-body.dark-mode .pf-vision,
-body.dark-mode .usr-foto,
-body.dark-mode .usr-tag,
-body.dark-mode .usr-ubicacion,
-body.dark-mode .avatar-perfil-img,
-body.dark-mode .avatar-circulo,
-body.dark-mode .avatar-wrapper,
-body.dark-mode .icono-silueta,
-body.dark-mode .modal-avatar-preview {
-    background: rgba(43, 35, 33, 0.85) !important;
-    color: #f4ebd0 !important;
-    border-color: #4a3b32 !important;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.35) !important;
-}
-body.dark-mode .avatar-circulo,
-body.dark-mode .modal-avatar-preview {
-    background: rgba(60, 40, 38, 0.85) !important;
-    border: 4px solid rgba(140, 93, 91, 0.4) !important;
-    box-shadow: 0 10px 25px rgba(140, 93, 91, 0.25) !important;
-}
-body.dark-mode .icono-silueta {
-    color: #f7d6d0 !important;
-}
-body.dark-mode .perfil-datos-usuario h2,
-body.dark-mode .perfil-header-prototipo h2,
-body.dark-mode .perfil-header-card h2,
-body.dark-mode .nombre-usuario,
-body.dark-mode .nombre-publico-fundacion,
-body.dark-mode .nombre-comercial,
-body.dark-mode .nombre-legal,
-body.dark-mode .nombre-donante,
-body.dark-mode .nombre-autor-texto,
-body.dark-mode .nombre-animal,
-body.dark-mode .nombre-actual-display,
-body.dark-mode .mostrar-nombre-usuario,
-body.dark-mode .mini-menu-username,
-body.dark-mode .user-name-text {
-    color: #f7d6d0 !important;
-}
-body.dark-mode .ubicacion-pill,
-body.dark-mode .pf-label-capsula {
-    background: rgba(53, 43, 40, 0.8) !important;
-    color: #f4ebd0 !important;
-    border: 1px solid #4a3b32 !important;
-}
-body.dark-mode .btn-icono-seguir,
-body.dark-mode .btn-lapiz-editar {
-    background: rgba(53, 43, 40, 0.85) !important;
-    border: 2px solid #4a3b32 !important;
-    color: #f4ebd0 !important;
-}
-body.dark-mode .btn-icono-seguir:hover,
-body.dark-mode .btn-lapiz-editar:hover {
-    background: #8c5d5b !important;
-    border-color: #8c5d5b !important;
-    color: #ffffff !important;
-}
-/* Estadísticas de seguidores */
-body.dark-mode .num-seguidores,
-body.dark-mode .num-seguidos,
-body.dark-mode .stats-seguidores-container,
-body.dark-mode .stats-seguidores-container span {
-    color: #f4ebd0 !important;
-}
-
-/* ==========================================
-   NAVEGACIÓN Y CABECERA
-   ========================================== */
-body.dark-mode .top-left {
-    color: #f4ebd0 !important;
-}
-body.dark-mode .page-title,
-body.dark-mode #titulo-pagina {
-    color: #f7d6d0 !important;
-}
-body.dark-mode .notif-bell {
-    background-color: #2b2321 !important;
-    color: #f7d6d0 !important;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
-}
-body.dark-mode .menu-item {
-    color: #f7d6d0 !important;
-}
-body.dark-mode .menu-item:hover {
-    background-color: rgba(140, 93, 91, 0.2) !important;
-    color: #ffffff !important;
-}
-body.dark-mode .sidebar-link.deshabilitado {
-    opacity: 0.4 !important;
-    color: #9e8578 !important;
-}
-body.dark-mode .sidebar-abierta {
-    background-color: #1f1918ee !important;
-}
-body.dark-mode .brand-arca {
-    color: #fbd7d3 !important;
-    -webkit-text-stroke: 4px #8c5d5b !important;
-}
-body.dark-mode .slogan,
-body.dark-mode .main-title,
-body.dark-mode .title {
-    color: #f4ebd0 !important;
-}
-body.dark-mode .logo-wrapper,
-body.dark-mode .small-logo-circle,
-body.dark-mode .mini-logo-circle,
-body.dark-mode .small-logo,
-body.dark-mode .arcapill-logo {
-    background-color: #8c5d5b !important;
-    box-shadow: 0 4px 10px rgba(140, 93, 91, 0.4) !important;
-}
-body.dark-mode .news-button,
-body.dark-mode .next-button {
-    color: #f7d6d0 !important;
-}
-body.dark-mode .next-button:hover {
-    color: #ffffff !important;
-}
-
-/* ==========================================
-   ALERTAS, ESTADOS VACÍOS Y NOTIFICACIONES
-   ========================================== */
-body.dark-mode .estado-vacio,
-body.dark-mode #estado-vacio-guardados,
-body.dark-mode #estado-vacio-mis-pubs {
-    color: #b59b8e !important;
-}
-body.dark-mode .estado-vacio h2 {
-    color: #f7d6d0 !important;
-}
-body.dark-mode .estado-vacio *:not(h2):not(p):not(.escena-cielo-kawaii):not(.sol-kawaii):not(.nube-kawaii):not(.destello):not(.ojo-sol):not(.boca-sol):not(.rubor-sol) {
-    color: #b59b8e !important;
-}
-body.dark-mode .notif-card,
-body.dark-mode .notif-item,
-body.dark-mode .notif-item:hover,
-body.dark-mode .notification-item,
-body.dark-mode .notification-item:hover,
-body.dark-mode .feed-notificaciones {
-    background: rgba(43, 35, 33, 0.85) !important;
-    border: 1px solid #4a3b32 !important;
-    color: #f4ebd0 !important;
-}
-body.dark-mode .notif-item:hover,
-body.dark-mode .notification-item:hover {
-    border-color: #8c5d5b !important;
-    background: rgba(56, 44, 40, 0.9) !important;
-}
-body.dark-mode .notif-container,
-body.dark-mode .notif-header,
-body.dark-mode .notification-header,
-body.dark-mode .notifications-dropdown {
-    background: rgba(35, 27, 26, 0.9) !important;
-    border-bottom: 1px solid #4a3b32 !important;
-    color: #f4ebd0 !important;
-}
-body.dark-mode .offline-alert-overlay,
-body.dark-mode .offl {
-    background-color: rgba(33, 25, 24, 0.85) !important;
-    backdrop-filter: blur(8px) !important;
-}
-
-/* ==========================================
-   ARCHIVOS, UPLOADS Y DROP ZONES
-   ========================================== */
-body.dark-mode .upload-box,
-body.dark-mode .zona-drop,
-body.dark-mode .zona-drop-adopcion,
-body.dark-mode .zona-drop-arca,
-body.dark-mode .zona-arrastre,
-body.dark-mode .zona-subida-foto,
-body.dark-mode .preview-container,
-body.dark-mode .preview-container-adopcion,
-body.dark-mode .preview-oficial,
-body.dark-mode .preview-portada,
-body.dark-mode .input-archivo-oculto,
-body.dark-mode .contenido-drop,
-body.dark-mode .contenido-drop i,
-body.dark-mode .circulo-upload,
-body.dark-mode .placeholder-oficial-iconos,
-body.dark-mode .placeholder-portada-iconos {
-    background: rgba(43, 35, 33, 0.8) !important;
-    border: 2px dashed #4a3b32 !important;
-    color: #f4ebd0 !important;
-    backdrop-filter: blur(6px) !important;
-}
-body.dark-mode .upload-box:hover,
-body.dark-mode .zona-drop:hover,
-body.dark-mode .zona-drop-adopcion:hover,
-body.dark-mode .zona-drop-arca:hover,
-body.dark-mode .preview-container:hover {
-    border-color: #8c5d5b !important;
-    background: rgba(56, 44, 40, 0.9) !important;
-}
-body.dark-mode .upload-icon-circle {
-    background-color: #8c5d5b !important;
-    color: #ffffff !important;
-}
-body.dark-mode .upload-box span {
-    color: #b59b8e !important;
-}
-body.dark-mode .img-preview-subida,
-body.dark-mode .img-reporte,
-body.dark-mode .indicador-fotos-detalle,
-body.dark-mode .usr-foto,
-body.dark-mode .modal-foto-contenido img,
-body.dark-mode .modal-foto-visor img {
-    border: 2px solid #4a3b32 !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.4) !important;
-}
-
-/* ==========================================
-   REDES SOCIALES Y CONTACTO
-   ========================================== */
-body.dark-mode .redes-iconos,
-body.dark-mode .redes-sociales,
-body.dark-mode .pf-redes-container,
-body.dark-mode .pf-redes-fila {
-    color: #f4ebd0 !important;
-}
-body.dark-mode .red-facebook,
-body.dark-mode .bg-facebook {
-    background-color: #2b2321 !important;
-    color: #f4ebd0 !important;
-    border: 1px solid #4a3b32 !important;
-}
-body.dark-mode .red-instagram,
-body.dark-mode .bg-instagram {
-    background-color: #2b2321 !important;
-    color: #f4ebd0 !important;
-    border: 1px solid #4a3b32 !important;
-}
-body.dark-mode .red-tiktok,
-body.dark-mode .bg-tiktok {
-    background-color: #2b2321 !important;
-    color: #f4ebd0 !important;
-    border: 1px solid #4a3b32 !important;
-}
-body.dark-mode .red-telefono,
-body.dark-mode .bg-telefono {
-    background-color: #2b2321 !important;
-    color: #f4ebd0 !important;
-    border: 1px solid #4a3b32 !important;
-}
-body.dark-mode .red-web,
-body.dark-mode .bg-web {
-    background-color: #2b2321 !important;
-    color: #f4ebd0 !important;
-    border: 1px solid #4a3b32 !important;
-}
-body.dark-mode .donation-contact-wrapper,
-body.dark-mode .donation-contact-wrapper i,
-body.dark-mode .donation-contact-wrapper input,
-body.dark-mode .donation-contact-wrapper input::placeholder,
-body.dark-mode .donation-contact-wrapper input:focus {
-    background: #2b2321 !important;
-    border: 1px solid #4a3b32 !important;
-    color: #f4ebd0 !important;
-}
-body.dark-mode .donation-contact-wrapper i {
-    color: #f7d6d0 !important;
-}
-body.dark-mode .donation-contact-wrapper input:focus {
-    border-color: #8c5d5b !important;
-}
-body.dark-mode .donation-plain-text,
-body.dark-mode .donation-label-text,
-body.dark-mode .texto-registro,
-body.dark-mode .texto-simple,
-body.dark-mode .texto-justificado,
-body.dark-mode .texto-restriccion,
-body.dark-mode .texto-opcion-radio,
-body.dark-mode .texto-item-contenedor,
-body.dark-mode .texto-item-guia,
-body.dark-mode .texto-item-sobre,
-body.dark-mode .texto-arrastra,
-body.dark-mode .texto-arrastrar,
-body.dark-mode .texto-btn-cercanas,
-body.dark-mode .texto-estado-telefono,
-body.dark-mode .texto-estado-ubicacion,
-body.dark-mode .texto-toast {
-    color: #f4ebd0 !important;
-}
-body.dark-mode .texto-rosa {
-    color: #f7d6d0 !important;
-}
-
-/* ==========================================
-   ETIQUETAS, LABELS Y TEXTO SECUNDARIO
-   ========================================== */
-body.dark-mode .label-adopcion,
-body.dark-mode .label-normal,
-body.dark-mode .label-obligatorio,
-body.dark-mode .lbl-contacto,
-body.dark-mode .lbl-descripcion,
-body.dark-mode .lbl-detalles,
-body.dark-mode .lbl-fecha,
-body.dark-mode .lbl-fecha-evento,
-body.dark-mode .lbl-hora-evento,
-body.dark-mode .lbl-info-extra,
-body.dark-mode .lbl-lugar-evento,
-body.dark-mode .lbl-nombre-evento,
-body.dark-mode .lbl-nombre-mascota,
-body.dark-mode .lbl-nombre-usuario,
-body.dark-mode .lbl-organizador,
-body.dark-mode .lbl-tipo-reporte,
-body.dark-mode .lbl-ubicacion,
-body.dark-mode .subtitulo,
-body.dark-mode .subtitulo-campo,
-body.dark-mode .subtitulo-guardados,
-body.dark-mode .subtitulo-reporte,
-body.dark-mode .subtitulo-seccion,
-body.dark-mode .sub-title,
-body.dark-mode .sub-capsula,
-body.dark-mode .tittle-idiomas,
-body.dark-mode .tittle-preferencias,
-body.dark-mode .titulo-seccion-fluido,
-body.dark-mode .titulo-subseccion,
-body.dark-mode .seccion-titulo-caja,
-body.dark-mode .section-pill-title,
-body.dark-mode .pill-text-container,
-body.dark-mode .mensaje-validacion,
-body.dark-mode .mensaje-error,
-body.dark-mode .mensaje-error-correo,
-body.dark-mode .mensaje-error-otp-correo,
-body.dark-mode .mensaje-error-telefono,
-body.dark-mode .mensaje-estado-fecha,
-body.dark-mode .mensaje-estado-nombre,
-body.dark-mode .mensaje-estado-pass,
-body.dark-mode .mensaje-estado-pass-modal,
-body.dark-mode .mensaje-estado-recuperar,
-body.dark-mode .info-nota-contacto,
-body.dark-mode .privacy-note,
-body.dark-mode .instrucciones,
-body.dark-mode .instrucciones-caja-texto,
-body.dark-mode .instrucciones-capsula-titulo,
-body.dark-mode .ayuda-input {
-    color: #b59b8e !important;
-}
-body.dark-mode .mensaje-validacion.exito {
-    color: #6bbbe7 !important;
-}
-body.dark-mode .mensaje-validacion.error {
-    color: #e57373 !important;
-}
-body.dark-mode .mensaje-validacion.esperando {
-    color: #9e8578 !important;
-}
-body.dark-mode .label-adopcion,
-body.dark-mode .lbl-contacto,
-body.dark-mode .lbl-descripcion,
-body.dark-mode .lbl-detalles,
-body.dark-mode .lbl-fecha,
-body.dark-mode .lbl-fecha-evento,
-body.dark-mode .lbl-hora-evento,
-body.dark-mode .lbl-info-extra,
-body.dark-mode .lbl-lugar-evento,
-body.dark-mode .lbl-nombre-evento,
-body.dark-mode .lbl-nombre-mascota,
-body.dark-mode .lbl-nombre-usuario,
-body.dark-mode .lbl-organizador,
-body.dark-mode .lbl-tipo-reporte,
-body.dark-mode .lbl-ubicacion {
-    color: #f4ebd0 !important;
-}
-
-/* ==========================================
-   SWITCHES, CHECKBOXES, RADIOS
-   ========================================== */
-body.dark-mode .switch-container,
-body.dark-mode .switch-text,
-body.dark-mode .switch {
-    color: #f4ebd0 !important;
-}
-body.dark-mode .switch {
-    background-color: #4a3b32 !important;
-}
-body.dark-mode .switch-container input:checked + .slider {
-    background-color: #8c5d5b !important;
-}
-body.dark-mode .custom-checkbox,
-body.dark-mode .custom-checkbox-cuadrado,
-body.dark-mode .donation-custom-checkbox,
-body.dark-mode .opcion-check input[type="radio"]:checked ~ .custom-checkbox,
-body.dark-mode .opcion-check input[type="radio"]:checked + .custom-checkbox {
-    background-color: #2b2321 !important;
-    border: 2px solid #4a3b32 !important;
-}
-body.dark-mode .custom-checkbox-cuadrado {
-    background: #2b2321 !important;
-    border: 2px solid #4a3b32 !important;
-}
-body.dark-mode .opcion-check-terminos,
-body.dark-mode .texto-terminos {
-    color: #f4ebd0 !important;
-}
-body.dark-mode .checkbox-label {
-    color: #f4ebd0 !important;
-}
-body.dark-mode .checkbox-label input {
-    accent-color: #8c5d5b !important;
-}
-body.dark-mode .radio-group-config,
-body.dark-mode .opcion-check {
-    color: #f4ebd0 !important;
-}
-
-/* ==========================================
-   MAPA Y ELEMENTOS GEOGRÁFICOS
-   ========================================== */
-body.dark-mode .mapa-arca,
-body.dark-mode .mapa-container-principal,
-body.dark-mode .mapa-header,
-body.dark-mode .mapa-header h1,
-body.dark-mode .mapa-header-icon,
-body.dark-mode .mapa-i,
-body.dark-mode .mapa-layout-cuerpo,
-body.dark-mode .map-container,
-body.dark-mode .map-guest-overlay,
-body.dark-mode .map-overlay,
-body.dark-mode .mini-mapa-selector,
-body.dark-mode .buscador-mapa-container,
-body.dark-mode .buscador-mapa-container button,
-body.dark-mode .buscador-mapa-container input,
-body.dark-mode .buscador-mapa-container input::placeholder,
-body.dark-mode .miOverlay,
-body.dark-mode .leaflet-control-attribution,
-body.dark-mode .leaflet-control-attribution a,
-body.dark-mode .leaflet-control-zoom a,
-body.dark-mode .leaflet-control-zoom a:hover,
-body.dark-mode .leaflet-popup-content-wrapper,
-body.dark-mode .leaflet-popup-tip,
-body.dark-mode .leaflet-tile-pane img,
-body.dark-mode .leaflet-tooltip.label-nombre-pin {
-    background: rgba(43, 35, 33, 0.85) !important;
-    color: #f4ebd0 !important;
-    border-color: #4a3b32 !important;
-    backdrop-filter: blur(10px) !important;
-}
-body.dark-mode .mapa-header {
-    background: rgba(56, 44, 40, 0.65) !important;
-    border: 2px solid rgba(140, 93, 91, 0.3) !important;
-}
-body.dark-mode .leaflet-control-zoom a {
-    background: #2b2321 !important;
-    color: #f4ebd0 !important;
-    border: 1px solid #4a3b32 !important;
-}
-body.dark-mode .leaflet-control-zoom a:hover {
-    background: #352b28 !important;
-    border-color: #8c5d5b !important;
-}
-body.dark-mode .card-vet-cercana {
-    background: rgba(43, 35, 33, 0.85) !important;
-    border: 1px solid #4a3b32 !important;
-    color: #f4ebd0 !important;
-}
-body.dark-mode .vet-nombre,
-body.dark-mode .vet-distancia,
-body.dark-mode .vet-dir {
-    color: #f4ebd0 !important;
-}
-body.dark-mode .panel-cercanas {
-    background: rgba(43, 35, 33, 0.85) !important;
-    border-right: 1px solid #382c28 !important;
-}
-
-/* ==========================================
-   ADOPCIÓN Y FUNDACIONES
-   ========================================== */
-body.dark-mode .seccion-adopcion-opciones {
-    background: rgba(43, 35, 33, 0.85) !important;
-    backdrop-filter: blur(22px) !important;
-    border: 3px solid rgba(140, 93, 91, 0.35) !important;
-    box-shadow: 0 24px 50px rgba(0,0,0,0.3) !important;
-}
-body.dark-mode .titulo-adopciones {
-    color: #f7d6d0 !important;
-}
-body.dark-mode .circulo-logo-adopcion {
-    background: linear-gradient(135deg, rgba(140, 93, 91, 0.88), rgba(106, 69, 68, 0.88)) !important;
-    border: 3.5px solid rgba(255, 255, 255, 0.2) !important;
-}
-body.dark-mode .btn-adopcion-opcion {
-    background: rgba(43, 35, 33, 0.85) !important;
-    border: 2px solid #4a3b32 !important;
-    color: #f4ebd0 !important;
-}
-body.dark-mode .btn-adopcion-opcion:hover {
-    background: #8c5d5b !important;
-    border-color: #8c5d5b !important;
-    color: #ffffff !important;
-}
-body.dark-mode .chip-opcion,
-body.dark-mode .chip-opcion:has(input[type="radio"]:checked) {
-    background: rgba(43, 35, 33, 0.85) !important;
-    border: 1px solid #4a3b32 !important;
-    color: #f4ebd0 !important;
-}
-body.dark-mode .chip-opcion:has(input[type="radio"]:checked) {
-    background: #8c5d5b !important;
-    border-color: #8c5d5b !important;
-    color: #ffffff !important;
-}
-body.dark-mode .normas-titulo,
-body.dark-mode .normas-adopcion-box {
-    color: #f7d6d0 !important;
-    border-color: #4a3b32 !important;
-}
-
-/* ==========================================
-   DONACIONES
-   ========================================== */
-body.dark-mode .donation-input-pill,
-body.dark-mode .donation-input-pill::placeholder,
-body.dark-mode .donation-input-pill:focus,
-body.dark-mode .donation-textarea,
-body.dark-mode .donation-textarea::placeholder,
-body.dark-mode .donation-textarea:focus {
-    background: #2b2321 !important;
-    border: 1px solid #4a3b32 !important;
-    color: #f4ebd0 !important;
-}
-body.dark-mode .donation-input-pill:focus,
-body.dark-mode .donation-textarea:focus {
-    border-color: #8c5d5b !important;
-}
-body.dark-mode .donation-option-row input[type="checkbox"]:checked {
-    background-color: #8c5d5b !important;
-    border-color: #8c5d5b !important;
-}
-body.dark-mode .donation-plain-text {
-    color: #f4ebd0 !important;
-}
-body.dark-mode .banner-donaciones,
-body.dark-mode .info-donante,
-body.dark-mode .nombre-donante {
-    color: #f7d6d0 !important;
-}
-
-/* ==========================================
-   REPORTES
-   ========================================== */
-body.dark-mode .report,
-body.dark-mode .reporte-card,
-body.dark-mode .reporte-card-header,
-body.dark-mode .tabla-reporte,
-body.dark-mode .tabla-emergencias,
-body.dark-mode .tabla-usuarios,
-body.dark-mode .grafica-box,
-body.dark-mode .btn-imprimir {
-    background: rgba(43, 35, 33, 0.85) !important;
-    color: #f4ebd0 !important;
-    border-color: #4a3b32 !important;
-}
-body.dark-mode .tabla-reporte th {
-    color: #b59b8e !important;
-    background: rgba(56, 44, 40, 0.5) !important;
-}
-body.dark-mode .tabla-reporte td {
-    background: #2b2321 !important;
-    color: #f4ebd0 !important;
-    border-color: #4a3b32 !important;
-}
-body.dark-mode .grafica-box {
-    background: #2b2321 !important;
-    border: 1px solid #4a3b32 !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
-}
-body.dark-mode .btn-imprimir {
-    background: #2b2321 !important;
-    border: 1px solid #4a3b32 !important;
-    color: #f4ebd0 !important;
-}
-body.dark-mode .btn-imprimir:hover {
-    background: #8c5d5b !important;
-    border-color: #8c5d5b !important;
-    color: #ffffff !important;
-}
-body.dark-mode .reporte-opcion-1,
-body.dark-mode .reporte-opcion-2,
-body.dark-mode .reporte-opcion-3,
-body.dark-mode .reporte-opcion-4,
-body.dark-mode .reporte-opcion-5 {
-    background: rgba(43, 35, 33, 0.85) !important;
-    border: 1px solid #4a3b32 !important;
-    color: #f4ebd0 !important;
-}
-body.dark-mode .rep-cargo,
-body.dark-mode .rep-correo,
-body.dark-mode .rep-documento,
-body.dark-mode .rep-nombre,
-body.dark-mode .rep-telefono,
-body.dark-mode .report-logo {
-    color: #b59b8e !important;
-}
-
-/* ==========================================
-   EVENTOS Y NOVEDADES (adicionales)
-   ========================================== */
-body.dark-mode .evento-input,
-body.dark-mode .titulo-modo-evento,
-body.dark-mode .novedades,
-body.dark-mode .novedades-adopciones,
-body.dark-mode .novedades-eventos,
-body.dark-mode .novedades-reportes,
-body.dark-mode .feed-novedades {
-    background: rgba(43, 35, 33, 0.85) !important;
-    color: #f4ebd0 !important;
-    border-color: #4a3b32 !important;
-}
-
-/* ==========================================
-   GUIA Y SOBRE NOSOTROS
-   ========================================== */
-body.dark-mode .guia,
-body.dark-mode .guia_arca,
-body.dark-mode .sobre_nosotros,
-body.dark-mode .quienes,
-body.dark-mode .que-encont,
-body.dark-mode .terminos_privacidad,
-body.dark-mode .sobre-titulo-principal,
-body.dark-mode .mision-publica,
-body.dark-mode .vision-publica,
-body.dark-mode .item-sobre-tarjeta,
-body.dark-mode .item-guia-tarjeta {
-    color: #f4ebd0 !important;
-}
-body.dark-mode .sobre-titulo-principal {
-    color: #f7d6d0 !important;
-    -webkit-text-stroke: 2px #8c5d5b !important;
-}
-
-/* ==========================================
-   FORMULARIOS ESPECÍFICOS (registro, login, etc.)
-   ========================================== */
-body.dark-mode .contenedor-registro,
-body.dark-mode .contenido-registro,
-body.dark-mode .formulario-inputs,
-body.dark-mode .bloque-pregunta,
-body.dark-mode .bloque-terminos,
-body.dark-mode .bloque-boton,
-body.dark-mode .formulario-correo,
-body.dark-mode .login-options,
-body.dark-mode .barra-superior,
-body.dark-mode .seccion-logo,
-body.dark-mode .circulo-logo,
-body.dark-mode .formulario-donaciones,
-body.dark-mode .formulario_adopcion,
-body.dark-mode .formulario_adoptante,
-body.dark-mode .formulario_evento,
-body.dark-mode .formularior,
-body.dark-mode .header-formulario-adopcion h2,
-body.dark-mode .header-formulario-adopcion p {
-    background: transparent !important;
-    color: #f4ebd0 !important;
-}
-body.dark-mode .barra-superior h1 {
-    color: #f7d6d0 !important;
-}
-body.dark-mode .subtitulo {
-    color: #b59b8e !important;
-}
-body.dark-mode .contenedor-botones-modal {
-    color: #f4ebd0 !important;
-}
+Mostrando dark-mode.css.
