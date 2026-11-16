@@ -1082,9 +1082,9 @@
                       if (esAdopcion) {
                           tituloTipo = pub.nombre_tipo_reporte || 'Publicación de adopción';
                           linkDetalle = `detalle_adopcion.html?id=${pub.id_origen}`;
-                      } else if (esEvento) {
+                     } else if (esEvento) {
                           tituloTipo = pub.nombre_tipo_reporte || 'Evento de Fundación';
-                          linkDetalle = `mapa.html`;
+                          linkDetalle = `detalle_evento.html?id=${pub.id_origen}`;
                       }
 
                       const tarjetaMini = document.createElement('div');
@@ -1094,7 +1094,7 @@
                           <div class="mini-pub-info">
                               <span class="mini-pub-titulo">${tituloTipo}</span>
                               <span style="font-size: 12px; color: #666;">${pub.Fecha_reporte ? pub.Fecha_reporte.split('T')[0] : ''}</span>
-                              <a href="${linkDetalle}" class="btn-ver-detalles-mini">${esEvento ? 'Ver en mapa / eventos' : 'Ver detalles'}</a>
+                              <a href="${linkDetalle}" class="btn-ver-detalles-mini">Ver detalles</a>
                           </div>
                       `;
                       contenedor.appendChild(tarjetaMini);
