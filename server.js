@@ -3118,6 +3118,164 @@ app.post('/api/eliminar-mi-cuenta', (req, res) => {
     });
 });
 // ==========================================
+// MÓDULO DE ESTADÍSTICAS PARA FUNDACIONES
+// ==========================================
+app.get('/api/estadisticas-fundacion', (req, res) => {
+    const { correo } = req.query;
+
+    if (!correo) {
+        return res.status(400).json({ error: "Se requiere el correo de la fundación." });
+    }
+
+    const sqlFund = `
+        SELECT f.id_fundacion, f.Nombre_Comercial, f.Nombre_Legal, u.id_usuarios
+        FROM fundacion f
+        LEFT JOIN usuarios u ON LOWER(TRIM(f.Correo_fundacion)) = LOWER(TRIM(u.correo_usuario))
+        WHERE LOWER(TRIM(f.Correo_fundacion)) = LOWER(TRIM(?))
+        LIMIT 1
+    `;
+
+    db.query(sqlFund, [correo], (err, fundRows) => {
+        if (err || fundRows.length === 0) {
+            return res.status(404).json({ error: "Fundación no encontrada." });
+        }
+
+        const idFundacion = fundRows[0].id_fundacion;
+        const idUsuario = fundRows[0].id_usuarios || 0;
+        const nombreFundacion = fundRows[0].Nombre_Comercial || fundRows[0].Nombre_Legal || 'Fundación';
+
+        // 1. Reportes marcados como resueltos (vinculados a la fundación por usuario o derivación)
+        const sqlReportesResueltos = `
+            SELECT 
+                r.id_reporte,
+                r.Fecha_reporte,
+                COALESCE(tr.Nombre_tipo_reporte, 'Otro reporte') AS tipo_reporte
+            FROM reportes r
+            LEFT JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
+            WHERE r.estado = 'resuelto'
+              AND (r.id_usuarios = ? OR r.id_fundacion_derivada = ?)
+        `;
+
+        // 2. Total de reportes en estado 'en_proceso' o 'derivado' activos
+        const sqlReportesActivos = `
+            SELECT COUNT(*) AS total
+            FROM reportes
+            WHERE estado IN ('en_proceso', 'derivado')
+              AND (id_usuarios = ? OR id_fundacion_derivada = ?)
+        `;
+
+        // 3. Donaciones recibidas (totales y recogidas) + desglose por tipo
+        const sqlDonaciones = `
+            SELECT tipo_donacion, estado, fecha_donacion
+            FROM donaciones
+            WHERE id_fundacion = ?
+        `;
+
+        // 4. Eventos realizados / publicados
+        const sqlEventos = `
+            SELECT id_evento, nombre_evento, fecha_hora
+            FROM eventos
+            WHERE id_fundacion = ?
+        `;
+
+        // 5. Publicaciones de adopción activas y seguidores de la fundación
+        const sqlExtras = `
+            SELECT
+                (SELECT COUNT(*) FROM publicaciones_adopcion WHERE id_usuarios = ?) AS adopciones_publicadas,
+                (SELECT COUNT(*) FROM seguidores WHERE id_usuario_seguido = ?) AS total_seguidores
+        `;
+
+        db.query(sqlReportesResueltos, [idUsuario, idFundacion], (errR, repResueltos) => {
+            const listaResueltos = errR ? [] : repResueltos;
+
+            db.query(sqlReportesActivos, [idUsuario, idFundacion], (errA, repActivos) => {
+                const totalActivos = (!errA && repActivos.length > 0) ? repActivos[0].total : 0;
+
+                db.query(sqlDonaciones, [idFundacion], (errD, donaciones) => {
+                    const listaDonaciones = errD ? [] : donaciones;
+
+                    db.query(sqlEventos, [idFundacion], (errE, eventos) => {
+                        const listaEventos = errE ? [] : eventos;
+
+                        db.query(sqlExtras, [idUsuario, idUsuario], (errEx, extras) => {
+                            const infoExtra = (!errEx && extras.length > 0)
+                                ? extras[0]
+                                : { adopciones_publicadas: 0, total_seguidores: 0 };
+
+                            // Agrupar tipos de reportes resueltos (para gráfico circular)
+                            const conteoTiposReporte = {};
+                            listaResueltos.forEach(r => {
+                                conteoTiposReporte[r.tipo_reporte] = (conteoTiposReporte[r.tipo_reporte] || 0) + 1;
+                            });
+
+                            // Agrupar crecimiento mensual (últimos 6 meses)
+                            const nombresMeses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+                            const ahora = new Date();
+                            const mesesUltimos6 = [];
+
+                            for (let i = 5; i >= 0; i--) {
+                                const fechaRef = new Date(ahora.getFullYear(), ahora.getMonth() - i, 1);
+                                mesesUltimos6.push({
+                                    mesIndex: fechaRef.getMonth(),
+                                    anio: fechaRef.getFullYear(),
+                                    etiqueta: nombresMeses[fechaRef.getMonth()],
+                                    reportes: 0,
+                                    eventos: 0,
+                                    donaciones: 0
+                                });
+                            }
+
+                            listaResueltos.forEach(r => {
+                                if (!r.Fecha_reporte) return;
+                                const f = new Date(r.Fecha_reporte);
+                                const slot = mesesUltimos6.find(m => m.mesIndex === f.getMonth() && m.anio === f.getFullYear());
+                                if (slot) slot.reportes++;
+                            });
+
+                            listaEventos.forEach(ev => {
+                                if (!ev.fecha_hora) return;
+                                const f = new Date(ev.fecha_hora);
+                                const slot = mesesUltimos6.find(m => m.mesIndex === f.getMonth() && m.anio === f.getFullYear());
+                                if (slot) slot.eventos++;
+                            });
+
+                            listaDonaciones.forEach(don => {
+                                if (!don.fecha_donacion) return;
+                                const f = new Date(don.fecha_donacion);
+                                const slot = mesesUltimos6.find(m => m.mesIndex === f.getMonth() && m.anio === f.getFullYear());
+                                if (slot) slot.donaciones++;
+                            });
+
+                            // Agrupar tipos de donaciones recibidas
+                            const conteoTiposDonacion = {};
+                            listaDonaciones.forEach(d => {
+                                const tipo = d.tipo_donacion || 'General';
+                                conteoTiposDonacion[tipo] = (conteoTiposDonacion[tipo] || 0) + 1;
+                            });
+
+                            res.json({
+                                nombre_fundacion: nombreFundacion,
+                                resumen: {
+                                    reportes_resueltos: listaResueltos.length,
+                                    reportes_en_curso: totalActivos,
+                                    donaciones_recibidas: listaDonaciones.length,
+                                    donaciones_recogidas: listaDonaciones.filter(d => d.estado === 'recogida').length,
+                                    eventos_realizados: listaEventos.length,
+                                    adopciones_publicadas: infoExtra.adopciones_publicadas,
+                                    seguidores: infoExtra.total_seguidores
+                                },
+                                tipos_reportes_resueltos: conteoTiposReporte,
+                                tipos_donaciones: conteoTiposDonacion,
+                                evolucion_mensual: mesesUltimos6
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    });
+});
+// ==========================================
 // INICIALIZACIÓN DEL SERVIDOR
 // ==========================================
 const PORT = process.env.PORT || 3000;

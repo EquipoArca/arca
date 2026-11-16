@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estadísticas de Fundación - ARCA</title>
+    <link rel="stylesheet" href="style_home.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="dark-mode.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        if (localStorage.getItem("modo_oscuro") === "true") {
+            document.body.classList.add("dark-mode");
+        }
+    </script>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Itim', cursive, sans-serif;
+            background-color: #fce8e6;
+            overflow-x: hidden;
+        }
+
+        .main-content {
+            padding: 25px 35px;
+            box-sizing: border-box;
+            min-height: calc(100vh - 70px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stats-wrapper {
+            width: 100%;
+            max-width: 1320px;
+            background: rgba(255, 255, 255, 0.52);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 3px solid rgba(255, 255, 255, 0.9);
+            border-radius: 32px;
+            padding: 32px 40px;
+            box-shadow: 0 18px 45px rgba(220, 140, 130, 0.16);
+            box-sizing: border-box;
+        }
+
+        .stats-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 28px;
+            padding-bottom: 14px;
+            border-bottom: 2px dashed rgba(220, 140, 120, 0.35);
+        }
+
+        .stats-header h1 {
+            margin: 0;
+            font-size: 1.95rem;
+            color: #3b2b25;
+            font-weight: 500;
+        }
+
+        .badge-anio {
+            background: #ffcad4;
+            color: #5c3a41;
+            padding: 6px 18px;
+            border-radius: 50px;
+            font-size: 0.98rem;
+            border: 1px solid rgba(255, 255, 255, 0.9);
+        }
+
+        /* GRID PRINCIPAL TIPO CAPTURA: COLUMNA DE PÍLDORAS + 2 GRÁFICOS */
+        .stats-top-grid {
+            display: grid;
+            grid-template-columns: 320px 1.2fr 1fr;
+            gap: 26px;
+            align-items: stretch;
+        }
+
+        .columna-pildoras {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* PÍLDORAS CELESTE PASTEL DE LA CAPTURA */
+        .kpi-pill {
+            background: linear-gradient(135deg, #d6f3fa 0%, #c4ecf7 100%);
+            border: 2px solid rgba(255, 255, 255, 0.95);
+            border-radius: 50px;
+            padding: 18px 26px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 8px 20px rgba(130, 195, 215, 0.25);
+            transition: transform 0.2s ease;
+        }
+
+        .kpi-pill:hover {
+            transform: translateY(-3px);
+        }
+
+        .kpi-pill.melocoton {
+            background: linear-gradient(135deg, #ffe0d6 0%, #ffd0c2 100%);
+            box-shadow: 0 8px 20px rgba(240, 160, 140, 0.22);
+        }
+
+        .kpi-pill.lila {
+            background: linear-gradient(135deg, #ece2fa 0%, #dfd0f7 100%);
+            box-shadow: 0 8px 20px rgba(175, 145, 220, 0.22);
+        }
+
+        .kpi-label {
+            font-size: 1.08rem;
+            color: #263238;
+        }
+
+        .kpi-valor {
+            font-size: 1.45rem;
+            font-weight: bold;
+            color: #1b262c;
+        }
+
+        .nota-periodo {
+            font-size: 0.92rem;
+            color: #555;
+            margin-left: 14px;
+            margin-top: -6px;
+        }
+
+        /* TARJETAS DE GRÁFICOS */
+        .chart-card {
+            background: rgba(255, 255, 255, 0.82);
+            border-radius: 26px;
+            padding: 22px 24px;
+            border: 2px solid rgba(255, 255, 255, 0.95);
+            box-shadow: 0 10px 28px rgba(210, 130, 110, 0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .chart-card h3 {
+            margin: 0 0 14px 0;
+            text-align: center;
+            font-size: 1.25rem;
+            color: #2b2b2b;
+            font-weight: 500;
+        }
+
+        .canvas-box {
+            position: relative;
+            width: 100%;
+            height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* FILA INFERIOR DE MÉTRICAS SECUNDARIAS */
+        .stats-bottom-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 26px;
+        }
+
+        .mini-stat-card {
+            background: rgba(255, 255, 255, 0.78);
+            border-radius: 22px;
+            padding: 18px 22px;
+            border: 2px solid rgba(255, 255, 255, 0.95);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .mini-stat-icono {
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            flex-shrink: 0;
+        }
+
+        .footer-volver {
+            margin-top: 26px;
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        .btn-volver-circular {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 2.5px solid #2b2b2b;
+            color: #2b2b2b;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-volver-circular:hover {
+            transform: scale(1.08);
+            background: #ffe8e5;
+        }
+
+        /* MODO OSCURO */
+        body.dark-mode .stats-wrapper {
+            background: rgba(30, 30, 42, 0.75);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+        body.dark-mode .stats-header h1,
+        body.dark-mode .chart-card h3 {
+            color: #f3f3f3;
+        }
+        body.dark-mode .chart-card,
+        body.dark-mode .mini-stat-card {
+            background: rgba(42, 42, 58, 0.85);
+            border-color: rgba(255, 255, 255, 0.12);
+            color: #eaeaea;
+        }
+        body.dark-mode .nota-periodo {
+            color: #ccc;
+        }
+
+        @media (max-width: 1120px) {
+            .stats-top-grid {
+                grid-template-columns: 1fr;
+            }
+            .stats-bottom-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAV SUPERIOR -->
+    <nav class="top-nav">
+        <div class="top-left">
+            <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu"></i>
+            <div class="mini-logo-circle"><img src="logo.png" alt="Logo ARCA"></div>
+            <span class="page-title">Estadísticas</span>
+        </div>
+        <div class="search-bar">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Busca algo">
+            <i class="fa-solid fa-microphone"></i>
+        </div>
+        <div class="top-right">
+            <div class="user-header-info">
+                <div class="user-profile-menu" id="user-profile-menu">
+                    <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
+                        <img src="logo.png" id="user-avatar-img" alt="Perfil">
+                    </div>
+                    <div class="mini-menu-card" id="mini-menu-card">
+                        <div class="mini-menu-header"><span id="mini-menu-username">Fundación</span></div>
+                        <hr class="mini-menu-divider">
+                        <a href="configuracion.html" class="mini-menu-item btn-ajustes"><i class="fa-solid fa-gear"></i><span>Ajustes</span></a>
+                        <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini"><i class="fa-solid fa-right-from-bracket"></i><span>Cerrar sesión</span></a>
+                    </div>
+                </div>
+                <div class="notif-circle"><a href="notificaciones.html"><i class="fa-solid fa-bell"></i></a></div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+        <div class="side-icons">
+            <a href="home.html" class="menu-fila"><i class="fa-solid fa-house"></i><span class="menu-text">Inicio</span></a>
+            <a href="perfil_fundacion.html" class="menu-fila activa"><i class="fa-solid fa-circle-user"></i><span class="menu-text">Perfil</span></a>
+            <a href="guardados_usuario.html" class="menu-fila"><i class="fa-solid fa-bookmark"></i><span class="menu-text">Guardado</span></a>
+            <a href="mapa.html" class="menu-fila"><i class="fa-solid fa-location-dot"></i><span class="menu-text">Mapa</span></a>
+            <a href="configuracion.html" class="menu-fila"><i class="fa-solid fa-gear"></i><span class="menu-text">Ajustes</span></a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="stats-wrapper">
+            <div class="stats-header">
+                <h1 id="titulo-fundacion-stats"><i class="fa-solid fa-chart-column" style="color: #5fa8d3;"></i> Estadísticas de Fundación</h1>
+                <span class="badge-anio" id="anio-actual-badge">Resumen general</span>
+            </div>
+
+            <!-- FILA SUPERIOR: PÍLDORAS + 2 GRÁFICOS -->
+            <div class="stats-top-grid">
+                
+                <!-- COLUMNA IZQUIERDA: PÍLDORAS KPI -->
+                <div class="columna-pildoras">
+                    <div class="kpi-pill">
+                        <span class="kpi-label">Reportes resueltos :</span>
+                        <span class="kpi-valor" id="kpi-resueltos">0</span>
+                    </div>
+
+                    <div class="kpi-pill">
+                        <span class="kpi-label">Donaciones recibidas :</span>
+                        <span class="kpi-valor" id="kpi-donaciones">0</span>
+                    </div>
+
+                    <div class="kpi-pill">
+                        <span class="kpi-label">Eventos realizados :</span>
+                        <span class="kpi-valor" id="kpi-eventos">0</span>
+                    </div>
+
+                    <span class="nota-periodo">(Datos registrados en ARCA)</span>
+
+                    <div class="kpi-pill melocoton">
+                        <span class="kpi-label">Reportes en curso :</span>
+                        <span class="kpi-valor" id="kpi-en-curso">0</span>
+                    </div>
+                </div>
+
+                <!-- GRÁFICO 1: CRECIMIENTO MENSUAL (BARRAS) -->
+                <div class="chart-card">
+                    <h3>Actividad y reportes atendidos (Últimos 6 meses)</h3>
+                    <div class="canvas-box">
+                        <canvas id="graficoBarrasCrecimiento"></canvas>
+                    </div>
+                </div>
+
+                <!-- GRÁFICO 2: TIPOS DE REPORTES RESUELTOS (PASTEL) -->
+                <div class="chart-card">
+                    <h3>Tipos de reportes resueltos</h3>
+                    <div class="canvas-box">
+                        <canvas id="graficoPastelTipos"></canvas>
+                        <p id="msg-sin-reportes" style="display: none; text-align: center; color: #777; font-size: 0.98rem;">
+                            Aún no tienes reportes marcados como resueltos.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FILA INFERIOR: DETALLES ÚTILES DE DONACIONES, ADOPCIONES PUBLICADAS Y SEGUIDORES -->
+            <div class="stats-bottom-grid">
+                <div class="mini-stat-card">
+                    <div class="mini-stat-icono" style="background: #d8f3dc; color: #2d6a4f;">
+                        <i class="fa-solid fa-hand-holding-heart"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.95rem; color: #666;">Donaciones recogidas / completadas</div>
+                        <div style="font-size: 1.35rem; font-weight: bold;" id="stat-donaciones-recogidas">0 de 0</div>
+                    </div>
+                </div>
+
+                <div class="mini-stat-card">
+                    <div class="mini-stat-icono" style="background: #ffcad4; color: #7f4f58;">
+                        <i class="fa-solid fa-paw"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.95rem; color: #666;">Mascotas publicadas en adopción</div>
+                        <div style="font-size: 1.35rem; font-weight: bold;" id="stat-adopciones-pub">0</div>
+                    </div>
+                </div>
+
+                <div class="mini-stat-card">
+                    <div class="mini-stat-icono" style="background: #e8dff5; color: #5e4b8b;">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.95rem; color: #666;">Seguidores de la fundación</div>
+                        <div style="font-size: 1.35rem; font-weight: bold;" id="stat-seguidores">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BOTÓN VOLVER CIRCULAR -->
+            <div class="footer-volver">
+                <a href="perfil_fundacion.html" class="btn-volver-circular" title="Volver al perfil">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="script.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btnToggleMenu = document.getElementById('btn-toggle-menu');
+            const sidebar = document.getElementById('sidebar');
+            if (btnToggleMenu && sidebar) {
+                btnToggleMenu.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    sidebar.classList.toggle('sidebar-abierta');
+                });
+            }
+
+            document.getElementById('anio-actual-badge').textContent = `Año ${new Date().getFullYear()}`;
+
+            firebase.auth().onAuthStateChanged(async (user) => {
+                if (!user) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+                cargarEstadisticas(user.email);
+            });
+        });
+
+        async function cargarEstadisticas(correo) {
+            try {
+                const res = await fetch(`/api/estadisticas-fundacion?correo=${encodeURIComponent(correo)}`);
+                if (!res.ok) throw new Error("No se pudieron cargar las estadísticas");
+
+                const data = await res.json();
+
+                document.getElementById('titulo-fundacion-stats').innerHTML =
+                    `<i class="fa-solid fa-chart-column" style="color: #5fa8d3;"></i> Estadísticas — ${data.nombre_fundacion}`;
+
+                // Llenar KPIs
+                document.getElementById('kpi-resueltos').textContent = data.resumen.reportes_resueltos;
+                document.getElementById('kpi-donaciones').textContent = data.resumen.donaciones_recibidas;
+                document.getElementById('kpi-eventos').textContent = data.resumen.eventos_realizados;
+                document.getElementById('kpi-en-curso').textContent = data.resumen.reportes_en_curso;
+
+                document.getElementById('stat-donaciones-recogidas').textContent =
+                    `${data.resumen.donaciones_recogidas} de ${data.resumen.donaciones_recibidas}`;
+                document.getElementById('stat-adopciones-pub').textContent = data.resumen.adopciones_publicadas;
+                document.getElementById('stat-seguidores').textContent = data.resumen.seguidores;
+
+                renderizarGraficoBarras(data.evolucion_mensual);
+                renderizarGraficoPastel(data.tipos_reportes_resueltos);
+
+            } catch (error) {
+                console.error("Error cargando estadísticas:", error);
+            }
+        }
+
+        function renderizarGraficoBarras(evolucion) {
+            const ctx = document.getElementById('graficoBarrasCrecimiento').getContext('2d');
+            const etiquetas = evolucion.map(item => item.etiqueta);
+            const datosReportes = evolucion.map(item => item.reportes);
+            const datosEventos = evolucion.map(item => item.eventos);
+            const datosDonaciones = evolucion.map(item => item.donaciones);
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: etiquetas,
+                    datasets: [
+                        {
+                            label: 'Reportes resueltos',
+                            data: datosReportes,
+                            backgroundColor: '#199ef3',
+                            borderRadius: 6
+                        },
+                        {
+                            label: 'Donaciones',
+                            data: datosDonaciones,
+                            backgroundColor: '#4cc980',
+                            borderRadius: 6
+                        },
+                        {
+                            label: 'Eventos',
+                            data: datosEventos,
+                            backgroundColor: '#fca38d',
+                            borderRadius: 6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { font: { family: 'Itim', size: 12 } }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1, font: { family: 'Itim' } },
+                            grid: { color: 'rgba(0,0,0,0.06)' }
+                        },
+                        x: {
+                            ticks: { font: { family: 'Itim' } },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderizarGraficoPastel(tiposObj) {
+            const etiquetas = Object.keys(tiposObj);
+            const valores = Object.values(tiposObj);
+            const canvas = document.getElementById('graficoPastelTipos');
+            const msgVacio = document.getElementById('msg-sin-reportes');
+
+            if (etiquetas.length === 0) {
+                canvas.style.display = 'none';
+                msgVacio.style.display = 'block';
+                return;
+            }
+
+            const total = valores.reduce((acc, n) => acc + n, 0);
+            const etiquetasConPorcentaje = etiquetas.map((nombre, idx) => {
+                const pct = Math.round((valores[idx] / total) * 100);
+                return `${nombre} (${pct}%)`;
+            });
+
+            const paleta = ['#27ae60', '#199ef3', '#f1c40f', '#e87a69', '#9b7ede', '#48cae4'];
+
+            new Chart(canvas.getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: etiquetasConPorcentaje,
+                    datasets: [{
+                        data: valores,
+                        backgroundColor: paleta.slice(0, etiquetas.length),
+                        borderColor: '#ffffff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: { family: 'Itim', size: 12 },
+                                usePointStyle: true
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
