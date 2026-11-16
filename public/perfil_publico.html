@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perfil de Usuario - ARCA</title>
+    <title>Perfil Público - ARCA</title>
     <link rel="stylesheet" href="style_home.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,23 +17,25 @@
     </script>
     <style>
         html, body {
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
-            overflow: hidden;
             font-family: 'Itim', cursive, sans-serif;
             background-color: #fce8e6;
+            overflow-x: hidden;
         }
 
         .main-content {
-            height: calc(100vh - 70px);
+            min-height: calc(100vh - 70px);
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: center;
-            padding: 20px;
+            padding: 25px;
             box-sizing: border-box;
-            overflow-y: auto;
         }
 
+        /* ==========================================
+           ESTILOS PERFIL DE USUARIO NORMAL
+        ========================================== */
         .perfil-container-principal {
             background: rgba(255, 255, 255, 0.45);
             backdrop-filter: blur(16px);
@@ -128,7 +130,7 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
-            max-height: 380px;
+            max-height: 420px;
             overflow-y: auto;
             padding-right: 5px;
         }
@@ -145,7 +147,7 @@
         }
 
         .mini-tarjeta-pub {
-            background: rgba(255, 255, 255, 0.7);
+            background: rgba(255, 255, 255, 0.75);
             border-radius: 18px;
             padding: 14px;
             display: flex;
@@ -236,10 +238,10 @@
         }
 
         .btn-accion-peligro {
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.85);
             border: 1px solid #f4c2c4;
             color: #d9534f;
-            padding: 10px;
+            padding: 10px 16px;
             border-radius: 16px;
             font-weight: bold;
             font-size: 14px;
@@ -247,6 +249,194 @@
             width: 100%;
             text-align: center;
             font-family: 'Itim', cursive, sans-serif;
+            transition: all 0.2s ease;
+        }
+
+        .btn-accion-peligro:hover {
+            background: #ffe9e8;
+            transform: translateY(-2px);
+        }
+
+        /* ==========================================
+           ESTILOS PERFIL PÚBLICO DE FUNDACIÓN
+        ========================================== */
+        .perfil-fundacion-publico {
+            max-width: 1280px;
+            width: 100%;
+            background: rgba(255, 235, 230, 0.68);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 3px solid rgba(255, 255, 255, 0.95);
+            border-radius: 35px;
+            padding: 32px 45px;
+            box-shadow: 0 20px 50px rgba(240, 150, 130, 0.22);
+            box-sizing: border-box;
+        }
+
+        .pf-portada-contenedor {
+            position: relative;
+            width: 100%;
+            height: 290px;
+            border-radius: 26px;
+            overflow: visible;
+            border: 4px solid rgba(255, 255, 255, 0.9);
+            background: #ffd8d0;
+            box-shadow: 0 12px 35px rgba(220, 130, 110, 0.25);
+        }
+
+        .pf-portada-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 22px;
+        }
+
+        .pf-avatar-flotante {
+            position: absolute;
+            bottom: -50px;
+            left: 45px;
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 6px solid #ffffff;
+            background: #fff;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
+            cursor: pointer;
+            z-index: 10;
+            transition: transform 0.25s ease;
+        }
+
+        .pf-avatar-flotante:hover {
+            transform: scale(1.05);
+        }
+
+        .pf-header-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 65px;
+            margin-bottom: 28px;
+            border-bottom: 3px dashed rgba(220, 140, 120, 0.35);
+            padding-bottom: 18px;
+        }
+
+        .pf-nombre-titulo {
+            margin: 0;
+            color: #3b2b25;
+            font-size: 2.3rem;
+            font-weight: 500;
+        }
+
+        .pf-acciones-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn-seguir-fundacion-pill {
+            background: linear-gradient(135deg, #fca38d 0%, #e87a69 100%);
+            color: #fff;
+            border: none;
+            padding: 11px 24px;
+            border-radius: 50px;
+            font-family: 'Itim', cursive;
+            font-size: 1rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 6px 18px rgba(252, 163, 141, 0.4);
+            transition: all 0.2s ease;
+        }
+
+        .btn-seguir-fundacion-pill:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-peligro-pill {
+            background: rgba(255, 255, 255, 0.85);
+            border: 1.5px solid #f4c2c4;
+            color: #d9534f;
+            padding: 10px 18px;
+            border-radius: 50px;
+            font-family: 'Itim', cursive;
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-peligro-pill:hover {
+            background: #ffe8e6;
+            transform: translateY(-2px);
+        }
+
+        .pf-grid-amplio {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .pf-card-seccion {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(15px);
+            border-radius: 25px;
+            padding: 22px;
+            border: 2px solid rgba(255, 255, 255, 0.95);
+            box-shadow: 0 10px 28px rgba(210, 130, 110, 0.12);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pf-label-capsula {
+            background-color: #d8e2dc;
+            color: #2e4332;
+            font-size: 1rem;
+            font-weight: 500;
+            padding: 6px 16px;
+            border-radius: 16px;
+            display: inline-block;
+            margin-bottom: 12px;
+            align-self: flex-start;
+        }
+
+        .pf-label-capsula.melocoton {
+            background-color: #ffcad4;
+            color: #5c3a41;
+        }
+
+        .pf-texto-info {
+            color: #4a403b;
+            font-size: 1.02rem;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .pf-redes-fila {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+            font-size: 0.98rem;
+            color: #4a403b;
+            text-decoration: none;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 9px 14px;
+            border-radius: 14px;
+            border: 1px solid rgba(252, 163, 141, 0.25);
+        }
+
+        .pf-redes-fila i {
+            color: #d87c6b;
+            width: 22px;
+            text-align: center;
+            font-size: 1.15rem;
         }
 
         #toast-seguimiento {
@@ -264,6 +454,14 @@
             border: 2px solid #fca38d;
             font-family: 'Itim', cursive, sans-serif;
         }
+
+        @media (max-width: 1050px) {
+            .pf-grid-amplio { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 768px) {
+            .pf-grid-amplio, .perfil-body-grid { grid-template-columns: 1fr; }
+            .perfil-fundacion-publico { padding: 20px; }
+        }
     </style>
 </head>
 <body>
@@ -274,7 +472,7 @@
         <div class="mini-logo-circle">
             <img src="logo.png" alt="Logo">
         </div>
-        <span class="page-title" id="titulo-pagina">Perfil de Usuario</span>
+        <span class="page-title" id="titulo-pagina">Perfil Público</span>
     </div>
 
     <div class="search-bar">
@@ -321,13 +519,12 @@
       </div>
   </aside>
 
-  <main class="main-content">
-      <div class="perfil-container-principal">
-          
+  <main class="main-content" id="main-perfil-publico">
+      <!-- VISTA 1: PERFIL DE USUARIO NORMAL -->
+      <div class="perfil-container-principal" id="vista-usuario-normal" style="display: none;">
           <div class="perfil-header-card">
               <div class="perfil-info-izquierda">
-                  <!-- AÑADIDO: onclick para ampliar la foto -->
-                  <img id="usr-foto" src="logo.png" class="avatar-perfil-img" alt="Avatar" onclick="ampliarFotoPerfilPublico()" title="Haz clic para ver la foto en grande">
+                  <img id="usr-foto" src="logo.png" class="avatar-perfil-img" alt="Avatar" onclick="ampliarFotoPerfilPublico('usr-foto')" title="Haz clic para ver la foto en grande">
                   <div class="perfil-datos-usuario">
                       <h2 id="usr-tag">@cargando</h2>
                       <div class="ubicacion-pill" id="usr-ubicacion"><i class="fa-solid fa-location-dot"></i> Ubicación aproximada: Cargando...</div>
@@ -339,7 +536,6 @@
           </div>
 
           <div class="perfil-body-grid">
-              
               <div class="columna-publicaciones">
                   <div class="seccion-titulo-caja">Publicaciones:</div>
                   <div id="contenedor-publicaciones-propias">
@@ -347,7 +543,7 @@
                   </div>
               </div>
 
-          <div class="columna-lateral-derecha">
+              <div class="columna-lateral-derecha">
                   <button id="btn-solicitud-adoptante" class="btn-solicitar-adoptante" onclick="solicitarVerAdoptante()">
                       Solicitar ver perfil de adoptante
                   </button>
@@ -362,37 +558,99 @@
                       </div>
                   </div>
 
-                  <div id="seccion-denuncia-bloqueo">
+                  <div id="seccion-denuncia-bloqueo" style="display: flex; flex-direction: column; gap: 10px;">
                       <button class="btn-accion-peligro" onclick="abrirModalDenuncia()">Denunciar perfil</button>
                       <button class="btn-accion-peligro" onclick="bloquearUsuarioActual()">Bloquear usuario</button>
                   </div>
               </div>
+          </div>
+      </div>
 
+      <!-- VISTA 2: PERFIL PÚBLICO DE FUNDACIÓN (SIN EDITAR, CON DENUNCIAR Y BLOQUEAR) -->
+      <div class="perfil-fundacion-publico" id="vista-fundacion-publica" style="display: none;">
+          <div class="pf-portada-contenedor">
+              <img id="pf-pub-portada" src="logo.png" alt="Portada Fundación" class="pf-portada-preview">
+              <img id="pf-pub-avatar" src="logo.png" alt="Logo Fundación" class="pf-avatar-flotante" onclick="ampliarFotoPerfilPublico('pf-pub-avatar')" title="Haz clic para ampliar logo">
+          </div>
+
+          <div class="pf-header-info">
+              <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                  <h2 id="pf-pub-nombre" class="pf-nombre-titulo">Fundación</h2>
+                  <span style="display: inline-flex; align-items: center; gap: 5px; background: #e8dff5; border: 1px solid #d4c5f0; color: #5e4b8b; padding: 4px 12px; border-radius: 50px; font-size: 0.92rem;">
+                      <i class="fa-solid fa-circle-check" style="color: #9b7ede;"></i> Fundación Verificada
+                  </span>
+              </div>
+
+              <div class="pf-acciones-header" id="pf-acciones-visitante">
+                  <button id="btn-seguir-fundacion" class="btn-seguir-fundacion-pill" onclick="alternarSeguir()">
+                      <i class="fa-solid fa-user-plus"></i> <span>Seguir fundación</span>
+                  </button>
+                  <button class="btn-peligro-pill" onclick="abrirModalDenuncia()">
+                      <i class="fa-solid fa-flag"></i> Denunciar perfil
+                  </button>
+                  <button class="btn-peligro-pill" onclick="bloquearUsuarioActual()">
+                      <i class="fa-solid fa-ban"></i> Bloquear
+                  </button>
+              </div>
+          </div>
+
+          <div class="pf-grid-amplio">
+              <div class="pf-card-seccion">
+                  <div class="pf-label-capsula melocoton">Misión</div>
+                  <p id="pf-pub-mision" class="pf-texto-info">Sin información.</p>
+              </div>
+
+              <div class="pf-card-seccion">
+                  <div class="pf-label-capsula melocoton">Visión</div>
+                  <p id="pf-pub-vision" class="pf-texto-info">Sin información.</p>
+              </div>
+
+              <div class="pf-card-seccion">
+                  <div class="pf-label-capsula">Enfoque principal</div>
+                  <p id="pf-pub-enfoque" class="pf-texto-info">Rescate y adopción</p>
+              </div>
+
+              <div class="pf-card-seccion">
+                  <div class="pf-label-capsula">Programas / Proyectos actuales</div>
+                  <p id="pf-pub-programas" class="pf-texto-info">Sin proyectos registrados.</p>
+              </div>
+
+              <div class="pf-card-seccion" style="grid-column: span 2;">
+                  <div class="pf-label-capsula melocoton">Contáctanos y Redes</div>
+                  <div id="pf-pub-redes-container"></div>
+              </div>
+
+              <!-- PUBLICACIONES Y EVENTOS DE LA FUNDACIÓN -->
+              <div class="pf-card-seccion" style="grid-column: 1 / -1;">
+                  <div class="pf-label-capsula">Publicaciones y Eventos de la Fundación</div>
+                  <div id="contenedor-publicaciones-fundacion" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; margin-top: 8px;">
+                      <p style="color: #666; font-style: italic;">Cargando actividad...</p>
+                  </div>
+              </div>
           </div>
       </div>
   </main>
 
-  <!-- VISOR DE FOTO DE PERFIL AMPLIADA (ESTILO FACEBOOK) -->
+  <!-- VISOR DE FOTO DE PERFIL AMPLIADA -->
   <div id="modal-visor-foto-grande" onclick="cerrarVisorFotoGrande(event)" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.85); z-index: 9999999; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
-      <button type="button" onclick="cerrarVisorFotoGrandeDirecto()" style="position: absolute; top: 20px; right: 25px; background: rgba(255,255,255,0.2); border: none; color: #fff; font-size: 30px; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s;">&times;</button>
+      <button type="button" onclick="cerrarVisorFotoGrandeDirecto()" style="position: absolute; top: 20px; right: 25px; background: rgba(255,255,255,0.2); border: none; color: #fff; font-size: 30px; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;">&times;</button>
       <div style="max-width: 90%; max-height: 90%; display: flex; justify-content: center; align-items: center;">
-          <img id="img-foto-ampliada-pantalla" src="" alt="Foto de perfil en grande" style="max-width: 100%; max-height: 85vh; border-radius: 12px; object-fit: contain; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+          <img id="img-foto-ampliada-pantalla" src="" alt="Foto en grande" style="max-width: 100%; max-height: 85vh; border-radius: 12px; object-fit: contain; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
       </div>
   </div>
 
   <div id="toast-seguimiento">
-      <h3 id="texto-toast">Ahora sigues a este usuario</h3>
+      <h3 id="texto-toast">Ahora sigues a este perfil</h3>
       <i class="fa-solid fa-check" style="color: #25d366; font-size: 38px; margin-top: 5px;"></i>
   </div>
+
   <!-- MODAL DE DENUNCIA DE PERFIL -->
   <div id="modal-denuncia-perfil" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 999999; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
       <div style="background: #fff; padding: 30px; border-radius: 25px; width: 90%; max-width: 450px; position: relative; font-family: 'Itim', cursive; box-shadow: 0 15px 35px rgba(0,0,0,0.2);">
           <button type="button" onclick="cerrarModalDenuncia()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 22px; cursor: pointer;">&times;</button>
           <h3 style="margin-top: 0; color: #d9534f; text-align: center;"><i class="fa-solid fa-triangle-exclamation"></i> Denunciar Perfil</h3>
           <p style="font-size: 14px; color: #666; text-align: center; margin-bottom: 15px;">Por favor, indícanos el motivo por el cual deseas denunciar este perfil:</p>
-          
           <textarea id="input-motivo-denuncia" placeholder="Escribe aquí el motivo detallado de la denuncia..." style="width: 100%; height: 100px; padding: 12px; border-radius: 12px; border: 1px solid #ccc; font-family: 'Itim', cursive; box-sizing: border-box; resize: none;"></textarea>
-          
           <div style="display: flex; gap: 10px; margin-top: 20px;">
               <button type="button" onclick="cerrarModalDenuncia()" style="flex: 1; background: #e0e0e0; border: none; padding: 10px; border-radius: 14px; font-family: 'Itim', cursive; cursor: pointer; font-weight: bold;">Cancelar</button>
               <button type="button" onclick="enviarDenunciaPerfil()" style="flex: 1; background: #d9534f; color: #fff; border: none; padding: 10px; border-radius: 14px; font-family: 'Itim', cursive; cursor: pointer; font-weight: bold;">Enviar Denuncia</button>
@@ -409,6 +667,7 @@
   <script>
       let idUsuarioPerfil = null;
       let usernamePerfil = null;
+      let esFundacionPerfil = false;
       let usuarioSeguidoActual = false;
       let estadoSolicitudActual = 'ninguna';
 
@@ -435,9 +694,8 @@
           });
       });
 
-      // Funciones para ampliar la foto de perfil del usuario público
-      function ampliarFotoPerfilPublico() {
-          const imgPerfil = document.getElementById('usr-foto');
+      function ampliarFotoPerfilPublico(idImg) {
+          const imgPerfil = document.getElementById(idImg);
           const visor = document.getElementById('modal-visor-foto-grande');
           const imgAmpliada = document.getElementById('img-foto-ampliada-pantalla');
 
@@ -472,30 +730,22 @@
           const correoLogueado = obtenerCorreoSesion();
 
           if (!usernamePerfil || usernamePerfil === 'null' || usernamePerfil === 'undefined') {
-              mostrarAlertaArca(
-                  "Hubo un error.",
-                  "No se especificó un usuario válido.",
-                  {
-                      tipo: "error",
-                      alCerrar: () => {
-                          window.location.href = 'home.html';
-                      }
-                  }
-              );
+              mostrarAlertaArca("¡Ups! ♡", "No se especificó un perfil válido.", {
+                  tipo: "error",
+                  alCerrar: () => { window.location.href = 'home.html'; }
+              });
               return;
           }
 
           try {
               const res = await fetch(`/api/perfil-publico/${encodeURIComponent(usernamePerfil)}?correo_visitante=${encodeURIComponent(correoLogueado)}`);
               if (!res.ok) {
-                  document.querySelector('.main-content').innerHTML = `
+                  document.getElementById('main-perfil-publico').innerHTML = `
                       <div style="text-align: center; padding: 60px 20px; font-family: 'Itim', cursive;">
                           <i class="fa-solid fa-user-slash" style="font-size: 55px; color: #d9534f; margin-bottom: 15px;"></i>
                           <h2 style="color: #2b2b2b; font-size: 24px;">¡Perfil no encontrado!</h2>
                           <p style="color: #666; font-size: 15px; margin-bottom: 20px;">Esta cuenta no está disponible o no se puede acceder a ella.</p>
-                          <a href="home.html" style="background: #fca38d; color: #fff; padding: 10px 22px; border-radius: 16px; text-decoration: none; font-weight: bold;">
-                              Volver al inicio
-                          </a>
+                          <a href="home.html" style="background: #fca38d; color: #fff; padding: 10px 22px; border-radius: 16px; text-decoration: none; font-weight: bold;">Volver al inicio</a>
                       </div>
                   `;
                   return;
@@ -505,55 +755,139 @@
               idUsuarioPerfil = datos.id_usuarios;
               usuarioSeguidoActual = datos.siguiendo;
               estadoSolicitudActual = datos.estado_solicitud || 'ninguna';
+              esFundacionPerfil = (datos.tipo_usuario === 'fundacion' || Boolean(datos.id_fundacion));
 
-              document.getElementById('usr-tag').textContent = `@${datos.nombre_usuario}`;
-              if (datos.foto_perfil) document.getElementById('usr-foto').src = datos.foto_perfil;
-              
-              if (datos.Ubicacion || datos.ubicacion) {
-                  document.getElementById('usr-ubicacion').innerHTML = `<i class="fa-solid fa-location-dot"></i> Ubicación aproximada: ${datos.Ubicacion || datos.ubicacion}`;
-              } else {
-                  document.getElementById('usr-ubicacion').innerHTML = `<i class="fa-solid fa-location-dot"></i> Ubicación aproximada: Medellín`;
-              }
-
-              const telefonoReal = datos.Telefono_usuario || datos.telefono || 'No registrado';
-              const correoReal = datos.correo_usuario || datos.correo || 'No registrado';
-
-              document.getElementById('contacto-tel').innerHTML = `<i class="fa-brands fa-whatsapp" style="color: #25d366; font-size: 16px;"></i> <span>${telefonoReal}</span>`;
-              document.getElementById('contacto-correo').innerHTML = `<i class="fa-solid fa-envelope" style="color: #007bff; font-size: 16px;"></i> <span>${correoReal}</span>`;
-
+              const correoReal = datos.correo_usuario || datos.correo || '';
               const esMiPerfil = (correoReal.toLowerCase().trim() === correoLogueado.toLowerCase().trim());
 
-              const seccionDenunciaBloqueo = document.getElementById('seccion-denuncia-bloqueo');
-              if (seccionDenunciaBloqueo) {
-                  seccionDenunciaBloqueo.style.display = esMiPerfil ? 'none' : 'block';
-              }
-
-              if (esMiPerfil) {
-                  const btnSeguir = document.getElementById('btn-seguir');
-                  if (btnSeguir) btnSeguir.style.display = 'none'; 
-
-                  const btnAdoptante = document.getElementById('btn-solicitud-adoptante');
-                  if (btnAdoptante) {
-                      btnAdoptante.textContent = "Editar mi perfil ⚙️";
-                      btnAdoptante.style.background = "#e8a87c";
-                      btnAdoptante.onclick = () => {
-                          window.location.href = 'perfil_usuario.html';
-                      };
-                  }
+              if (esFundacionPerfil) {
+                  renderizarVistaFundacion(datos, esMiPerfil);
               } else {
-                  actualizarBotonSeguirUI(usuarioSeguidoActual);
-                  actualizarEstadoBotonSolicitud(estadoSolicitudActual);
+                  renderizarVistaUsuarioNormal(datos, esMiPerfil);
               }
-
-              cargarPublicacionesDeUsuario(usernamePerfil, idUsuarioPerfil);
 
           } catch (error) {
               console.error("Error al cargar perfil:", error);
           }
       }
 
+      /* ==========================================
+         RENDERIZAR PERFIL PÚBLICO DE FUNDACIÓN
+      ========================================== */
+      function renderizarVistaFundacion(datos, esMiPerfil) {
+          document.getElementById('vista-usuario-normal').style.display = 'none';
+          document.getElementById('vista-fundacion-publica').style.display = 'block';
+          document.getElementById('titulo-pagina').textContent = 'Perfil de Fundación';
+
+          const nombreComercial = datos.Nombre_Comercial || datos.Nombre_Legal || datos.nombre_usuario;
+          usernamePerfil = nombreComercial;
+
+          document.getElementById('pf-pub-nombre').textContent = nombreComercial;
+          document.getElementById('pf-pub-mision').textContent = datos.Descripcion_mision || 'Sin misión registrada.';
+          document.getElementById('pf-pub-vision').textContent = datos.Descripcion_vision || 'Sin visión registrada.';
+          document.getElementById('pf-pub-enfoque').textContent = datos.enfoque_otro || 'Rescate y adopción';
+          document.getElementById('pf-pub-programas').textContent = datos.Programas_Proyectos_Actuales || 'Sin proyectos actuales.';
+
+          if (datos.Foto_Portada && datos.Foto_Portada.trim() !== '') {
+              document.getElementById('pf-pub-portada').src = datos.Foto_Portada;
+          }
+          if (datos.PFP_Fundacion && datos.PFP_Fundacion.trim() !== '') {
+              document.getElementById('pf-pub-avatar').src = datos.PFP_Fundacion;
+          } else if (datos.foto_perfil) {
+              document.getElementById('pf-pub-avatar').src = datos.foto_perfil;
+          }
+
+          // Redes y contacto
+          const redesContainer = document.getElementById('pf-pub-redes-container');
+          let htmlRedes = `
+              <div class="pf-redes-fila"><i class="fa-solid fa-envelope"></i> <span>${datos.correo_usuario || 'No registrado'}</span></div>
+              <div class="pf-redes-fila"><i class="fa-solid fa-phone"></i> <span>${datos.Telefono_fundacion || datos.Telefono_usuario || 'No registrado'}</span></div>
+          `;
+          if (datos.Ciudad || datos.Direccion) {
+              htmlRedes += `<div class="pf-redes-fila"><i class="fa-solid fa-location-dot"></i> <span>${[datos.Ciudad, datos.Direccion].filter(Boolean).join(' - ')}</span></div>`;
+          }
+          if (datos.Instagram && datos.Instagram.trim() !== '') {
+              htmlRedes += `<div class="pf-redes-fila"><i class="fa-brands fa-instagram" style="color: #e1306c;"></i> <a href="${datos.Instagram}" target="_blank" style="color: #d87c6b; text-decoration: none; font-weight: bold;">Instagram oficial</a></div>`;
+          }
+          if (datos.Facebook && datos.Facebook.trim() !== '') {
+              htmlRedes += `<div class="pf-redes-fila"><i class="fa-brands fa-facebook" style="color: #1877f2;"></i> <a href="${datos.Facebook}" target="_blank" style="color: #d87c6b; text-decoration: none; font-weight: bold;">Facebook oficial</a></div>`;
+          }
+          if (datos.TikTok && datos.TikTok.trim() !== '') {
+              htmlRedes += `<div class="pf-redes-fila"><i class="fa-brands fa-tiktok" style="color: #000;"></i> <a href="${datos.TikTok}" target="_blank" style="color: #d87c6b; text-decoration: none; font-weight: bold;">TikTok oficial</a></div>`;
+          }
+          if (datos.Pagina_web && datos.Pagina_web.trim() !== '') {
+              htmlRedes += `<div class="pf-redes-fila"><i class="fa-solid fa-globe"></i> <a href="${datos.Pagina_web}" target="_blank" style="color: #d87c6b; text-decoration: none; font-weight: bold;">${datos.Pagina_web}</a></div>`;
+          }
+          redesContainer.innerHTML = htmlRedes;
+
+          // Si es la propia fundación viendo su enlace público, ocultamos denunciar/bloquear
+          const accionesVisitante = document.getElementById('pf-acciones-visitante');
+          if (esMiPerfil) {
+              accionesVisitante.innerHTML = `
+                  <a href="perfil_fundacion.html" class="btn-seguir-fundacion-pill" style="text-decoration: none;">
+                      <i class="fa-solid fa-gear"></i> Ir a mi panel de fundación
+                  </a>
+              `;
+          } else {
+              actualizarBotonSeguirUI(usuarioSeguidoActual);
+          }
+
+          cargarPublicacionesDePerfil(
+              [datos.nombre_usuario, datos.Nombre_Comercial, datos.Nombre_Legal],
+              idUsuarioPerfil,
+              'contenedor-publicaciones-fundacion'
+          );
+      }
+
+      /* ==========================================
+         RENDERIZAR PERFIL PÚBLICO DE USUARIO NORMAL
+      ========================================== */
+      function renderizarVistaUsuarioNormal(datos, esMiPerfil) {
+          document.getElementById('vista-fundacion-publica').style.display = 'none';
+          document.getElementById('vista-usuario-normal').style.display = 'block';
+          document.getElementById('titulo-pagina').textContent = 'Perfil de Usuario';
+
+          document.getElementById('usr-tag').textContent = `@${datos.nombre_usuario}`;
+          if (datos.foto_perfil) document.getElementById('usr-foto').src = datos.foto_perfil;
+
+          if (datos.Ubicacion || datos.ubicacion) {
+              document.getElementById('usr-ubicacion').innerHTML = `<i class="fa-solid fa-location-dot"></i> Ubicación aproximada: ${datos.Ubicacion || datos.ubicacion}`;
+          } else {
+              document.getElementById('usr-ubicacion').innerHTML = `<i class="fa-solid fa-location-dot"></i> Ubicación aproximada: Medellín`;
+          }
+
+          const telefonoReal = datos.Telefono_usuario || datos.telefono || 'No registrado';
+          const correoReal = datos.correo_usuario || datos.correo || 'No registrado';
+
+          document.getElementById('contacto-tel').innerHTML = `<i class="fa-brands fa-whatsapp" style="color: #25d366; font-size: 16px;"></i> <span>${telefonoReal}</span>`;
+          document.getElementById('contacto-correo').innerHTML = `<i class="fa-solid fa-envelope" style="color: #007bff; font-size: 16px;"></i> <span>${correoReal}</span>`;
+
+          const seccionDenunciaBloqueo = document.getElementById('seccion-denuncia-bloqueo');
+          if (seccionDenunciaBloqueo) {
+              seccionDenunciaBloqueo.style.display = esMiPerfil ? 'none' : 'flex';
+          }
+
+          if (esMiPerfil) {
+              const btnSeguir = document.getElementById('btn-seguir');
+              if (btnSeguir) btnSeguir.style.display = 'none';
+
+              const btnAdoptante = document.getElementById('btn-solicitud-adoptante');
+              if (btnAdoptante) {
+                  btnAdoptante.textContent = "Editar mi perfil ⚙️";
+                  btnAdoptante.style.background = "#e8a87c";
+                  btnAdoptante.onclick = () => { window.location.href = 'perfil_usuario.html'; };
+              }
+          } else {
+              actualizarBotonSeguirUI(usuarioSeguidoActual);
+              actualizarEstadoBotonSolicitud(estadoSolicitudActual);
+          }
+
+          cargarPublicacionesDePerfil([datos.nombre_usuario], idUsuarioPerfil, 'contenedor-publicaciones-propias');
+      }
+
       function actualizarEstadoBotonSolicitud(estado) {
           const btnAdoptante = document.getElementById('btn-solicitud-adoptante');
+          if (!btnAdoptante) return;
 
           if (estado === 'aceptada') {
               btnAdoptante.textContent = "Ver ficha de adoptante ✓";
@@ -574,6 +908,7 @@
               btnAdoptante.onclick = solicitarVerAdoptante;
           }
       }
+
       function abrirModalDenuncia() {
           document.getElementById('modal-denuncia-perfil').style.display = 'flex';
       }
@@ -588,16 +923,12 @@
           const correoLogueado = obtenerCorreoSesion();
 
           if (!motivo) {
-              mostrarAlertaArca("Campo requerido", 
-              "Por favor escribe el motivo de la denuncia.", 
-              { tipo: "error" });
+              mostrarAlertaArca("Campo requerido ♡", "Por favor escribe el motivo de la denuncia.", { tipo: "error" });
               return;
           }
 
           if (!correoLogueado) {
-              mostrarAlertaArca("Inicia sesión", 
-              "Debes iniciar sesión para realizar una denuncia.", 
-              { tipo: "aviso" });
+              mostrarAlertaArca("Inicia sesión", "Debes iniciar sesión para realizar una denuncia.", { tipo: "aviso" });
               return;
           }
 
@@ -616,41 +947,44 @@
               const data = await res.json();
               if (res.ok) {
                   cerrarModalDenuncia();
-                  mostrarAlertaArca("¡Denuncia enviada!", 
-                  "La denuncia ha sido enviada al panel de administración correctamente.", 
-                  { tipo: "aviso" });
+                  mostrarAlertaArca("¡Denuncia enviada! 🌸", "La denuncia ha sido enviada al panel de administración correctamente.", { tipo: "aviso" });
               } else {
-                  mostrarAlertaArca("Error", data.error ||
-                   "No se pudo enviar la denuncia.", 
-                   { tipo: "error" });
+                  mostrarAlertaArca("Error", data.error || "No se pudo enviar la denuncia.", { tipo: "error" });
               }
           } catch (e) {
               console.error("Error al enviar denuncia:", e);
-              mostrarAlertaArca("Error de red", 
-              "Hubo un problema al conectar con el servidor.", 
-              { tipo: "error" });
+              mostrarAlertaArca("Error de red", "Hubo un problema al conectar con el servidor.", { tipo: "error" });
           }
       }
 
       function actualizarBotonSeguirUI(siguiendo) {
-          const btnSeguir = document.getElementById('btn-seguir');
-          if (siguiendo) {
-              btnSeguir.innerHTML = '<i class="fa-solid fa-user-check" style="color:#25d366;"></i>';
-              btnSeguir.title = "Dejar de seguir";
+          if (esFundacionPerfil) {
+              const btnFund = document.getElementById('btn-seguir-fundacion');
+              if (!btnFund) return;
+              if (siguiendo) {
+                  btnFund.style.background = "linear-gradient(135deg, #25d366 0%, #1ea952 100%)";
+                  btnFund.innerHTML = '<i class="fa-solid fa-user-check"></i> <span>Siguiendo</span>';
+              } else {
+                  btnFund.style.background = "linear-gradient(135deg, #fca38d 0%, #e87a69 100%)";
+                  btnFund.innerHTML = '<i class="fa-solid fa-user-plus"></i> <span>Seguir fundación</span>';
+              }
           } else {
-              btnSeguir.innerHTML = '<i class="fa-solid fa-user-plus"></i>';
-              btnSeguir.title = "Seguir usuario";
+              const btnSeguir = document.getElementById('btn-seguir');
+              if (!btnSeguir) return;
+              if (siguiendo) {
+                  btnSeguir.innerHTML = '<i class="fa-solid fa-user-check" style="color:#25d366;"></i>';
+                  btnSeguir.title = "Dejar de seguir";
+              } else {
+                  btnSeguir.innerHTML = '<i class="fa-solid fa-user-plus"></i>';
+                  btnSeguir.title = "Seguir usuario";
+              }
           }
       }
 
       async function alternarSeguir() {
           const correoLogueado = obtenerCorreoSesion();
           if (!correoLogueado) {
-              mostrarAlertaArca(
-                  "¡Inicia sesión! ",
-                  "Debes iniciar sesión para seguir a otros usuarios.",
-                  { tipo: "aviso" }
-              );
+              mostrarAlertaArca("¡Inicia sesión! ♡", "Debes iniciar sesión para seguir este perfil.", { tipo: "aviso" });
               return;
           }
 
@@ -666,7 +1000,9 @@
               actualizarBotonSeguirUI(usuarioSeguidoActual);
 
               if (usuarioSeguidoActual) {
-                  document.getElementById('texto-toast').textContent = "Ahora sigues a este usuario";
+                  document.getElementById('texto-toast').textContent = esFundacionPerfil
+                      ? "Ahora sigues a esta fundación"
+                      : "Ahora sigues a este usuario";
                   const toast = document.getElementById('toast-seguimiento');
                   toast.style.display = 'block';
                   setTimeout(() => toast.style.display = 'none', 2000);
@@ -679,20 +1015,12 @@
       async function solicitarVerAdoptante() {
           const correoLogueado = obtenerCorreoSesion();
           if (!correoLogueado) {
-              mostrarAlertaArca(
-                  "¡Inicia sesión! ",
-                  "Debes iniciar sesión para enviar una solicitud.",
-                  { tipo: "aviso" }
-              );
+              mostrarAlertaArca("¡Inicia sesión! ♡", "Debes iniciar sesión para enviar una solicitud.", { tipo: "aviso" });
               return;
           }
 
           if (estadoSolicitudActual === 'pendiente') {
-              mostrarAlertaArca(
-                  "Solicitud pendiente",
-                  "Ya tienes una solicitud pendiente enviada a este usuario.",
-                  { tipo: "aviso" }
-              );
+              mostrarAlertaArca("Solicitud pendiente", "Ya tienes una solicitud pendiente enviada a este usuario.", { tipo: "aviso" });
               return;
           }
 
@@ -703,12 +1031,8 @@
                   body: JSON.stringify({ correo_solicitante: correoLogueado, id_propietario: idUsuarioPerfil })
               });
               const data = await res.json();
-              
-              mostrarAlertaArca(
-                  "¡Solicitud enviada! 🌸",
-                  data.mensaje || "Solicitud enviada con éxito",
-                  { tipo: "aviso" }
-              );
+
+              mostrarAlertaArca("¡Solicitud enviada! 🌸", data.mensaje || "Solicitud enviada con éxito", { tipo: "aviso" });
 
               if (data.estado) {
                   estadoSolicitudActual = data.estado;
@@ -719,18 +1043,22 @@
           }
       }
 
-      async function cargarPublicacionesDeUsuario(username, idUser) {
-          const contenedor = document.getElementById('contenedor-publicaciones-propias');
+      async function cargarPublicacionesDePerfil(posiblesNombres, idUser, idContenedor) {
+          const contenedor = document.getElementById(idContenedor);
+          if (!contenedor) return;
+
+          const nombresLimpios = posiblesNombres
+              .filter(Boolean)
+              .map(n => n.toLowerCase().trim());
+
           try {
               const res = await fetch('/api/publicaciones-globales');
               const pubs = await res.json();
-              
-              const nameTarget = username.toLowerCase().trim();
 
               const propias = pubs.filter(p => {
                   const autorPub = (p.nombre_usuario || p.autor || '').toLowerCase().trim();
-                  const matchUser = autorPub === nameTarget;
-                  const matchId = idUser && Number(p.id_usuarios) === Number(idUser);
+                  const matchUser = nombresLimpios.includes(autorPub);
+                  const matchId = idUser && p.id_usuarios && Number(p.id_usuarios) === Number(idUser);
                   return matchUser || matchId;
               });
 
@@ -746,9 +1074,18 @@
                       }
 
                       const esAdopcion = pub.tipo_publicacion === 'adopcion';
-                      const tituloTipo = esAdopcion ? 'Publicación de adopción' : 'Nuevo Reporte';
-                      const idDestino = esAdopcion ? pub.id_origen : (pub.id_origen || pub.id_reporte);
-                      const linkDetalle = esAdopcion ? `detalle_adopcion.html?id=${idDestino}` : `detalle_reporte.html?id=${idDestino}`;
+                      const esEvento = pub.tipo_publicacion === 'evento';
+
+                      let tituloTipo = 'Nuevo Reporte';
+                      let linkDetalle = `detalle_reporte.html?id=${pub.id_origen || pub.id_reporte}`;
+
+                      if (esAdopcion) {
+                          tituloTipo = pub.nombre_tipo_reporte || 'Publicación de adopción';
+                          linkDetalle = `detalle_adopcion.html?id=${pub.id_origen}`;
+                      } else if (esEvento) {
+                          tituloTipo = pub.nombre_tipo_reporte || 'Evento de Fundación';
+                          linkDetalle = `mapa.html`;
+                      }
 
                       const tarjetaMini = document.createElement('div');
                       tarjetaMini.className = 'mini-tarjeta-pub';
@@ -757,47 +1094,37 @@
                           <div class="mini-pub-info">
                               <span class="mini-pub-titulo">${tituloTipo}</span>
                               <span style="font-size: 12px; color: #666;">${pub.Fecha_reporte ? pub.Fecha_reporte.split('T')[0] : ''}</span>
-                              <a href="${linkDetalle}" class="btn-ver-detalles-mini">Ver detalles</a>
+                              <a href="${linkDetalle}" class="btn-ver-detalles-mini">${esEvento ? 'Ver en mapa / eventos' : 'Ver detalles'}</a>
                           </div>
                       `;
                       contenedor.appendChild(tarjetaMini);
                   }
               } else {
-                  contenedor.innerHTML = `<p style="text-align: center; color: #666; font-style: italic;">Este usuario aún no tiene publicaciones.</p>`;
+                  contenedor.innerHTML = `<p style="text-align: center; color: #666; font-style: italic;">Aún no tiene publicaciones registradas.</p>`;
               }
           } catch (e) {
-              console.error("Error cargando publicaciones del usuario", e);
+              console.error("Error cargando publicaciones del perfil", e);
           }
       }
 
       async function bloquearUsuarioActual() {
           const correoLogueado = obtenerCorreoSesion();
           if (!correoLogueado) {
-              mostrarAlertaArca(
-                  "¡Inicia sesión! ",
-                  "Debes iniciar sesión para bloquear a un usuario.",
-                  {
-                      tipo: "aviso",
-                      alCerrar: () => {
-                          window.location.href = 'login.html';
-                      }
-                  }
-              );
+              mostrarAlertaArca("¡Inicia sesión! ♡", "Debes iniciar sesión para bloquear este perfil.", {
+                  tipo: "aviso",
+                  alCerrar: () => { window.location.href = 'login.html'; }
+              });
               return;
           }
 
           if (!idUsuarioPerfil) {
-              mostrarAlertaArca(
-                  "Hubo un error",
-                  "No se pudo identificar al usuario que deseas bloquear.",
-                  { tipo: "error" }
-              );
+              mostrarAlertaArca("¡Ups! ♡", "No se pudo identificar el perfil que deseas bloquear.", { tipo: "error" });
               return;
           }
 
           mostrarAlertaArca(
-              "¿Bloquear usuario?",
-              "¿Estás seguro de que deseas bloquear a este usuario? Dejarás de ver sus publicaciones y contenido.",
+              esFundacionPerfil ? "¿Bloquear fundación?" : "¿Bloquear usuario?",
+              "¿Estás seguro de que deseas bloquear esta cuenta? Dejarás de ver sus publicaciones y contenido.",
               {
                   tipo: "pregunta",
                   confirmar: true,
@@ -815,32 +1142,18 @@
                           });
 
                           const resultado = await respuesta.json();
-                          
+
                           if (respuesta.ok) {
-                              mostrarAlertaArca(
-                                  "Bloqueaste a este usuario",
-                                  "Usuario bloqueado correctamente.",
-                                  {
-                                      tipo: "aviso",
-                                      alCerrar: () => {
-                                          window.location.href = 'home.html';
-                                      }
-                                  }
-                              );
+                              mostrarAlertaArca("¡Cuenta bloqueada! 🌸", "Has bloqueado este perfil correctamente.", {
+                                  tipo: "aviso",
+                                  alCerrar: () => { window.location.href = 'home.html'; }
+                              });
                           } else {
-                              mostrarAlertaArca(
-                                  "Hubo un error",
-                                  resultado.error || "No se pudo bloquear al usuario.",
-                                  { tipo: "error" }
-                              );
+                              mostrarAlertaArca("No se pudo bloquear", resultado.error || "No se pudo bloquear la cuenta.", { tipo: "error" });
                           }
                       } catch (error) {
                           console.error("Error en la solicitud de bloqueo:", error);
-                          mostrarAlertaArca(
-                              "Error de conexión",
-                              "Ocurrió un error al intentar bloquear al usuario.",
-                              { tipo: "error" }
-                          );
+                          mostrarAlertaArca("Error de conexión ♡", "Ocurrió un error al intentar bloquear el perfil.", { tipo: "error" });
                       }
                   }
               }
