@@ -957,7 +957,47 @@ document.addEventListener('DOMContentLoaded', () => {
                                   }
                               });
                           } else {
-                              contenedorBoton.innerHTML = `<span style="font-size: 13px; color: #666;">Vista pública de reporte</span>`;
+                              // Es un usuario normal viendo un reporte ajeno -> Mostramos botón de Guardar
+                              const idPubReal = reporteData.id_publicacion || reporteId;
+                              
+                              // Consultamos si ya está guardado para adaptar el botón
+                              fetch(`/api/guardados/ids/${encodeURIComponent(correoLogueado)}`)
+                                  .then(res => res.json())
+                                  .then(idsGuardados => {
+                                      const estaGuardado = Array.isArray(idsGuardados) && idsGuardados.includes(Number(idPubReal));
+                                      
+                                      contenedorBoton.innerHTML = `
+                                          <button class="detalle-btn-accion" id="btn-guardar-reporte" style="background: ${estaGuardado ? '#ffe5dd' : '#fff'}; color: ${estaGuardado ? '#d9534f' : '#2b2b2b'}; cursor: pointer;">
+                                              <i class="fa-solid fa-bookmark"></i> ${estaGuardado ? 'Guardado' : 'Guardar publicación'}
+                                          </button>
+                                      `;
+
+                                      document.getElementById('btn-guardar-reporte').addEventListener('click', async () => {
+                                          const endpoint = estaGuardado ? '/api/quitar-guardado' : '/api/guardar-publicacion';
+                                          try {
+                                              const r = await fetch(endpoint, {
+                                                  method: 'POST',
+                                                  headers: { 'Content-Type': 'application/json' },
+                                                  body: JSON.stringify({ correo: correoLogueado, id_publicacion: idPubReal })
+                                              });
+                                              if (r.ok) {
+                                                  location.reload();
+                                              } else {
+                                                  const errJson = await r.json();
+                                                  mostrarAlertaArca("Aviso", errJson.error || "No se pudo actualizar el guardado.", { tipo: "aviso" });
+                                              }
+                                          } catch(ex) {
+                                              console.error(ex);
+                                          }
+                                      });
+                                  })
+                                  .catch(() => {
+                                      contenedorBoton.innerHTML = `
+                                          <button class="detalle-btn-accion" id="btn-guardar-reporte">
+                                              <i class="fa-solid fa-bookmark"></i> Guardar publicación
+                                          </button>
+                                      `;
+                                  });
                           }
                       } catch (innerErr) {
                           console.warn("Aviso de permisos:", innerErr);
