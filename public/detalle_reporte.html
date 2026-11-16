@@ -956,7 +956,9 @@ document.addEventListener('DOMContentLoaded', () => {
                                       }
                                   }
                               });
-                          app.post('/api/guardar-publicacion', (req, res) => {
+                              } else {
+                              const idPubReal = reporteData.id_publicacion || reporteId;
+app.post('/api/guardar-publicacion', (req, res) => {
     const { correo, id_publicacion } = req.body;
 
     if (!correo || !id_publicacion) {
@@ -964,40 +966,58 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     db.query("SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))", [correo], (err, results) => {
-        if (err || results.length === 0) {
+        if (err) {
+            return res.status(500).json({ error: "Error en el servidor: " + err.message });
+        }
+        if (results.length === 0) {
             return res.status(404).json({ error: "No se encontró el usuario en la base de datos." });
         }
 
         const id_usuarios = results[0].id_usuarios;
 
-        // Verificar si el ID existe en la tabla publicaciones (puede ser id_publicacion o id_reporte)
-        const verificarPub = `SELECT id_publicacion FROM publicaciones WHERE id_publicacion = ? OR id_reporte = ?`;
-        db.query(verificarPub, [id_publicacion, id_publicacion], (errV, pubRows) => {
-            let idPubReal = id_publicacion;
+        // Buscamos si ya existe el registro en la tabla publicaciones
+        const queryBusqueda = `SELECT id_publicacion FROM publicaciones WHERE id_publicacion = ?`;
+        db.query(queryBusqueda, [id_publicacion], (errB, pubRows) => {
+            if (errB) {
+                return res.status(500).json({ error: "Error al buscar publicación: " + errB.message });
+            }
 
             if (pubRows && pubRows.length > 0) {
-                idPubReal = pubRows[0].id_publicacion;
-                ejecutarGuardado(id_usuarios, idPubReal, res);
+                ejecutarInsertGuardado(id_usuarios, pubRows[0].id_publicacion, res);
             } else {
-                // Si no está en publicaciones, verificamos si es un reporte válido para crear su registro al vuelo
+                // Si no está directamente como id_publicacion, verificamos si es un reporte y creamos su publicación al vuelo
                 db.query("SELECT id_reporte FROM reportes WHERE id_reporte = ?", [id_publicacion], (errR, repRows) => {
+                    if (errR) {
+                        return res.status(500).json({ error: "Error al verificar reporte: " + errR.message });
+                    }
                     if (repRows && repRows.length > 0) {
-                        db.query("INSERT INTO publicaciones (id_reporte) VALUES (?)", [id_publicacion], (errInsP, resInsP) => {
-                            if (!errInsP) {
-                                idPubReal = resInsP.insertId;
-                                ejecutarGuardado(id_usuarios, idPubReal, res);
-                            } else {
-                                return res.status(400).json({ error: "No se pudo registrar la publicación asociada." });
+                        db.query("INSERT INTO publicaciones (id_reporte) VALUES (?)", [id_publicacion], (errIns, resIns) => {
+                            if (errIns) {
+                                return res.status(500).json({ error: "Error al crear la publicación: " + errIns.message });
                             }
+                            ejecutarInsertGuardado(id_usuarios, resIns.insertId, res);
                         });
                     } else {
-                        return res.status(400).json({ error: "La publicación que intentas guardar no existe en el sistema." });
+                        return res.status(400).json({ error: "La publicación o reporte no existe en el sistema." });
                     }
                 });
             }
         });
     });
 });
+
+function ejecutarInsertGuardado(id_usuarios, id_publicacion, res) {
+    const query = `INSERT INTO guardados (id_usuarios, id_publicacion) VALUES (?, ?)`;
+    db.query(query, [id_usuarios, id_publicacion], (errInsert) => {
+        if (errInsert) {
+            if (errInsert.code === 'ER_DUP_ENTRY') {
+                return res.status(400).json({ error: "Ya tienes esta publicación en tus guardados." });
+            }
+            return res.status(500).json({ error: "Error al guardar en la base de datos: " + errInsert.message });
+        }
+        res.status(201).json({ mensaje: "Publicación guardada exitosamente" });
+    });
+}
 
 function ejecutarGuardado(id_usuarios, id_publicacion, res) {
     const query = `INSERT INTO guardados (id_usuarios, id_publicacion) VALUES (?, ?)`;
