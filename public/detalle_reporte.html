@@ -956,82 +956,98 @@ document.addEventListener('DOMContentLoaded', () => {
                                       }
                                   }
                               });
-                              } else {
-                              const idPubReal = reporteData.id_publicacion || reporteId;
-app.post('/api/guardar-publicacion', (req, res) => {
-    const { correo, id_publicacion } = req.body;
 
-    if (!correo || !id_publicacion) {
-        return res.status(400).json({ error: "Faltan datos requeridos (correo o id_publicacion)" });
-    }
+} else {
+    const idPubReal = reporteData.id_publicacion || reporteId;
 
-    db.query("SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))", [correo], (err, results) => {
-        if (err) {
-            return res.status(500).json({ error: "Error en el servidor: " + err.message });
-        }
-        if (results.length === 0) {
-            return res.status(404).json({ error: "No se encontró el usuario en la base de datos." });
-        }
+    try {
+        // Consultar si el usuario ya tiene guardada esta publicación
+        const resGuards = await fetch(`/api/guardados/ids/${encodeURIComponent(correoLogueado)}`);
+        const idsGuardados = resGuards.ok ? await resGuards.json() : [];
+        const estaGuardada = idsGuardados.map(Number).includes(Number(idPubReal));
 
-        const id_usuarios = results[0].id_usuarios;
+        if (estaGuardada) {
+            contenedorBoton.innerHTML = `
+                <button class="detalle-btn-accion" id="btn-accion-guardado" style="background: #ffe5dd; color: #d9534f; border-color: #f4c2c4;">
+                    <i class="fa-solid fa-bookmark"></i> Publicación guardada
+                </button>
+            `;
 
-        // Buscamos si ya existe el registro en la tabla publicaciones
-        const queryBusqueda = `SELECT id_publicacion FROM publicaciones WHERE id_publicacion = ?`;
-        db.query(queryBusqueda, [id_publicacion], (errB, pubRows) => {
-            if (errB) {
-                return res.status(500).json({ error: "Error al buscar publicación: " + errB.message });
-            }
+            document.getElementById('btn-accion-guardado')?.addEventListener('click', async () => {
+                if (confirm("¿Deseas quitar esta publicación de tus guardados?")) {
+                    const quitRes = await fetch('/api/quitar-guardado', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            correo: correoLogueado,
+                            id_publicacion: Number(idPubReal)
+                        })
+                    });
 
-            if (pubRows && pubRows.length > 0) {
-                ejecutarInsertGuardado(id_usuarios, pubRows[0].id_publicacion, res);
-            } else {
-                // Si no está directamente como id_publicacion, verificamos si es un reporte y creamos su publicación al vuelo
-                db.query("SELECT id_reporte FROM reportes WHERE id_reporte = ?", [id_publicacion], (errR, repRows) => {
-                    if (errR) {
-                        return res.status(500).json({ error: "Error al verificar reporte: " + errR.message });
-                    }
-                    if (repRows && repRows.length > 0) {
-                        db.query("INSERT INTO publicaciones (id_reporte) VALUES (?)", [id_publicacion], (errIns, resIns) => {
-                            if (errIns) {
-                                return res.status(500).json({ error: "Error al crear la publicación: " + errIns.message });
-                            }
-                            ejecutarInsertGuardado(id_usuarios, resIns.insertId, res);
-                        });
+                    if (quitRes.ok) {
+                        mostrarAlertaArca(
+                            "Publicación eliminada.",
+                            "La publicación ha sido eliminada de tus guardados. 🌸",
+                            { tipo: "aviso" }
+                        );
+                        location.reload();
                     } else {
-                        return res.status(400).json({ error: "La publicación o reporte no existe en el sistema." });
+                        const errData = await quitRes.json();
+                        mostrarAlertaArca(
+                            "Error",
+                            errData.error || "No se pudo quitar de tus guardados.",
+                            { tipo: "error" }
+                        );
                     }
+                }
+            });
+
+        } else {
+            contenedorBoton.innerHTML = `
+                <button class="detalle-btn-accion" id="btn-accion-guardado">
+                    <i class="fa-regular fa-bookmark"></i> Guardar publicación
+                </button>
+            `;
+
+            document.getElementById('btn-accion-guardado')?.addEventListener('click', async () => {
+                const saveRes = await fetch('/api/guardar-publicacion', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        correo: correoLogueado,
+                        id_publicacion: Number(idPubReal)
+                    })
                 });
-            }
-        });
-    });
-});
 
-function ejecutarInsertGuardado(id_usuarios, id_publicacion, res) {
-    const query = `INSERT INTO guardados (id_usuarios, id_publicacion) VALUES (?, ?)`;
-    db.query(query, [id_usuarios, id_publicacion], (errInsert) => {
-        if (errInsert) {
-            if (errInsert.code === 'ER_DUP_ENTRY') {
-                return res.status(400).json({ error: "Ya tienes esta publicación en tus guardados." });
-            }
-            return res.status(500).json({ error: "Error al guardar en la base de datos: " + errInsert.message });
+                if (saveRes.ok) {
+                    mostrarAlertaArca(
+                        "Publicación guardada.",
+                        "La publicación ha sido guardada con éxito. 🌸",
+                        { tipo: "aviso" }
+                    );
+                    location.reload();
+                } else {
+                    const errData = await saveRes.json();
+                    mostrarAlertaArca(
+                        "Error",
+                        errData.error || "No se pudo guardar la publicación.",
+                        { tipo: "error" }
+                    );
+                }
+            });
         }
-        res.status(201).json({ mensaje: "Publicación guardada exitosamente" });
-    });
+
+    } catch (e) {
+        console.error("Error al verificar guardados:", e);
+        mostrarAlertaArca(
+            "Error",
+            "No se pudo verificar el estado de tus publicaciones guardadas.",
+            { tipo: "error" }
+        );
+    }
 }
 
-function ejecutarGuardado(id_usuarios, id_publicacion, res) {
-    const query = `INSERT INTO guardados (id_usuarios, id_publicacion) VALUES (?, ?)`;
-    db.query(query, [id_usuarios, id_publicacion], (errInsert) => {
-        if (errInsert) {
-            if (errInsert.code === 'ER_DUP_ENTRY') {
-                return res.status(400).json({ error: "Ya tienes esta publicación en tus guardados." });
-            }
-            return res.status(500).json({ error: "Error al guardar en la base de datos: " + errInsert.message });
-        }
-        res.status(201).json({ mensaje: "Publicación guardada exitosamente" });
-    });
-}
-                          }
+                          
                       } catch (innerErr) {
                           console.warn("Aviso de permisos:", innerErr);
                       }
