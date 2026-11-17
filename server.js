@@ -1666,7 +1666,7 @@ app.get('/api/mis-reportes', (req, res) => {
                 NULL AS nombre_animal
             FROM publicaciones p
             INNER JOIN eventos e ON p.id_evento = e.id_evento
-            INNER JOIN fundacion f ON e.id_fundacion = f.id_fundacion
+            LEFT JOIN fundacion f ON e.id_fundacion = f.id_fundacion
             WHERE LOWER(TRIM(f.Correo_fundacion)) = LOWER(TRIM(?))
         ) AS mis_publicaciones_unificadas
         ORDER BY fecha_real DESC, id_publicacion DESC
@@ -1680,7 +1680,6 @@ app.get('/api/mis-reportes', (req, res) => {
         res.json(rows);
     });
 });
-
 app.get('/api/adopciones/:id', (req, res) => {
     const idAdopcion = req.params.id;
 
