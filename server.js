@@ -1206,7 +1206,7 @@ app.get('/api/publicaciones-globales', (req, res) => {
 
     let sql = `
         SELECT
-            COALESCE(p.id_publicacion, r.id_reporte) AS id_publicacion,
+            p.id_publicacion AS id_publicacion,
             'reporte' AS tipo_publicacion,
             r.id_reporte AS id_reporte,
             r.id_reporte AS id_origen,
@@ -1223,7 +1223,7 @@ app.get('/api/publicaciones-globales', (req, res) => {
             u.tipo_usuario AS tipo_usuario,
             r.id_usuarios
         FROM reportes r
-        LEFT JOIN publicaciones p ON r.id_reporte = p.id_reporte
+        INNER JOIN publicaciones p ON r.id_reporte = p.id_reporte
         INNER JOIN usuarios u ON r.id_usuarios = u.id_usuarios
         LEFT JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
         WHERE r.id_usuarios NOT IN (
