@@ -195,23 +195,23 @@
 
     <!-- Contenido Principal -->
     <main class="main-content">
-        <div class="soporte-container">
-            <div class="soporte-box-grande">
+ <div class="soporte-box-grande" id="contenedor-botones-soporte">
 
-    <a href="preguntas_frecuentes.html" class="btn-soporte-capsula" style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+    <a href="preguntas_frecuentes.html" id="enlace-faq" class="btn-soporte-capsula" style="display: flex; align-items: center; justify-content: center; gap: 15px;">
         <i class="fa-regular fa-circle-question"></i>
-        <span>Preguntas Frecuentes</span>
+        <span id="texto-faq">Preguntas Frecuentes</span>
     </a>
 
-    <a href="guia_arca.html" class="btn-soporte-capsula" style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+    <a href="guia_arca.html" id="enlace-guia" class="btn-soporte-capsula" style="display: flex; align-items: center; justify-content: center; gap: 15px;">
         <i class="fa-solid fa-book-open"></i>
-        <span>Guía rápida de Arca</span>
+        <span id="texto-guia">Guía rápida de Arca</span>
     </a>
 
     <a href="reportar_error.html" class="btn-soporte-capsula" style="display: flex; align-items: center; justify-content: center; gap: 15px;">
         <i class="fa-regular fa-circle-xmark"></i>
         <span>Reportar un error</span>
     </a>
+
 
             </div>
 
@@ -267,11 +267,38 @@
                 }, 200);
             }
         });
+
+        document.addEventListener('DOMContentLoaded', () => {
+        const tipoUsuario = localStorage.getItem('tipo_usuario') || 'usuario';
+        
+        const enlaceFaq = document.getElementById('enlace-faq');
+        const textoFaq = document.getElementById('texto-faq');
+        const enlaceGuia = document.getElementById('enlace-guia');
+        const textoGuia = document.getElementById('texto-guia');
+
+        if (tipoUsuario === 'fundacion') {
+            // Redirecciones y textos adaptados para Fundaciones
+            if (enlaceFaq) enlaceFaq.href = "preguntas_frecuentes_fundacion.html";
+            if (textoFaq) textoFaq.textContent = "Preguntas Frecuentes (Fundaciones)";
+            
+            if (enlaceGuia) enlaceGuia.href = "guia_arca_fundacion.html";
+            if (textoGuia) textoGuia.textContent = "Guía rápida para Fundaciones";
+        } else {
+            // Redirecciones y textos para Usuario Normal
+            if (enlaceFaq) enlaceFaq.href = "preguntas_frecuentes.html";
+            if (textoFaq) textoFaq.textContent = "Preguntas Frecuentes";
+            
+            if (enlaceGuia) enlaceGuia.href = "guia_arca.html";
+            if (textoGuia) textoGuia.textContent = "Guía rápida de Arca";
+        }
+    });
     </script>
     <style>
         .goog-te-banner-frame { display: none !important; }
         body { top: 0 !important; }
         .skiptranslate { display: none !important; }
+
+        
     </style>
 </body>
 </html>

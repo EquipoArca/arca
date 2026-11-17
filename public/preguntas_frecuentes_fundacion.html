@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preguntas Frecuentes - Fundaciones ARCA</title>
+    <link rel="stylesheet" href="style_faq.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="dark-mode.css">
+    <script>
+    if (localStorage.getItem("modo_oscuro") === "true") {
+        document.body.classList.add("dark-mode");
+    }
+    </script>
+</head>
+<body>
+
+    <nav class="top-nav">
+        <div class="top-left">
+            <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu" onclick="toggleSidebar()"></i>
+            <div class="mini-logo-circle">
+                <img src="logo.png" alt="Logo">
+            </div>
+            <span class="page-title">FAQ - Fundaciones</span>
+        </div>
+    </nav>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="side-icons">
+            <a href="home.html" class="menu-fila"><i class="fa-solid fa-house"></i><span class="menu-text">Inicio</span></a>
+            <a href="configuracion.html" class="menu-fila"><i class="fa-solid fa-gear"></i><span class="menu-text">Ajustes</span></a>
+        </div>
+    </aside>
+
+    <main class="main-content-faq" style="margin-top: 75px; margin-left: 60px; padding: 30px; display: flex; flex-direction: column; align-items: center;">
+        <div class="card-faq-principal" style="width: 100%; max-width: 850px; background: rgba(255,255,255,0.75); border-radius: 38px; padding: 40px; border: 2px dashed rgba(229,115,115,0.5);">
+            
+            <h1 class="faq-titulo-principal" style="text-align: center; color: #442c20; font-size: 2.2rem;">
+                <i class="fa-solid fa-certificate" style="color: #e57373;"></i> Preguntas Frecuentes (Fundaciones)
+            </h1>
+
+            <ul class="lista-faq-estilizada" style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
+                
+                <li class="item-faq-acordeon" style="background: rgba(234, 243, 218, 0.72); border-radius: 22px; overflow: hidden; border: 2px solid rgba(190, 198, 165, 0.7);">
+                    <button class="faq-pregunta-btn" onclick="toggleAcordeon(this)" style="width: 100%; background: none; border: none; padding: 18px; font-family: 'Itim'; font-size: 1.1rem; display: flex; justify-content: space-between; cursor: pointer; color: #4a5a1c; font-weight: 600;">
+                        <span>¿Cómo se aprueba el registro legal de mi fundación?</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-respuesta-contenido" style="max-height: 0; overflow: hidden; padding: 0 20px; transition: all 0.3s ease; color: #442c20;">
+                        El equipo administrativo de ARCA revisa los documentos legales proporcionados durante el registro. Una vez verificados, tu cuenta cambiará de estado "pendiente" a "aprobado", habilitando todas las herramientas de gestión.
+                    </div>
+                </li>
+
+                <li class="item-faq-acordeon" style="background: rgba(234, 243, 218, 0.72); border-radius: 22px; overflow: hidden; border: 2px solid rgba(190, 198, 165, 0.7);">
+                    <button class="faq-pregunta-btn" onclick="toggleAcordeon(this)" style="width: 100%; background: none; border: none; padding: 18px; font-family: 'Itim'; font-size: 1.1rem; display: flex; justify-content: space-between; cursor: pointer; color: #4a5a1c; font-weight: 600;">
+                        <span>¿Cómo publico mascotas en adopción oficial?</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-respuesta-contenido" style="max-height: 0; overflow: hidden; padding: 0 20px; transition: all 0.3s ease; color: #442c20;">
+                        Desde tu panel de fundación, accede a la sección de publicaciones o gestión de adopciones. Podrás rellenar el formulario con las características del animal, su historia y subir múltiples fotografías oficiales.
+                    </div>
+                </li>
+
+                <li class="item-faq-acordeon" style="background: rgba(234, 243, 218, 0.72); border-radius: 22px; overflow: hidden; border: 2px solid rgba(190, 198, 165, 0.7);">
+                    <button class="faq-pregunta-btn" onclick="toggleAcordeon(this)" style="width: 100%; background: none; border: none; padding: 18px; font-family: 'Itim'; font-size: 1.1rem; display: flex; justify-content: space-between; cursor: pointer; color: #4a5a1c; font-weight: 600;">
+                        <span>¿Cómo gestiono los reportes de emergencia recibidos?</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-respuesta-contenido" style="max-height: 0; overflow: hidden; padding: 0 20px; transition: all 0.3s ease; color: #442c20;">
+                        En la sección "Reportes de Fundación" podrás visualizar los casos activos reportados por los usuarios en tu zona de cobertura para coordinar rescates o brindar apoyo prioritario.
+                    </div>
+                </li>
+
+            </ul>
+
+            <div style="display: flex; justify-content: center; margin-top: 25px;">
+                <a href="soporte.html" class="btn-volver-pill" style="background: #fbc2c4; padding: 10px 30px; border-radius: 25px; text-decoration: none; color: #442c20; font-family: 'Itim';">
+                    <i class="fa-solid fa-arrow-left"></i> Volver al Soporte
+                </a>
+            </div>
+
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+    <script>
+        function toggleAcordeon(button) {
+            const item = button.parentElement;
+            const isOpen = item.classList.contains('activo');
+            document.querySelectorAll('.item-faq-acordeon').forEach(acc => acc.classList.remove('activo'));
+            if (!isOpen) item.classList.add('activo');
+        }
+    </script>
+</body>
+</html>
