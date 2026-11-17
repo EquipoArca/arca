@@ -288,6 +288,16 @@
         }
         .btn-copiar-mini:hover { background: #ffe5dd; }
 
+        .badge-ver-perfil {
+            font-size: 11px;
+            background: rgba(252, 185, 160, 0.4);
+            padding: 2px 6px;
+            border-radius: 8px;
+            color: #d9534f;
+            border: 1px dashed #fca38d;
+            margin-left: 4px;
+        }
+
         .modal-arca-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -392,10 +402,16 @@
               </div>
           </div>
 
-          <!-- Título del Evento Centrado -->
+          <!-- Título del Evento Centrado con Link al Perfil Público de la Fundación -->
           <div class="evento-titulo-principal">
               <h2 id="lbl-nombre-evento">Cargando evento...</h2>
-              <div style="font-size: 14.5px; color: #666; margin-top: 4px;">Organiza: <strong id="lbl-organizador">Fundación</strong></div>
+              <div style="font-size: 14.5px; color: #666; margin-top: 4px;">
+                  Organiza: 
+                  <a href="javascript:void(0)" id="link-organizador" style="color: #d9534f; text-decoration: none; font-weight: bold;" title="Ver perfil público de la fundación">
+                      <strong id="lbl-organizador">Fundación</strong>
+                      <span class="badge-ver-perfil"><i class="fa-solid fa-user-check"></i> Ver perfil</span>
+                  </a>
+              </div>
           </div>
 
           <!-- Grid de Contenido -->
@@ -493,8 +509,6 @@
               </div>
           </form>
       </div>
-  </div>
-         
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -618,10 +632,16 @@
               fechaEventoGlobal = evento.fecha_hora;
 
               document.getElementById('lbl-nombre-evento').textContent = evento.nombre_evento;
-              document.getElementById('lbl-organizador').textContent = evento.entidad_organizadora || 'Fundación ARCA';
+              
+              const nombreOrganizador = evento.entidad_organizadora || 'Fundación ARCA';
+              document.getElementById('lbl-organizador').textContent = nombreOrganizador;
+              
+              const linkOrganizador = document.getElementById('link-organizador');
+              if (linkOrganizador) {
+                  linkOrganizador.href = `perfil_publico.html?user=${encodeURIComponent(nombreOrganizador)}`;
+              }
               
               if (evento.fecha_hora) {
-                  // Corrección robusta para extraer la fecha y hora exacta sin ceros
                   const fechaObj = new Date(evento.fecha_hora);
                   const anio = fechaObj.getFullYear();
                   const mes = String(fechaObj.getMonth() + 1).padStart(2, '0');
@@ -632,7 +652,7 @@
                   const minutos = String(fechaObj.getMinutes()).padStart(2, '0');
                   const ampm = horas >= 12 ? 'pm' : 'am';
                   horas = horas % 12;
-                  horas = horas ? horas : 12; // la hora '0' debe ser '12'
+                  horas = horas ? horas : 12;
                   const horaFormateada = `${String(horas).padStart(2, '0')}:${minutos} ${ampm}`;
 
                   document.getElementById('lbl-fecha').textContent = `Publicado el ${fechaFormateada}`;
@@ -658,7 +678,6 @@
                   btnMapa.href = `mapa.html`;
               }
 
-// Datos de contacto exclusivos de la fundación organizadora (sin mezclar ubicación)
               const tel = evento.telefono_fundacion || evento.Telefono_fundacion || '';
               const correo = evento.correo_fundacion || evento.Correo_fundacion || '';
               
@@ -689,24 +708,13 @@
               
               document.getElementById('lbl-contacto').innerHTML = contactoHTML || '<span>Sin medios de contacto registrados.</span>';
 
-              // Estado de Recordatorio
-              const recordatoriosGuardados = JSON.parse(localStorage.getItem('arca_recordatorios') || '[]');
-              if (recordatoriosGuardados.includes(Number(eventoId))) {
-                  const btnRec = document.getElementById('btn-activar-recordatorio');
-                  btnRec.innerHTML = `<i class="fa-solid fa-bell"></i> RECORDATORIO ACTIVADO`;
-                  btnRec.classList.add('btn-recordatorio-activo');
-              }
-
-// Gestión de Propiedad y Acciones (Si es tuyo, muestras Editar; si no, Guardar/Recordatorio)
               firebase.auth().onAuthStateChanged(async (user) => {
                   const correoLogueado = user ? user.email : (localStorage.getItem('correo_usuario') || localStorage.getItem('correo'));
                   const columnaDerecha = document.querySelector('.evento-columna-derecha');
                   
-                  // Verificamos si el correo logueado coincide con el correo de la fundación organizadora del evento
                   const esDueño = correoLogueado && evento.correo_fundacion && correoLogueado.toLowerCase() === evento.correo_fundacion.toLowerCase();
 
                   if (esDueño) {
-                      // Si es el dueño, reemplazamos los botones de visitante por los de gestión propia
                       const btnRecordatorio = document.getElementById('btn-activar-recordatorio');
                       const btnGuardar = document.getElementById('btn-accion-guardar');
                       
@@ -715,20 +723,16 @@
 
                       const divDueño = document.createElement('div');
                       divDueño.innerHTML = `
-                        
-<div style="background: #fbd4d8; color: #80515e; padding: 10px 20px; border: 1px solid #f4b8bf; border-radius: 25px; font-size: 14px; text-align: left; margin-bottom: 10px; font-family: 'Itim', cursive; font-weight: bold; box-sizing: border-box; box-shadow: 0 2px 6px rgba(180, 100, 115, 0.08);">
-    ESTE EVENTO FUE PUBLICADO POR TU FUNDACIÓN
-</div>
-
-<button id="btn-abrir-editar" class="btn-accion-prototipo" style="width: 100%; margin-top: 5px;" onclick="abrirModalEditar()">
-    <i class="fa-solid fa-pen-to-square"></i> EDITAR EVENTO
-</button>
-
+                        <div style="background: #fbd4d8; color: #80515e; padding: 10px 20px; border: 1px solid #f4b8bf; border-radius: 25px; font-size: 14px; text-align: left; margin-bottom: 10px; font-family: 'Itim', cursive; font-weight: bold; box-sizing: border-box; box-shadow: 0 2px 6px rgba(180, 100, 115, 0.08);">
+                            ESTE EVENTO FUE PUBLICADO POR TU FUNDACIÓN
+                        </div>
+                        <button id="btn-abrir-editar" class="btn-accion-prototipo" style="width: 100%; margin-top: 5px;" onclick="abrirModalEditar()">
+                            <i class="fa-solid fa-pen-to-square"></i> EDITAR EVENTO
+                        </button>
                       `;
                       columnaDerecha.appendChild(divDueño);
 
                   } else {
-                      // Comportamiento normal para visitantes (Recordatorio y Guardar)
                       const recordatoriosGuardados = JSON.parse(localStorage.getItem('arca_recordatorios') || '[]');
                       if (recordatoriosGuardados.includes(Number(eventoId))) {
                           const btnRec = document.getElementById('btn-activar-recordatorio');
@@ -796,7 +800,6 @@
           }
       }
 
-      // Lógica Funcional para Programar y Activar Recordatorio (1 día antes)
       function activarRecordatorioEvento() {
           const params = new URLSearchParams(window.location.search);
           const eventoId = Number(params.get('id'));
@@ -822,7 +825,6 @@
              localStorage.setItem('arca_programacion_notificaciones', JSON.stringify(eventosNotif));
          }
 
-          // Solicitar permiso de notificaciones nativas si es soportado
           if ("Notification" in window && Notification.permission !== "granted") {
               Notification.requestPermission();
           }
@@ -834,7 +836,6 @@
           mostrarAlertaArca(`¡Recordatorio activado con éxito! Te enviaremos una notificación un día antes de "${nombreEventoGlobal}" para que no lo olvides. 🐾✨`, "¡Listo!");
       }
 
-      // Variables y funciones para la edición de eventos propios
       let eventoGlobalParaEditar = null;
 
       async function abrirModalEditar() {
@@ -849,7 +850,6 @@
               if (!evento) return;
               eventoGlobalParaEditar = evento;
 
-              // Rellenar campos del formulario con los datos actuales
               document.getElementById('edit-nombre').value = evento.nombre_evento || '';
               document.getElementById('edit-lugar').value = evento.lugar || '';
               
@@ -859,7 +859,6 @@
               }
               
               document.getElementById('edit-detalles').value = evento.detalles_adicionales || '';
-
               document.getElementById('modalEditarEvento').style.display = 'flex';
           } catch (e) {
               console.error("Error al preparar edición:", e);
@@ -908,7 +907,6 @@
               mostrarAlertaArca("Error de conexión con el servidor.", "Error");
           }
       }
-
   </script>
 </body>
 </html>

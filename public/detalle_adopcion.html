@@ -257,17 +257,9 @@
             white-space: nowrap;
         }
 
-        .btn-contacto-link.whatsapp {
-            color: #25d366;
-        }
-
-        .btn-contacto-link.correo {
-            color: #007bff;
-        }
-
-        .btn-contacto-link:hover {
-            text-decoration: underline;
-        }
+        .btn-contacto-link.whatsapp { color: #25d366; }
+        .btn-contacto-link.correo { color: #007bff; }
+        .btn-contacto-link:hover { text-decoration: underline; }
 
         .btn-copiar-mini {
             background: #fff;
@@ -285,9 +277,7 @@
             font-family: 'Itim', cursive, sans-serif;
         }
 
-        .btn-copiar-mini:hover {
-            background: #ffe5dd;
-        }
+        .btn-copiar-mini:hover { background: #ffe5dd; }
 
         .detalle-barra-inferior {
             display: flex;
@@ -296,6 +286,8 @@
             margin-top: 15px;
             padding-top: 12px;
             border-top: 1px dashed rgba(245, 180, 165, 0.6);
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .detalle-info-autor {
@@ -333,7 +325,7 @@
             backdrop-filter: blur(6px);
             color: #2b2b2b;
             border: 1px solid #f4d0c5;
-            padding: 8px 20px;
+            padding: 8px 18px;
             border-radius: 16px;
             cursor: pointer;
             font-weight: bold;
@@ -353,16 +345,10 @@
 
         .modal-arca-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.4);
             backdrop-filter: blur(4px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
+            display: none; align-items: center; justify-content: center; z-index: 1000;
         }
 
         .modal-arca-box {
@@ -387,83 +373,31 @@
             font-size: 36px;
             color: #7b5c93;
             margin-bottom: 12px;
-            display: flex;
-            justify-content: center;
-            gap: 8px;
+            display: flex; justify-content: center; gap: 8px;
         }
 
-        .modal-arca-box h3 {
-            margin: 0 0 10px 0;
-            color: #2b2b2b;
-            font-size: 20px;
-        }
+        .modal-arca-box h3 { margin: 0 0 10px 0; color: #2b2b2b; font-size: 20px; }
+        .modal-arca-box p { color: #555; font-size: 15px; line-height: 1.4; margin-bottom: 20px; }
 
-        .modal-arca-box p {
-            color: #555;
-            font-size: 15px;
-            line-height: 1.4;
-            margin-bottom: 20px;
-        }
-
-        .modal-botones-fila {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
+        .modal-botones-fila { display: flex; gap: 10px; justify-content: center; }
 
         .modal-btn-aceptar {
-            background: #fca38d;
-            color: #fff;
-            border: none;
-            padding: 10px 24px;
-            border-radius: 18px;
-            font-weight: bold;
-            font-size: 15px;
-            cursor: pointer;
-            font-family: 'Itim', cursive, sans-serif;
-            box-shadow: 0 4px 12px rgba(252, 163, 141, 0.4);
-            transition: background 0.2s;
+            background: #fca38d; color: #fff; border: none; padding: 10px 24px;
+            border-radius: 18px; font-weight: bold; font-size: 15px; cursor: pointer;
+            font-family: 'Itim', cursive, sans-serif; box-shadow: 0 4px 12px rgba(252, 163, 141, 0.4);
         }
-
-        .modal-btn-aceptar:hover {
-            background: #eb917b;
-        }
-
         .modal-btn-cancelar {
-            background: #f1f1f1;
-            color: #555;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 18px;
-            font-weight: bold;
-            font-size: 15px;
-            cursor: pointer;
+            background: #f1f1f1; color: #555; border: none; padding: 10px 20px;
+            border-radius: 18px; font-weight: bold; font-size: 15px; cursor: pointer;
             font-family: 'Itim', cursive, sans-serif;
-            transition: background 0.2s;
         }
 
-        .modal-btn-cancelar:hover {
-            background: #e2e2e2;
-        }
         .badge-fundacion-verificada {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    background: #fff3cc;
-    border: 1px solid #fce0a6;
-    color: #705814;
-    padding: 2px 8px;
-    border-radius: 50px;
-    font-size: 12px;
-    font-weight: 400;
-    margin-left: 6px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.02);
-}
-
-.badge-fundacion-verificada i {
-    color: #e09f1f;
-    font-size: 11px;
-}
+            display: inline-flex; align-items: center; gap: 4px;
+            background: #fff3cc; border: 1px solid #fce0a6; color: #705814;
+            padding: 2px 8px; border-radius: 50px; font-size: 12px; font-weight: 400; margin-left: 6px;
+        }
+        .badge-fundacion-verificada i { color: #e09f1f; font-size: 11px; }
     </style>
 </head>
 <body>
@@ -472,15 +406,13 @@
   <nav class="top-nav">
     <div class="top-left">
         <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu"></i>
-        <div class="mini-logo-circle">
-            <img src="logo.png" alt="Logo">
-        </div>
+        <div class="mini-logo-circle"><img src="logo.png" alt="Logo"></div>
         <span class="page-title" id="titulo-pagina">Adopción</span>
     </div>
 
     <div class="search-bar">
         <i class="fa-solid fa-magnifying-glass"></i>
-        <input type="text" id="input-busqueda-nav" name="busqueda" placeholder="Busca algo" aria-label="Buscar en la aplicación">
+        <input type="text" id="input-busqueda-nav" name="busqueda" placeholder="Busca algo">
         <i class="fa-solid fa-microphone"></i>
     </div>
 
@@ -491,28 +423,24 @@
                     <img src="logo.png" id="user-avatar-img" alt="Perfil">
                 </div>
                 <div class="mini-menu-card" id="mini-menu-card">
-                    <div class="mini-menu-header">
-                        <span id="mini-menu-username">Usuario</span>
-                    </div>
+                    <div class="mini-menu-header"><span id="mini-menu-username">Usuario</span></div>
                     <hr class="mini-menu-divider">
                     <a href="javascript:void(0)" onclick="mostrarSeccion('configuracion')" class="mini-menu-item btn-ajustes">
-                        <i class="fa-solid fa-gear"></i>
-                        <span>Ajustes</span>
+                        <i class="fa-solid fa-gear"></i><span>Ajustes</span>
                     </a>
                     <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini">
-                        <i class="fa-solid fa-right-from-bracket"></i>
-                        <span>Cerrar sesión</span>
+                        <i class="fa-solid fa-right-from-bracket"></i><span>Cerrar sesión</span>
                     </a>
                 </div>
             </div>
             <div class="notif-circle">
-                <a href="notificaciones.html" aria-label="Notificaciones"><i class="fa-solid fa-bell"></i></a>
+                <a href="notificaciones.html"><i class="fa-solid fa-bell"></i></a>
             </div>
         </div>
     </div>
   </nav>
 
-  <!-- Barra Lateral (Sidebar) -->
+  <!-- Barra Lateral -->
   <aside class="sidebar" id="sidebar">
       <div class="side-icons">
           <a href="home.html" class="menu-fila"><i class="fa-solid fa-house"></i><span class="menu-text">Inicio</span></a>
@@ -574,7 +502,7 @@
                       <span class="badge-ver-perfil"><i class="fa-solid fa-user-check"></i> Ver perfil</span>
                   </a>
               </div>
-              <div id="contenedor-boton-accion">
+              <div id="contenedor-boton-accion" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
                   <button class="detalle-btn-accion"><i class="fa-solid fa-bookmark"></i> Cargando...</button>
               </div>
           </div>
@@ -622,38 +550,24 @@
               let destinoUrl = 'home.html';
               let textoBoton = 'Volver al inicio';
 
-            if (origen === 'guardados') {
-    destinoUrl = 'guardados_usuario.html';
-    textoBoton = 'Volver a guardados';
-} else if (origen === 'mis-reportes' || origen === 'mis_reportes') {
-    destinoUrl = 'mis_publicaciones.html';
-    textoBoton = 'Volver a mis publicaciones';
-} else if (origen === 'mapa') {
-    destinoUrl = 'mapa.html';
-    textoBoton = 'Volver al mapa';
-} else if (origen === 'novedades') {
-    destinoUrl = 'novedades.html';
-    textoBoton = 'Volver a novedades';
-} else if (origen === 'fundacion' || origen === 'panel-fundacion') {
-    destinoUrl = 'home.html';
-    textoBoton = 'Volver al panel';
+              if (origen === 'guardados') {
+                  destinoUrl = 'guardados_usuario.html';
+                  textoBoton = 'Volver a guardados';
+              } else if (origen === 'mis-reportes' || origen === 'mis_reportes') {
+                  destinoUrl = 'mis_publicaciones.html';
+                  textoBoton = 'Volver a mis publicaciones';
+              } else if (origen === 'mapa') {
+                  destinoUrl = 'mapa.html';
+                  textoBoton = 'Volver al mapa';
+              } else if (origen === 'novedades') {
+                  destinoUrl = 'novedades.html';
+                  textoBoton = 'Volver a novedades';
               } else {
-                  // Detección automática por rol o historial si no hay parámetro de origen explícito
                   const tipoUsuarioLocal = localStorage.getItem('tipo_usuario');
                   const referrer = document.referrer;
-
                   if (tipoUsuarioLocal === 'fundacion' || (referrer && referrer.includes('fundacion'))) {
                       destinoUrl = 'home_fundacion.html';
                       textoBoton = 'Volver al panel';
-                  } else if (referrer && referrer.includes('mis_reportes')) {
-                      destinoUrl = 'mis_reportes.html';
-                      textoBoton = 'Volver a mis publicaciones';
-                  } else if (referrer && referrer.includes('guardados')) {
-                      destinoUrl = 'guardados_usuario.html';
-                      textoBoton = 'Volver a guardados';
-                  } else if (referrer && referrer.includes('mapa')) {
-                      destinoUrl = 'mapa.html';
-                      textoBoton = 'Volver al mapa';
                   }
               }
 
@@ -666,15 +580,9 @@
 
       function copiarAlPortapapeles(texto) {
           navigator.clipboard.writeText(texto).then(() => {
-              mostrarAlertaArca(`¡Copiado: ${texto}!`,
-              "Se ha copiado al portapapeles correctamente. 🌸",
-              {tipo: "aviso"}
-
-              );
+              mostrarAlertaArca(`¡Copiado: ${texto}!`, "Se ha copiado al portapapeles correctamente. 🌸", {tipo: "aviso"});
           }).catch(err => {
-              console.error('Error al copiar: ',
-              "Intente nuevamente. ♡",
-              {tipo: "error"}, err);
+              console.error('Error al copiar: ', err);
           });
       }
 
@@ -703,10 +611,7 @@
           const adopcionId = params.get('id');
 
           if (!adopcionId) {
-              mostrarAlertaArca("No se especificó ninguna adopción.",
-              "Por favor, seleccione una adopción para ver sus detalles. ♡",
-              {tipo: "error"}
-              );
+              mostrarAlertaArca("No se especificó ninguna adopción.", "Por favor, seleccione una adopción para ver sus detalles. ♡", {tipo: "error"});
               window.location.href = 'home.html';
               return;
           }
@@ -721,17 +626,11 @@
               const nombreAnimal = adopcion.nombre_animal || 'Mascota';
               document.getElementById('lbl-nombre-mascota').textContent = `Adopción: ${nombreAnimal}`;
 
-              const especie = adopcion.especie_catalogo || adopcion.especie || adopcion.otro_especie || '';
-              const raza = adopcion.raza_catalogo || adopcion.raza || adopcion.otra_raza || '';
-             
               let especieTexto = adopcion.especie || adopcion.otro_especie || '';
               if (Number(adopcion.id_especie) === 1) especieTexto = 'Perro';
               if (Number(adopcion.id_especie) === 2) especieTexto = 'Gato';
-              if (!especieTexto && adopcion.id_especie) especieTexto = `Especie ID: ${adopcion.id_especie}`;
 
               let razaTexto = adopcion.raza || adopcion.otra_raza || '';
-              if (!razaTexto && adopcion.id_raza && adopcion.id_raza > 1) razaTexto = `Raza específica`;
-
               let textoEspecieRaza = "No especificada";
               if (especieTexto && razaTexto) {
                   textoEspecieRaza = `${especieTexto} - ${razaTexto}`;
@@ -755,13 +654,13 @@
 
               const ciudad = adopcion.ciudad || '';
               const barrio = adopcion.barrio || '';
-              const textoUbicacion = [barrio, ciudad].filter(Boolean).join(', ') || adopcion.Ubicacion || 'Medellín';
+              const textoUbicacion = [barrio, ciudad].filter(Boolean).join(', ') || 'Medellín';
               document.getElementById('lbl-ubicacion').innerHTML = `<span>${textoUbicacion}</span>`;
 
               let contactoHTML = "";
               const tel = adopcion.telefono_contacto ? adopcion.telefono_contacto.trim() : "";
               const correo = adopcion.correo_contacto ? adopcion.correo_contacto.trim() : "";
-              const urlGmail = correo ? `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(correo)}&su=${encodeURIComponent("Sobre la adopción en ARCA")}&body=${encodeURIComponent("Hola, vi la publicación de adopción en ARCA y me interesa adoptar...")}` : "";
+              const urlGmail = correo ? `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(correo)}&su=${encodeURIComponent("Sobre la adopción en ARCA")}` : "";
               const urlWhatsapp = tel ? `https://wa.me/${tel.replace(/\D/g,'')}` : "";
 
               if (tel && correo) {
@@ -869,16 +768,8 @@
                                       const idAResolver = adopcion.id_adopcion || adopcionId;
                                       const resDel = await fetch(`/api/adopciones/${idAResolver}`, { method: 'DELETE' });
                                       if (resDel.ok) {
-                                          mostrarAlertaArca("Publicación eliminada .",
-                                              "La publicación ha sido eliminada exitosamente. 🌸",
-                                              {tipo: "aviso"}
-                                          );
+                                          mostrarAlertaArca("Publicación eliminada.", "La publicación ha sido eliminada exitosamente. 🌸", {tipo: "aviso"});
                                           window.location.href = 'home.html';
-                                      } else {
-                                          mostrarAlertaArca("Error al eliminar.",
-                                              "Por favor, inténtelo nuevamente. ♡",
-                                              {tipo: "error"}
-                                          );
                                       }
                                   } catch (err) {
                                       console.error("Error al eliminar adopción:", err);
@@ -901,64 +792,121 @@
                           const idsGuardados = await resGuards.json();
                           const estaGuardada = idsGuardados.map(Number).includes(Number(idPublicacionGlobal));
 
+                          let htmlBotones = "";
                           if (estaGuardada) {
-                              contenedorAccion.innerHTML = `
+                              htmlBotones += `
                                   <button class="detalle-btn-accion" id="btn-accion-guardado" style="background: #ffe5dd; color: #d9534f; border-color: #f4c2c4;">
-                                      <i class="fa-solid fa-bookmark"></i> Publicación guardada
+                                      <i class="fa-solid fa-bookmark"></i> Guardada
                                   </button>
                               `;
-                              document.getElementById('btn-accion-guardado').addEventListener('click', async () => {
-                                  if (confirm("¿Deseas quitar esta publicación de tus guardados?")) {
-                                      const quitRes = await fetch('/api/quitar-guardado', {
+                          } else {
+                              htmlBotones += `
+                                  <button class="detalle-btn-accion" id="btn-accion-guardado">
+                                      <i class="fa-regular fa-bookmark"></i> Guardar
+                                  </button>
+                              `;
+                          }
+
+                          // Si es una adopción publicada por una fundación, añadimos el botón "Estoy interesado"
+                          const esDeFundacion = tipoUsuario === 'fundacion' || (adopcion.correo_usuario && adopcion.correo_usuario.includes('fundacion')) || (nombreUsuario && nombreUsuario.toLowerCase().includes('fundacion'));
+                          
+                          if (esDeFundacion) {
+                              htmlBotones += `
+                                  <button class="detalle-btn-accion" id="btn-estoy-interesado" style="background: #fca38d; color: #fff; border-color: #fca38d;">
+                                      <i class="fa-solid fa-heart"></i> Estoy interesado
+                                  </button>
+                              `;
+                          }
+
+                          contenedorAccion.innerHTML = htmlBotones;
+
+                          // Evento Guardar/Quitar Guardado
+                          const btnGuardar = document.getElementById('btn-accion-guardado');
+                          if (btnGuardar) {
+                              btnGuardar.addEventListener('click', async () => {
+                                  if (estaGuardada) {
+                                      await fetch('/api/quitar-guardado', {
                                           method: 'POST',
                                           headers: { 'Content-Type': 'application/json' },
                                           body: JSON.stringify({ correo: correoLogueado, id_publicacion: Number(idPublicacionGlobal) })
                                       });
-                                      if (quitRes.ok) {
-                                          mostrarAlertaArca("Publicación eliminada.",
-                                              "La publicación ha sido eliminada de tus guardados. 🌸",
-                                              {tipo: "aviso"}
-                                          );
-                                          location.reload();
-                                      }
+                                  } else {
+                                      await fetch('/api/guardar-publicacion', {
+                                          method: 'POST',
+                                          headers: { 'Content-Type': 'application/json' },
+                                          body: JSON.stringify({ correo: correoLogueado, id_publicacion: Number(idPublicacionGlobal) })
+                                      });
                                   }
+                                  location.reload();
                               });
-                          } else {
-                              contenedorAccion.innerHTML = `
-                                  <button class="detalle-btn-accion" id="btn-accion-guardado">
-                                      <i class="fa-regular fa-bookmark"></i> Guardar publicación
-                                  </button>
-                              `;
-                              document.getElementById('btn-accion-guardado').addEventListener('click', async () => {
-                                  const saveRes = await fetch('/api/guardar-publicacion', {
-                                      method: 'POST',
-                                      headers: { 'Content-Type': 'application/json' },
-                                      body: JSON.stringify({ correo: correoLogueado, id_publicacion: Number(idPublicacionGlobal) })
-                                  });
-                                  if (saveRes.ok) {
-                                      mostrarAlertaArca("Publicación guardada.",
-                                          "La publicación ha sido guardada con exito. 🌸",
-                                          {tipo: "aviso"}
-                                      );
-                                      location.reload();
+                          }
+
+                          // Evento Botón "Estoy interesado" para fundaciones
+                          if (esDeFundacion) {
+                              const btnInteresado = document.getElementById('btn-estoy-interesado');
+                              
+                              // Consultar estado inicial del interés
+                              try {
+                                  const resInt = await fetch(`/api/adopcion/interes?correo=${encodeURIComponent(correoLogueado)}&id_adopcion=${adopcionId}`);
+                                  const dataInt = await resInt.json();
+                                  if (dataInt.interesado) {
+                                      btnInteresado.innerHTML = `<i class="fa-solid fa-heart-circle-check"></i> Interesado (Cancelar)`;
+                                      btnInteresado.style.background = '#ffe5dd';
+                                      btnInteresado.style.color = '#d9534f';
+                                      btnInteresado.style.borderColor = '#f4c2c4';
+                                  }
+                              } catch (err) {
+                                  console.error("Error al verificar estado de interés:", err);
+                              }
+
+                              btnInteresado.addEventListener('click', async () => {
+                                  try {
+                                      const resPost = await fetch('/api/adopcion/interes', {
+                                          method: 'POST',
+                                          headers: { 'Content-Type': 'application/json' },
+                                          body: JSON.stringify({
+                                              correo_usuario: correoLogueado,
+                                              id_adopcion: adopcionId,
+                                              nombre_mascota: nombreAnimal,
+                                              id_fundacion_usuario: adopcion.id_usuarios
+                                          })
+                                      });
+                                      const dataPost = await resPost.json();
+
+                                      if (dataPost.exito) {
+                                          if (dataPost.interesado) {
+                                              mostrarAlertaArca(
+                                                  "¡Notificación enviada!",
+                                                  "Hemos notificado a la fundación de tu interés. Te dirigiremos a su perfil público para que puedas ver sus datos y solicitar tu perfil de adoptante. 🌸",
+                                                  "Aviso"
+                                              );
+                                              setTimeout(() => {
+                                                  window.location.href = `perfil_publico.html?user=${encodeURIComponent(nombreUsuario)}`;
+                                              }, 1800);
+                                          } else {
+                                              mostrarAlertaArca("Interés cancelado", "Has cancelado tu notificación de interés para esta adopción. ♡", "Aviso");
+                                              btnInteresado.innerHTML = `<i class="fa-solid fa-heart"></i> Estoy interesado`;
+                                              btnInteresado.style.background = '#fca38d';
+                                              btnInteresado.style.color = '#fff';
+                                              btnInteresado.style.borderColor = '#fca38d';
+                                          }
+                                      }
+                                  } catch (e) {
+                                      console.error("Error al registrar interés:", e);
                                   }
                               });
                           }
                       }
                   } catch (e) {
-                      console.error("Error al validar el propietario de la adopción:", e);
+                      console.error("Error al validar propietario:", e);
                   }
               });
               
           } catch (error) {
               console.error("Error al cargar detalle de adopción:", error);
-              mostrarAlertaArca("Error al cargar.",
-                  "Hubo un error, inténtelo nuevamente. ♡",
-                  {tipo: "error"}
-              );
+              mostrarAlertaArca("Error al cargar.", "Hubo un error, inténtelo nuevamente. ♡");
           }
       }
-
   </script>
 </body>
 </html>

@@ -1118,6 +1118,88 @@ app.delete('/api/reportes/:id', (req, res) => {
         }
     });
 });
+// ==========================================
+// MÓDULO DE INTERÉS EN ADOPCIÓN (FUNDACIONES)
+// ==========================================
+app.get('/api/adopcion/interes', (req, res) => {
+    const { correo, id_adopcion } = req.query;
+    if (!correo || !id_adopcion) return res.status(400).json({ error: "Faltan parámetros" });
+
+    db.query("SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))", [correo], (err, uRows) => {
+        if (err || uRows.length === 0) return res.status(404).json({ error: "Usuario no encontrado" });
+        const idUsuario = uRows[0].id_usuarios;
+
+        const patronMensaje = `%[ADOPCION_ID:${id_adopcion}]%`;
+        const sqlCheck = `
+            SELECT id_notificacion FROM notificaciones 
+            WHERE id_usuario_origen = ? 
+              AND tipo = 'interesado_adopcion' 
+              AND mensaje LIKE ?
+        `;
+
+        db.query(sqlCheck, [idUsuario, patronMensaje], (errN, nRows) => {
+            if (errN) return res.status(500).json({ error: "Error en servidor" });
+            res.json({ interesado: nRows.length > 0 });
+        });
+    });
+});
+
+app.post('/api/adopcion/interes', (req, res) => {
+    const { correo_usuario, id_adopcion, nombre_mascota, id_fundacion_usuario } = req.body;
+    if (!correo_usuario || !id_adopcion) return res.status(400).json({ error: "Faltan datos requeridos" });
+
+    db.query("SELECT id_usuarios, nombre_usuario FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))", [correo_usuario], (err, uRows) => {
+        if (err || uRows.length === 0) return res.status(404).json({ error: "Usuario no encontrado" });
+        const idUsuario = uRows[0].id_usuarios;
+        const nombreUsuario = uRows[0].nombre_usuario;
+
+        const patronMensaje = `%[ADOPCION_ID:${id_adopcion}]%`;
+        const sqlCheck = `
+            SELECT id_notificacion FROM notificaciones 
+            WHERE id_usuario_origen = ? 
+              AND tipo = 'interesado_adopcion' 
+              AND mensaje LIKE ?
+        `;
+
+        db.query(sqlCheck, [idUsuario, patronMensaje], (errC, cRows) => {
+            if (errC) return res.status(500).json({ error: "Error en servidor" });
+
+            if (cRows.length > 0) {
+                // Ya estaba interesado -> Quitar interés (eliminar notificación de la fundación)
+                const idNotif = cRows[0].id_notificacion;
+                db.query("DELETE FROM notificaciones WHERE id_notificacion = ?", [idNotif], (errDel) => {
+                    if (errDel) return res.status(500).json({ error: "Error al eliminar interés" });
+                    res.json({ exito: true, interesado: false, mensaje: "Has cancelado tu interés en esta adopción." });
+                });
+            } else {
+                // No estaba interesado -> Registrar interés y notificar a la fundación
+                const registrarNotificacion = (idDestino) => {
+                    const mensaje = `@${nombreUsuario} está interesado en la adopción de "${nombre_mascota || 'Mascota'}". [ADOPCION_ID:${id_adopcion}]`;
+                    const sqlInsert = `
+                        INSERT INTO notificaciones (id_usuario_destino, id_usuario_origen, tipo, mensaje)
+                        VALUES (?, ?, 'interesado_adopcion', ?)
+                    `;
+                    db.query(sqlInsert, [idDestino, idUsuario, mensaje], (errIns) => {
+                        if (errIns) return res.status(500).json({ error: "Error al registrar notificación" });
+                        res.json({ exito: true, interesado: true, mensaje: "¡Notificación enviada a la fundación con éxito!" });
+                    });
+                };
+
+                if (id_fundacion_usuario) {
+                    registrarNotificacion(id_fundacion_usuario);
+                } else {
+                    const sqlBusq = `
+                        SELECT pa.id_usuarios FROM publicaciones_adopcion pa WHERE pa.id_publicaciones_adopcion = ?
+                    `;
+                    db.query(sqlBusq, [id_adopcion], (errB, bRows) => {
+                        const idDestino = (bRows && bRows.length > 0) ? bRows[0].id_usuarios : 1;
+                        registrarNotificacion(idDestino);
+                    });
+                }
+            }
+        });
+    });
+});
 
 app.get('/api/publicaciones-globales', (req, res) => {
     const correoVisitante = req.query.correo;
