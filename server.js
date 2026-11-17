@@ -2131,8 +2131,7 @@ app.get('/api/ficha-adoptante-publica/:username', (req, res) => {
             });
         });
     });
-});
-
+}); 
 // ==========================================
 // MÓDULO DE REGISTRO DE FUNDACIONES
 // ==========================================
@@ -2869,7 +2868,6 @@ app.get('/api/novedades', (req, res) => {
     });
 
 }); 
-
 
 app.post('/api/enviar-reporte-error', upload.single('imagen_error'), (req, res) => {
     try {

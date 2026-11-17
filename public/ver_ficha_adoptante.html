@@ -271,7 +271,7 @@
           });
       });
 
-      async function cargarFichaPublica() {
+     async function cargarFichaPublica() {
           const params = new URLSearchParams(window.location.search);
           const username = params.get('user');
           const correoSolicitante = obtenerCorreoSesion();
@@ -291,18 +291,25 @@
                   mostrarAlertaArca("Acceso denegado.", 
                       "No tienes permiso para ver esta ficha de adoptante o aún no ha sido aceptada.", 
                       { tipo: "aviso" });
-                  window.location.href = `perfil_publico.html?user=${username}`;
+                  window.location.href = `perfil_publico.html?user=${encodeURIComponent(username)}`;
+                  return;
+              }
+
+              if (res.status === 404) {
+                  mostrarAlertaArca("Aviso", 
+                      "El usuario aún no ha completado su ficha de adoptante.", 
+                      { tipo: "aviso" });
                   return;
               }
 
               if (!res.ok) throw new Error("No se pudo cargar la ficha.");
 
               const data = await res.json();
-              const u = data.usuario;
-              const f = data.ficha;
+              const u = data.usuario || {};
+              const f = data.ficha || {};
 
               // Rellenar Cabecera
-              document.getElementById('lbl-nombre-usuario').textContent = f.nombre_completo || u.nombre_usuario;
+              document.getElementById('lbl-nombre-usuario').textContent = f.nombre_completo || u.nombre_usuario || 'Adoptante';
               if (f.ubicacion) {
                   document.getElementById('lbl-ubicacion').innerHTML = `<i class="fa-solid fa-location-dot"></i> ${f.ubicacion}`;
               }
@@ -320,15 +327,15 @@
               else if (f.id_tipo_vivienda === 7) tipoViviendaTexto = 'Finca / Casa Campestre';
               
               const tenencia = f.vivienda_propia === 1 ? 'Propia' : (f.vivienda_arrendada === 1 ? 'Arrendada' : '');
-              document.getElementById('f-vivienda').textContent = `${tipoViviendaTexto} (${tenencia})`;
+              document.getElementById('f-vivienda').textContent = `${tipoViviendaTexto} ${tenencia ? '(' + tenencia + ')' : ''}`;
               
               document.getElementById('f-permiten').textContent = f.mascotas_permitidas === 1 ? 'Sí' : 'No';
               document.getElementById('f-convivientes').textContent = f.con_quien_vives || 'No especificado';
               document.getElementById('f-ninos').textContent = f.hay_niños_en_casa === 1 ? 'Sí' : 'No';
 
-              // 3. Responsabilidad y Logística (Mapeado exacto con tu BD)
+              // 3. Responsabilidad y Logística
               document.getElementById('f-otras-mascotas').textContent = f.tiene_otras_mascotas === 1 ? 'Sí' : 'No';
-              document.getElementById('f-presupuesto').textContent = f.prosupuesto_mensual ? `${f.prosupuesto_mensual}` : 'No definido';
+              document.getElementById('f-presupuesto').textContent = f.prosupuesto_mensual ? `$${Number(f.prosupuesto_mensual).toLocaleString()}` : 'No definido';
               document.getElementById('f-tiempo-solo').textContent = f.horas_ausente !== null && f.horas_ausente !== undefined ? `${f.horas_ausente} horas al día` : 'No especificado';
               document.getElementById('f-cuidador').textContent = f.cuidador || 'No especificado';
 
@@ -336,7 +343,8 @@
               document.getElementById('f-motivacion').textContent = `"${f.motivacion || 'Deseo brindarle un hogar amoroso a una mascota.'}"`;
 
           } catch (e) {
-              console.error("error al cargar la ficha:", e);
+              console.error("Error al cargar la ficha:", e);
+              mostrarAlertaArca("Error", "No se pudo conectar con el servidor para obtener la ficha.", { tipo: "error" });
           }
       }
   </script>
