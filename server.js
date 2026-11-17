@@ -1611,64 +1611,65 @@ app.get('/api/mis-reportes', (req, res) => {
     }
 
     const sql = `
-        SELECT
-            p.id_publicacion,
-            'reporte' AS tipo_publicacion,
-            r.id_reporte AS id_origen,
-            r.Descripcion,
-            r.Ubicacion,
-            r.img_reporte,
-            r.Fecha_reporte,
-            tr.Nombre_tipo_reporte AS nombre_tipo_reporte,
-            r.telefono_contacto,
-            r.correo_contacto,
-            NULL AS nombre_animal
-        FROM publicaciones p
-        INNER JOIN reportes r ON p.id_reporte = r.id_reporte
-        INNER JOIN usuarios u ON r.id_usuarios = u.id_usuarios
-        LEFT JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
-        WHERE LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(?))
-       
-        UNION ALL
-       
-        SELECT
-            p.id_publicacion,
-            'adopcion' AS tipo_publicacion,
-            pa.id_publicaciones_adopcion AS id_origen,
-            a.descripcion_animal AS Descripcion,
-            CONCAT(a.ciudad, ', ', a.barrio) AS Ubicacion,
-            a.fotos_animal AS img_reporte,
-            NOW() AS Fecha_reporte,
-            CONCAT('Adopción: ', a.nombre_animal) AS nombre_tipo_reporte,
-            pa.telefono_contacto,
-            pa.correo_contacto,
-            a.nombre_animal
-        FROM publicaciones p
-        INNER JOIN publicaciones_adopcion pa ON p.id_publicaciones_adopcion = pa.id_publicaciones_adopcion
-        INNER JOIN animal a ON pa.id_animal = a.id_animal
-        INNER JOIN usuarios u ON pa.id_usuarios = u.id_usuarios
-        WHERE LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(?))
+        SELECT * FROM (
+            SELECT
+                p.id_publicacion,
+                'reporte' AS tipo_publicacion,
+                r.id_reporte AS id_origen,
+                r.Descripcion,
+                r.Ubicacion,
+                r.img_reporte,
+                r.Fecha_reporte AS fecha_real,
+                tr.Nombre_tipo_reporte AS nombre_tipo_reporte,
+                r.telefono_contacto,
+                r.correo_contacto,
+                NULL AS nombre_animal
+            FROM publicaciones p
+            INNER JOIN reportes r ON p.id_reporte = r.id_reporte
+            INNER JOIN usuarios u ON r.id_usuarios = u.id_usuarios
+            LEFT JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
+            WHERE LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(?))
+           
+            UNION ALL
+           
+            SELECT
+                p.id_publicacion,
+                'adopcion' AS tipo_publicacion,
+                pa.id_publicaciones_adopcion AS id_origen,
+                a.descripcion_animal AS Descripcion,
+                CONCAT(a.ciudad, ', ', a.barrio) AS Ubicacion,
+                a.fotos_animal AS img_reporte,
+                COALESCE(pa.fecha_creacion, NOW()) AS fecha_real,
+                CONCAT('Adopción: ', a.nombre_animal) AS nombre_tipo_reporte,
+                pa.telefono_contacto,
+                pa.correo_contacto,
+                a.nombre_animal
+            FROM publicaciones p
+            INNER JOIN publicaciones_adopcion pa ON p.id_publicaciones_adopcion = pa.id_publicaciones_adopcion
+            INNER JOIN animal a ON pa.id_animal = a.id_animal
+            INNER JOIN usuarios u ON pa.id_usuarios = u.id_usuarios
+            WHERE LOWER(TRIM(u.correo_usuario)) = LOWER(TRIM(?))
 
-        UNION ALL
+            UNION ALL
 
-        SELECT
-            p.id_publicacion,
-            'evento' AS tipo_publicacion,
-            e.id_evento AS id_origen,
-            e.detalles_adicionales AS Descripcion,
-            e.ubicacion AS Ubicacion,
-            NULL AS img_reporte,
-            NOW() AS Fecha_reporte,
-            CONCAT('Evento: ', e.nombre_evento) AS nombre_tipo_reporte,
-            NULL AS telefono_contacto,
-            f.Correo_fundacion AS correo_contacto,
-            NULL AS nombre_animal
-        FROM publicaciones p
-        INNER JOIN eventos e ON p.id_evento = e.id_evento
-        INNER JOIN fundacion f ON e.id_fundacion = f.id_fundacion
-        WHERE LOWER(TRIM(f.Correo_fundacion)) = LOWER(TRIM(?))
-
-        ORDER BY id_publicacion DESC
+            SELECT
+                p.id_publicacion,
+                'evento' AS tipo_publicacion,
+                e.id_evento AS id_origen,
+                e.detalles_adicionales AS Descripcion,
+                e.ubicacion AS Ubicacion,
+                NULL AS img_reporte,
+                e.fecha_hora AS fecha_real,
+                CONCAT('Evento: ', e.nombre_evento) AS nombre_tipo_reporte,
+                NULL AS telefono_contacto,
+                f.Correo_fundacion AS correo_contacto,
+                NULL AS nombre_animal
+            FROM publicaciones p
+            INNER JOIN eventos e ON p.id_evento = e.id_evento
+            INNER JOIN fundacion f ON e.id_fundacion = f.id_fundacion
+            WHERE LOWER(TRIM(f.Correo_fundacion)) = LOWER(TRIM(?))
+        ) AS mis_publicaciones_unificadas
+        ORDER BY fecha_real DESC, id_publicacion DESC
     `;
 
     db.query(sql, [correoUsuario, correoUsuario, correoUsuario], (err, rows) => {
@@ -2646,55 +2647,56 @@ app.put('/api/eventos/:id', (req, res) => {
 
 app.get('/api/novedades', (req, res) => {
     const query = `
-        SELECT
-            p.id_publicacion,
-            'reporte' AS tipo_publicacion,
-            r.id_reporte AS id_origen,
-            r.Descripcion AS descripcion,
-            r.Ubicacion AS ubicacion,
-            r.img_reporte AS imagen,
-            r.Fecha_reporte AS fecha,
-            tr.Nombre_tipo_reporte AS subtitulo,
-            u.nombre_usuario AS autor
-        FROM publicaciones p
-        INNER JOIN reportes r ON p.id_reporte = r.id_reporte
-        INNER JOIN usuarios u ON r.id_usuarios = u.id_usuarios
-        LEFT JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
-       
-        UNION ALL
-       
-        SELECT
-            p.id_publicacion,
-            'adopcion' AS tipo_publicacion,
-            pa.id_publicaciones_adopcion AS id_origen,
-            a.descripcion_animal AS descripcion,
-            CONCAT(a.ciudad, ', ', a.barrio) AS ubicacion,
-            a.fotos_animal AS imagen,
-            NOW() AS fecha,
-            CONCAT('Adopción: ', a.nombre_animal) AS subtitulo,
-            u.nombre_usuario AS autor
-        FROM publicaciones p
-        INNER JOIN publicaciones_adopcion pa ON p.id_publicaciones_adopcion = pa.id_publicaciones_adopcion
-        INNER JOIN animal a ON pa.id_animal = a.id_animal
-        INNER JOIN usuarios u ON pa.id_usuarios = u.id_usuarios
+        SELECT * FROM (
+            SELECT
+                p.id_publicacion,
+                'reporte' AS tipo_publicacion,
+                r.id_reporte AS id_origen,
+                r.Descripcion AS descripcion,
+                r.Ubicacion AS ubicacion,
+                r.img_reporte AS imagen,
+                r.Fecha_reporte AS fecha_real,
+                tr.Nombre_tipo_reporte AS subtitulo,
+                u.nombre_usuario AS autor
+            FROM publicaciones p
+            INNER JOIN reportes r ON p.id_reporte = r.id_reporte
+            INNER JOIN usuarios u ON r.id_usuarios = u.id_usuarios
+            LEFT JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
+           
+            UNION ALL
+           
+            SELECT
+                p.id_publicacion,
+                'adopcion' AS tipo_publicacion,
+                pa.id_publicaciones_adopcion AS id_origen,
+                a.descripcion_animal AS descripcion,
+                CONCAT(a.ciudad, ', ', a.barrio) AS ubicacion,
+                a.fotos_animal AS imagen,
+                COALESCE(pa.fecha_creacion, NOW()) AS fecha_real,
+                CONCAT('Adopción: ', a.nombre_animal) AS subtitulo,
+                u.nombre_usuario AS autor
+            FROM publicaciones p
+            INNER JOIN publicaciones_adopcion pa ON p.id_publicaciones_adopcion = pa.id_publicaciones_adopcion
+            INNER JOIN animal a ON pa.id_animal = a.id_animal
+            INNER JOIN usuarios u ON pa.id_usuarios = u.id_usuarios
 
-        UNION ALL
+            UNION ALL
 
-        SELECT
-            p.id_publicacion,
-            'evento' AS tipo_publicacion,
-            e.id_evento AS id_origen,
-            e.detalles_adicionales AS descripcion,
-            e.ubicacion AS ubicacion,
-            NULL AS imagen,
-            e.fecha_hora AS fecha,
-            CONCAT('Evento: ', e.nombre_evento) AS subtitulo,
-            f.Nombre_Comercial AS autor
-        FROM publicaciones p
-        INNER JOIN eventos e ON p.id_evento = e.id_evento
-        INNER JOIN fundacion f ON e.id_fundacion = f.id_fundacion
-
-        ORDER BY id_publicacion DESC
+            SELECT
+                p.id_publicacion,
+                'evento' AS tipo_publicacion,
+                e.id_evento AS id_origen,
+                e.detalles_adicionales AS descripcion,
+                e.ubicacion AS ubicacion,
+                NULL AS imagen,
+                e.fecha_hora AS fecha_real,
+                CONCAT('Evento: ', e.nombre_evento) AS subtitulo,
+                f.Nombre_Comercial AS autor
+            FROM publicaciones p
+            INNER JOIN eventos e ON p.id_evento = e.id_evento
+            INNER JOIN fundacion f ON e.id_fundacion = f.id_fundacion
+        ) AS todo_unificado
+        ORDER BY fecha_real DESC, id_publicacion DESC
     `;
 
     db.query(query, (err, rows) => {
