@@ -1205,94 +1205,95 @@ app.get('/api/publicaciones-globales', (req, res) => {
     const correoVisitante = req.query.correo;
 
     let sql = `
-        SELECT
-            p.id_publicacion AS id_publicacion,
-            'reporte' AS tipo_publicacion,
-            r.id_reporte AS id_reporte,
-            r.id_reporte AS id_origen,
-            r.Descripcion,
-            r.Ubicacion,
-            r.img_reporte,
-            r.Fecha_reporte,
-            tr.Nombre_tipo_reporte AS nombre_tipo_reporte,
-            r.telefono_contacto,
-            r.correo_contacto,
-            r.estado,
-            NULL AS nombre_animal,
-            u.nombre_usuario AS nombre_usuario,
-            u.tipo_usuario AS tipo_usuario,
-            r.id_usuarios
-        FROM reportes r
-        INNER JOIN publicaciones p ON r.id_reporte = p.id_reporte
-        INNER JOIN usuarios u ON r.id_usuarios = u.id_usuarios
-        LEFT JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
-        WHERE r.id_usuarios NOT IN (
-            SELECT COALESCE(ub.id_usuario_bloqueado, 0) FROM usuarios_bloqueados ub
-            INNER JOIN usuarios u_bloq ON ub.id_usuario_bloqueador = u_bloq.id_usuarios
-            WHERE LOWER(TRIM(u_bloq.correo_usuario)) = LOWER(TRIM(?))
-            UNION
-            SELECT COALESCE(ub.id_usuario_bloqueado, 0) FROM usuarios_bloqueados ub
-            INNER JOIN usuarios u_bloq ON ub.id_usuario_bloqueado = u_bloq.id_usuarios
-            WHERE LOWER(TRIM(u_bloq.correo_usuario)) = LOWER(TRIM(?))
-        )
-       
-        UNION ALL
-       
-        SELECT
-            p.id_publicacion,
-            'adopcion' AS tipo_publicacion,
-            pa.id_publicaciones_adopcion AS id_reporte,
-            pa.id_publicaciones_adopcion AS id_origen,
-            a.descripcion_animal AS Descripcion,
-            CONCAT(a.ciudad, ', ', a.barrio) AS Ubicacion,
-            a.fotos_animal AS img_reporte,
-            NOW() AS Fecha_reporte,
-            CONCAT('Adopción: ', a.nombre_animal) AS nombre_tipo_reporte,
-            pa.telefono_contacto,
-            pa.correo_contacto,
-            NULL AS estado,
-            a.nombre_animal,
-            u.nombre_usuario AS nombre_usuario,
-            u.tipo_usuario AS tipo_usuario,
-            pa.id_usuarios
-        FROM publicaciones p
-        INNER JOIN publicaciones_adopcion pa ON p.id_publicaciones_adopcion = pa.id_publicaciones_adopcion
-        INNER JOIN animal a ON pa.id_animal = a.id_animal
-        INNER JOIN usuarios u ON pa.id_usuarios = u.id_usuarios
-        WHERE pa.id_usuarios NOT IN (
-            SELECT COALESCE(ub.id_usuario_bloqueado, 0) FROM usuarios_bloqueados ub
-            INNER JOIN usuarios u_bloq ON ub.id_usuario_bloqueador = u_bloq.id_usuarios
-            WHERE LOWER(TRIM(u_bloq.correo_usuario)) = LOWER(TRIM(?))
-            UNION
-            SELECT COALESCE(ub.id_usuario_bloqueado, 0) FROM usuarios_bloqueados ub
-            INNER JOIN usuarios u_bloq ON ub.id_usuario_bloqueado = u_bloq.id_usuarios
-            WHERE LOWER(TRIM(u_bloq.correo_usuario)) = LOWER(TRIM(?))
-        )
+        SELECT * FROM (
+            SELECT
+                p.id_publicacion AS id_publicacion,
+                'reporte' AS tipo_publicacion,
+                r.id_reporte AS id_reporte,
+                r.id_reporte AS id_origen,
+                r.Descripcion,
+                r.Ubicacion,
+                r.img_reporte,
+                r.Fecha_reporte AS fecha_orden,
+                tr.Nombre_tipo_reporte AS nombre_tipo_reporte,
+                r.telefono_contacto,
+                r.correo_contacto,
+                r.estado,
+                NULL AS nombre_animal,
+                u.nombre_usuario AS nombre_usuario,
+                u.tipo_usuario AS tipo_usuario,
+                r.id_usuarios
+            FROM reportes r
+            INNER JOIN publicaciones p ON r.id_reporte = p.id_reporte
+            INNER JOIN usuarios u ON r.id_usuarios = u.id_usuarios
+            LEFT JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
+            WHERE r.id_usuarios NOT IN (
+                SELECT COALESCE(ub.id_usuario_bloqueado, 0) FROM usuarios_bloqueados ub
+                INNER JOIN usuarios u_bloq ON ub.id_usuario_bloqueador = u_bloq.id_usuarios
+                WHERE LOWER(TRIM(u_bloq.correo_usuario)) = LOWER(TRIM(?))
+                UNION
+                SELECT COALESCE(ub.id_usuario_bloqueado, 0) FROM usuarios_bloqueados ub
+                INNER JOIN usuarios u_bloq ON ub.id_usuario_bloqueado = u_bloq.id_usuarios
+                WHERE LOWER(TRIM(u_bloq.correo_usuario)) = LOWER(TRIM(?))
+            )
+            
+            UNION ALL
+            
+            SELECT
+                p.id_publicacion,
+                'adopcion' AS tipo_publicacion,
+                pa.id_publicaciones_adopcion AS id_reporte,
+                pa.id_publicaciones_adopcion AS id_origen,
+                a.descripcion_animal AS Descripcion,
+                CONCAT(a.ciudad, ', ', a.barrio) AS Ubicacion,
+                a.fotos_animal AS img_reporte,
+                COALESCE(pa.fecha_creacion, p.id_publicacion) AS fecha_orden, -- Ajusta si tienes una fecha real en adopciones
+                CONCAT('Adopción: ', a.nombre_animal) AS nombre_tipo_reporte,
+                pa.telefono_contacto,
+                pa.correo_contacto,
+                NULL AS estado,
+                a.nombre_animal,
+                u.nombre_usuario AS nombre_usuario,
+                u.tipo_usuario AS tipo_usuario,
+                pa.id_usuarios
+            FROM publicaciones p
+            INNER JOIN publicaciones_adopcion pa ON p.id_publicaciones_adopcion = pa.id_publicaciones_adopcion
+            INNER JOIN animal a ON pa.id_animal = a.id_animal
+            INNER JOIN usuarios u ON pa.id_usuarios = u.id_usuarios
+            WHERE pa.id_usuarios NOT IN (
+                SELECT COALESCE(ub.id_usuario_bloqueado, 0) FROM usuarios_bloqueados ub
+                INNER JOIN usuarios u_bloq ON ub.id_usuario_bloqueador = u_bloq.id_usuarios
+                WHERE LOWER(TRIM(u_bloq.correo_usuario)) = LOWER(TRIM(?))
+                UNION
+                SELECT COALESCE(ub.id_usuario_bloqueado, 0) FROM usuarios_bloqueados ub
+                INNER JOIN usuarios u_bloq ON ub.id_usuario_bloqueado = u_bloq.id_usuarios
+                WHERE LOWER(TRIM(u_bloq.correo_usuario)) = LOWER(TRIM(?))
+            )
 
-        UNION ALL
+            UNION ALL
 
-        SELECT
-            p.id_publicacion,
-            'evento' AS tipo_publicacion,
-            e.id_evento AS id_reporte,
-            e.id_evento AS id_origen,
-            e.detalles_adicionales AS Descripcion,
-            e.ubicacion AS Ubicacion,
-            NULL AS img_reporte,
-            e.fecha_hora AS Fecha_reporte,
-            CONCAT('Evento: ', e.nombre_evento) AS nombre_tipo_reporte,
-            NULL AS telefono_contacto,
-            f.Correo_fundacion AS correo_contacto,
-            NULL AS estado,
-            NULL AS nombre_animal,
-            f.Nombre_Comercial AS nombre_usuario,
-            'fundacion' AS tipo_usuario,
-            NULL AS id_usuarios
-        FROM publicaciones p
-        INNER JOIN eventos e ON p.id_evento = e.id_evento
-        INNER JOIN fundacion f ON e.id_fundacion = f.id_fundacion
-
-        ORDER BY id_publicacion DESC
+            SELECT
+                p.id_publicacion,
+                'evento' AS tipo_publicacion,
+                e.id_evento AS id_reporte,
+                e.id_evento AS id_origen,
+                e.detalles_adicionales AS Descripcion,
+                e.ubicacion AS Ubicacion,
+                NULL AS img_reporte,
+                e.fecha_hora AS fecha_orden,
+                CONCAT('Evento: ', e.nombre_evento) AS nombre_tipo_reporte,
+                NULL AS telefono_contacto,
+                f.Correo_fundacion AS correo_contacto,
+                NULL AS estado,
+                NULL AS nombre_animal,
+                f.Nombre_Comercial AS nombre_usuario,
+                'fundacion' AS tipo_usuario,
+                NULL AS id_usuarios
+            FROM publicaciones p
+            INNER JOIN eventos e ON p.id_evento = e.id_evento
+            INNER JOIN fundacion f ON e.id_fundacion = f.id_fundacion
+        ) AS global_unificado
+        ORDER BY fecha_orden DESC, id_publicacion DESC
     `;
 
     const correoParam = correoVisitante || '';
@@ -2661,9 +2662,9 @@ app.get('/api/novedades', (req, res) => {
             INNER JOIN reportes r ON p.id_reporte = r.id_reporte
             INNER JOIN usuarios u ON r.id_usuarios = u.id_usuarios
             LEFT JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
-           
+            
             UNION ALL
-           
+            
             SELECT
                 p.id_publicacion,
                 'adopcion' AS tipo_publicacion,
@@ -2671,7 +2672,7 @@ app.get('/api/novedades', (req, res) => {
                 a.descripcion_animal AS descripcion,
                 CONCAT(a.ciudad, ', ', a.barrio) AS ubicacion,
                 a.fotos_animal AS imagen,
-                COALESCE(pa.fecha_creacion, NOW()) AS fecha_real,
+                COALESCE(pa.fecha_creacion, '2000-01-01 00:00:00') AS fecha_real, -- Evita usar NOW() para no alterar el orden
                 CONCAT('Adopción: ', a.nombre_animal) AS subtitulo,
                 u.nombre_usuario AS autor
             FROM publicaciones p
