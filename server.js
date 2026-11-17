@@ -1144,8 +1144,7 @@ app.get('/api/publicaciones-globales', (req, res) => {
         LEFT JOIN publicaciones p ON r.id_reporte = p.id_reporte
         INNER JOIN usuarios u ON r.id_usuarios = u.id_usuarios
         LEFT JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
-        WHERE (r.estado IS NULL OR LOWER(TRIM(r.estado)) != 'resuelto' OR r.Fecha_reporte >= NOW() - INTERVAL 1 DAY)
-          AND r.id_usuarios NOT IN (
+        WHERE r.id_usuarios NOT IN (
             SELECT COALESCE(ub.id_usuario_bloqueado, 0) FROM usuarios_bloqueados ub
             INNER JOIN usuarios u_bloq ON ub.id_usuario_bloqueador = u_bloq.id_usuarios
             WHERE LOWER(TRIM(u_bloq.correo_usuario)) = LOWER(TRIM(?))
@@ -2579,7 +2578,7 @@ app.get('/api/novedades', (req, res) => {
         INNER JOIN reportes r ON p.id_reporte = r.id_reporte
         INNER JOIN usuarios u ON r.id_usuarios = u.id_usuarios
         LEFT JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
-        WHERE (r.estado IS NULL OR LOWER(TRIM(r.estado)) != 'resuelto' OR r.Fecha_reporte >= NOW() - INTERVAL 1 DAY)
+       
         UNION ALL
        
         SELECT
@@ -2881,15 +2880,7 @@ app.delete('/api/adoptante/acceso/:id_solicitud', (req, res) => {
         res.json({ mensaje: "Acceso revocado con éxito." });
     });
 });
-// Limpieza automática segura de reportes resueltos con más de 24 horas
 
-// ==========================================
-// MÓDULO DE DENUNCIAS DE PERFIL
-// ==========================================
-
-// ==========================================
-// MÓDULO DE DENUNCIAS DE PERFIL
-// ==========================================
 
 // 1. Registrar denuncia de perfil y notificar al admin (Sin enviar a correos de prueba)
 app.post('/api/denunciar-usuario', (req, res) => {
@@ -3298,6 +3289,64 @@ app.get('/api/estadisticas-fundacion', (req, res) => {
                             });
                         });
                     });
+                });
+            });
+        });
+    });
+});
+// ==========================================
+// MÓDULO DE ESTADÍSTICAS GLOBALES PARA ADMINISTRADORES
+// ==========================================
+app.get('/api/admin/estadisticas-globales', (req, res) => {
+    const sqlKPIs = `
+        SELECT 
+            (SELECT COUNT(*) FROM fundacion) AS total_fundaciones,
+            (SELECT COUNT(*) FROM reportes WHERE LOWER(TRIM(estado)) = 'resuelto') AS total_resueltos,
+            (SELECT COUNT(*) FROM reportes) AS total_reportes,
+            (SELECT COUNT(*) FROM publicaciones_adopcion) AS total_adopciones,
+            (SELECT COUNT(*) FROM usuarios) AS total_usuarios
+    `;
+
+    // Reportes por mes (últimos 6 meses)
+    const sqlReportesMes = `
+        SELECT 
+            DATE_FORMAT(Fecha_reporte, '%Y-%m') AS anio_mes,
+            DATE_FORMAT(Fecha_reporte, '%b %Y') AS mes_nombre,
+            COUNT(*) AS total
+        FROM reportes
+        WHERE Fecha_reporte >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
+        GROUP BY anio_mes, mes_nombre
+        ORDER BY anio_mes ASC
+    `;
+
+    // Adopciones por especie
+    const sqlAdopcionesEspecie = `
+        SELECT 
+            COALESCE(e.nombre_especie, 'Otro') AS especie,
+            COUNT(a.id_animal) AS total
+        FROM animal a
+        LEFT JOIN especie e ON a.id_especie = e.id_especie
+        GROUP BY especie
+        ORDER BY total DESC
+    `;
+
+    db.query(sqlKPIs, (errKPI, kpiRows) => {
+        if (errKPI) {
+            console.error("❌ Error al obtener KPIs de admin:", errKPI.message);
+            return res.status(500).json({ exito: false, error: "Error en el servidor" });
+        }
+
+        db.query(sqlReportesMes, (errMes, mesRows) => {
+            const reportesMes = errMes ? [] : mesRows;
+
+            db.query(sqlAdopcionesEspecie, (errAdop, adopRows) => {
+                const adopcionesEspecie = errAdop ? [] : adopRows;
+
+                res.json({
+                    exito: true,
+                    kpis: kpiRows[0],
+                    reportes_por_mes: reportesMes,
+                    adopciones_por_especie: adopcionesEspecie
                 });
             });
         });
