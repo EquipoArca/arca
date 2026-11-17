@@ -841,7 +841,7 @@
                               });
                           }
 
-                          // Evento Botón "Estoy interesado" para fundaciones
+// Evento Botón "Estoy interesado" para fundaciones
                           if (esDeFundacion) {
                               const btnInteresado = document.getElementById('btn-estoy-interesado');
                               
@@ -875,16 +875,23 @@
 
                                       if (dataPost.exito) {
                                           if (dataPost.interesado) {
+                                              // Se envió la notificación con éxito, nos quedamos en la misma página
                                               mostrarAlertaArca(
-                                                  "¡Notificación enviada!",
-                                                  "Hemos notificado a la fundación de tu interés. Te dirigiremos a su perfil público para que puedas ver sus datos y solicitar tu perfil de adoptante. 🌸",
+                                                  "¡Interés registrado!",
+                                                  "Se ha enviado la notificación a la fundación para que puedan ver tu perfil de adoptante. 🌸",
                                                   "Aviso"
                                               );
-                                              setTimeout(() => {
-                                                  window.location.href = `perfil_publico.html?user=${encodeURIComponent(nombreUsuario)}`;
-                                              }, 1800);
+                                              btnInteresado.innerHTML = `<i class="fa-solid fa-heart-circle-check"></i> Interesado (Cancelar)`;
+                                              btnInteresado.style.background = '#ffe5dd';
+                                              btnInteresado.style.color = '#d9534f';
+                                              btnInteresado.style.borderColor = '#f4c2c4';
                                           } else {
-                                              mostrarAlertaArca("Interés cancelado", "Has cancelado tu notificación de interés para esta adopción. ♡", "Aviso");
+                                              // Se retiró el interés y se eliminó la notificación
+                                              mostrarAlertaArca(
+                                                  "Interés cancelado", 
+                                                  "Has cancelado tu notificación de interés para esta adopción. ♡", 
+                                                  "Aviso"
+                                              );
                                               btnInteresado.innerHTML = `<i class="fa-solid fa-heart"></i> Estoy interesado`;
                                               btnInteresado.style.background = '#fca38d';
                                               btnInteresado.style.color = '#fff';
