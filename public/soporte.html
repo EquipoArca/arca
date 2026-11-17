@@ -72,26 +72,30 @@
             color: #000;
         }
 
-        /* Botón de Sobre Nosotros centrado abajo */
+        /* Botón de Sobre Nosotros en formato Píldora Completa */
         .btn-sobre-nosotros {
             background-color: #fbc2c4;
             color: #000;
-            border: 1px solid rgba(255, 255, 255, 0.6);
+            border: 2px solid rgba(255, 255, 255, 0.85);
             padding: 14px 45px;
-            border-radius: 28px;
+            border-radius: 9999px; /* Píldora perfecta */
             font-family: 'Itim', cursive, sans-serif;
             font-size: 1.3rem;
             text-decoration: none;
             font-weight: 500;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            transition: transform 0.2s ease, background-color 0.2s ease;
-            display: inline-block;
+            box-shadow: 0 4px 12px rgba(229, 115, 115, 0.2);
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s ease, box-shadow 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
             text-align: center;
         }
 
         .btn-sobre-nosotros:hover {
-            transform: scale(1.05);
+            transform: scale(1.05) translateY(-2px);
             background-color: #f9a3a6;
+            box-shadow: 0 6px 18px rgba(229, 115, 115, 0.3);
         }
 
         @media (max-width: 768px) {
@@ -195,26 +199,55 @@
 
     <!-- Contenido Principal -->
     <main class="main-content">
- <div class="soporte-box-grande" id="contenedor-botones-soporte">
+        <div class="soporte-container">
+            <div class="soporte-box-grande">
 
-    <a href="preguntas_frecuentes.html" id="enlace-faq" class="btn-soporte-capsula" style="display: flex; align-items: center; justify-content: center; gap: 15px;">
-        <i class="fa-regular fa-circle-question"></i>
-        <span id="texto-faq">Preguntas Frecuentes</span>
-    </a>
+                <a href="preguntas_frecuentes.html" id="enlace-faq" class="btn-soporte-capsula" style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+                    <i class="fa-regular fa-circle-question"></i>
+                    <span id="texto-faq">Preguntas Frecuentes</span>
+                </a>
 
-    <a href="guia_arca.html" id="enlace-guia" class="btn-soporte-capsula" style="display: flex; align-items: center; justify-content: center; gap: 15px;">
-        <i class="fa-solid fa-book-open"></i>
-        <span id="texto-guia">Guía rápida de Arca</span>
-    </a>
+                <a href="guia_arca.html" id="enlace-guia" class="btn-soporte-capsula" style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+                    <i class="fa-solid fa-book-open"></i>
+                    <span id="texto-guia">Guía rápida de Arca</span>
+                </a>
 
-    <a href="reportar_error.html" class="btn-soporte-capsula" style="display: flex; align-items: center; justify-content: center; gap: 15px;">
-        <i class="fa-regular fa-circle-xmark"></i>
-        <span>Reportar un error</span>
-    </a>
+                <a href="reportar_error.html" class="btn-soporte-capsula" style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+                    <i class="fa-regular fa-circle-xmark"></i>
+                    <span>Reportar un error</span>
+                </a>
+
+            </div>
 
             <a href="sobre_nosotros.html" class="btn-sobre-nosotros">Sobre nosotros</a>
         </div>
     </main>
+
+    <!-- Script para diferenciar dinámicamente si es Fundación o Usuario Normal -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tipoUsuario = localStorage.getItem('tipo_usuario') || 'usuario';
+            
+            const enlaceFaq = document.getElementById('enlace-faq');
+            const textoFaq = document.getElementById('texto-faq');
+            const enlaceGuia = document.getElementById('enlace-guia');
+            const textoGuia = document.getElementById('texto-guia');
+
+            if (tipoUsuario === 'fundacion') {
+                if (enlaceFaq) enlaceFaq.href = "preguntas_frecuentes_fundacion.html";
+                if (textoFaq) textoFaq.textContent = "Preguntas Frecuentes (Fundaciones)";
+                
+                if (enlaceGuia) enlaceGuia.href = "guia_arca_fundacion.html";
+                if (textoGuia) textoGuia.textContent = "Guía rápida para Fundaciones";
+            } else {
+                if (enlaceFaq) enlaceFaq.href = "preguntas_frecuentes.html";
+                if (textoFaq) textoFaq.textContent = "Preguntas Frecuentes";
+                
+                if (enlaceGuia) enlaceGuia.href = "guia_arca.html";
+                if (textoGuia) textoGuia.textContent = "Guía rápida de Arca";
+            }
+        });
+    </script>
 
     <!-- Firebase v8 Scripts -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -264,38 +297,11 @@
                 }, 200);
             }
         });
-
-        document.addEventListener('DOMContentLoaded', () => {
-        const tipoUsuario = localStorage.getItem('tipo_usuario') || 'usuario';
-        
-        const enlaceFaq = document.getElementById('enlace-faq');
-        const textoFaq = document.getElementById('texto-faq');
-        const enlaceGuia = document.getElementById('enlace-guia');
-        const textoGuia = document.getElementById('texto-guia');
-
-        if (tipoUsuario === 'fundacion') {
-            // Redirecciones y textos adaptados para Fundaciones
-            if (enlaceFaq) enlaceFaq.href = "preguntas_frecuentes_fundacion.html";
-            if (textoFaq) textoFaq.textContent = "Preguntas Frecuentes (Fundaciones)";
-            
-            if (enlaceGuia) enlaceGuia.href = "guia_arca_fundacion.html";
-            if (textoGuia) textoGuia.textContent = "Guía rápida para Fundaciones";
-        } else {
-            // Redirecciones y textos para Usuario Normal
-            if (enlaceFaq) enlaceFaq.href = "preguntas_frecuentes.html";
-            if (textoFaq) textoFaq.textContent = "Preguntas Frecuentes";
-            
-            if (enlaceGuia) enlaceGuia.href = "guia_arca.html";
-            if (textoGuia) textoGuia.textContent = "Guía rápida de Arca";
-        }
-    });
     </script>
     <style>
         .goog-te-banner-frame { display: none !important; }
         body { top: 0 !important; }
         .skiptranslate { display: none !important; }
-
-        
     </style>
 </body>
 </html>
