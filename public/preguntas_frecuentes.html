@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Preguntas Frecuentes - ARCA</title>
-    <link rel="stylesheet" href="style_faq.css">
+    <link rel="stylesheet" href="style_home.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
@@ -15,82 +15,6 @@
         document.body.classList.add("dark-mode");
     }
     </script>
-</head>
-<body>
-
-    <!-- Alerta Offline -->
-    <div id="offline-alert-overlay" class="custom-alert-overlay d-none">
-      <div class="custom-alert-card">
-        <button type="button" class="close-x-btn" id="close-x-btn">&times;</button>
-        <div class="alert-icon-circle">
-          <svg viewBox="0 0 24 24" class="alert-icon">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-          </svg>
-        </div>
-        <h3 class="custom-alert-title">¡Sin conexión a internet!</h3>
-        <p class="custom-alert-message">
-          No se pudo verificar tu cuenta. Revisa tu conexión a internet e inténtalo más tarde.
-        </p>
-        <button type="button" id="close-offline-alert" class="custom-alert-btn">
-          Aceptar
-        </button>
-      </div>
-    </div>
-
-    <!-- Barra Superior -->
-    <nav class="top-nav">
-        <div class="top-left">
-            <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu" onclick="toggleSidebar()"></i>
-            <div class="mini-logo-circle">
-                <img src="logo.png" alt="Logo">
-            </div>
-            <span class="page-title" id="titulo-pagina">Ayuda y soporte técnico</span>
-        </div>
-
-        <div class="search-bar">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" placeholder="Busca algo">
-            <i class="fa-solid fa-microphone"></i>
-        </div>
-
-    <div class="top-right">
-        <div class="user-header-info">
-
-            <!-- 1. PERFIL Y MINI MENÚ -->
-            <div class="user-profile-menu" id="user-profile-menu">
-                <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
-                    <img src="logo.png" id="user-avatar-img" alt="Perfil">
-                </div>
-
-                <div class="mini-menu-card" id="mini-menu-card">
-                    <div class="mini-menu-header">
-                        <span id="mini-menu-username">Usuario</span>
-                    </div>
-                    
-                    <hr class="mini-menu-divider">
-                    
-                    <a href="javascript:void(0)" onclick="mostrarSeccion('configuracion')" class="mini-menu-item btn-ajustes">
-                        <i class="fa-solid fa-gear"></i>
-                        <span>Ajustes</span>
-                    </a>
-                    
-                    <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini">
-                        <i class="fa-solid fa-right-from-bracket"></i>
-                        <span>Cerrar sesión</span>
-                    </a>
-                </div>
-            </div>
-
-            <!-- 2. CAMPANA DE NOTIFICACIONES -->
-            <div class="notif-circle">
-                <a href="notificaciones.html" aria-label="Notificaciones"><i class="fa-solid fa-bell"></i></a>
-            </div>
-
-        </div>
-
-    </nav>
-    
-    <!-- Barra Lateral -->
     <style>
         body {
             font-family: 'Itim', cursive, sans-serif;
@@ -215,7 +139,7 @@
             border-top: 1px solid transparent;
         }
 
-        /* Estado abierto del acordeon */
+        /* Estado abierto del acordeón */
         .item-faq-acordeon.activo .faq-respuesta-contenido {
             max-height: 250px;
             padding: 16px 24px 20px 24px;
@@ -255,29 +179,23 @@
             box-shadow: 0 6px 18px rgba(229, 115, 115, 0.25);
         }
 
-        .btn-sobre-nosotros {
-            background-color: #fbc2c4;
-            color: #000;
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            padding: 8px 20px;
-            border-radius: 25px;
-            font-size: 1rem;
-            text-decoration: none;
-            font-weight: 500;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            transition: transform 0.2s ease, background-color 0.2s ease;
+        @media (max-width: 768px) {
+            .main-content-faq {
+                margin-left: 0;
+                padding: 20px 15px 45px 15px;
+            }
+            .card-faq-principal {
+                padding: 25px 20px;
+            }
+            .faq-titulo-principal {
+                font-size: 1.8rem;
+            }
         }
-
-        .btn-sobre-nosotros:hover {
-            transform: scale(1.05);
-            background-color: #f9a3a6;
-        }
-
     </style>
 </head>
 <body>
 
-  <!-- Barra de Navegación Superior -->
+  <!-- Barra de Navegación Superior Única (Idéntica a sobre_nosotros.html) -->
   <nav class="top-nav">
     <div class="top-left">
         <i class="fa-solid fa-bars menu-icon" id="btn-toggle-menu"></i>
@@ -423,8 +341,6 @@
         </div>
     </main>
 
-    
-
     <!-- Firebase v8 Scripts -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -438,12 +354,10 @@
             const item = button.parentElement;
             const isOpen = item.classList.contains('activo');
             
-            // Cierra todos los demás
             document.querySelectorAll('.item-faq-acordeon').forEach(acc => {
                 acc.classList.remove('activo');
             });
 
-            // Si no estaba abierto, lo abre
             if (!isOpen) {
                 item.classList.add('activo');
             }
