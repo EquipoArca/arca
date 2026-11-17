@@ -49,17 +49,17 @@
         }
 
         .stats-admin-container {
-            max-width: 1180px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 0 20px;
             box-sizing: border-box;
         }
 
-        /* GRID DE TARJETAS KPI SUPERIORES */
+        /* TARJETAS KPI SUPERIORES */
         .kpi-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 14px;
             margin-bottom: 25px;
         }
 
@@ -67,12 +67,12 @@
             background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(12px);
             border: 2px solid #ffffff;
-            border-radius: 22px;
-            padding: 18px 22px;
+            border-radius: 20px;
+            padding: 16px 18px;
             box-shadow: 0 8px 24px rgba(229, 115, 115, 0.08);
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
             transition: transform 0.2s ease;
         }
 
@@ -81,13 +81,13 @@
         }
 
         .kpi-icono {
-            width: 50px;
-            height: 50px;
-            border-radius: 16px;
+            width: 45px;
+            height: 45px;
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.4rem;
+            font-size: 1.3rem;
             flex-shrink: 0;
         }
 
@@ -97,14 +97,14 @@
         }
 
         .kpi-titulo {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: #8c6d77;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
         .kpi-valor {
-            font-size: 1.6rem;
+            font-size: 1.45rem;
             font-weight: bold;
             color: #4a3b40;
             margin-top: 2px;
@@ -136,7 +136,7 @@
 
         .chart-card h3 {
             margin: 0 0 15px 0;
-            font-size: 1.15rem;
+            font-size: 1.1rem;
             color: #5c3a44;
             display: flex;
             align-items: center;
@@ -189,7 +189,7 @@
 
     <header class="header-admin">
         <h1><i class="fa-solid fa-chart-pie"></i> Estadísticas Globales de ARCA</h1>
-        <p>Métricas de control, fundaciones, reportes y crecimiento de usuarios en la plataforma.</p>
+        <p>Métricas de control, crecimiento mensual, demografía de usuarios y actividad en la plataforma.</p>
     </header>
 
     <div style="text-align: center; margin-bottom: 25px;">
@@ -207,7 +207,7 @@
                     <i class="fa-solid fa-building-shield"></i>
                 </div>
                 <div class="kpi-info">
-                    <span class="kpi-titulo">Fundaciones Registradas</span>
+                    <span class="kpi-titulo">Fundaciones</span>
                     <span class="kpi-valor" id="kpi-fundaciones">0</span>
                 </div>
             </div>
@@ -234,11 +234,21 @@
 
             <div class="kpi-card">
                 <div class="kpi-icono" style="background: #fff3e0; color: #ffb74d;">
-                    <i class="fa-solid fa-paw"></i>
+                    <i class="fa-solid fa-hand-holding-heart"></i>
                 </div>
                 <div class="kpi-info">
-                    <span class="kpi-titulo">Adopciones Publicadas</span>
-                    <span class="kpi-valor" id="kpi-adopciones">0</span>
+                    <span class="kpi-titulo">Donaciones</span>
+                    <span class="kpi-valor" id="kpi-donaciones">0</span>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icono" style="background: #e1f5fe; color: #0288d1;">
+                    <i class="fa-solid fa-calendar-days"></i>
+                </div>
+                <div class="kpi-info">
+                    <span class="kpi-titulo">Eventos</span>
+                    <span class="kpi-valor" id="kpi-eventos">0</span>
                 </div>
             </div>
 
@@ -247,7 +257,7 @@
                     <i class="fa-solid fa-users"></i>
                 </div>
                 <div class="kpi-info">
-                    <span class="kpi-titulo">Usuarios Totales</span>
+                    <span class="kpi-titulo">Usuarios</span>
                     <span class="kpi-valor" id="kpi-usuarios">0</span>
                 </div>
             </div>
@@ -258,25 +268,33 @@
             
             <!-- Gráfico 1: Reportes registrados por mes -->
             <div class="chart-card full-width">
-                <h3><i class="fa-solid fa-chart-column" style="color: #e57373;"></i> Crecimiento de Reportes Registrados por Mes</h3>
-                <div class="canvas-box" style="height: 260px;">
+                <h3><i class="fa-solid fa-chart-column" style="color: #e57373;"></i> Crecimiento de Reportes Registrados por Mes (Últimos 6 meses)</h3>
+                <div class="canvas-box" style="height: 250px;">
                     <canvas id="graficoReportesMes"></canvas>
                 </div>
             </div>
 
-            <!-- Gráfico 2: Estado de Reportes (Resueltos vs Activos) -->
+            <!-- Gráfico 2: Donaciones por mes -->
             <div class="chart-card">
-                <h3><i class="fa-solid fa-chart-pie" style="color: #81c784;"></i> Proporción de Casos Resueltos vs En Curso</h3>
+                <h3><i class="fa-solid fa-gift" style="color: #ffb74d;"></i> Donaciones Registradas por Mes</h3>
+                <div class="canvas-box">
+                    <canvas id="graficoDonacionesMes"></canvas>
+                </div>
+            </div>
+
+            <!-- Gráfico 3: Estado de Reportes (Resueltos vs Activos) -->
+            <div class="chart-card">
+                <h3><i class="fa-solid fa-chart-pie" style="color: #81c784;"></i> Proporción de Casos Resueltos vs Activos</h3>
                 <div class="canvas-box">
                     <canvas id="graficoEstadoReportes"></canvas>
                 </div>
             </div>
 
-            <!-- Gráfico 3: Tipos de Adopciones / Mascotas -->
-            <div class="chart-card">
-                <h3><i class="fa-solid fa-dog" style="color: #ffb74d;"></i> Adopciones por Especie</h3>
+            <!-- Gráfico 4: Demografía de Usuarios por Edad -->
+            <div class="chart-card full-width">
+                <h3><i class="fa-solid fa-user-group" style="color: #ba68c8;"></i> Distribución de Usuarios por Rango de Edad</h3>
                 <div class="canvas-box">
-                    <canvas id="graficoAdopcionesEspecie"></canvas>
+                    <canvas id="graficoUsuariosEdad"></canvas>
                 </div>
             </div>
 
@@ -303,33 +321,45 @@
                 document.getElementById('kpi-fundaciones').textContent = data.kpis.total_fundaciones;
                 document.getElementById('kpi-resueltos').textContent = data.kpis.total_resueltos;
                 document.getElementById('kpi-reportes').textContent = data.kpis.total_reportes;
-                document.getElementById('kpi-adopciones').textContent = data.kpis.total_adopciones;
+                document.getElementById('kpi-donaciones').textContent = data.kpis.total_donaciones;
+                document.getElementById('kpi-eventos').textContent = data.kpis.total_eventos;
                 document.getElementById('kpi-usuarios').textContent = data.kpis.total_usuarios;
 
                 // Renderizar Gráficos
-                renderizarGraficoReportesMes(data.reportes_por_mes);
-                renderizarGraficoEstadoReportes(data.kpis.total_resueltos, data.kpis.total_reportes - data.kpis.total_resueltos);
-                renderizarGraficoAdopciones(data.adopciones_por_especie);
+                renderizarGraficoBarras('graficoReportesMes', data.reportes_por_mes.map(i => i.mes_nombre), data.reportes_por_mes.map(i => i.total), '#e57373', 'Reportes');
+                renderizarGraficoBarras('graficoDonacionesMes', data.donaciones_por_mes.map(i => i.mes_nombre), data.donaciones_por_mes.map(i => i.total), '#ffb74d', 'Donaciones');
+                
+                renderizarGraficoDonut(
+                    'graficoEstadoReportes', 
+                    ['Casos Resueltos', 'Casos Activos'], 
+                    [data.kpis.total_resueltos, Math.max(0, data.kpis.total_reportes - data.kpis.total_resueltos)],
+                    ['#81c784', '#64b5f6']
+                );
+
+                renderizarGraficoBarras(
+                    'graficoUsuariosEdad', 
+                    data.usuarios_por_edad.map(i => i.rango_edad), 
+                    data.usuarios_por_edad.map(i => i.total_usuarios),
+                    '#ba68c8',
+                    'Usuarios'
+                );
 
             } catch (error) {
                 console.error("Error al conectar con el servidor para estadísticas:", error);
             }
         }
 
-        function renderizarGraficoReportesMes(mensualData) {
-            const ctx = document.getElementById('graficoReportesMes').getContext('2d');
-            const etiquetas = mensualData.map(item => item.mes_nombre);
-            const valores = mensualData.map(item => item.total);
-
+        function renderizarGraficoBarras(canvasId, etiquetas, valores, colorHex, nombreDataset) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
             new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: etiquetas,
+                    labels: etiquetas.length > 0 ? etiquetas : ['Sin datos'],
                     datasets: [{
-                        label: 'Reportes registrados',
-                        data: valores,
-                        backgroundColor: '#e57373',
-                        borderRadius: 8
+                        label: nombreDataset,
+                        data: valores.length > 0 ? valores : [0],
+                        backgroundColor: colorHex,
+                        borderRadius: 6
                     }]
                 },
                 options: {
@@ -339,11 +369,11 @@
                     scales: {
                         y: {
                             beginAtZero: true,
-                            ticks: { stepSize: 1, font: { family: 'Itim', size: 12 } },
+                            ticks: { stepSize: 1, font: { family: 'Itim', size: 11 } },
                             grid: { color: 'rgba(0,0,0,0.05)' }
                         },
                         x: {
-                            ticks: { font: { family: 'Itim', size: 12 } },
+                            ticks: { font: { family: 'Itim', size: 11 } },
                             grid: { display: false }
                         }
                     }
@@ -351,44 +381,15 @@
             });
         }
 
-        function renderizarGraficoEstadoReportes(resueltos, activos) {
-            const ctx = document.getElementById('graficoEstadoReportes').getContext('2d');
+        function renderizarGraficoDonut(canvasId, etiquetas, valores, colores) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
             new Chart(ctx, {
                 type: 'doughnut',
-                data: {
-                    labels: ['Casos Resueltos', 'Casos en Curso / Activos'],
-                    datasets: [{
-                        data: [resueltos, Math.max(0, activos)],
-                        backgroundColor: ['#81c784', '#64b5f6'],
-                        borderWidth: 2,
-                        borderColor: '#ffffff'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: { font: { family: 'Itim', size: 12 }, boxWidth: 12 }
-                        }
-                    }
-                }
-            });
-        }
-
-        function renderizarGraficoAdopciones(especiesData) {
-            const ctx = document.getElementById('graficoAdopcionesEspecie').getContext('2d');
-            const etiquetas = especiesData.map(i => i.especie || 'Otro');
-            const valores = especiesData.map(i => i.total);
-
-            new Chart(ctx, {
-                type: 'pie',
                 data: {
                     labels: etiquetas,
                     datasets: [{
                         data: valores,
-                        backgroundColor: ['#ffb74d', '#ba68c8', '#4db6ac', '#e57373', '#64b5f6'],
+                        backgroundColor: colores,
                         borderWidth: 2,
                         borderColor: '#ffffff'
                     }]
@@ -399,7 +400,7 @@
                     plugins: {
                         legend: {
                             position: 'bottom',
-                            labels: { font: { family: 'Itim', size: 12 }, boxWidth: 12 }
+                            labels: { font: { family: 'Itim', size: 11 }, boxWidth: 12 }
                         }
                     }
                 }

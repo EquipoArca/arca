@@ -3304,7 +3304,9 @@ app.get('/api/admin/estadisticas-globales', (req, res) => {
             (SELECT COUNT(*) FROM reportes WHERE LOWER(TRIM(estado)) = 'resuelto') AS total_resueltos,
             (SELECT COUNT(*) FROM reportes) AS total_reportes,
             (SELECT COUNT(*) FROM publicaciones_adopcion) AS total_adopciones,
-            (SELECT COUNT(*) FROM usuarios) AS total_usuarios
+            (SELECT COUNT(*) FROM usuarios) AS total_usuarios,
+            (SELECT COUNT(*) FROM donaciones) AS total_donaciones,
+            (SELECT COUNT(*) FROM eventos) AS total_eventos
     `;
 
     // Reportes por mes (últimos 6 meses)
@@ -3319,15 +3321,43 @@ app.get('/api/admin/estadisticas-globales', (req, res) => {
         ORDER BY anio_mes ASC
     `;
 
-    // Adopciones por especie
-    const sqlAdopcionesEspecie = `
+    // Donaciones por mes (últimos 6 meses)
+    const sqlDonacionesMes = `
         SELECT 
-            COALESCE(e.nombre_especie, 'Otro') AS especie,
-            COUNT(a.id_animal) AS total
-        FROM animal a
-        LEFT JOIN especie e ON a.id_especie = e.id_especie
-        GROUP BY especie
-        ORDER BY total DESC
+            DATE_FORMAT(fecha_donacion, '%Y-%m') AS anio_mes,
+            DATE_FORMAT(fecha_donacion, '%b %Y') AS mes_nombre,
+            COUNT(*) AS total
+        FROM donaciones
+        WHERE fecha_donacion >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
+        GROUP BY anio_mes, mes_nombre
+        ORDER BY anio_mes ASC
+    `;
+
+    // Distribución de usuarios por rango de edad
+    const sqlUsuariosEdad = `
+        SELECT
+            CASE
+                WHEN TIMESTAMPDIFF(YEAR, Fecha_nacimiento, CURDATE()) BETWEEN 18 AND 24 THEN '18-24 años'
+                WHEN TIMESTAMPDIFF(YEAR, Fecha_nacimiento, CURDATE()) BETWEEN 25 AND 34 THEN '25-34 años'
+                WHEN TIMESTAMPDIFF(YEAR, Fecha_nacimiento, CURDATE()) BETWEEN 35 AND 49 THEN '35-49 años'
+                ELSE '50+ años'
+            END AS rango_edad,
+            COUNT(id_usuarios) AS total_usuarios
+        FROM usuarios
+        WHERE Fecha_nacimiento IS NOT NULL
+        GROUP BY rango_edad
+        ORDER BY total_usuarios DESC
+    `;
+
+    // Tipos de emergencias / reportes más frecuentes
+    const sqlEmergencias = `
+        SELECT
+            tr.Nombre_tipo_reporte AS tipo_emergencia,
+            COUNT(r.id_reporte) AS total_casos
+        FROM reportes r
+        INNER JOIN tipo_reporte tr ON r.id_tipo_reporte = tr.id_tipo_reporte
+        GROUP BY tr.Nombre_tipo_reporte
+        ORDER BY total_casos DESC
     `;
 
     db.query(sqlKPIs, (errKPI, kpiRows) => {
@@ -3339,14 +3369,24 @@ app.get('/api/admin/estadisticas-globales', (req, res) => {
         db.query(sqlReportesMes, (errMes, mesRows) => {
             const reportesMes = errMes ? [] : mesRows;
 
-            db.query(sqlAdopcionesEspecie, (errAdop, adopRows) => {
-                const adopcionesEspecie = errAdop ? [] : adopRows;
+            db.query(sqlDonacionesMes, (errDonMes, donMesRows) => {
+                const donacionesMes = errDonMes ? [] : donMesRows;
 
-                res.json({
-                    exito: true,
-                    kpis: kpiRows[0],
-                    reportes_por_mes: reportesMes,
-                    adopciones_por_especie: adopcionesEspecie
+                db.query(sqlUsuariosEdad, (errEdad, edadRows) => {
+                    const usuariosEdad = errEdad ? [] : edadRows;
+
+                    db.query(sqlEmergencias, (errEm, emRows) => {
+                        const emergencias = errEm ? [] : emRows;
+
+                        res.json({
+                            exito: true,
+                            kpis: kpiRows[0],
+                            reportes_por_mes: reportesMes,
+                            donaciones_por_mes: donacionesMes,
+                            usuarios_por_edad: usuariosEdad,
+                            tipos_emergencias: emergencias
+                        });
+                    });
                 });
             });
         });
