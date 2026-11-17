@@ -53,28 +53,40 @@
             <i class="fa-solid fa-microphone"></i>
         </div>
 
-        <div class="top-right">
-            <div class="user-header-info">
-                <!-- Perfil y Mini Menú -->
-                <div class="user-profile-menu" id="user-profile-menu">
-                    <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
-                        <img src="logo.png" id="user-avatar-img" alt="Perfil">
-                    </div>
-                    <div class="mini-menu-card" id="mini-menu-card">
-                        <div class="mini-menu-header">
-                            <span id="mini-menu-username">Usuario</span>
-                        </div>
-                        <hr class="mini-menu-divider">
-                        <a href="configuracion.html" class="mini-menu-item btn-ajustes">
-                            <i class="fa-solid fa-gear"></i>
-                            <span>Ajustes</span>
-                        </a>
-                        <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini">
-                            <i class="fa-solid fa-right-from-bracket"></i>
-                            <span>Cerrar sesión</span>
-                        </a>
-                    </div>
+    <div class="top-right">
+        <div class="user-header-info">
+
+            <!-- 1. PERFIL Y MINI MENÚ -->
+            <div class="user-profile-menu" id="user-profile-menu">
+                <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleMiniMenu()">
+                    <img src="logo.png" id="user-avatar-img" alt="Perfil">
                 </div>
+
+                <div class="mini-menu-card" id="mini-menu-card">
+                    <div class="mini-menu-header">
+                        <span id="mini-menu-username">Usuario</span>
+                    </div>
+                    
+                    <hr class="mini-menu-divider">
+                    
+                    <a href="javascript:void(0)" onclick="mostrarSeccion('configuracion')" class="mini-menu-item btn-ajustes">
+                        <i class="fa-solid fa-gear"></i>
+                        <span>Ajustes</span>
+                    </a>
+                    
+                    <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Cerrar sesión</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 2. CAMPANA DE NOTIFICACIONES -->
+            <div class="notif-circle">
+                <a href="notificaciones.html" aria-label="Notificaciones"><i class="fa-solid fa-bell"></i></a>
+            </div>
+
+        </div>
 
                 <!-- Notificaciones -->
                 <div class="notif-circle">
