@@ -1556,11 +1556,19 @@ function adaptarInterfazSegunRol() {
             cardReportar.setAttribute("href", "reportes_fundacion.html");
         }
 
+        // Configuración para el menú lateral cuando es FUNDACIÓN
         if (linkGuardado) {
             const iconoGuardado = linkGuardado.querySelector('i');
             const textoGuardado = linkGuardado.querySelector('.menu-text');
-            if (iconoGuardado) iconoGuardado.className = "fa-solid fa-layer-group";
-            if (textoGuardado) textoGuardado.textContent = "Publicaciones";
+            
+            if (iconoGuardado) {
+                // Cambiamos a un icono representativo de gestión de publicaciones
+                iconoGuardado.className = "fa-solid fa-layer-group"; 
+            }
+            if (textoGuardado) {
+                textoGuardado.textContent = "Publicaciones";
+            }
+            // VERIFICA QUE ESTE ARCHIVO EXISTA EN TU PROYECTO (ej. publicaciones_fundacion.html)
             linkGuardado.href = "publicaciones_fundacion.html";
         }
 
@@ -1579,11 +1587,18 @@ function adaptarInterfazSegunRol() {
         if (cardReportar && typeof auth !== 'undefined' && auth.currentUser) {
             cardReportar.setAttribute("href", "formularior.html");
         }
+        
+        // Configuración para el menú lateral cuando es USUARIO NORMAL
         if (linkGuardado) {
             const iconoGuardado = linkGuardado.querySelector('i');
             const textoGuardado = linkGuardado.querySelector('.menu-text');
-            if (iconoGuardado) iconoGuardado.className = "fa-solid fa-bookmark";
-            if (textoGuardado) textoGuardado.textContent = "Guardado";
+            
+            if (iconoGuardado) {
+                iconoGuardado.className = "fa-solid fa-bookmark";
+            }
+            if (textoGuardado) {
+                textoGuardado.textContent = "Guardado";
+            }
             linkGuardado.href = "guardados_usuario.html";
         }
 
