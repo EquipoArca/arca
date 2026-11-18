@@ -387,6 +387,7 @@
             <span class="menu-text">Inicio</span>
         </a>
        
+        <!-- Redirigen a home.html o llaman a tu función de bloqueo según tu lógica de invitado -->
         <a href="home.html?seccion=perfil" id="link-perfil" class="menu-fila">
             <i class="fa-solid fa-circle-user"></i>
             <span class="menu-text">Perfil</span>
@@ -470,7 +471,7 @@
                       <i class="fa-regular fa-bell"></i> ACTIVAR RECORDATORIO
                   </button>
 
-                  <button id="btn-accion-guardar" class="btn-accion-prototipo" onclick="toggleGuardarPublicacion()">
+                  <button id="btn-accion-guardar" class="btn-accion-prototipo">
                       <i class="fa-regular fa-bookmark"></i> Guardar publicación
                   </button>
               </div>
@@ -595,7 +596,6 @@
 
       let fechaEventoGlobal = null;
       let nombreEventoGlobal = "";
-      let eventoIdGlobal = null;
 
      document.addEventListener('DOMContentLoaded', () => {
           const btnToggleMenu = document.getElementById('btn-toggle-menu');
@@ -630,9 +630,9 @@
 
       async function cargarDetalleEvento() {
           const params = new URLSearchParams(window.location.search);
-          eventoIdGlobal = params.get('id');
+          const eventoId = params.get('id');
 
-          if (!eventoIdGlobal) {
+          if (!eventoId) {
               mostrarAlertaArca("No se especificó ningún evento.", "Aviso", () => {
                   window.location.href = 'novedades-eventos.html';
               });
@@ -644,7 +644,7 @@
               if (!res.ok) throw new Error("Error al obtener eventos");
               const eventos = await res.json();
 
-              const evento = eventos.find(e => Number(e.id_evento) === Number(eventoIdGlobal));
+              const evento = eventos.find(e => Number(e.id_evento) === Number(eventoId));
               if (!evento) throw new Error("Evento no encontrado.");
 
               nombreEventoGlobal = evento.nombre_evento;
@@ -733,27 +733,6 @@
                   
                   const esDueño = correoLogueado && evento.correo_fundacion && correoLogueado.toLowerCase() === evento.correo_fundacion.toLowerCase();
 
-                  // Verificamos si ya está guardado para este rol
-                  const tipoUsuarioActual = localStorage.getItem('tipo_usuario') || 'usuario';
-                  if (correoLogueado && !esDueño) {
-                      try {
-                          const resGuardados = await fetch(`/api/obtener-guardados?correo=${encodeURIComponent(correoLogueado)}&tipo=${encodeURIComponent(tipoUsuarioActual)}`);
-                          if (resGuardados.ok) {
-                              const listaGuardados = await resGuardados.json();
-                              const yaGuardado = listaGuardados.some(g => Number(g.id_publicacion) === Number(eventoIdGlobal) || Number(g.id_origen) === Number(eventoIdGlobal));
-                              if (yaGuardado) {
-                                  const btnG = document.getElementById('btn-accion-guardar');
-                                  if (btnG) {
-                                      btnG.innerHTML = `<i class="fa-solid fa-bookmark"></i> Publicación guardada`;
-                                      btnG.classList.add('btn-guardado-activo');
-                                  }
-                              }
-                          }
-                      } catch (e) {
-                          console.error("Error al comprobar estado de guardado:", e);
-                      }
-                  }
-
                   if (esDueño) {
                       const btnRecordatorio = document.getElementById('btn-activar-recordatorio');
                       const btnGuardar = document.getElementById('btn-accion-guardar');
@@ -761,89 +740,191 @@
                       if (btnRecordatorio) btnRecordatorio.remove();
                       if (btnGuardar) btnGuardar.remove();
 
-                      // Agregamos la barra de gestión de estado al lado tal como pediste
                       const divDueño = document.createElement('div');
                       divDueño.innerHTML = `
-                        <div style="background: #fbd4d8; color: #80515e; padding: 10px 20px; border: 1px solid #f4b8bf; border-radius: 25px; font-size: 14px; text-align: left; margin-bottom: 10px; font-family: 'Itim', cursive; font-weight: bold; box-sizing: border-box; box-shadow: 0 2px 6px rgba(180, 100, 115, 0.08); display: flex; justify-content: space-between; align-items: center;">
-                            <span>Estado: <strong id="texto-estado-actual">pendiente</strong></span>
-                            <button onclick="cambiarEstadoEvento()" class="btn-copiar-mini" style="font-size: 13px; padding: 5px 12px;">Actualizar estado</button>
+                        <div style="background: #fbd4d8; color: #80515e; padding: 10px 20px; border: 1px solid #f4b8bf; border-radius: 25px; font-size: 14px; text-align: left; margin-bottom: 10px; font-family: 'Itim', cursive; font-weight: bold; box-sizing: border-box; box-shadow: 0 2px 6px rgba(180, 100, 115, 0.08);">
+                            ESTE EVENTO FUE PUBLICADO POR TU FUNDACIÓN
                         </div>
                         <button id="btn-abrir-editar" class="btn-accion-prototipo" style="width: 100%; margin-top: 5px;" onclick="abrirModalEditar()">
                             <i class="fa-solid fa-pen-to-square"></i> EDITAR EVENTO
                         </button>
                       `;
                       columnaDerecha.appendChild(divDueño);
+
+                  } else {
+                      const recordatoriosGuardados = JSON.parse(localStorage.getItem('arca_recordatorios') || '[]');
+                      if (recordatoriosGuardados.includes(Number(eventoId))) {
+                          const btnRec = document.getElementById('btn-activar-recordatorio');
+                          if (btnRec) {
+                              btnRec.innerHTML = `<i class="fa-solid fa-bell"></i> RECORDATORIO ACTIVADO`;
+                              btnRec.classList.add('btn-recordatorio-activo');
+                          }
+                      }
+
+                      const btnGuardar = document.getElementById('btn-accion-guardar');
+                      if (!correoLogueado) {
+                          if (btnGuardar) btnGuardar.onclick = () => { window.location.href = 'login.html'; };
+                      } else {
+                          try {
+                              const resG = await fetch(`/api/guardados/ids/${encodeURIComponent(correoLogueado)}`);
+                              const idsGuards = await resG.json();
+                              
+                              const resPub = await fetch('/api/publicaciones-globales');
+                              const pubList = await resPub.json();
+                              const pubEvento = pubList.find(p => p.tipo_publicacion === 'evento' && Number(p.id_origen) === Number(eventoId));
+                              const idPubReal = pubEvento ? pubEvento.id_publicacion : eventoId;
+
+                              const estaGuardada = idsGuards.map(Number).includes(Number(idPubReal));
+
+                              if (estaGuardada) {
+                                  if (btnGuardar) {
+                                      btnGuardar.innerHTML = `<i class="fa-solid fa-bookmark"></i> Publicación guardada`;
+                                      btnGuardar.classList.add('btn-guardado-activo');
+                                      btnGuardar.onclick = async () => {
+                                          mostrarConfirmacionArca("¿Deseas quitar este evento de tus guardados?", "Quitar guardado", async () => {
+                                              await fetch('/api/quitar-guardado', {
+                                                  method: 'POST',
+                                                  headers: { 'Content-Type': 'application/json' },
+                                                  body: JSON.stringify({ correo: correoLogueado, id_publicacion: Number(idPubReal) })
+                                              });
+                                              location.reload();
+                                          });
+                                      };
+                                  }
+                              } else {
+                                  if (btnGuardar) {
+                                      btnGuardar.innerHTML = `<i class="fa-regular fa-bookmark"></i> Guardar publicación`;
+                                      btnGuardar.onclick = async () => {
+                                          await fetch('/api/guardar-publicacion', {
+                                              method: 'POST',
+                                              headers: { 'Content-Type': 'application/json' },
+                                              body: JSON.stringify({ correo: correoLogueado, id_publicacion: Number(idPubReal) })
+                                          });
+                                          mostrarAlertaArca("¡Evento guardado con éxito en tus favoritos!", "Guardado", () => {
+                                              location.reload();
+                                          });
+                                      };
+                                  }
+                              }
+                          } catch (e) {
+                              console.error("Error al gestionar guardados:", e);
+                          }
+                      }
                   }
               });
 
-          } catch (error) {
-              console.error("Error al cargar detalle del evento:", error);
-              mostrarAlertaArca("No se pudo cargar la información del evento.", "Error", () => {
-                  window.location.href = 'novedades-eventos.html';
-              });
+          } catch (e) {
+              console.error(e);
+              mostrarAlertaArca("No se pudo cargar la información completa del evento.", "Aviso");
           }
       }
 
-      async function toggleGuardarPublicacion() {
-          const user = firebase.auth().currentUser;
-          const correo = user ? user.email : (localStorage.getItem('correo_usuario') || localStorage.getItem('correo'));
-          const tipoUsuario = localStorage.getItem('tipo_usuario') || 'usuario';
+      function activarRecordatorioEvento() {
+          const params = new URLSearchParams(window.location.search);
+          const eventoId = Number(params.get('id'));
+          let recordatorios = JSON.parse(localStorage.getItem('arca_recordatorios') || '[]');
 
-          if (!correo) {
-              mostrarAlertaArca("Debes iniciar sesión para guardar publicaciones.", "Aviso");
+          if (recordatorios.includes(eventoId)) {
+              mostrarAlertaArca("Ya tienes un recordatorio activo para este evento. Te avisaremos un día antes. 🌸", "Recordatorio");
               return;
           }
 
-          const btnGuardar = document.getElementById('btn-accion-guardar');
-          const estaGuardado = btnGuardar.classList.contains('btn-guardado-activo');
+          recordatorios.push(eventoId);
+          localStorage.setItem('arca_recordatorios', JSON.stringify(recordatorios));
 
-          try {
-              if (!estaGuardado) {
-                  const respuesta = await fetch('/api/guardar-publicacion', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({
-                          correo: correo,
-                          id_publicacion: eventoIdGlobal,
-                          tipo_usuario: tipoUsuario
-                      })
-                  });
+          if (fechaEventoGlobal) {
+             const fechaEv = new Date(fechaEventoGlobal);
+             const unDiaAntes = new Date(fechaEv.getTime() - (24 * 60 * 60 * 1000));
+             
+             let eventosNotif = JSON.parse(localStorage.getItem('arca_programacion_notificaciones') || '{}');
+             eventosNotif[eventoId] = {
+                 nombre: nombreEventoGlobal,
+                 fechaDisparo: unDiaAntes.getTime()
+             };
+             localStorage.setItem('arca_programacion_notificaciones', JSON.stringify(eventosNotif));
+         }
 
-                  if (respuesta.ok) {
-                      btnGuardar.innerHTML = `<i class="fa-solid fa-bookmark"></i> Publicación guardada`;
-                      btnGuardar.classList.add('btn-guardado-activo');
-                      mostrarAlertaArca("¡Publicación guardada con éxito en tu cuenta!", "¡Guardado! 🌸");
-                  } else {
-                      const errData = await respuesta.json();
-                      mostrarAlertaArca(errData.error || "No se pudo guardar la publicación.", "Aviso");
-                  }
-              } else {
-                  // Opcional si deseas eliminar de guardados al dar clic nuevamente
-                  mostrarAlertaArca("Esta publicación ya se encuentra en tus guardados.", "Aviso");
-              }
-          } catch (error) {
-              console.error("Error al guardar:", error);
-              mostrarAlertaArca("Error de conexión al intentar guardar.", "Error");
+          if ("Notification" in window && Notification.permission !== "granted") {
+              Notification.requestPermission();
           }
+
+          const btnRec = document.getElementById('btn-activar-recordatorio');
+          btnRec.innerHTML = `<i class="fa-solid fa-bell"></i> RECORDATORIO ACTIVADO`;
+          btnRec.classList.add('btn-recordatorio-activo');
+
+          mostrarAlertaArca(`¡Recordatorio activado con éxito! Te enviaremos una notificación un día antes de "${nombreEventoGlobal}" para que no lo olvides. 🐾✨`, "¡Listo!");
       }
 
-      function cambiarEstadoEvento() {
-          mostrarAlertaArca("Estado del evento actualizado correctamente.", "Actualizado 🌸");
-      }
+      let eventoGlobalParaEditar = null;
 
-      function abrirModalEditar() {
-          document.getElementById('modalEditarEvento').style.display = 'flex';
+      async function abrirModalEditar() {
+          const params = new URLSearchParams(window.location.search);
+          const eventoId = params.get('id');
+          
+          try {
+              const res = await fetch('/api/eventos');
+              const eventos = await res.json();
+              const evento = eventos.find(e => Number(e.id_evento) === Number(eventoId));
+              
+              if (!evento) return;
+              eventoGlobalParaEditar = evento;
+
+              document.getElementById('edit-nombre').value = evento.nombre_evento || '';
+              document.getElementById('edit-lugar').value = evento.lugar || '';
+              
+              if (evento.fecha_hora) {
+                  const fechaIso = new Date(evento.fecha_hora).toISOString().slice(0, 16);
+                  document.getElementById('edit-fecha').value = fechaIso;
+              }
+              
+              document.getElementById('edit-detalles').value = evento.detalles_adicionales || '';
+              document.getElementById('modalEditarEvento').style.display = 'flex';
+          } catch (e) {
+              console.error("Error al preparar edición:", e);
+              mostrarAlertaArca("No se pudo cargar la información para editar.", "Error");
+          }
       }
 
       function cerrarModalEditar() {
           document.getElementById('modalEditarEvento').style.display = 'none';
       }
 
-      function activarRecordatorioEvento() {
-          const btn = document.getElementById('btn-activar-recordatorio');
-          btn.innerHTML = `<i class="fa-solid fa-bell"></i> RECORDATORIO ACTIVADO`;
-          btn.classList.add('btn-recordatorio-activo');
-          mostrarAlertaArca("¡Recordatorio activado con éxito! Te avisaremos antes del evento.", "¡Listo! 🌸");
+      async function guardarEdicionEvento(event) {
+          event.preventDefault();
+          const params = new URLSearchParams(window.location.search);
+          const eventoId = params.get('id');
+          const correoActual = firebase.auth().currentUser ? firebase.auth().currentUser.email : (localStorage.getItem('correo_usuario') || localStorage.getItem('correo'));
+
+          const datosActualizados = {
+              nombre_evento: document.getElementById('edit-nombre').value.trim(),
+              lugar: document.getElementById('edit-lugar').value.trim(),
+              ubicacion: eventoGlobalParaEditar ? eventoGlobalParaEditar.ubicacion : 'Medellín',
+              fecha_hora: document.getElementById('edit-fecha').value,
+              detalles_adicionales: document.getElementById('edit-detalles').value.trim(),
+              correo_fundacion: correoActual
+          };
+
+          try {
+              const respuesta = await fetch(`/api/eventos/${eventoId}`, {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(datosActualizados)
+              });
+
+              const resultado = await respuesta.json();
+
+              if (respuesta.ok) {
+                  cerrarModalEditar();
+                  mostrarAlertaArca("¡Evento actualizado con éxito! 🌸", "¡Listo!", () => {
+                      location.reload();
+                  });
+              } else {
+                  mostrarAlertaArca("No se pudo actualizar: " + (resultado.error || "Error desconocido"), "Aviso");
+              }
+          } catch (error) {
+              console.error("Error de red al actualizar evento:", error);
+              mostrarAlertaArca("Error de conexión con el servidor.", "Error");
+          }
       }
   </script>
 </body>
