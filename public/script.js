@@ -1526,13 +1526,17 @@ function mostrarAlertaArca(titulo, mensaje, opciones = {}) {
     boton.focus();
 }
 
-// Función global para adaptar el menú según el rol en cualquier página
 function adaptarInterfazSegunRol() {
     const tipoUsuario = localStorage.getItem('tipo_usuario') || 'usuario';
     
-    // Elementos comunes en las páginas
     const brandContainer = document.getElementById('brand-title-container');
-    const linkGuardado = document.getElementById('link-guardado');
+    const tituloCard1 = document.getElementById('titulo-card-1');
+    const logoCard1 = document.getElementById('logo-card-1');
+    const cardReportar = document.getElementById('card-reportar-home');
+    
+    // Buscamos el enlace de guardados de manera robusta (por ID o por href antiguo)
+    const linkGuardado = document.getElementById('link-guardado') || document.querySelector('a[href*="guardados_usuario.html"], a[href*="publicaciones_fundacion.html"]');
+    const botonNovedades = document.querySelector('.news-button');
 
     if (tipoUsuario === 'fundacion') {
         if (brandContainer) {
@@ -1544,23 +1548,45 @@ function adaptarInterfazSegunRol() {
             `;
         }
 
-        // --- ESTO APLICA PARA CUALQUIER PÁGINA QUE TENGA EL MENÚ LATERAL ---
+        if (tituloCard1) tituloCard1.textContent = "Reportes";
+        
+        if (logoCard1) {
+            logoCard1.innerHTML = `<img src="rflogo.png" alt="Logo Reportes Fundación" class="logo-card-reportes-fundacion">`;
+        }
+
+        if (cardReportar && typeof auth !== 'undefined' && auth.currentUser) {
+            cardReportar.setAttribute("href", "reportes_fundacion.html");
+        }
+
+        // --- AQUÍ ESTÁ EL CAMBIO CLAVE PARA LA FUNDACIÓN ---
         if (linkGuardado) {
             const iconoGuardado = linkGuardado.querySelector('i');
             const textoGuardado = linkGuardado.querySelector('.menu-text');
             
             if (iconoGuardado) {
-                iconoGuardado.className = "fa-solid fa-layer-group"; // Icono de fundación
+                // Cambiamos el icono de marcador por el de capas/publicaciones
+                iconoGuardado.className = "fa-solid fa-layer-group"; 
             }
             if (textoGuardado) {
-                textoGuardado.textContent = "Publicaciones"; // Texto de fundación
+                textoGuardado.textContent = "Publicaciones";
             }
-            linkGuardado.href = "guardados_usuario.html"; // Misma página de destino
+            linkGuardado.href = "guardados_usuario.html";
+        }
+
+        if (botonNovedades) {
+            botonNovedades.style.display = 'none';
         }
 
     } else {
         if (brandContainer) {
             brandContainer.innerHTML = `ARCA`;
+        }
+        if (tituloCard1) tituloCard1.textContent = "Reportar";
+        if (logoCard1) {
+            logoCard1.innerHTML = `<img src="rlogo.png" alt="Logor">`;
+        }
+        if (cardReportar && typeof auth !== 'undefined' && auth.currentUser) {
+            cardReportar.setAttribute("href", "formularior.html");
         }
         
         // --- MODO USUARIO NORMAL ---
@@ -1569,19 +1595,19 @@ function adaptarInterfazSegunRol() {
             const textoGuardado = linkGuardado.querySelector('.menu-text');
             
             if (iconoGuardado) {
-                iconoGuardado.className = "fa-solid fa-bookmark"; // Icono normal
+                iconoGuardado.className = "fa-solid fa-bookmark";
             }
             if (textoGuardado) {
-                textoGuardado.textContent = "Guardado"; // Texto normal
+                textoGuardado.textContent = "Guardado";
             }
             linkGuardado.href = "guardados_usuario.html";
         }
+
+        if (botonNovedades) {
+            botonNovedades.style.display = 'flex';
+        }
     }
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-    adaptarInterfazSegunRol();
-});
 
 document.addEventListener('DOMContentLoaded', () => {
     const modoOscuroGuardado = localStorage.getItem('theme') === 'dark' || localStorage.getItem('darkMode') === 'true';
