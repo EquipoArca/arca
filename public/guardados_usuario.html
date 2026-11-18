@@ -163,8 +163,24 @@
     </script>
     <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
-    <script>
+<script>
         document.addEventListener('DOMContentLoaded', () => {
+            const tipoUsuario = localStorage.getItem('tipo_usuario') || 'usuario';
+            const linkGuardado = document.getElementById('link-guardado');
+
+            if (tipoUsuario === 'fundacion' && linkGuardado) {
+                const iconoGuardado = linkGuardado.querySelector('i');
+                const textoGuardado = linkGuardado.querySelector('.menu-text');
+                
+                if (iconoGuardado) {
+                    iconoGuardado.className = "fa-solid fa-layer-group"; // Icono de publicaciones/capas
+                }
+                if (textoGuardado) {
+                    textoGuardado.textContent = "Publicaciones"; // Texto adaptado
+                }
+                linkGuardado.href = "guardados_usuario.html"; 
+            }
+
             const savedLang = localStorage.getItem('app_selected_lang');
             if (savedLang && savedLang !== 'es') {
                 const interval = setInterval(() => {
@@ -175,6 +191,17 @@
                         clearInterval(interval);
                     }
                 }, 200);
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const btnToggleMenu = document.getElementById('btn-toggle-menu');
+            const sidebar = document.getElementById('sidebar');
+
+            if (btnToggleMenu && sidebar) {
+                btnToggleMenu.addEventListener('click', () => {
+                    sidebar.classList.toggle('sidebar-abierta');
+                });
             }
         });
     </script>

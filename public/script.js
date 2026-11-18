@@ -1556,20 +1556,18 @@ function adaptarInterfazSegunRol() {
             cardReportar.setAttribute("href", "reportes_fundacion.html");
         }
 
-        // Configuración para el menú lateral cuando es FUNDACIÓN
+        // --- AQUÍ CAMBIA SOLO EL ICONO Y EL TEXTO, PERO APUNTA A LA MISMA PÁGINA ---
         if (linkGuardado) {
             const iconoGuardado = linkGuardado.querySelector('i');
             const textoGuardado = linkGuardado.querySelector('.menu-text');
             
             if (iconoGuardado) {
-                // Cambiamos a un icono representativo de gestión de publicaciones
-                iconoGuardado.className = "fa-solid fa-layer-group"; 
+                iconoGuardado.className = "fa-solid fa-layer-group"; // Icono para fundación
             }
             if (textoGuardado) {
-                textoGuardado.textContent = "Publicaciones";
+                textoGuardado.textContent = "Publicaciones"; // Texto adaptado
             }
-            // VERIFICA QUE ESTE ARCHIVO EXISTA EN TU PROYECTO (ej. publicaciones_fundacion.html)
-            linkGuardado.href = "publicaciones_fundacion.html";
+            linkGuardado.href = "guardados_usuario.html"; // ¡Misma página!
         }
 
         if (botonNovedades) {
@@ -1588,13 +1586,13 @@ function adaptarInterfazSegunRol() {
             cardReportar.setAttribute("href", "formularior.html");
         }
         
-        // Configuración para el menú lateral cuando es USUARIO NORMAL
+        // --- MODO USUARIO NORMAL ---
         if (linkGuardado) {
             const iconoGuardado = linkGuardado.querySelector('i');
             const textoGuardado = linkGuardado.querySelector('.menu-text');
             
             if (iconoGuardado) {
-                iconoGuardado.className = "fa-solid fa-bookmark";
+                iconoGuardado.className = "fa-solid fa-bookmark"; // Icono de marcador normal
             }
             if (textoGuardado) {
                 textoGuardado.textContent = "Guardado";
