@@ -482,7 +482,6 @@
             <span class="menu-text">Inicio</span>
         </a>
        
-        <!-- Redirigen a home.html o llaman a tu función de bloqueo según tu lógica de invitado -->
         <a href="home.html?seccion=perfil" id="link-perfil" class="menu-fila">
             <i class="fa-solid fa-circle-user"></i>
             <span class="menu-text">Perfil</span>
@@ -647,10 +646,9 @@ document.addEventListener('DOMContentLoaded', () => {
                   destinoUrl = 'mapa.html';
                   textoBoton = 'Volver al mapa';
               } else if (origen === 'fundacion' || origen === 'panel-fundacion') {
-                  destinoUrl = 'home.html'; // O la ruta de la home de fundaciones que utilices
+                  destinoUrl = 'home.html';
                   textoBoton = 'Volver al panel';
               } else {
-                  // Si no hay parámetro de origen explícito, revisamos de dónde vino el navegador o el rol
                   const tipoUsuarioLocal = localStorage.getItem('tipo_usuario');
                   const referrer = document.referrer;
 
@@ -659,7 +657,7 @@ document.addEventListener('DOMContentLoaded', () => {
                       textoBoton = 'Volver al panel';
                   } else if (referrer && referrer.includes('mis_reportes')) {
                       destinoUrl = 'reportes_fundacion.html';
-                      textoBoton = 'Volver a los    reportes';
+                      textoBoton = 'Volver a los reportes';
                   } else if (referrer && referrer.includes('guardados')) {
                       destinoUrl = 'guardados_usuario.html';
                       textoBoton = 'Volver a guardados';
@@ -813,7 +811,6 @@ document.addEventListener('DOMContentLoaded', () => {
               document.getElementById('lbl-tipo-reporte').textContent = reporteData.Nombre_tipo_reporte || reporteData.nombre_tipo_reporte || 'Reporte General';
               document.getElementById('lbl-descripcion').textContent = reporteData.Descripcion || 'Sin descripción proporcionada.';
               
-              // BADGE DE ESTADO CON COLORES SUAVES PROFESIONALES Y SIN EMOJIS
               const badgeEstadoPublico = document.getElementById('badge-estado-publico');
               const estadoReporte = reporteData.estado ? reporteData.estado.toLowerCase().trim() : 'pendiente';
               
@@ -836,7 +833,6 @@ document.addEventListener('DOMContentLoaded', () => {
                   badgeEstadoPublico.textContent = 'Pendiente';
               }
 
-              // Mostrar evidencias si ya está resuelto
               if (reporteData.detalles_resolucion) {
                   const contenedorEvidencia = document.getElementById('contenedor-evidencia-resolucion');
                   contenedorEvidencia.style.display = 'block';
@@ -848,7 +844,6 @@ document.addEventListener('DOMContentLoaded', () => {
                   `;
               }
               
-              // FOTOS
               const fotoWrapper = document.querySelector('.detalle-foto-wrapper');
               if (reporteData.img_reporte) {
                   try {
@@ -895,12 +890,12 @@ document.addEventListener('DOMContentLoaded', () => {
               document.getElementById('nombre-autor-texto').textContent = `@${nombreUsuario}`;
               document.getElementById('link-autor').href = `perfil_publico.html?user=${encodeURIComponent(nombreUsuario)}`;
 
-              // Gestionar botones de acción
               const contenedorBoton = document.getElementById('contenedor-boton-accion');
 
               if (typeof firebase !== 'undefined' && firebase.auth) {
                   firebase.auth().onAuthStateChanged(async (user) => {
                       const correoLogueado = user ? user.email : (localStorage.getItem('correo_usuario') || localStorage.getItem('correo'));
+                      const tipoUsuarioActual = localStorage.getItem('tipo_usuario') || 'usuario';
                       
                       if (!correoLogueado) {
                           contenedorBoton.innerHTML = `<a href="login.html" class="detalle-btn-accion">Inicia sesión</a>`;
@@ -911,14 +906,29 @@ document.addEventListener('DOMContentLoaded', () => {
                           const resUser = await fetch(`/api/obtener-usuario?correo=${encodeURIComponent(correoLogueado)}`);
                           const datosUsuarioLogueado = resUser.ok ? await resUser.json() : null;
                           const idUsuarioLogueado = datosUsuarioLogueado ? Number(datosUsuarioLogueado.id_usuarios) : null;
-                          const tipoUsuario = datosUsuarioLogueado ? datosUsuarioLogueado.tipo_usuario : localStorage.getItem('tipo_usuario');
+                          const tipoUsuario = datosUsuarioLogueado ? datosUsuarioLogueado.tipo_usuario : tipoUsuarioActual;
                           const idCreadorReporte = Number(reporteData.id_usuarios);
 
                           const esFundacion = tipoUsuario === 'fundacion';
                           const esDueño = (idUsuarioLogueado && idCreadorReporte && idUsuarioLogueado === idCreadorReporte) || 
                                           (reporteData.correo_usuario && reporteData.correo_usuario.toLowerCase().trim() === correoLogueado.toLowerCase().trim());
 
+                          const idPubReal = reporteData.id_publicacion || reporteId;
+
+                          // Verificamos si ya está guardado para este rol
+                          let estaGuardada = false;
+                          try {
+                              const resGuards = await fetch(`/api/obtener-guardados?correo=${encodeURIComponent(correoLogueado)}&tipo=${encodeURIComponent(tipoUsuario)}`);
+                              if (resGuards.ok) {
+                                  const listaGuardados = await resGuards.json();
+                                  estaGuardada = listaGuardados.some(g => Number(g.id_publicacion) === Number(idPubReal) || Number(g.id_origen) === Number(idPubReal));
+                              }
+                          } catch (errGuard) {
+                              console.error("Error al consultar guardados:", errGuard);
+                          }
+
                           if (esFundacion) {
+                              // Fundaciones: Selectores de estado + Botón Actualizar + Botón Guardar
                               contenedorBoton.innerHTML = `
                                   <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                                       <select id="select-estado-reporte" class="detalle-btn-accion" style="background: #fff; cursor: pointer;">
@@ -929,6 +939,9 @@ document.addEventListener('DOMContentLoaded', () => {
                                       </select>
                                       <button class="detalle-btn-accion detalle-btn-editar" id="btn-actualizar-estado">
                                           Actualizar Estado
+                                      </button>
+                                      <button class="detalle-btn-accion" id="btn-accion-guardado" ${estaGuardada ? 'style="background: #ffe5dd; color: #d9534f; border-color: #f4c2c4;"' : ''}>
+                                          <i class="${estaGuardada ? 'fa-solid' : 'fa-regular'} fa-bookmark"></i> ${estaGuardada ? 'Publicación guardada' : 'Guardar publicación'}
                                       </button>
                                   </div>
                               `;
@@ -952,6 +965,46 @@ document.addEventListener('DOMContentLoaded', () => {
                                   }
                               });
 
+                              // Evento para el botón de guardar en modo fundación
+                              document.getElementById('btn-accion-guardado')?.addEventListener('click', async () => {
+                                  if (estaGuardada) {
+                                      if (confirm("¿Deseas quitar esta publicación de tus guardados?")) {
+                                          const quitRes = await fetch('/api/quitar-guardado', {
+                                              method: 'POST',
+                                              headers: { 'Content-Type': 'application/json' },
+                                              body: JSON.stringify({
+                                                  correo: correoLogueado,
+                                                  id_publicacion: Number(idPubReal),
+                                                  tipo_usuario: tipoUsuario
+                                              })
+                                          });
+                                          if (quitRes.ok) {
+                                              mostrarAlertaArca("Publicación eliminada.", "La publicación ha sido eliminada de tus guardados. 🌸", { tipo: "aviso" });
+                                              location.reload();
+                                          } else {
+                                              mostrarAlertaArca("Error", "No se pudo quitar de tus guardados.", { tipo: "error" });
+                                          }
+                                      }
+                                  } else {
+                                      const saveRes = await fetch('/api/guardar-publicacion', {
+                                          method: 'POST',
+                                          headers: { 'Content-Type': 'application/json' },
+                                          body: JSON.stringify({
+                                              correo: correoLogueado,
+                                              id_publicacion: Number(idPubReal),
+                                              tipo_usuario: tipoUsuario
+                                          })
+                                      });
+                                      if (saveRes.ok) {
+                                          mostrarAlertaArca("Publicación guardada.", "La publicación ha sido guardada con éxito. 🌸", { tipo: "aviso" });
+                                          location.reload();
+                                      } else {
+                                          const errData = await saveRes.json();
+                                          mostrarAlertaArca("Error", errData.error || "No se pudo guardar.", { tipo: "error" });
+                                      }
+                                  }
+                              });
+
                           } else if (esDueño) {
                               contenedorBoton.innerHTML = `
                                   <div style="display: flex; gap: 8px;">
@@ -969,115 +1022,78 @@ document.addEventListener('DOMContentLoaded', () => {
                                       if (resDel.ok) {
                                           window.location.href = 'novedades.html';
                                       } else {
-                                          mostrarAlertaArca("Error al eliminar.", 
-                                          "No se pudo eliminar el reporte.", 
-                                          { tipo: "error" });
+                                          mostrarAlertaArca("Error al eliminar.", "No se pudo eliminar el reporte.", { tipo: "error" });
                                       }
                                   }
                               });
 
-} else {
-    const idPubReal = reporteData.id_publicacion || reporteId;
+                          } else {
+                              // Usuario normal
+                              if (estaGuardada) {
+                                  contenedorBoton.innerHTML = `
+                                      <button class="detalle-btn-accion" id="btn-accion-guardado" style="background: #ffe5dd; color: #d9534f; border-color: #f4c2c4;">
+                                          <i class="fa-solid fa-bookmark"></i> Publicación guardada
+                                      </button>
+                                  `;
 
-    try {
-        // Consultar si el usuario ya tiene guardada esta publicación
-        const resGuards = await fetch(`/api/guardados/ids/${encodeURIComponent(correoLogueado)}`);
-        const idsGuardados = resGuards.ok ? await resGuards.json() : [];
-        const estaGuardada = idsGuardados.map(Number).includes(Number(idPubReal));
+                                  document.getElementById('btn-accion-guardado')?.addEventListener('click', async () => {
+                                      if (confirm("¿Deseas quitar esta publicación de tus guardados?")) {
+                                          const quitRes = await fetch('/api/quitar-guardado', {
+                                              method: 'POST',
+                                              headers: { 'Content-Type': 'application/json' },
+                                              body: JSON.stringify({
+                                                  correo: correoLogueado,
+                                                  id_publicacion: Number(idPubReal),
+                                                  tipo_usuario: tipoUsuario
+                                              })
+                                          });
 
-        if (estaGuardada) {
-            contenedorBoton.innerHTML = `
-                <button class="detalle-btn-accion" id="btn-accion-guardado" style="background: #ffe5dd; color: #d9534f; border-color: #f4c2c4;">
-                    <i class="fa-solid fa-bookmark"></i> Publicación guardada
-                </button>
-            `;
+                                          if (quitRes.ok) {
+                                              mostrarAlertaArca("Publicación eliminada.", "La publicación ha sido eliminada de tus guardados. 🌸", { tipo: "aviso" });
+                                              location.reload();
+                                          } else {
+                                              mostrarAlertaArca("Error", "No se pudo quitar de tus guardados.", { tipo: "error" });
+                                          }
+                                      }
+                                  });
+                              } else {
+                                  contenedorBoton.innerHTML = `
+                                      <button class="detalle-btn-accion" id="btn-accion-guardado">
+                                          <i class="fa-regular fa-bookmark"></i> Guardar publicación
+                                      </button>
+                                  `;
 
-            document.getElementById('btn-accion-guardado')?.addEventListener('click', async () => {
-                if (confirm("¿Deseas quitar esta publicación de tus guardados?")) {
-                    const quitRes = await fetch('/api/quitar-guardado', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            correo: correoLogueado,
-                            id_publicacion: Number(idPubReal)
-                        })
-                    });
+                                  document.getElementById('btn-accion-guardado')?.addEventListener('click', async () => {
+                                      const saveRes = await fetch('/api/guardar-publicacion', {
+                                          method: 'POST',
+                                          headers: { 'Content-Type': 'application/json' },
+                                          body: JSON.stringify({
+                                              correo: correoLogueado,
+                                              id_publicacion: Number(idPubReal),
+                                              tipo_usuario: tipoUsuario
+                                          })
+                                      });
 
-                    if (quitRes.ok) {
-                        mostrarAlertaArca(
-                            "Publicación eliminada.",
-                            "La publicación ha sido eliminada de tus guardados. 🌸",
-                            { tipo: "aviso" }
-                        );
-                        location.reload();
-                    } else {
-                        const errData = await quitRes.json();
-                        mostrarAlertaArca(
-                            "Error",
-                            errData.error || "No se pudo quitar de tus guardados.",
-                            { tipo: "error" }
-                        );
-                    }
-                }
-            });
-
-        } else {
-            contenedorBoton.innerHTML = `
-                <button class="detalle-btn-accion" id="btn-accion-guardado">
-                    <i class="fa-regular fa-bookmark"></i> Guardar publicación
-                </button>
-            `;
-
-            document.getElementById('btn-accion-guardado')?.addEventListener('click', async () => {
-                const saveRes = await fetch('/api/guardar-publicacion', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        correo: correoLogueado,
-                        id_publicacion: Number(idPubReal)
-                    })
-                });
-
-                if (saveRes.ok) {
-                    mostrarAlertaArca(
-                        "Publicación guardada.",
-                        "La publicación ha sido guardada con éxito. 🌸",
-                        { tipo: "aviso" }
-                    );
-                    location.reload();
-                } else {
-                    const errData = await saveRes.json();
-                    mostrarAlertaArca(
-                        "Error",
-                        errData.error || "No se pudo guardar la publicación.",
-                        { tipo: "error" }
-                    );
-                }
-            });
-        }
-
-    } catch (e) {
-        console.error("Error al verificar guardados:", e);
-        mostrarAlertaArca(
-            "Error",
-            "No se pudo verificar el estado de tus publicaciones guardadas.",
-            { tipo: "error" }
-        );
-    }
-}
-
-                          
+                                      if (saveRes.ok) {
+                                          mostrarAlertaArca("Publicación guardada.", "La publicación ha sido guardada con éxito. 🌸", { tipo: "aviso" });
+                                          location.reload();
+                                      } else {
+                                          const errData = await saveRes.json();
+                                          mostrarAlertaArca("Error", errData.error || "No se pudo guardar la publicación.", { tipo: "error" });
+                                      }
+                                  });
+                              }
+                          }
                       } catch (innerErr) {
                           console.warn("Aviso de permisos:", innerErr);
+                          contenedorBoton.innerHTML = `<button class="detalle-btn-accion"><i class="fa-regular fa-bookmark"></i> Guardar publicación</button>`;
                       }
                   });
               }
 
           } catch (error) {
               console.error("Error al cargar detalle:", error);
-              mostrarAlertaArca("Error al cargar detalle.", 
-              "No se pudieron cargar los detalles del reporte.", 
-              { tipo: "error" });
+              mostrarAlertaArca("Error al cargar detalle.", "No se pudieron cargar los detalles del reporte.", { tipo: "error" });
           }
       }
   </script>
