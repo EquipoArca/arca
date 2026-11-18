@@ -860,11 +860,13 @@ app.post('/api/guardar-adoptante', (req, res) => {
 // GESTIÓN DE PUBLICACIONES Y GUARDADOS
 // ==========================================
 app.post('/api/guardar-publicacion', (req, res) => {
-    const { correo, id_publicacion } = req.body;
+    const { correo, id_publicacion, tipo_usuario } = req.body;
 
     if (!correo || !id_publicacion) {
         return res.status(400).json({ error: "Faltan datos requeridos (correo o id_publicacion)" });
     }
+
+    const rolFinal = tipo_usuario || 'usuario';
 
     db.query("SELECT id_usuarios FROM usuarios WHERE LOWER(TRIM(correo_usuario)) = LOWER(TRIM(?))", [correo], (err, results) => {
         if (err || results.length === 0) {
@@ -880,8 +882,8 @@ app.post('/api/guardar-publicacion', (req, res) => {
             let pubIdFinal = id_publicacion;
 
             if (pubRows.length > 0) {
-                // Si existe, guardamos directamente
-                ejecutarInsertGuardado(id_usuarios, pubIdFinal, res);
+                // Si existe, guardamos directamente pasando el rol
+                ejecutarInsertGuardado(id_usuarios, pubIdFinal, rolFinal, res);
             } else {
                 // 2. Si no existe como id_publicacion, comprobamos si es un id_reporte válido
                 db.query("SELECT id_reporte FROM reportes WHERE id_reporte = ?", [id_publicacion], (errRep, repRows) => {
@@ -895,7 +897,7 @@ app.post('/api/guardar-publicacion', (req, res) => {
                             return res.status(500).json({ error: "Error al registrar la publicación: " + errIns.message });
                         }
                         pubIdFinal = insRes.insertId; // Usamos el nuevo ID de publicación generado
-                        ejecutarInsertGuardado(id_usuarios, pubIdFinal, res);
+                        ejecutarInsertGuardado(id_usuarios, pubIdFinal, rolFinal, res);
                     });
                 });
             }
@@ -903,9 +905,9 @@ app.post('/api/guardar-publicacion', (req, res) => {
     });
 });
 
-function ejecutarInsertGuardado(id_usuarios, id_publicacion, res) {
-    const query = `INSERT INTO guardados (id_usuarios, id_publicacion) VALUES (?, ?)`;
-    db.query(query, [id_usuarios, id_publicacion], (errInsert) => {
+function ejecutarInsertGuardado(id_usuarios, id_publicacion, tipo_usuario, res) {
+    const query = `INSERT INTO guardados (id_usuarios, id_publicacion, tipo_usuario) VALUES (?, ?, ?)`;
+    db.query(query, [id_usuarios, id_publicacion, tipo_usuario], (errInsert) => {
         if (errInsert) {
             if (errInsert.code === 'ER_DUP_ENTRY') {
                 return res.status(400).json({ error: "Ya tienes esta publicación en tus guardados." });
