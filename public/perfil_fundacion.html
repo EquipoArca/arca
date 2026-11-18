@@ -275,8 +275,9 @@
                         <div class="mini-menu-header"><span id="mini-menu-username">Fundación</span></div>
                         <hr class="mini-menu-divider">
                         <a href="configuracion.html" class="mini-menu-item btn-ajustes"><i class="fa-solid fa-gear"></i><span>Ajustes</span></a>
-                        <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini"><i class="fa-solid fa-right-from-bracket"></i><span>Cerrar sesión</span></a>
-                    </div>
+ <a href="javascript:void(0)" class="mini-menu-item btn-cerrar-sesion" id="btn-cerrar-sesion-mini">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>Cerrar sesión</span>                    </div>
                 </div>
                 <div class="notif-circle"><a href="notificaciones.html"><i class="fa-solid fa-bell"></i></a></div>
             </div>
@@ -404,13 +405,8 @@
                 });
             }
 
+            // Cargar información de la fundación al iniciar
             firebase.auth().onAuthStateChanged(async (user) => {
-                if (!user) {
-                    window.location.href = 'login.html';
-                    return;
-                }
-
-                cargarContadorSeguidoresFundacion(user.email);
 
                 try {
                     const res = await fetch(`/api/obtener-fundacion?correo=${encodeURIComponent(user.email)}`);
