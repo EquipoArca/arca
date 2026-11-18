@@ -1533,9 +1533,7 @@ function adaptarInterfazSegunRol() {
     const tituloCard1 = document.getElementById('titulo-card-1');
     const logoCard1 = document.getElementById('logo-card-1');
     const cardReportar = document.getElementById('card-reportar-home');
-    
-    // Buscamos el enlace de guardados de manera robusta (por ID o por href antiguo)
-    const linkGuardado = document.getElementById('link-guardado') || document.querySelector('a[href*="guardados_usuario.html"], a[href*="publicaciones_fundacion.html"]');
+    const linkGuardado = document.getElementById('link-guardado');
     const botonNovedades = document.querySelector('.news-button');
 
     if (tipoUsuario === 'fundacion') {
@@ -1558,18 +1556,11 @@ function adaptarInterfazSegunRol() {
             cardReportar.setAttribute("href", "reportes_fundacion.html");
         }
 
-        // --- AQUÍ ESTÁ EL CAMBIO CLAVE PARA LA FUNDACIÓN ---
         if (linkGuardado) {
             const iconoGuardado = linkGuardado.querySelector('i');
             const textoGuardado = linkGuardado.querySelector('.menu-text');
-            
-            if (iconoGuardado) {
-                // Cambiamos el icono de marcador por el de capas/publicaciones
-                iconoGuardado.className = "fa-solid fa-layer-group"; 
-            }
-            if (textoGuardado) {
-                textoGuardado.textContent = "Publicaciones";
-            }
+            if (iconoGuardado) iconoGuardado.className = "fa-solid fa-layer-group";
+            if (textoGuardado) textoGuardado.textContent = "Publicaciones";
             linkGuardado.href = "guardados_usuario.html";
         }
 
@@ -1588,18 +1579,11 @@ function adaptarInterfazSegunRol() {
         if (cardReportar && typeof auth !== 'undefined' && auth.currentUser) {
             cardReportar.setAttribute("href", "formularior.html");
         }
-        
-        // --- MODO USUARIO NORMAL ---
         if (linkGuardado) {
             const iconoGuardado = linkGuardado.querySelector('i');
             const textoGuardado = linkGuardado.querySelector('.menu-text');
-            
-            if (iconoGuardado) {
-                iconoGuardado.className = "fa-solid fa-bookmark";
-            }
-            if (textoGuardado) {
-                textoGuardado.textContent = "Guardado";
-            }
+            if (iconoGuardado) iconoGuardado.className = "fa-solid fa-bookmark";
+            if (textoGuardado) textoGuardado.textContent = "Guardado";
             linkGuardado.href = "guardados_usuario.html";
         }
 
